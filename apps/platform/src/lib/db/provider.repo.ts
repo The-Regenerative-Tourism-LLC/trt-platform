@@ -1,14 +1,4 @@
-import { prisma } from "./prisma"
-
-export async function createProvider(name: string, email: string) {
-  return prisma.provider.create({
-    data: {
-      name,
-      email,
-    },
-  })
-}
-
-export async function getProviders() {
-  return prisma.provider.findMany()
-}
+// This file is intentionally empty.
+// The Provider model has been replaced by the full TRT data model.
+// See src/lib/db/repositories/ for the authoritative repositories.
+export {};

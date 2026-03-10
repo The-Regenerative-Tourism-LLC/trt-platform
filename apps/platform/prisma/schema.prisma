@@ -1,20 +1,423 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider= "postgresql"
 }
 
-model Provider {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
+// ── Enums ──────────────────────────────────────────────────────────────────
+
+enum AppRole {
+  operator
+  traveler
+  admin
+  institution_partner
+
+  @@map("app_role")
+}
+
+enum OperatorType {
+  A
+  B
+  C
+}
+
+enum P3Status {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum PressureLevel {
+  low
+  moderate
+  high
+}
+
+enum GPSBand {
+  regenerative_leader
+  regenerative_practice
+  advancing
+  developing
+  not_yet_published
+}
+
+enum DPSBand {
+  accelerating
+  progressing
+  stable
+  regressing
+  critical
+}
+
+enum EvidenceTier {
+  T1
+  T2
+  T3
+  Proxy
+}
+
+enum VerificationState {
+  pending
+  verified
+  rejected
+  lapsed
+}
+
+enum ForwardCommitmentStatus {
+  pending
+  matched
+  activated
+  lapsed
+}
+
+enum BookingStatus {
+  booked
+  completed
+  cancelled
+}
+
+// ── Identity & Auth ────────────────────────────────────────────────────────
+
+model UserRole {
+  id     String  @id @default(cuid())
+  userId String
+  role   AppRole
+
+  @@unique([userId, role])
+  @@map("user_roles")
+}
+
+// ── Territory ──────────────────────────────────────────────────────────────
+
+model Territory {
+  id                   String         @id @default(cuid())
+  name                 String
+  country              String?
+  touristIntensity     Decimal?       @db.Decimal(6, 2)
+  ecologicalSensitivity Decimal?      @db.Decimal(6, 2)
+  economicLeakageRate  Decimal?       @db.Decimal(6, 2)
+  regenerativePerformance Decimal?    @db.Decimal(6, 2)
+  compositeDpi         Decimal?       @db.Decimal(6, 2)
+  pressureLevel        PressureLevel?
+  operatorCohortSize   Int            @default(0)
+  dpiComputedAt        DateTime?
+  createdAt            DateTime       @default(now())
+
+  operators            Operator[]
+  assessmentSnapshots  AssessmentSnapshot[]
+  dpiSnapshots         DpiSnapshot[]
+
+  @@map("territories")
+}
+
+// ── Operator ───────────────────────────────────────────────────────────────
+
+model Operator {
+  id                    String        @id @default(cuid())
+  userId                String?
+  legalName             String
+  tradingName           String?
+  country               String?
+  destinationRegion     String?
+  territoryId           String?
+  operatorType          OperatorType?
+  operatorCode          String?       @unique
+  yearOperationStart    Int?
+  website               String?
+  primaryContactName    String?
+  primaryContactEmail   String?
+  accommodationCategory String?
+  rooms                 Int?
+  bedCapacity           Int?
+  experienceTypes       String[]
+  ownershipType         String?
+  localEquityPct        Decimal?      @db.Decimal(5, 2)
+  isChainMember         Boolean       @default(false)
+  chainName             String?
+  assessmentCycleCount  Int           @default(0)
+  onboardingData        Json          @default("{}")
+  onboardingStep        Int           @default(0)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  territory                Territory?                @relation(fields: [territoryId], references: [id])
+  assessmentSnapshots      AssessmentSnapshot[]
+  scoreSnapshots           ScoreSnapshot[]
+  forwardCommitmentRecords ForwardCommitmentRecord[]
+  bookings                 Booking[]
+  evidenceRefs             EvidenceRef[]
+
+  @@map("operators")
+}
+
+// ── Assessment Snapshot (immutable after creation) ─────────────────────────
+
+model AssessmentSnapshot {
+  id                          String        @id @default(cuid())
+  operatorId                  String
+  territoryId                 String
+  assessmentCycle             Int           @default(1)
+  assessmentPeriodEnd         DateTime      @db.Date
+  operatorType                OperatorType?
+  guestNights                 Decimal?      @db.Decimal(10, 2)
+  visitorDays                 Decimal?      @db.Decimal(10, 2)
+  revenueSplitAccommodationPct Decimal?     @db.Decimal(5, 2)
+  revenueSplitExperiencePct   Decimal?      @db.Decimal(5, 2)
+
+  // Pillar 1
+  p1EnergyIntensity           Decimal?      @db.Decimal(10, 4)
+  p1RenewablePct              Decimal?      @db.Decimal(5, 2)
+  p1WaterIntensity            Decimal?      @db.Decimal(10, 4)
+  p1RecirculationScore        Int?
+  p1WasteDiversionPct         Decimal?      @db.Decimal(5, 2)
+  p1CarbonIntensity           Decimal?      @db.Decimal(10, 4)
+  p1SiteScore                 Int?
+
+  // Pillar 2
+  p2LocalEmploymentRate       Decimal?      @db.Decimal(5, 2)
+  p2EmploymentQuality         Decimal?      @db.Decimal(5, 2)
+  p2LocalFbRate               Decimal?      @db.Decimal(5, 2)
+  p2LocalNonfbRate            Decimal?      @db.Decimal(5, 2)
+  p2DirectBookingRate         Decimal?      @db.Decimal(5, 2)
+  p2LocalOwnershipPct         Decimal?      @db.Decimal(5, 2)
+  p2CommunityScore            Int?
+
+  // Pillar 3
+  p3Status                    P3Status?
+  p3CategoryScope             Int?
+  p3Traceability              Int?
+  p3Additionality             Int?
+  p3Continuity                Int?
+  p3ContributionCategories    String[]
+  p3ProgrammeDescription      String?
+  p3ProgrammeDuration         String?
+  p3GeographicScope           String?
+  p3AnnualBudget              Decimal?      @db.Decimal(15, 2)
+  p3GuestsParticipating       Int?
+  p3IsCollective              Boolean       @default(false)
+  p3CollectiveSize            String?
+  p3CollectiveTotalBudget     Decimal?      @db.Decimal(15, 2)
+  p3CollectiveSharePct        Decimal?      @db.Decimal(5, 2)
+  p3InstitutionName           String?
+
+  // Delta block (null on Cycle 1)
+  deltaPriorCycle             Int?
+  deltaBaselineScores         Json?
+  deltaPriorScores            Json?
+  deltaCurrentScores          Json?
+
+  snapshotHash                String?
+  createdAt                   DateTime      @default(now())
+
+  operator                    Operator               @relation(fields: [operatorId], references: [id])
+  territory                   Territory              @relation(fields: [territoryId], references: [id])
+  scoreSnapshots              ScoreSnapshot[]
+  evidenceRefs                EvidenceRef[]
+
+  @@map("assessment_snapshots")
+}
+
+// ── Evidence Reference (immutable) ─────────────────────────────────────────
+
+model EvidenceRef {
+  id                    String            @id @default(cuid())
+  assessmentSnapshotId  String
+  operatorId            String
+  indicatorId           String
+  tier                  EvidenceTier?
+  fileName              String?
+  storagePath           String?
+  checksum              String?
+  verificationState     VerificationState @default(pending)
+  proxyMethod           String?
+  proxyCorrectionFactor Decimal?          @db.Decimal(6, 4)
+  submittedAt           DateTime          @default(now())
+  verifiedAt            DateTime?
+  verifiedBy            String?
+
+  assessmentSnapshot    AssessmentSnapshot @relation(fields: [assessmentSnapshotId], references: [id])
+  operator              Operator           @relation(fields: [operatorId], references: [id])
+
+  @@map("evidence_refs")
+}
+
+// ── DPI Snapshot (immutable) ───────────────────────────────────────────────
+
+model DpiSnapshot {
+  id                     String        @id @default(cuid())
+  territoryId            String
+  touristIntensity       Decimal       @db.Decimal(6, 2)
+  ecologicalSensitivity  Decimal       @db.Decimal(6, 2)
+  economicLeakageRate    Decimal       @db.Decimal(6, 2)
+  regenerativePerf       Decimal       @db.Decimal(6, 2)
+  compositeDpi           Decimal       @db.Decimal(6, 2)
+  pressureLevel          PressureLevel
+  operatorCohortSize     Int           @default(0)
+  snapshotHash           String?
+  createdAt              DateTime      @default(now())
+
+  territory              Territory     @relation(fields: [territoryId], references: [id])
+  scoreSnapshots         ScoreSnapshot[]
+
+  @@map("dpi_snapshots")
+}
+
+// ── Score Snapshot (immutable) ─────────────────────────────────────────────
+
+model ScoreSnapshot {
+  id                    String       @id @default(cuid())
+  assessmentSnapshotId  String
+  operatorId            String
+  dpiSnapshotId         String?
+  methodologyVersion    String       @default("1.0.0")
+  inputHash             String?
+  bundleHash            String?
+
+  p1Score               Decimal      @db.Decimal(6, 2)
+  p2Score               Decimal      @db.Decimal(6, 2)
+  p3Score               Decimal      @db.Decimal(6, 2)
+  gpsTotal              Decimal      @db.Decimal(5, 2)
+  gpsBand               GPSBand
+
+  dpsTotal              Decimal?     @db.Decimal(6, 2)
+  dps1                  Decimal?     @db.Decimal(6, 2)
+  dps2                  Decimal?     @db.Decimal(6, 2)
+  dps3                  Decimal?     @db.Decimal(6, 2)
+  dpsBand               DPSBand?
+
+  dpiScore              Decimal?     @db.Decimal(6, 2)
+  dpiPressureLevel      PressureLevel?
+
+  computationTrace      Json?
+  isPublished           Boolean      @default(false)
+  publicationBlockedReason String?
+  computedAt            DateTime     @default(now())
+
+  assessmentSnapshot    AssessmentSnapshot @relation(fields: [assessmentSnapshotId], references: [id])
+  operator              Operator           @relation(fields: [operatorId], references: [id])
+  dpiSnapshot           DpiSnapshot?       @relation(fields: [dpiSnapshotId], references: [id])
+  bookings              Booking[]
+
+  @@map("score_snapshots")
+}
+
+// ── Forward Commitment Record ──────────────────────────────────────────────
+
+model ForwardCommitmentRecord {
+  id                      String                  @id @default(cuid())
+  operatorId              String
+  assessmentCycle         Int
+  preferredCategory       String?
+  territoryContext        String?
+  preferredInstitutionType String?
+  targetActivationCycle   Int?
+  authorisedSignatory     String?
+  status                  ForwardCommitmentStatus @default(pending)
+  matchedInstitution      String?
+  activatedAt             DateTime?
+  lapsedAt                DateTime?
+  signedAt                DateTime?
+  createdAt               DateTime                @default(now())
+
+  operator                Operator @relation(fields: [operatorId], references: [id])
+
+  @@map("forward_commitment_records")
+}
+
+// ── Methodology Bundle (versioned, never deleted) ─────────────────────────
+
+model MethodologyBundleRecord {
+  id          String   @id @default(cuid())
+  version     String   @unique
+  publishedAt DateTime @default(now())
+  bundle      Json
+  bundleHash  String
+  signature   String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("methodology_bundles")
+}
+
+// ── Traveler ───────────────────────────────────────────────────────────────
+
+model Traveler {
+  id                    String    @id @default(cuid())
+  userId                String?   @unique
+  displayName           String?
+  cumulativeChoiceScore Decimal?  @db.Decimal(6, 2)
+  totalContributionEvents Int     @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  bookings              Booking[]
+  postTripReports       PostTripReport[]
+
+  @@map("travelers")
+}
+
+// ── Booking ────────────────────────────────────────────────────────────────
+
+model Booking {
+  id               String        @id @default(cuid())
+  travelerId       String?
+  operatorId       String
+  scoreSnapshotId  String?
+  dpiScoreAtBooking Decimal?     @db.Decimal(6, 2)
+  checkIn          DateTime?     @db.Date
+  checkOut         DateTime?     @db.Date
+  nights           Int?
+  status           BookingStatus @default(booked)
+  createdAt        DateTime      @default(now())
+
+  traveler         Traveler?      @relation(fields: [travelerId], references: [id])
+  operator         Operator       @relation(fields: [operatorId], references: [id])
+  scoreSnapshot    ScoreSnapshot? @relation(fields: [scoreSnapshotId], references: [id])
+  postTripReport   PostTripReport?
+
+  @@map("bookings")
+}
+
+// ── Post-Trip Report (immutable) ───────────────────────────────────────────
+
+model PostTripReport {
+  id                            String    @id @default(cuid())
+  bookingId                     String    @unique
+  travelerId                    String
+  operatorId                    String
+  renewableKwhUsed              Decimal?  @db.Decimal(10, 4)
+  kwhVsRegionalAvg              Decimal?  @db.Decimal(6, 2)
+  localEconomyEur               Decimal?  @db.Decimal(10, 2)
+  contributionActivities        Json?
+  destinationDpi                Decimal?  @db.Decimal(6, 2)
+  pressureLevel                 String?
+  destinationNote               String?
+  cumulativeChoiceScoreAtReport Decimal?  @db.Decimal(6, 2)
+  totalContributionEventsAtReport Int?
+  generatedAt                   DateTime  @default(now())
+
+  booking                       Booking  @relation(fields: [bookingId], references: [id])
+  traveler                      Traveler @relation(fields: [travelerId], references: [id])
+
+  @@map("post_trip_reports")
+}
+
+// ── Audit Log (append-only) ────────────────────────────────────────────────
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  actor         String?
+  actorRole     AppRole?
+  action        String
+  entityType    String
+  entityId      String?
+  payload       Json?
+  ipAddress     String?
+  createdAt     DateTime @default(now())
+
+  @@map("audit_logs")
 }
