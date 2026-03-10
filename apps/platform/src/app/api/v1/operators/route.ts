@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ operator: updated }, { status: 200 });
     } else {
       const created = await createOperator({
-        userId: session.userId,
+        user: { connect: { id: session.userId } },
         legalName: data.legalName,
         tradingName: data.tradingName,
         country: data.country,

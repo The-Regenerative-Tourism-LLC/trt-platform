@@ -58,7 +58,7 @@ function fetchDashboard(): Promise<OperatorDashboardData> {
 }
 
 export function OperatorDashboardClient() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { data, isLoading } = useQuery({
     queryKey: ["operator-dashboard"],
     queryFn: fetchDashboard,
@@ -114,6 +114,12 @@ export function OperatorDashboardClient() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={signOut}
+            className="inline-flex items-center gap-2 border border-border px-4 py-2 rounded-full text-sm hover:bg-muted transition-colors"
+          >
+            Sign out
+          </button>
           <Link
             href="/operator/onboarding"
             className="inline-flex items-center gap-2 bg-emerald-600 text-white font-medium px-4 py-2 rounded-full text-sm hover:bg-emerald-700 transition-colors"

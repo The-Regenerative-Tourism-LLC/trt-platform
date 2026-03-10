@@ -1,20 +1,12 @@
 /**
- * Session Management
+ * Session helpers — thin wrappers over Auth.js v5 `auth()`.
  *
- * JWT-based session tokens enforced in API Routes and middleware.
- * The scoring engine has no concept of identity — auth is purely a platform concern.
+ * These maintain backward-compatible signatures so existing API routes
+ * (onboarding, scoring, dashboard) need no changes.
  */
 
-import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
+import { auth } from "@/auth";
 import type { AppRole } from "@prisma/client";
-
-const SESSION_SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET ?? "change-me-in-production-must-be-32-chars-min"
-);
-
-const COOKIE_NAME = "trt_session";
-const SESSION_DURATION = "7d";
 
 export interface SessionPayload {
   userId: string;
@@ -22,35 +14,23 @@ export interface SessionPayload {
   role: AppRole;
 }
 
-export async function createSession(payload: SessionPayload): Promise<string> {
-  return new SignJWT({ ...payload })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(SESSION_DURATION)
-    .sign(SESSION_SECRET);
-}
-
-export async function verifySession(token: string): Promise<SessionPayload | null> {
-  try {
-    const { payload } = await jwtVerify(token, SESSION_SECRET);
-    return payload as unknown as SessionPayload;
-  } catch {
-    return null;
-  }
-}
-
 export async function getSession(): Promise<SessionPayload | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  return verifySession(token);
+  const session = await auth();
+  if (!session?.user?.id) return null;
+
+  const primaryRole = session.user.roles?.[0] ?? null;
+  if (!primaryRole) return null;
+
+  return {
+    userId: session.user.id,
+    email: session.user.email,
+    role: primaryRole,
+  };
 }
 
 export async function requireSession(): Promise<SessionPayload> {
   const session = await getSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
+  if (!session) throw new Error("Unauthorized");
   return session;
 }
 
@@ -61,5 +41,3 @@ export async function requireRole(role: AppRole): Promise<SessionPayload> {
   }
   return session;
 }
-
-export { COOKIE_NAME };

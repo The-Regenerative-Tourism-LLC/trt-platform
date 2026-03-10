@@ -1,56 +1,47 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
+import type { AppRole } from "@prisma/client";
 
 export interface AuthUser {
   userId: string;
   email: string;
-  role: "operator" | "traveler" | "admin" | "institution_partner";
+  name: string | null;
+  image: string | null;
+  roles: AppRole[];
+  /** Primary role — first in the roles array. Null until role is selected. */
+  role: AppRole | null;
+  needsRoleSelection: boolean;
 }
 
-interface AuthContextType {
+interface UseAuthReturn {
   user: AuthUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  signOut: async () => {},
-});
+export function useAuth(): UseAuthReturn {
+  const { data: session, status } = useSession();
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check session on mount
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.user) setUser(data.user);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const user: AuthUser | null = session?.user
+    ? {
+        userId: session.user.id,
+        email: session.user.email,
+        name: session.user.name ?? null,
+        image: session.user.image ?? null,
+        roles: session.user.roles ?? [],
+        role: session.user.roles?.[0] ?? null,
+        needsRoleSelection: session.user.needsRoleSelection ?? false,
+      }
+    : null;
 
   const signOut = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
+    await nextAuthSignOut({ callbackUrl: "/login" });
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return {
+    user,
+    loading: status === "loading",
+    signOut,
+  };
 }
-
-export const useAuth = () => useContext(AuthContext);
