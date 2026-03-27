@@ -1,0 +1,61 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+**/node_modules
+
+# ── Root-level lockfile guard (no package.json at root) ───────────────────────
+/package-lock.json
+/yarn.lock
+/pnpm-lock.yaml
+
+# ── Build / Output ────────────────────────────────────────────────────────────
+**/.next
+**/out
+**/build
+**/dist
+**/.turbo
+
+# ── Environment Variables ──────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Testing / Coverage ────────────────────────────────────────────────────────
+**/coverage
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+npm-debug.log*
+pnpm-debug.log*
+*.log
+
+# ── OS / Editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+
+# ── TypeScript ────────────────────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Prisma ────────────────────────────────────────────────────────────────────
+**/prisma/generated
+**/src/generated/prisma
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Certificates / Secrets ────────────────────────────────────────────────────
+*.pem
+*.key
+*.crt
+
+# ── Cache / Temp ──────────────────────────────────────────────────────────────
+.cache
+.tmp
+.temp
+*.bak
+*.old
+*.orig
