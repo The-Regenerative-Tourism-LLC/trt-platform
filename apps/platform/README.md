@@ -112,31 +112,123 @@ src/
 | Replayable | Historical GPS reproducible from source snapshots |
 | Auditable | Full `computationTrace` in every `ScoreSnapshot` |
 
-## Getting Started
+## Development Setup
+
+### Prerequisites
+
+- Node.js 20+
+- Docker Desktop (for local PostgreSQL)
+
+### Quick start
 
 ```bash
-# Install dependencies
+docker compose up -d          # start PostgreSQL in Docker
+npm install                   # .npmrc handles React 19 peer dep flags automatically
+npm run db:migrate            # apply migrations (also runs prisma generate)
+npm run db:seed               # create admin, operator, traveler, territory, DPI snapshot
+npm run dev                   # start Next.js at http://localhost:3000
+```
+
+### First-time setup
+
+#### 1. Set up environment files
+
+```bash
+cp .env.example .env
+cp .env.example .env.local
+```
+
+Generate an `AUTH_SECRET` and paste it into both files:
+
+```bash
+openssl rand -base64 32
+```
+
+`DATABASE_URL` in both files is pre-set to the Docker PostgreSQL instance — leave it as-is.
+
+#### 2. Start the local database
+
+```bash
+docker compose up -d
+```
+
+PostgreSQL 15 starts at `localhost:5432`:
+- User: `trt` · Password: `trt` · Database: `trt_platform`
+
+#### 3. Install dependencies
+
+```bash
 npm install
+```
 
-# Generate Prisma client
-npm run db:generate
+> `.npmrc` (committed) sets `legacy-peer-deps=true` automatically. Some packages
+> have not yet declared React 19 peer dep support — this flag is required until
+> the ecosystem catches up.
 
-# Run migrations (requires DATABASE_URL env var)
+#### 4. Run migrations and generate the Prisma client
+
+```bash
 npm run db:migrate
+```
 
-# Start dev server
+`prisma migrate dev` applies all pending migrations and automatically regenerates the Prisma client.
+
+#### 5. Seed the database
+
+```bash
+npm run db:seed
+```
+
+Creates the minimum data to use the app:
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@trt-local.dev` | `Admin1234!` |
+| Operator | `operator@trt-local.dev` | `Operator1234!` |
+| Traveler | `traveler@trt-local.dev` | `Traveler1234!` |
+
+The seed also creates a territory (Costa Rica Highlands), a DPI snapshot, and seeds the methodology bundle record. Safe to re-run — all operations are idempotent.
+
+#### 6. Start the development server
+
+```bash
 npm run dev
+```
 
-# Run golden tests (CI)
+App runs at [http://localhost:3000](http://localhost:3000).
+
+### Database scripts
+
+| Script | When to use |
+|---|---|
+| `db:migrate` | Local dev — creates + applies a new migration file |
+| `db:migrate:deploy` | CI/CD / Railway — applies existing migrations, no interaction |
+| `db:generate` | After manual schema edits without a migration |
+| `db:push` | Prototyping only — syncs schema without migration history |
+| `db:studio` | Opens Prisma Studio GUI at `localhost:5555` |
+
+### Run tests
+
+```bash
 npm test
 ```
 
+Golden vector tests must pass before merging. CI will fail if scoring output changes.
+
+---
+
 ## Environment Variables
 
-```env
-DATABASE_URL=postgresql://...   # PostgreSQL connection string
-SESSION_SECRET=...              # JWT signing secret (min 32 chars)
-```
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `AUTH_SECRET` | Yes | JWT signing secret — generate with `openssl rand -base64 32` |
+| `AUTH_GOOGLE_ID` | Optional | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | Optional | Google OAuth client secret |
+| `NEXTAUTH_URL` | Production only | Public app URL for OAuth callbacks |
+
+**Local dev:** values are in `.env` and `.env.local` (both gitignored).
+**Railway (staging/production):** set all variables in the Railway dashboard — never in committed files.
 
 ## Scoring Formula
 
