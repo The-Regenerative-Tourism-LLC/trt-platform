@@ -12,6 +12,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
     "db:studio": "prisma studio"
   },
   "dependencies": {
@@ -73,6 +75,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3",
     "@tailwindcss/typography": "^0.5.16",
     "@types/bcryptjs": "^2.4.6",
     "@types/mapbox-gl": "^3.4.1",
