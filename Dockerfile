@@ -74,11 +74,17 @@ COPY --from=builder /app/prisma ./prisma
 # Next.js config
 COPY --from=builder /app/next.config.ts ./next.config.ts
 
+# Production entrypoint — handles DB wait, migrations, and server start
+COPY --chmod=755 start.sh ./start.sh
+
+# prisma generate writes to node_modules/.prisma/client at runtime.
+# Grant the nextjs user write access to that specific directory only.
+RUN chown -R nextjs:nodejs /app/node_modules/.prisma
+
 USER nextjs
 
-# Railway injects PORT automatically. Next.js 13.5+ respects it natively.
+# Railway injects PORT automatically. Next.js reads it natively.
 EXPOSE 3000
 ENV PORT=3000
 
-# Run pending migrations on every boot (no-op if already up to date), then start.
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["./start.sh"]
