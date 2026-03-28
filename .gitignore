@@ -1,11 +1,6 @@
 # ── Dependencies ──────────────────────────────────────────────────────────────
 **/node_modules
 
-# ── Root-level lockfile guard (no package.json at root) ───────────────────────
-/package-lock.json
-/yarn.lock
-/pnpm-lock.yaml
-
 # ── Build / Output ────────────────────────────────────────────────────────────
 **/.next
 **/out
@@ -13,7 +8,7 @@
 **/dist
 **/.turbo
 
-# ── Environment Variables ──────────────────────────────────────────────────────
+# ── Environment Variables ─────────────────────────────────────────────────────
 .env
 .env.*
 !.env.example
