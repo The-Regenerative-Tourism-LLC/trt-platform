@@ -1,0 +1,40 @@
+# ── Never send these to the Docker build context ──────────────────────────────
+
+# Dependencies — reinstalled fresh inside the container
+**/node_modules
+
+# Previous build output
+**/.next
+**/out
+**/dist
+
+# Environment files — secrets come from Railway env vars, never from files
+**/.env
+**/.env.*
+
+# Dev tooling
+**/coverage
+**/*.log
+**/npm-debug.log*
+
+# Docker / local dev files (not needed in build context)
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.override.yml
+
+# Packages placeholder
+packages/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# TypeScript cache
+**/*.tsbuildinfo
