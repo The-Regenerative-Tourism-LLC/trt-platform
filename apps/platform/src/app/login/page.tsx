@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
@@ -40,7 +41,21 @@ export default function LoginPage() {
           <p className="text-sm text-gray-500 mb-6">
             Sign in to your account to continue
           </p>
-          <LoginForm />
+          {/*
+           * LoginForm reads `callbackUrl` from search params via useSearchParams().
+           * Suspense is required by Next.js whenever useSearchParams() is used in a
+           * client component — without it the build fails at prerender time.
+           * The fallback renders during SSR; the real form takes over on hydration.
+           */}
+          <Suspense
+            fallback={
+              <div className="h-64 flex items-center justify-center">
+                <span className="w-6 h-6 rounded-full border-2 border-emerald-200 border-t-emerald-600 animate-spin" />
+              </div>
+            }
+          >
+            <LoginForm />
+          </Suspense>
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-6">
