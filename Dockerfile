@@ -33,13 +33,18 @@ COPY apps/platform/ .
 # The local macOS binary will not work here — must be generated fresh.
 RUN npx prisma generate
 
-# Build-time stubs — Next.js and Auth.js v5 require these to be present
-# during module initialisation at build time. Railway will inject the real
-# values at runtime; these placeholders are never used by a running server.
+# Build-time stubs.
+#
+# AUTH_SECRET is read by Auth.js at module-load time (when auth.ts is imported
+# during bundle evaluation), so a placeholder is required even though the value
+# is never used to sign or verify a real token during build.
+#
+# DATABASE_URL is intentionally absent: Prisma only opens a connection at query
+# time, and all DB-dependent routes are marked `force-dynamic`, so no query is
+# executed during `next build`. Railway injects the real DATABASE_URL at runtime.
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    DATABASE_URL="postgresql://build:build@localhost:5432/build" \
-    AUTH_SECRET="build-time-placeholder-32-chars-minimum-value" \
+    AUTH_SECRET="build-placeholder-change-in-railway" \
     NEXTAUTH_URL="http://localhost:3000"
 
 RUN npm run build

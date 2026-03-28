@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import Link from "next/link";
 
+// Admin data is always request-scoped: live DB queries, auth-gated, never cached.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Admin Dashboard" };
 
 export default async function AdminDashboardPage() {

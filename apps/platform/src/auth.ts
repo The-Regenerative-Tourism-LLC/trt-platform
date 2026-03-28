@@ -22,6 +22,11 @@ const CredentialsSchema = z.object({
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
 
+  // Required when deployed behind Railway's (or any) reverse proxy.
+  // Without this, Auth.js rejects requests whose Host header differs from
+  // the canonical AUTH_URL, causing sign-in/callback failures in production.
+  trustHost: true,
+
   session: { strategy: "jwt" },
 
   pages: {

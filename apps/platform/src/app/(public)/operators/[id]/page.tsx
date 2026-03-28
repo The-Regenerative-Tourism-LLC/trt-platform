@@ -5,6 +5,11 @@ import { GPS_BAND_CONFIG } from "@/lib/constants";
 import { GPSCircle, GPSBandBadge, DPSBandBadge, PressureBadge } from "@/components/scoring/ScoreDisplays";
 import type { GreenPassportBand, DpsBand } from "@/lib/engine/trt-scoring-engine/types";
 
+// Each operator page is backed by a live DB read and generateMetadata also queries
+// the DB. No generateStaticParams is defined, so this is already dynamic, but we
+// make it explicit to prevent any future regression.
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ id: string }>;
 }
