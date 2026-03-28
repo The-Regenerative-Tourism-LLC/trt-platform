@@ -1,0 +1,27 @@
+version: "3.8"
+
+# Local development only — starts PostgreSQL for use with `npm run dev`.
+# The Next.js app runs locally, not in Docker.
+#
+# Usage:
+#   docker compose up -d        # start postgres in background
+#   docker compose down         # stop
+#   docker compose down -v      # stop and delete data volume
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: trt_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: trt_local
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

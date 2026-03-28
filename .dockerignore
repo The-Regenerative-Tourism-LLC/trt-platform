@@ -6,25 +6,25 @@
 # Previous build output
 **/.next
 **/out
+**/dist
 
 # Environment files — secrets come from Railway env vars, never from files
 **/.env
 **/.env.*
 
-# Dev tooling and local data
+# Dev tooling
 **/coverage
 **/*.log
 **/npm-debug.log*
 
-# Docker files themselves
+# Docker / local dev files (not needed in build context)
 Dockerfile
-apps/platform/Dockerfile
 .dockerignore
-apps/platform/.dockerignore
+docker-compose.yml
+docker-compose.override.yml
 
-# Local dev
-apps/platform/docker-compose.yml
-apps/platform/docker-compose.override.yml
+# Packages placeholder
+packages/
 
 # OS / Editor
 .DS_Store
