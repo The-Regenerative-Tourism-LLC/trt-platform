@@ -1,44 +1,39 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
+/**
+ * Returns the primary dashboard URL for a given set of roles.
+ * Used to redirect users away from wrong-role routes and public/auth pages.
+ * Admin takes precedence; institution_partner has no dashboard yet so falls
+ * back to /select-role as a safe default.
+ */
+function getDashboardUrl(roles: string[]): string {
+  if (roles.includes("admin")) return "/admin/dashboard";
+  if (roles.includes("operator")) return "/operator/dashboard";
+  if (roles.includes("traveler")) return "/traveler/dashboard";
+  return "/select-role";
+}
+
 export default auth((req) => {
   const session = req.auth;
   const { pathname } = req.nextUrl;
 
   const isLoggedIn = !!session?.user?.id;
   const needsRoleSelection = session?.user?.needsRoleSelection ?? false;
-  const userRoles = session?.user?.roles ?? [];
+  const userRoles: string[] = session?.user?.roles ?? [];
 
+  const isAdminRoute = pathname.startsWith("/admin");
   const isOperatorRoute = pathname.startsWith("/operator");
   const isTravelerRoute = pathname.startsWith("/traveler");
-  const isAdminRoute = pathname.startsWith("/admin");
   const isSelectRoleRoute = pathname === "/select-role";
-  const isLoginRoute = pathname === "/login";
-  const isSignupRoute = pathname === "/signup";
+  const isAuthRoute = pathname === "/login" || pathname === "/signup";
   const isRootRoute = pathname === "/";
 
-  // Redirect authenticated users away from auth pages → their dashboard
-  if (isLoggedIn && (isLoginRoute || isSignupRoute || isRootRoute)) {
-    if (needsRoleSelection) {
-      return NextResponse.redirect(new URL("/select-role", req.url));
-    }
-    const primaryRole = userRoles[0];
-    if (primaryRole === "operator") {
-      return NextResponse.redirect(new URL("/operator/dashboard", req.url));
-    }
-    if (primaryRole === "traveler") {
-      return NextResponse.redirect(new URL("/traveler/dashboard", req.url));
-    }
-  }
-
-  // Unauthenticated users cannot access protected routes
+  // ── Unauthenticated ──────────────────────────────────────────────────────────
+  // Protected routes require a session. Redirect to login and preserve the
+  // intended destination so the user lands there after signing in.
   if (!isLoggedIn) {
-    if (
-      isOperatorRoute ||
-      isTravelerRoute ||
-      isAdminRoute ||
-      isSelectRoleRoute
-    ) {
+    if (isAdminRoute || isOperatorRoute || isTravelerRoute || isSelectRoleRoute) {
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
@@ -46,29 +41,39 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // Authenticated but role not yet selected → force role selection
+  // ── Authenticated — role not yet assigned ────────────────────────────────────
+  // New users that completed sign-up but haven't selected a role yet must finish
+  // role selection before accessing any role-scoped route.
   if (needsRoleSelection && !isSelectRoleRoute) {
-    if (isOperatorRoute || isTravelerRoute || isAdminRoute) {
+    if (isAdminRoute || isOperatorRoute || isTravelerRoute) {
       return NextResponse.redirect(new URL("/select-role", req.url));
     }
     return NextResponse.next();
   }
 
-  // Wrong-role access → redirect to the user's correct dashboard
-  if (
-    isOperatorRoute &&
-    !userRoles.includes("operator") &&
-    !userRoles.includes("admin")
-  ) {
-    return NextResponse.redirect(new URL("/traveler/dashboard", req.url));
+  // ── Authenticated — redirect away from auth/marketing pages ─────────────────
+  // Once logged in, /login, /signup, and / are no longer meaningful destinations.
+  // Send the user directly to their role dashboard.
+  if (isAuthRoute || isRootRoute) {
+    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
-  if (
-    isTravelerRoute &&
-    !userRoles.includes("traveler") &&
-    !userRoles.includes("admin")
-  ) {
-    return NextResponse.redirect(new URL("/operator/dashboard", req.url));
+  // ── Role enforcement ─────────────────────────────────────────────────────────
+  // Admins are granted read access to all role-scoped routes (oversight / support).
+  // Any other user trying to access a route outside their role is redirected to
+  // their own dashboard.
+  const isAdmin = userRoles.includes("admin");
+
+  if (isAdminRoute && !isAdmin) {
+    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+  }
+
+  if (isOperatorRoute && !userRoles.includes("operator") && !isAdmin) {
+    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+  }
+
+  if (isTravelerRoute && !userRoles.includes("traveler") && !isAdmin) {
+    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
   return NextResponse.next();

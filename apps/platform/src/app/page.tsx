@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   title: "Green Passport · The Regenerative Tourism",
 };
 
-export const revalidate = 300; // revalidate every 5 minutes
+// The listing reads live DB data (published operator snapshots). ISR is the
+// long-term goal, but requires DB access at build time which is not available
+// in the Docker build stage. Declare dynamic for now; add revalidate once a
+// build-time seed or on-demand revalidation strategy is in place.
+export const dynamic = "force-dynamic";
 
 async function getPublishedOperators() {
   return prisma.operator.findMany({
@@ -31,7 +35,7 @@ async function getPublishedOperators() {
 }
 
 export default async function HomePage() {
-  const operators = await getPublishedOperators().catch(() => []);
+  const operators = await getPublishedOperators();
 
   return (
     <main className="min-h-screen">
