@@ -6,6 +6,7 @@
  */
 
 import { createHash } from "crypto";
+import { canonicalize } from "../engine/trt-scoring-engine/canonical";
 import type { DpiSnapshot } from "../engine/trt-scoring-engine/types";
 
 export interface DpiSnapshotInput {
@@ -68,8 +69,7 @@ export function buildDpiSnapshot(
     createdAt,
   };
 
-  const canonical = JSON.stringify(partial, Object.keys(partial).sort());
-  const snapshotHash = createHash("sha256").update(canonical).digest("hex");
+  const snapshotHash = createHash("sha256").update(canonicalize(partial)).digest("hex");
 
   return { ...partial, snapshotHash, operatorCohortSize: input.operatorCohortSize };
 }

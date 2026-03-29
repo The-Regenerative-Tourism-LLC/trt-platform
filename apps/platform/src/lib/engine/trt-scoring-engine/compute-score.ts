@@ -54,11 +54,34 @@ export function computeScore(
   const p3Result = computeP3(assessment.pillar3, assessment.p3Status, methodology);
 
   // ── GPS base (weighted pillar total) ──────────────────────────────────
+  // Type C operators: P2 and P3 scored separately under accommodation (Type A)
+  // and experience (Type B) normalization bounds, blended by revenue split.
   const pw = methodology.pillarWeights;
+
+  let effectiveP2Score = p2Result.score;
+  let effectiveP3Score = p3Result.score;
+
+  if (
+    assessment.operatorType === "C" &&
+    assessment.revenueSplit?.accommodationPct !== undefined &&
+    assessment.revenueSplit?.experiencePct !== undefined
+  ) {
+    const accFrac = assessment.revenueSplit.accommodationPct / 100;
+    const expFrac = assessment.revenueSplit.experiencePct / 100;
+
+    const p2Acc = computeP2(assessment.pillar2, "A", methodology).score;
+    const p2Exp = computeP2(assessment.pillar2, "B", methodology).score;
+    effectiveP2Score = p2Acc * accFrac + p2Exp * expFrac;
+
+    const p3Acc = computeP3(assessment.pillar3, assessment.p3Status, methodology).score;
+    const p3Exp = computeP3(assessment.pillar3, assessment.p3Status, methodology).score;
+    effectiveP3Score = p3Acc * accFrac + p3Exp * expFrac;
+  }
+
   const gpsBase =
     p1Result.score * pw.p1 +
-    p2Result.score * pw.p2 +
-    p3Result.score * pw.p3;
+    effectiveP2Score * pw.p2 +
+    effectiveP3Score * pw.p3;
 
   // ── DPS (Cycle 2+ only) ───────────────────────────────────────────────
   let dpsTotal: number | null = null;
@@ -72,7 +95,7 @@ export function computeScore(
     const currentIndicatorScores: Record<string, number> = {
       ...p1Result.subScores,
       ...p2Result.subScores,
-      p3: p3Result.score,
+      p3: effectiveP3Score,
     };
 
     const dpsResult = computeDps(
@@ -91,7 +114,10 @@ export function computeScore(
   }
 
   // ── GPS total (clamped 0-100) ──────────────────────────────────────────
-  const gpsTotal = clamp(Math.round(gpsBase + (dpsTotal ?? 0)), 0, 100);
+  // R6: clamp first, then round — rounding applied only once at the final step
+  const gpsRaw = gpsBase + (dpsTotal ?? 0);
+  const gpsClamped = clamp(gpsRaw, 0, 100);
+  const gpsTotal = Math.round(gpsClamped);
   const gpsBand = getGpsBand(gpsTotal, methodology.bandThresholds);
 
   // ── Computation trace ─────────────────────────────────────────────────
@@ -99,10 +125,10 @@ export function computeScore(
     p1SubScores: p1Result.subScores,
     p2SubScores: p2Result.subScores,
     p3SubScores: p3Result.subScores,
-    p1Weighted: Math.round(p1Result.score * pw.p1 * 10) / 10,
-    p2Weighted: Math.round(p2Result.score * pw.p2 * 10) / 10,
-    p3Weighted: Math.round(p3Result.score * pw.p3 * 10) / 10,
-    gpsBase: Math.round(gpsBase * 10) / 10,
+    p1Weighted: p1Result.score * pw.p1,
+    p2Weighted: effectiveP2Score * pw.p2,
+    p3Weighted: effectiveP3Score * pw.p3,
+    gpsBase,
     ...(dpsComponents ? { dpsComponents } : {}),
   };
 
@@ -111,8 +137,8 @@ export function computeScore(
     gpsTotal,
     gpsBand,
     p1Score: p1Result.score,
-    p2Score: p2Result.score,
-    p3Score: p3Result.score,
+    p2Score: effectiveP2Score,
+    p3Score: effectiveP3Score,
     dpsTotal,
     dps1,
     dps2,

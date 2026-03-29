@@ -86,8 +86,9 @@ describe("TRT Scoring Engine — Golden Vectors", () => {
 
     // Freeze expected output for regression protection
     // These values are the authoritative golden outputs — must not change
-    expect(result.p1Score).toBe(77);
-    expect(result.p2Score).toBe(71);
+    // R6 fix: pillar sub-scores are full-precision floats; only gpsTotal is rounded
+    expect(result.p1Score).toBe(76.65);
+    expect(result.p2Score).toBe(70.55);
     expect(result.p3Score).toBe(70);
     expect(result.gpsTotal).toBe(73);
     expect(result.gpsBand).toBe("regenerative_practice");

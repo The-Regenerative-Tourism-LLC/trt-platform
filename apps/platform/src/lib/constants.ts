@@ -12,31 +12,31 @@ export const GPS_BAND_CONFIG: Record<
 > = {
   regenerative_leader: {
     label: "Regenerative Leader",
-    color: "bg-emerald-500",
+    color: "bg-band-leader",
     badgeVariant: "default",
     description: "GPS 85–100 · Highest verified regenerative performance",
   },
   regenerative_practice: {
     label: "Regenerative Practice",
-    color: "bg-green-500",
+    color: "bg-band-practice",
     badgeVariant: "secondary",
     description: "GPS 70–84 · Demonstrated regenerative operations",
   },
   advancing: {
     label: "Advancing",
-    color: "bg-teal-500",
+    color: "bg-band-advancing",
     badgeVariant: "outline",
     description: "GPS 55–69 · Solid progress toward regenerative standards",
   },
   developing: {
     label: "Developing",
-    color: "bg-amber-500",
+    color: "bg-band-developing",
     badgeVariant: "outline",
     description: "GPS 40–54 · Meaningful foundations established",
   },
   not_yet_published: {
     label: "Not Yet Published",
-    color: "bg-zinc-400",
+    color: "bg-band-unpublished",
     badgeVariant: "outline",
     description: "GPS < 40 · Private assessment report",
   },

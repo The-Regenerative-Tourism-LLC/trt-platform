@@ -7,6 +7,7 @@
  */
 
 import { createHash } from "crypto";
+import { canonicalize } from "../engine/trt-scoring-engine/canonical";
 import type {
   AssessmentSnapshot,
   P1Responses,
@@ -62,8 +63,7 @@ export function buildAssessmentSnapshot(
     createdAt,
   };
 
-  const canonical = JSON.stringify(partial, Object.keys(partial).sort());
-  const snapshotHash = createHash("sha256").update(canonical).digest("hex");
+  const snapshotHash = createHash("sha256").update(canonicalize(partial)).digest("hex");
 
   return { ...partial, snapshotHash };
 }

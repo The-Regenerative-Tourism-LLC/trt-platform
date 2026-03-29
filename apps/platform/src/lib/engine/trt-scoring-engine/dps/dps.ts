@@ -53,7 +53,8 @@ export function computeDps(
   const p3Delta = p3Score - (priorScores["p3"] ?? 0);
   const dps3 = p3Delta > cfg.dps3Threshold ? cfg.dps3Bonus : 0;
 
-  const dpsTotal = Math.round((dps1 + dps2 + dps3) * 10) / 10;
+  // R6: No rounding of intermediate DPS total — rounding applied only at final GPS clamp
+  const dpsTotal = dps1 + dps2 + dps3;
   const dpsBand = getDpsBand(dpsTotal);
 
   return { dpsTotal, dps1, dps2, dps3, dpsBand };

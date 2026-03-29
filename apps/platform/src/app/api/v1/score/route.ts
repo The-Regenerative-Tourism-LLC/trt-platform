@@ -54,11 +54,10 @@ const ScoreRequestSchema = z.object({
     accommodationPct: z.number().optional(),
     experiencePct: z.number().optional(),
   }).optional(),
+  // baselineScores intentionally excluded — loaded from DB by orchestrator
   delta: z.object({
-    priorCycle: z.number().int(),
-    baselineScores: z.record(z.number()),
+    priorCycle: z.number().int().min(1),
     priorScores: z.record(z.number()),
-    currentScores: z.record(z.number()),
   }).nullable(),
   evidence: z.array(z.object({
     indicatorId: z.string(),
@@ -106,7 +105,14 @@ export async function POST(req: NextRequest) {
         pillar2: data.pillar2,
         pillar3: data.pillar3,
         p3Status: data.p3Status,
-        delta: data.delta,
+        delta: data.delta
+          ? {
+              priorCycle: data.delta.priorCycle,
+              baselineScores: {}, // overwritten from DB by orchestrator
+              priorScores: data.delta.priorScores,
+              currentScores: {},
+            }
+          : null,
         evidence: data.evidence,
       },
     });

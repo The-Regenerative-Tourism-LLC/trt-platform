@@ -4,13 +4,17 @@
  * The ONLY layer authorised to invoke the TRT Scoring Engine.
  *
  * Responsibilities (in order):
- *   1. Validate input data
+ *   1. Validate input data (including Type C revenue split)
  *   2. Build the AssessmentSnapshot
- *   3. Load the active DPI snapshot for the territory
- *   4. Load the active MethodologyBundle
- *   5. Invoke computeScore() — the engine
- *   6. Persist the resulting ScoreSnapshot (append-only)
- *   7. Return the persisted ScoreSnapshot
+ *   3. Load Cycle 1 ScoreSnapshot from DB to lock baselineScores (Cycle 2+)
+ *   4. Load the active DPI snapshot for the territory
+ *   5. Load the active MethodologyBundle
+ *   6. Invoke computeScore() — the engine
+ *   7. Enforce T3 gate: zero out P3 score if no verified T3 evidence
+ *   8. Persist the resulting ScoreSnapshot with isPublished = false (always)
+ *   9. If p3Status = D, create a ForwardCommitmentRecord
+ *  10. Increment operator assessmentCycleCount
+ *  11. Audit log
  *
  * This orchestrator must NOT be called from frontend components or pages.
  * It must ONLY be called from API routes.
@@ -20,21 +24,21 @@ import { createHash } from "crypto";
 import { computeScore } from "../engine/trt-scoring-engine";
 import {
   buildAssessmentSnapshot,
+  buildDeltaBlock,
   type AssessmentSnapshotInput,
 } from "../snapshots/assessment-snapshot.builder";
 import { loadActiveBundle } from "../methodology/methodology-bundle.loader";
 import { findLatestDpiByTerritory } from "../db/repositories/dpi.repo";
-import {
-  createAssessmentSnapshot,
-  findLatestAssessmentByOperator,
-  findBaselineAssessment,
-} from "../db/repositories/assessment.repo";
+import { createAssessmentSnapshot } from "../db/repositories/assessment.repo";
 import {
   createScoreSnapshot,
-  findPublishedScoresByTerritory,
+  findCycle1ScoreByOperator,
 } from "../db/repositories/score.repo";
-import { findEvidenceBySnapshot } from "../db/repositories/evidence.repo";
+import { findVerifiedT3Evidence } from "../db/repositories/evidence.repo";
+import { incrementAssessmentCycle } from "../db/repositories/operator.repo";
+import { createForwardCommitmentRecord } from "../db/repositories/forward-commitment.repo";
 import { logAuditEvent } from "../audit/logger";
+import { validateTypeCRevenueSplit } from "../validation/assessment.schema";
 import type { DpiSnapshot } from "../engine/trt-scoring-engine/types";
 
 // Default DPI snapshot when no territory-specific data is available
@@ -79,12 +83,22 @@ export interface ScoringResult {
 
 /**
  * Execute a full scoring run:
- * snapshot → engine → persist → return
+ * validate → snapshot → baseline lock → engine → T3 gate → persist → side-effects → return
  */
 export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
   const createdAt = new Date().toISOString();
 
+  // ── Validate Type C revenue split ──────────────────────────────────────
+  const revenueSplitError = validateTypeCRevenueSplit(
+    input.snapshotInput.operatorType,
+    input.snapshotInput.revenueSplit
+  );
+  if (revenueSplitError) {
+    throw new Error(revenueSplitError);
+  }
+
   // ── Step 1: Build the immutable AssessmentSnapshot ─────────────────────
+  // For Cycle 2+, delta.baselineScores will be overwritten from DB below.
   const assessmentSnapshot = buildAssessmentSnapshot(input.snapshotInput, createdAt);
 
   // ── Step 2: Persist the AssessmentSnapshot ─────────────────────────────
@@ -124,7 +138,7 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     p3Additionality: assessmentSnapshot.pillar3.additionality,
     p3Continuity: assessmentSnapshot.pillar3.continuity,
 
-    // Delta
+    // Delta — will be DB-locked for Cycle 2+ below
     deltaPriorCycle: assessmentSnapshot.delta?.priorCycle,
     deltaBaselineScores: assessmentSnapshot.delta?.baselineScores as any,
     deltaPriorScores: assessmentSnapshot.delta?.priorScores as any,
@@ -133,7 +147,42 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     snapshotHash: assessmentSnapshot.snapshotHash,
   });
 
-  // ── Step 3: Load active DPI snapshot for territory ─────────────────────
+  // ── Step 3: Lock baselineScores from Cycle 1 ScoreSnapshot (Cycle 2+) ──
+  // SECURITY: We never trust client-supplied baselineScores.
+  // The authoritative baseline is always the persisted Cycle 1 ScoreSnapshot.
+  let lockedSnapshot = assessmentSnapshot;
+
+  if (assessmentSnapshot.assessmentCycle > 1) {
+    const cycle1Score = await findCycle1ScoreByOperator(input.operatorId);
+    if (!cycle1Score) {
+      throw new Error(
+        `Cannot score Cycle ${assessmentSnapshot.assessmentCycle}: no Cycle 1 ScoreSnapshot found for operator ${input.operatorId}`
+      );
+    }
+
+    const trace = cycle1Score.computationTrace as Record<string, any> | null;
+    if (!trace) {
+      throw new Error(
+        "Cycle 1 ScoreSnapshot has no computationTrace — cannot lock baseline scores"
+      );
+    }
+
+    const baselineScores: Record<string, number> = {
+      ...(trace.p1SubScores ?? {}),
+      ...(trace.p2SubScores ?? {}),
+      p3: Number(cycle1Score.p3Score),
+    };
+
+    const lockedDelta = buildDeltaBlock({
+      priorCycle: 1,
+      baselineScores,
+      priorScores: assessmentSnapshot.delta?.priorScores ?? baselineScores,
+    });
+
+    lockedSnapshot = { ...assessmentSnapshot, delta: lockedDelta };
+  }
+
+  // ── Step 4: Load active DPI snapshot for territory ─────────────────────
   const dpiRecord = await findLatestDpiByTerritory(input.territoryId);
   const dpiSnapshot: DpiSnapshot = dpiRecord
     ? {
@@ -149,34 +198,50 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
       }
     : { ...FALLBACK_DPI, territoryId: input.territoryId };
 
-  // ── Step 4: Load active MethodologyBundle ──────────────────────────────
+  // ── Step 5: Load active MethodologyBundle ──────────────────────────────
   const { bundle: methodology, hash: bundleHash } = await loadActiveBundle();
 
-  // ── Step 5: Compute input hash for audit ──────────────────────────────
+  // ── Step 6: Compute input hash for audit ──────────────────────────────
   const inputHash = createHash("sha256")
-    .update(assessmentSnapshot.snapshotHash)
+    .update(lockedSnapshot.snapshotHash)
     .digest("hex");
 
-  // ── Step 6: Invoke the TRT Scoring Engine ──────────────────────────────
-  const engineResult = computeScore(assessmentSnapshot, dpiSnapshot, methodology);
+  // ── Step 7: Invoke the TRT Scoring Engine ──────────────────────────────
+  const engineResult = computeScore(lockedSnapshot, dpiSnapshot, methodology);
 
-  // ── Step 7: Determine publication eligibility ──────────────────────────
-  const pendingEvidence = input.snapshotInput.evidence.filter(
-    (e) => e.verificationState === "pending"
-  );
-  const hasT1Evidence = input.snapshotInput.evidence.some((e) => e.tier === "T1");
-  let isPublished = true;
+  // ── Step 8: T3 evidence gate ───────────────────────────────────────────
+  // If P3 status is A/B/C and no verified T3 evidence exists, P3 score = 0.
+  // Status D and E already return score = 0 from the engine.
+  let finalP3Score = engineResult.p3Score;
   let publicationBlockedReason: string | null = null;
 
-  if (engineResult.gpsTotal < 40) {
-    isPublished = false;
-    publicationBlockedReason = "GPS below 40 — private assessment report";
-  } else if (!hasT1Evidence && pendingEvidence.length === 0) {
-    isPublished = false;
-    publicationBlockedReason = "T1 evidence required";
+  const p3Status = lockedSnapshot.p3Status;
+  if (p3Status !== "D" && p3Status !== "E") {
+    const hasVerifiedT3 = await findVerifiedT3Evidence(input.operatorId);
+    if (!hasVerifiedT3) {
+      finalP3Score = 0;
+      publicationBlockedReason = "T3 evidence required for P3 scoring";
+    }
   }
 
-  // ── Step 8: Persist the ScoreSnapshot (append-only) ───────────────────
+  // GPS total must be recomputed if P3 was zeroed by the T3 gate
+  let finalGpsTotal = engineResult.gpsTotal;
+  if (finalP3Score !== engineResult.p3Score) {
+    const pw = methodology.pillarWeights;
+    const gpsRaw =
+      engineResult.p1Score * pw.p1 +
+      engineResult.p2Score * pw.p2 +
+      finalP3Score * pw.p3 +
+      (engineResult.dpsTotal ?? 0);
+    finalGpsTotal = Math.round(Math.max(0, Math.min(100, gpsRaw)));
+  }
+
+  // ── Step 9: ScoreSnapshot is ALWAYS created with isPublished = false ───
+  // Publication requires explicit admin action after T1 evidence verification.
+  if (!publicationBlockedReason) {
+    publicationBlockedReason = "Pending T1 evidence verification";
+  }
+
   const persistedScore = await createScoreSnapshot({
     assessmentSnapshot: { connect: { id: persistedAssessment.id } },
     operator: { connect: { id: input.operatorId } },
@@ -186,8 +251,8 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     bundleHash,
     p1Score: engineResult.p1Score,
     p2Score: engineResult.p2Score,
-    p3Score: engineResult.p3Score,
-    gpsTotal: engineResult.gpsTotal,
+    p3Score: finalP3Score,
+    gpsTotal: finalGpsTotal,
     gpsBand: engineResult.gpsBand as any,
     dpsTotal: engineResult.dpsTotal,
     dps1: engineResult.dps1,
@@ -197,11 +262,22 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     dpiScore: engineResult.dpiScore,
     dpiPressureLevel: engineResult.dpiPressureLevel as any,
     computationTrace: engineResult.computationTrace as any,
-    isPublished,
+    isPublished: false,
     publicationBlockedReason,
   });
 
-  // ── Step 9: Audit log ──────────────────────────────────────────────────
+  // ── Step 10: Create ForwardCommitmentRecord for Status D ───────────────
+  if (p3Status === "D") {
+    await createForwardCommitmentRecord({
+      operatorId: input.operatorId,
+      assessmentCycle: lockedSnapshot.assessmentCycle,
+    });
+  }
+
+  // ── Step 11: Increment operator assessmentCycleCount ──────────────────
+  await incrementAssessmentCycle(input.operatorId);
+
+  // ── Step 12: Audit log ─────────────────────────────────────────────────
   await logAuditEvent({
     actor: input.actorUserId,
     action: "score.computed",
@@ -209,9 +285,11 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     entityId: persistedScore.id,
     payload: {
       assessmentSnapshotId: persistedAssessment.id,
-      gpsTotal: engineResult.gpsTotal,
+      gpsTotal: finalGpsTotal,
       gpsBand: engineResult.gpsBand,
       methodologyVersion: methodology.version,
+      isPublished: false,
+      publicationBlockedReason,
     },
   });
 
