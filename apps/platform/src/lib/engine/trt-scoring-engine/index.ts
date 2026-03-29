@@ -38,3 +38,4 @@ export type {
 } from "./types";
 export { normalizeValue, normalizeDiscreteScore, getRubricBandLabel } from "./pillars/normalise";
 export { getGpsBand } from "./bands/bands";
+export { canonicalize } from "./canonical";

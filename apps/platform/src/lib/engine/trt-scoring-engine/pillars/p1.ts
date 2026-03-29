@@ -57,13 +57,13 @@ export function computeP1(
   // 1E: Site & land use — discrete 0-4
   const p1e = normalizeDiscreteScore(responses.siteScore, 4);
 
-  const score = Math.round(
+  // R6: No rounding here — full float precision required until final GPS clamp
+  const score =
     p1a * w.energy +
     p1b * w.water +
     p1c * w.waste +
     p1d * w.carbon +
-    p1e * w.site
-  );
+    p1e * w.site;
 
   return {
     score,

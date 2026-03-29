@@ -63,12 +63,12 @@ export function computeP2(
   // 2D: Community integration — discrete 0-4
   const p2d = normalizeDiscreteScore(responses.communityScore, 4);
 
-  const score = Math.round(
+  // R6: No rounding here — full float precision required until final GPS clamp
+  const score =
     p2a * w.employment +
     p2b * w.procurement +
     p2c * w.revenueRetention +
-    p2d * w.community
-  );
+    p2d * w.community;
 
   return {
     score,

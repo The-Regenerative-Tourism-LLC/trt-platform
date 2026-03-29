@@ -44,12 +44,12 @@ export function computeP3(
   const p3c = responses.additionality ?? 0; // 0 | 25 | 50 | 75 | 100
   const p3d = responses.continuity ?? 0; // 0 | 25 | 50 | 75 | 100
 
-  const score = Math.round(
+  // R6: No rounding here — full float precision required until final GPS clamp
+  const score =
     p3a * w.categoryScope +
     p3b * w.traceability +
     p3c * w.additionality +
-    p3d * w.continuity
-  );
+    p3d * w.continuity;
 
   return {
     score,
