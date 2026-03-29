@@ -26,8 +26,8 @@ export default async function AdminDashboardPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+    <div className="space-y-8">
+      <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

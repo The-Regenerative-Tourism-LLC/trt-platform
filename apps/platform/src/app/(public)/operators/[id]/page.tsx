@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/db/prisma";
-import { GPS_BAND_CONFIG } from "@/lib/constants";
-import { GPSCircle, GPSBandBadge, DPSBandBadge, PressureBadge } from "@/components/scoring/ScoreDisplays";
+import { GPS_BAND_CONFIG, DPS_BAND_CONFIG, PRESSURE_CONFIG, OPERATOR_TYPES } from "@/lib/constants";
+import { GPSCircle, GPSBandBadge, DPSBandBadge, PressureBadge, PillarBar } from "@/components/scoring/ScoreDisplays";
+import { MapPin, Calendar, Shield, ExternalLink, Leaf, ArrowLeft, CheckCircle2, Globe, TrendingUp } from "lucide-react";
 import type { GreenPassportBand, DpsBand } from "@/lib/engine/trt-scoring-engine/types";
 
-// Each operator page is backed by a live DB read and generateMetadata also queries
-// the DB. No generateStaticParams is defined, so this is already dynamic, but we
-// make it explicit to prevent any future regression.
 export const dynamic = "force-dynamic";
 
 interface Props {
@@ -18,11 +17,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const operator = await prisma.operator.findUnique({
     where: { id },
-    select: { tradingName: true, legalName: true },
+    select: { tradingName: true, legalName: true, destinationRegion: true },
   });
   if (!operator) return { title: "Operator Not Found" };
+  const name = operator.tradingName ?? operator.legalName;
   return {
-    title: `${operator.tradingName ?? operator.legalName} · Green Passport`,
+    title: `${name} · Green Passport`,
+    description: `Verified regenerative tourism profile for ${name}${operator.destinationRegion ? ` in ${operator.destinationRegion}` : ""}.`,
   };
 }
 
@@ -36,6 +37,10 @@ export default async function PublicGreenPassportPage({ params }: Props) {
       scoreSnapshots: {
         where: { isPublished: true },
         orderBy: { computedAt: "desc" },
+        take: 5,
+      },
+      forwardCommitmentRecords: {
+        orderBy: { createdAt: "desc" },
         take: 1,
       },
     },
@@ -49,103 +54,329 @@ export default async function PublicGreenPassportPage({ params }: Props) {
   const gpsTotal = Number(score.gpsTotal);
   const gpsBand = score.gpsBand as GreenPassportBand;
   const config = GPS_BAND_CONFIG[gpsBand];
+  const dpsBand = score.dpsBand ? (score.dpsBand as DpsBand) : null;
+  const dpsConfig = dpsBand ? DPS_BAND_CONFIG[dpsBand] : null;
+  const operatorType = OPERATOR_TYPES[operator.operatorType ?? ""] ?? null;
+  const fcr = operator.forwardCommitmentRecords[0] ?? null;
+
+  const p1 = Number(score.p1Score);
+  const p2 = Number(score.p2Score);
+  const p3 = Number(score.p3Score);
+  const dpsTotal = score.dpsTotal ? Number(score.dpsTotal) : null;
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-12 space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">
-            🌿 Verified Green Passport
+      {/* Hero / Cover */}
+      <section className="relative">
+        {operator.coverPhotoUrl ? (
+          <div
+            className="h-64 md:h-80 w-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${operator.coverPhotoUrl})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
-          <h1 className="text-4xl font-bold">
+        ) : (
+          <div className="h-64 md:h-80 w-full bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-700/20 to-transparent" />
+          </div>
+        )}
+
+        {/* Back button overlay */}
+        <div className="absolute top-4 left-4">
+          <Link
+            href="/operators"
+            className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-sm font-medium px-3 py-1.5 rounded-full hover:bg-white transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            All Operators
+          </Link>
+        </div>
+
+        {/* GPS score overlay */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
+          <div className="bg-white rounded-2xl shadow-xl p-4 flex items-center gap-4">
+            <GPSCircle score={gpsTotal} band={gpsBand} size={100} />
+            <div className="hidden sm:block">
+              <GPSBandBadge band={gpsBand} />
+              {dpsBand && dpsConfig && (
+                <div className="mt-1.5">
+                  <DPSBandBadge band={dpsBand} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 pt-20 pb-12 space-y-8">
+        {/* Operator identity */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">
+            <Leaf className="h-3 w-3" />
+            Verified Green Passport
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             {operator.tradingName ?? operator.legalName}
           </h1>
-          {operator.destinationRegion && (
-            <p className="text-muted-foreground">
-              📍 {operator.destinationRegion}
-              {operator.country ? `, ${operator.country}` : ""}
+          <div className="flex items-center justify-center gap-3 text-muted-foreground text-sm flex-wrap">
+            {operator.destinationRegion && (
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5" />
+                {operator.destinationRegion}
+                {operator.country ? `, ${operator.country}` : ""}
+              </span>
+            )}
+            {operatorType && (
+              <span className="flex items-center gap-1">
+                · {operatorType.label}
+              </span>
+            )}
+          </div>
+          {operator.tagline && (
+            <p className="text-muted-foreground italic max-w-xl mx-auto">
+              {operator.tagline}
             </p>
           )}
         </div>
 
-        {/* GPS Score */}
-        <div className="rounded-2xl border bg-card p-8 flex flex-col items-center gap-4">
-          <GPSCircle score={gpsTotal} band={gpsBand} size={160} />
-          <GPSBandBadge band={gpsBand} />
-          <p className="text-sm text-muted-foreground text-center max-w-xs">
-            {config.description}
-          </p>
-          {score.dpsBand && (
-            <DPSBandBadge band={score.dpsBand as DpsBand} />
-          )}
-        </div>
+        {/* Score breakdown */}
+        <div className="rounded-2xl border bg-card p-6 md:p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
+              Green Passport Score
+            </h2>
+            <span className="text-xs text-muted-foreground">
+              GPS {gpsTotal}/100
+            </span>
+          </div>
 
-        {/* Pillar breakdown */}
-        <div className="rounded-2xl border bg-card p-6 space-y-4">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-            Score Breakdown
-          </p>
-          <div className="space-y-3">
+          <div className="space-y-5">
+            <PillarBar
+              label="P1 Operational Footprint"
+              score={p1}
+              weight={0.4}
+              colorClass="bg-emerald-500"
+            />
+            <PillarBar
+              label="P2 Local Integration"
+              score={p2}
+              weight={0.3}
+              colorClass="bg-amber-500"
+            />
+            <PillarBar
+              label="P3 Regenerative Contribution"
+              score={p3}
+              weight={0.3}
+              colorClass="bg-teal-500"
+            />
+          </div>
+
+          {/* Pillar explanations */}
+          <div className="grid md:grid-cols-3 gap-4 pt-2">
             {[
-              { label: "P1 Operational Footprint", score: Number(score.p1Score), weight: 0.4, color: "bg-emerald-500" },
-              { label: "P2 Local Integration", score: Number(score.p2Score), weight: 0.3, color: "bg-amber-500" },
-              { label: "P3 Regenerative Contribution", score: Number(score.p3Score), weight: 0.3, color: "bg-teal-500" },
-            ].map((p) => (
-              <div key={p.label} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>{p.label}</span>
-                  <span className="tabular-nums text-muted-foreground">
-                    {p.score}/100
-                  </span>
+              {
+                label: "Operational Footprint",
+                score: p1,
+                description: "Energy, water, waste, carbon, and land use intensity per activity unit.",
+                color: "border-emerald-200 bg-emerald-50/50",
+              },
+              {
+                label: "Local Integration",
+                score: p2,
+                description: "Employment, procurement, revenue retention, and community engagement.",
+                color: "border-amber-200 bg-amber-50/50",
+              },
+              {
+                label: "Regenerative Contribution",
+                score: p3,
+                description: "Active ecological, cultural, or scientific contribution with institutional traceability.",
+                color: "border-teal-200 bg-teal-50/50",
+              },
+            ].map((pillar) => (
+              <div
+                key={pillar.label}
+                className={`rounded-xl border p-4 ${pillar.color}`}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold">{pillar.label}</span>
+                  <span className="text-sm font-bold tabular-nums">{pillar.score}</span>
                 </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${p.color}`}
-                    style={{ width: `${p.score}%` }}
-                  />
-                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {pillar.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Territory DPI */}
-        {operator.territory?.compositeDpi != null && (
-          <div className="rounded-2xl border bg-card p-6 space-y-3">
+        {/* DPS — Direction of Travel */}
+        {dpsTotal != null && dpsBand && dpsConfig && (
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-                Destination Context — {operator.territory.name}
-              </p>
-              {operator.territory.pressureLevel && (
-                <PressureBadge level={operator.territory.pressureLevel} />
-              )}
+              <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Direction of Travel
+              </h2>
+              <DPSBandBadge band={dpsBand} />
             </div>
-            <p className="text-sm text-muted-foreground">
-              Destination Pressure Index:{" "}
-              <span className="font-bold text-foreground">
-                {Number(operator.territory.compositeDpi)}
+            <div className="flex items-center gap-3">
+              <span className="text-4xl font-black tabular-nums">
+                {dpsTotal > 0 ? "+" : ""}{dpsTotal}
               </span>
-              . Choosing a high-GPS operator in a high-pressure destination is
-              the highest-impact booking choice.
+              <p className="text-sm text-muted-foreground">
+                This operator is <strong className="text-foreground">{dpsConfig.label.toLowerCase()}</strong>
+                {" "}— measuring how fast and consistently they improve across assessment cycles.
+              </p>
+            </div>
+            {score.dps1 != null && (
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Rate of Improvement", value: Number(score.dps1) },
+                  { label: "Consistency", value: score.dps2 ? Number(score.dps2) : null },
+                  { label: "P3 Acceleration", value: score.dps3 ? Number(score.dps3) : null },
+                ].map((d) => (
+                  <div key={d.label} className="rounded-xl bg-muted p-3 text-center">
+                    <span className="text-lg font-bold tabular-nums">
+                      {d.value != null ? (d.value > 0 ? `+${d.value}` : d.value) : "—"}
+                    </span>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{d.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Forward Commitment */}
+        {fcr && (
+          <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <Leaf className="h-4 w-4 text-teal-600" />
+              <h2 className="text-sm font-semibold text-teal-800">
+                Forward Commitment — Pillar 3 In Development
+              </h2>
+            </div>
+            <p className="text-sm text-teal-700">
+              This operator has formally committed to establishing a regenerative contribution programme.
+              Category: <strong>{fcr.preferredCategory}</strong>.
+              Status: <strong className="capitalize">{fcr.status}</strong>.
             </p>
           </div>
         )}
 
-        {/* Methodology */}
-        <div className="rounded-2xl border bg-muted/30 p-5 text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground">Verification & Audit</p>
-          <p>Methodology version: {score.methodologyVersion}</p>
-          <p>
-            Computed:{" "}
-            {new Date(score.computedAt).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-          <p>
-            Score snapshot ID: <span className="font-mono">{score.id}</span>
+        {/* DPI — Destination Context */}
+        {operator.territory?.compositeDpi != null && (
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Destination Context — {operator.territory.name}
+              </h2>
+              {operator.territory.pressureLevel && (
+                <PressureBadge level={operator.territory.pressureLevel} />
+              )}
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-4xl font-black tabular-nums">
+                {Number(operator.territory.compositeDpi)}
+              </span>
+              <div className="text-sm text-muted-foreground flex-1">
+                <p>
+                  Destination Pressure Index measures the ecological and social pressure this
+                  destination is under.{" "}
+                  <strong className="text-foreground">
+                    Choosing a high-GPS operator in a high-pressure destination is the
+                    highest-impact booking choice.
+                  </strong>
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: "Tourist Intensity", value: operator.territory.touristIntensity, weight: "35%" },
+                { label: "Ecological Sensitivity", value: operator.territory.ecologicalSensitivity, weight: "30%" },
+                { label: "Economic Leakage", value: operator.territory.economicLeakageRate, weight: "20%" },
+                { label: "Regen. Performance", value: operator.territory.regenerativePerformance, weight: "15%" },
+              ].map((m) => (
+                <div key={m.label} className="rounded-xl bg-muted p-3 text-center">
+                  <span className="text-lg font-bold tabular-nums">{m.value != null ? Number(m.value) : "—"}</span>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {m.label} ({m.weight})
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Score History (if multiple cycles) */}
+        {operator.scoreSnapshots.length > 1 && (
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
+              Assessment History
+            </h2>
+            <div className="space-y-3">
+              {operator.scoreSnapshots.map((s, i) => (
+                <div
+                  key={s.id}
+                  className={`flex items-center justify-between p-3 rounded-xl ${
+                    i === 0 ? "bg-emerald-50 border border-emerald-200" : "bg-muted"
+                  }`}
+                >
+                  <div>
+                    <p className="text-sm font-medium">
+                      {i === 0 ? "Current" : `Cycle ${operator.scoreSnapshots.length - i}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(s.computedAt).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-black tabular-nums">{Number(s.gpsTotal)}</span>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {(s.gpsBand as string).replace(/_/g, " ")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Verification & Audit */}
+        <div className="rounded-2xl border bg-muted/30 p-6 space-y-3">
+          <div className="flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold">Verification & Audit</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+            <p>
+              <span className="font-medium text-foreground">Methodology:</span>{" "}
+              {score.methodologyVersion}
+            </p>
+            <p>
+              <span className="font-medium text-foreground">Computed:</span>{" "}
+              {new Date(score.computedAt).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+            <p className="sm:col-span-2">
+              <span className="font-medium text-foreground">Snapshot ID:</span>{" "}
+              <span className="font-mono">{score.id}</span>
+            </p>
+          </div>
+          <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
+            This score is computed by the TRT Scoring Engine — a deterministic, stateless computation
+            layer. Any GPS can be independently reproduced by passing the source AssessmentSnapshot and
+            MethodologyBundle to the engine. Scores displayed here are read from persisted ScoreSnapshots,
+            never computed on-the-fly.
           </p>
         </div>
       </div>

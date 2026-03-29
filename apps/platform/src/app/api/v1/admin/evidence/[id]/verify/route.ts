@@ -33,7 +33,7 @@ const VerifyRequestSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await requireRole("admin");
@@ -48,7 +48,7 @@ export async function POST(
     }
 
     const { action, notes } = parsed.data;
-    const evidenceId = params.id;
+    const { id: evidenceId } = await params;
 
     // Load the evidence ref
     const evidenceRef = await prisma.evidenceRef.findUnique({
