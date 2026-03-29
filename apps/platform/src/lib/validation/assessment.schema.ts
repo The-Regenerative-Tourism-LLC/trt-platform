@@ -15,6 +15,22 @@ export const RevenueSplitSchema = z.object({
   experiencePct: z.number().min(0).max(100).optional(),
 });
 
+// Type C operators must provide a revenue split that sums to 100 ±1
+export function validateTypeCRevenueSplit(
+  operatorType: string,
+  revenueSplit: { accommodationPct?: number; experiencePct?: number } | undefined
+): string | null {
+  if (operatorType !== "C") return null;
+  if (!revenueSplit) return "Type C operators must provide revenueSplit";
+  const acc = revenueSplit.accommodationPct ?? 0;
+  const exp = revenueSplit.experiencePct ?? 0;
+  const sum = acc + exp;
+  if (Math.abs(sum - 100) > 1) {
+    return `Type C revenueSplit must sum to 100 ±1 (got ${sum})`;
+  }
+  return null;
+}
+
 // ── Pillar 1 Responses ─────────────────────────────────────────────────────
 
 export const P1ResponsesSchema = z.object({

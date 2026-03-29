@@ -44,6 +44,19 @@ export async function updateVerificationState(
   });
 }
 
+/**
+ * Check whether a verified T3 evidence ref exists for an operator.
+ * Used by the orchestrator to enforce T3 gate before P3 scoring.
+ */
+export async function findVerifiedT3Evidence(
+  operatorId: string
+): Promise<boolean> {
+  const count = await prisma.evidenceRef.count({
+    where: { operatorId, tier: "T3", verificationState: "verified" },
+  });
+  return count > 0;
+}
+
 export async function findPendingEvidenceQueue(): Promise<PendingEvidenceItem[]> {
   return prisma.evidenceRef.findMany({
     where: { verificationState: "pending" },

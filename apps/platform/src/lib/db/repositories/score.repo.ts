@@ -89,6 +89,23 @@ export async function blockScorePublication(
 }
 
 /**
+ * Find the Cycle 1 (baseline) ScoreSnapshot for an operator.
+ * Used by the orchestrator to lock baselineScores into the DeltaBlock.
+ */
+export async function findCycle1ScoreByOperator(
+  operatorId: string
+): Promise<ScoreSnapshot | null> {
+  return prisma.scoreSnapshot.findFirst({
+    where: {
+      operatorId,
+      assessmentSnapshot: { assessmentCycle: 1 },
+    },
+    include: { assessmentSnapshot: true } as any,
+    orderBy: { computedAt: "asc" },
+  });
+}
+
+/**
  * Find all published scores for operators in a territory.
  * Used for DPI regenerative performance calculation.
  */
@@ -102,7 +119,7 @@ export async function findPublishedScoresByTerritory(
     },
     select: { operatorId: true, gpsTotal: true },
   });
-  return results.map((r) => ({
+  return results.map((r: { operatorId: string; gpsTotal: unknown }) => ({
     operatorId: r.operatorId,
     gpsTotal: Number(r.gpsTotal),
   }));
