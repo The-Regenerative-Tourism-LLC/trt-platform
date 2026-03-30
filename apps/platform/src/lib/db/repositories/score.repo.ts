@@ -29,6 +29,21 @@ export async function findLatestScoreByOperator(
   });
 }
 
+/**
+ * Returns the second-most-recent ScoreSnapshot for an operator.
+ * Used by the dashboard delta comparison section.
+ */
+export async function findPreviousScoreByOperator(
+  operatorId: string
+): Promise<ScoreSnapshot | null> {
+  const results = await prisma.scoreSnapshot.findMany({
+    where: { operatorId },
+    orderBy: { computedAt: "desc" },
+    take: 2,
+  });
+  return results[1] ?? null;
+}
+
 export async function findPublishedScoreByOperator(
   operatorId: string
 ): Promise<ScoreSnapshot | null> {

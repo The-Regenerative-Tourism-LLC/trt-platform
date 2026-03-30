@@ -251,6 +251,7 @@ model Operator {
   isChainMember         Boolean       @default(false)
   chainName             String?
   assessmentCycleCount  Int           @default(0)
+  onboardingCompleted   Boolean       @default(false)
   onboardingData        Json          @default("{}")
   onboardingStep        Int           @default(0)
 
@@ -281,6 +282,7 @@ model Operator {
   reviews                  OperatorReview[]
   profileViews             ProfileView[]
   checkIns                 CheckIn[]
+  onboardingDraft          OnboardingDraft?
 
   @@map("operators")
 }
@@ -336,6 +338,7 @@ model AssessmentSnapshot {
   p3InstitutionName           String?
 
   // Delta block (null on Cycle 1)
+  deltaExplanation            String?       @db.Text
   deltaPriorCycle             Int?
   deltaBaselineScores         Json?
   deltaPriorScores            Json?
@@ -756,6 +759,20 @@ model ProfileView {
   operator    Operator  @relation(fields: [operatorId], references: [id])
 
   @@map("profile_views")
+}
+
+// ── Onboarding Draft (mutable, one per operator) ──────────────────────────
+
+model OnboardingDraft {
+  id          String   @id @default(cuid())
+  operatorId  String   @unique
+  currentStep Int      @default(0)
+  dataJson    Json     @default("{}")
+  updatedAt   DateTime @updatedAt
+
+  operator    Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+
+  @@map("onboarding_drafts")
 }
 
 // ── Traveler Waitlist ──────────────────────────────────────────────────────

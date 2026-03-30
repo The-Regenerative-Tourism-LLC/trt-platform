@@ -3,115 +3,92 @@
 /**
  * Onboarding UI Store (Zustand)
  *
- * This store holds LOCAL UI state for the operator onboarding form.
- * It is NOT authoritative for scores — it collects form data before
- * submission to the API route, which delegates to the scoring orchestrator.
- *
- * Zustand stores in this codebase are ONLY for UI state.
- * No scoring logic of any kind is permitted here.
+ * Raw onboarding data only — no derived or computed values.
+ * All scoring comes from POST /api/v1/score/preview.
+ * Step navigation delegates to onboarding-steps.ts helpers.
  */
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { OnboardingData } from "@/lib/onboarding/onboarding-steps";
+import {
+  ONBOARDING_STEPS,
+  getNextStep,
+  getPreviousStep,
+  validateStep,
+  getStepIndex,
+} from "@/lib/onboarding/onboarding-steps";
 
-export interface OnboardingFormData {
-  // Section 0 — Operator Profile
-  operatorType?: "A" | "B" | "C";
-  legalName?: string;
-  tradingName?: string;
-  country?: string;
-  destinationRegion?: string;
-  territoryId?: string;
-  guestNights?: number;
-  visitorDays?: number;
-  revenueSplitAccommodationPct?: number;
-  revenueSplitExperiencePct?: number;
-  assessmentPeriodEnd?: string; // ISO8601 date — 12-month period end
-  accommodationCategory?: string;
-  rooms?: number;
-  bedCapacity?: number;
-  yearOperationStart?: number;
-  website?: string;
-  primaryContactName?: string;
-  primaryContactEmail?: string;
-  experienceTypes?: string[];
-  ownershipType?: string;
-  localEquityPct?: number;
-  isChainMember?: boolean;
-  chainName?: string;
-
-  // Section 1 — Pillar 1 (Operational Footprint)
-  p1EnergyIntensity?: number;
-  p1RenewablePct?: number;
-  p1WaterIntensity?: number;
-  p1RecirculationScore?: number;
-  p1WasteDiversionPct?: number;
-  p1CarbonIntensity?: number;
-  p1SiteScore?: number;
-
-  // Section 2 — Pillar 2 (Local Integration)
-  p2LocalEmploymentRate?: number;
-  p2EmploymentQuality?: number;
-  p2LocalFbRate?: number;
-  p2LocalNonfbRate?: number;
-  p2DirectBookingRate?: number;
-  p2LocalOwnershipPct?: number;
-  p2CommunityScore?: number;
-
-  // Section 3 — Pillar 3 (Regenerative Contribution)
-  p3Status?: "A" | "B" | "C" | "D" | "E";
-  p3CategoryScope?: number;
-  p3Traceability?: number;
-  p3Additionality?: number;
-  p3Continuity?: number;
-  p3ContributionCategories?: string[];
-  p3ProgrammeDescription?: string;
-  p3ProgrammeDuration?: string;
-  p3GeographicScope?: string;
-  p3AnnualBudget?: number;
-  p3GuestsParticipating?: number;
-  p3IsCollective?: boolean;
-  p3CollectiveSize?: string;
-  p3CollectiveTotalBudget?: number;
-  p3CollectiveSharePct?: number;
-  p3InstitutionName?: string;
-
-  // Forward commitment
-  forwardCommitmentPreferredCategory?: string;
-  forwardCommitmentTerritoryContext?: string;
-  forwardCommitmentTargetCycle?: number;
-  forwardCommitmentSignatory?: string;
-
-  // Evidence
-  evidenceRefs?: Array<{
-    indicatorId: string;
-    tier: "T1" | "T2" | "T3" | "Proxy";
-    checksum: string;
-    verificationState: "pending" | "verified" | "rejected" | "lapsed";
-  }>;
-}
+export type { OnboardingData };
 
 interface OnboardingStore {
-  step: number;
-  data: OnboardingFormData;
-  setStep: (step: number) => void;
-  updateData: (patch: Partial<OnboardingFormData>) => void;
+  stepId: string;
+  data: OnboardingData;
+
+  updateField: (patch: Partial<OnboardingData>) => void;
+  nextStep: () => boolean;
+  previousStep: () => void;
+  setStepId: (id: string) => void;
+  loadDraft: (draft: { currentStep: number; dataJson: Record<string, unknown> }) => void;
+  saveDraft: () => Promise<void>;
   resetOnboarding: () => void;
 }
 
+const INITIAL_STEP = ONBOARDING_STEPS[0].id;
+
 export const useOnboardingStore = create<OnboardingStore>()(
   persist(
-    (set) => ({
-      step: 0,
+    (set, get) => ({
+      stepId: INITIAL_STEP,
       data: {},
-      setStep: (step) => set({ step }),
-      updateData: (patch) =>
+
+      updateField: (patch) =>
         set((state) => ({ data: { ...state.data, ...patch } })),
-      resetOnboarding: () => set({ step: 0, data: {} }),
+
+      nextStep: () => {
+        const { stepId, data } = get();
+        if (!validateStep(stepId, data)) return false;
+        const next = getNextStep(stepId, data);
+        if (!next) return false;
+        set({ stepId: next.id });
+        return true;
+      },
+
+      previousStep: () => {
+        const { stepId, data } = get();
+        const prev = getPreviousStep(stepId, data);
+        if (prev) set({ stepId: prev.id });
+      },
+
+      setStepId: (id) => set({ stepId: id }),
+
+      loadDraft: (draft) => {
+        const step = ONBOARDING_STEPS[draft.currentStep];
+        set({
+          stepId: step?.id ?? INITIAL_STEP,
+          data: (draft.dataJson ?? {}) as OnboardingData,
+        });
+      },
+
+      saveDraft: async () => {
+        const { stepId, data } = get();
+        const idx = getStepIndex(stepId);
+        const res = await fetch("/api/v1/onboarding/draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            currentStep: idx === -1 ? 0 : idx,
+            dataJson: data,
+          }),
+        });
+        if (!res.ok) throw new Error("Draft save failed");
+      },
+
+      resetOnboarding: () => set({ stepId: INITIAL_STEP, data: {} }),
     }),
     {
       name: "trt-onboarding",
-      partialize: (state) => ({ step: state.step, data: state.data }),
+      partialize: (state) => ({ stepId: state.stepId, data: state.data }),
     }
   )
 );

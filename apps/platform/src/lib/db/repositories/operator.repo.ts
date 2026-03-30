@@ -40,6 +40,13 @@ export async function incrementAssessmentCycle(operatorId: string): Promise<Oper
   });
 }
 
+export async function markOnboardingCompleted(operatorId: string): Promise<Operator> {
+  return prisma.operator.update({
+    where: { id: operatorId },
+    data: { onboardingCompleted: true },
+  });
+}
+
 export async function findPublishedOperatorsWithScores(
   options?: { territoryId?: string; limit?: number }
 ) {

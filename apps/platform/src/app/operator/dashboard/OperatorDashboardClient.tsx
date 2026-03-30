@@ -38,6 +38,7 @@ interface OperatorDashboardData {
     operatorType: string | null;
     operatorCode: string | null;
     assessmentCycleCount: number;
+    onboardingCompleted: boolean;
     onboardingStep: number;
     onboardingData: Record<string, unknown>;
     territory: {
@@ -67,6 +68,13 @@ interface OperatorDashboardData {
       publicationBlockedReason: string | null;
       computedAt: string;
     } | null;
+    previousScore: {
+      gpsScore: number;
+      pillar1Score: number;
+      pillar2Score: number;
+      pillar3Score: number;
+      createdAt: string;
+    } | null;
   } | null;
 }
 
@@ -83,15 +91,13 @@ export function OperatorDashboardClient() {
     enabled: !!user,
   });
 
-  // Redirect operators who have never completed an assessment to onboarding.
-  // assessmentCycleCount === 0 means no ScoreSnapshot has ever been produced
-  // for this operator. The dashboard has no meaningful content to show.
-  // This runs on the client after the API response — it cannot run in middleware
-  // because that would require a DB query on every matched request.
+  // Redirect to onboarding only if onboarding has never been completed.
+  // Once onboardingCompleted = true, the operator stays on the dashboard
+  // even if their ScoreSnapshot is still being processed.
   const operator = data?.operator;
   useEffect(() => {
     if (!isLoading && !authLoading && operator !== undefined) {
-      if (operator === null || operator.assessmentCycleCount === 0) {
+      if (operator === null || !operator.onboardingCompleted) {
         router.replace("/operator/onboarding");
       }
     }
@@ -105,7 +111,7 @@ export function OperatorDashboardClient() {
     );
   }
 
-  if (!operator || operator.assessmentCycleCount === 0) {
+  if (!operator || !operator.onboardingCompleted) {
     // Show spinner while redirect is in progress
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -115,6 +121,7 @@ export function OperatorDashboardClient() {
   }
 
   const score = operator.latestScore;
+  const prev = operator.previousScore;
 
   return (
     <div className="space-y-6">
@@ -297,6 +304,79 @@ export function OperatorDashboardClient() {
             </Card>
           )}
 
+          {/* Delta — Change Since Last Assessment */}
+          {prev && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Change Since Last Assessment
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {([
+                    {
+                      label: "GPS Score",
+                      current: score.gpsTotal,
+                      previous: prev.gpsScore,
+                    },
+                    {
+                      label: "P1 Footprint",
+                      current: score.p1Score,
+                      previous: prev.pillar1Score,
+                    },
+                    {
+                      label: "P2 Integration",
+                      current: score.p2Score,
+                      previous: prev.pillar2Score,
+                    },
+                    {
+                      label: "P3 Regenerative",
+                      current: score.p3Score,
+                      previous: prev.pillar3Score,
+                    },
+                  ] as const).map(({ label, current, previous }) => {
+                    const diff = Math.round((current - previous) * 10) / 10;
+                    const positive = diff > 0;
+                    const neutral = diff === 0;
+                    return (
+                      <div
+                        key={label}
+                        className="rounded-xl bg-muted p-3 text-center space-y-1"
+                      >
+                        <span
+                          className={`text-xl font-bold tabular-nums ${
+                            neutral
+                              ? "text-muted-foreground"
+                              : positive
+                              ? "text-emerald-600"
+                              : "text-destructive"
+                          }`}
+                        >
+                          {neutral ? "±0" : positive ? `+${diff}` : `${diff}`}
+                        </span>
+                        <p className="text-[10px] text-muted-foreground">{label}</p>
+                        <p className="text-[9px] text-muted-foreground/60">
+                          {previous} → {current}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Compared to assessment on{" "}
+                  {new Date(prev.createdAt).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  .
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* DPI — Destination Context */}
           {operator.territory?.compositeDpi != null && (
             <Card>
@@ -408,17 +488,11 @@ function NoAssessmentState() {
         <div className="w-16 h-16 rounded-full bg-emerald-50 mx-auto flex items-center justify-center">
           <Zap className="w-8 h-8 text-emerald-600" />
         </div>
-        <p className="font-semibold text-lg">No assessment completed yet</p>
+        <p className="font-semibold text-lg">Your assessment is being processed.</p>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Complete your onboarding assessment to receive your Green Passport Score,
-          pillar breakdown, and directional progress.
+          Your submission has been received. Your Green Passport Score, pillar breakdown,
+          and assessment details will appear here shortly.
         </p>
-        <Button className="bg-emerald-600 hover:bg-emerald-700" asChild>
-          <Link href="/operator/onboarding">
-            Start Assessment
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Link>
-        </Button>
       </CardContent>
     </Card>
   );

@@ -34,7 +34,10 @@ import {
   createScoreSnapshot,
   findCycle1ScoreByOperator,
 } from "../db/repositories/score.repo";
-import { findVerifiedT3Evidence } from "../db/repositories/evidence.repo";
+import {
+  createEvidenceRef,
+  findVerifiedT3Evidence,
+} from "../db/repositories/evidence.repo";
 import { incrementAssessmentCycle } from "../db/repositories/operator.repo";
 import { createForwardCommitmentRecord } from "../db/repositories/forward-commitment.repo";
 import { logAuditEvent } from "../audit/logger";
@@ -146,6 +149,24 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
 
     snapshotHash: assessmentSnapshot.snapshotHash,
   });
+
+  // ── Step 2b: Persist evidence refs (append-only, never updated) ────────
+  if (input.snapshotInput.evidence.length > 0) {
+    await Promise.all(
+      input.snapshotInput.evidence.map((e) =>
+        createEvidenceRef({
+          assessmentSnapshot: { connect: { id: persistedAssessment.id } },
+          operator: { connect: { id: input.operatorId } },
+          indicatorId: e.indicatorId,
+          tier: e.tier as any,
+          checksum: e.checksum,
+          verificationState: (e.verificationState ?? "pending") as any,
+          proxyMethod: e.proxyMethod,
+          proxyCorrectionFactor: e.proxyCorrectionFactor,
+        })
+      )
+    );
+  }
 
   // ── Step 3: Lock baselineScores from Cycle 1 ScoreSnapshot (Cycle 2+) ──
   // SECURITY: We never trust client-supplied baselineScores.

@@ -31,8 +31,8 @@ export interface AssessmentSnapshotInput {
   pillar3: P3Responses;
   p3Status: "A" | "B" | "C" | "D" | "E";
 
-  // Delta (null on Cycle 1)
-  delta: DeltaBlock | null;
+  // Delta explanation (null on Cycle 1) — full DeltaBlock is built server-side by orchestrator
+  delta: { explanation?: string } | null;
 
   // Evidence refs (checksums only, no bytes)
   evidence: EvidenceRef[];
@@ -47,6 +47,8 @@ export function buildAssessmentSnapshot(
   input: AssessmentSnapshotInput,
   createdAt: string
 ): AssessmentSnapshot {
+  // delta is always null in the hash — the full DeltaBlock is built server-side by the orchestrator
+  // from locked DB data and is never part of the operator-submitted payload integrity check.
   const partial: Omit<AssessmentSnapshot, "snapshotHash"> = {
     operatorId: input.operatorId,
     operatorType: input.operatorType,
@@ -58,7 +60,7 @@ export function buildAssessmentSnapshot(
     pillar2: input.pillar2,
     pillar3: input.pillar3,
     p3Status: input.p3Status,
-    delta: input.delta,
+    delta: null,
     evidence: input.evidence,
     createdAt,
   };
