@@ -2,9 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Building2,
   QrCode,
   FileText,
   ArrowRight,
@@ -75,11 +76,26 @@ function fetchDashboard(): Promise<OperatorDashboardData> {
 
 export function OperatorDashboardClient() {
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
   const { data, isLoading } = useQuery({
     queryKey: ["operator-dashboard"],
     queryFn: fetchDashboard,
     enabled: !!user,
   });
+
+  // Redirect operators who have never completed an assessment to onboarding.
+  // assessmentCycleCount === 0 means no ScoreSnapshot has ever been produced
+  // for this operator. The dashboard has no meaningful content to show.
+  // This runs on the client after the API response — it cannot run in middleware
+  // because that would require a DB query on every matched request.
+  const operator = data?.operator;
+  useEffect(() => {
+    if (!isLoading && !authLoading && operator !== undefined) {
+      if (operator === null || operator.assessmentCycleCount === 0) {
+        router.replace("/operator/onboarding");
+      }
+    }
+  }, [operator, isLoading, authLoading, router]);
 
   if (authLoading || isLoading) {
     return (
@@ -89,10 +105,13 @@ export function OperatorDashboardClient() {
     );
   }
 
-  const operator = data?.operator;
-
-  if (!operator) {
-    return <EmptyState />;
+  if (!operator || operator.assessmentCycleCount === 0) {
+    // Show spinner while redirect is in progress
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+      </div>
+    );
   }
 
   const score = operator.latestScore;
@@ -383,29 +402,6 @@ export function OperatorDashboardClient() {
       ) : (
         <NoAssessmentState />
       )}
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="max-w-lg mx-auto py-20 text-center space-y-6">
-      <div className="w-20 h-20 rounded-full bg-emerald-50 mx-auto flex items-center justify-center">
-        <Building2 className="w-10 h-10 text-emerald-600" />
-      </div>
-      <h1 className="text-3xl font-bold tracking-tight">
-        Welcome to Green Passport
-      </h1>
-      <p className="text-muted-foreground">
-        Complete your operator assessment to receive your Green Passport Score and
-        showcase your regenerative impact to travelers.
-      </p>
-      <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700" asChild>
-        <Link href="/operator/onboarding">
-          Start Assessment
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Link>
-      </Button>
     </div>
   );
 }
