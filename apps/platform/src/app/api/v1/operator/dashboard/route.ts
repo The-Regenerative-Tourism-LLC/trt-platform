@@ -8,7 +8,10 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/auth/session";
 import { findOperatorByUserId } from "@/lib/db/repositories/operator.repo";
-import { findLatestScoreByOperator } from "@/lib/db/repositories/score.repo";
+import {
+  findLatestScoreByOperator,
+  findPreviousScoreByOperator,
+} from "@/lib/db/repositories/score.repo";
 import { findTerritoryById } from "@/lib/db/repositories/dpi.repo";
 
 export async function GET() {
@@ -20,8 +23,9 @@ export async function GET() {
       return NextResponse.json({ operator: null });
     }
 
-    const [latestScore, territory] = await Promise.all([
+    const [latestScore, previousScore, territory] = await Promise.all([
       findLatestScoreByOperator(operator.id),
+      findPreviousScoreByOperator(operator.id),
       operator.territoryId ? findTerritoryById(operator.territoryId) : null,
     ]);
 
@@ -35,6 +39,7 @@ export async function GET() {
         operatorType: operator.operatorType,
         operatorCode: operator.operatorCode,
         assessmentCycleCount: operator.assessmentCycleCount,
+        onboardingCompleted: operator.onboardingCompleted,
         onboardingStep: operator.onboardingStep,
         onboardingData: operator.onboardingData,
         territory: territory
@@ -78,6 +83,15 @@ export async function GET() {
               isPublished: latestScore.isPublished,
               publicationBlockedReason: latestScore.publicationBlockedReason,
               computedAt: latestScore.computedAt.toISOString(),
+            }
+          : null,
+        previousScore: previousScore
+          ? {
+              gpsScore: Number(previousScore.gpsTotal),
+              pillar1Score: Number(previousScore.p1Score),
+              pillar2Score: Number(previousScore.p2Score),
+              pillar3Score: Number(previousScore.p3Score),
+              createdAt: previousScore.computedAt.toISOString(),
             }
           : null,
       },

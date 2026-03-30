@@ -108,8 +108,10 @@ export interface DeltaBlock {
 export interface EvidenceRef {
   readonly indicatorId: string;
   readonly tier: "T1" | "T2" | "T3" | "Proxy";
-  readonly checksum: string;
-  readonly verificationState: "pending" | "verified" | "rejected" | "lapsed";
+  readonly checksum?: string;
+  readonly verificationState?: "pending" | "verified" | "rejected" | "lapsed";
+  readonly proxyMethod?: string;
+  readonly proxyCorrectionFactor?: number;
 }
 
 export interface AssessmentSnapshot {
