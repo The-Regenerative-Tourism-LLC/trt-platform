@@ -7,7 +7,8 @@ interface ScoreRingsProps {
   footprint: number;
   local: number;
   regen: number;
-  total?: number;
+  /** GPS total from ScoreSnapshot. Must be passed — never computed locally. */
+  total: number;
   peerLabel?: string;
   size?: number;
   className?: string;
@@ -40,8 +41,7 @@ export const ScoreRings = React.forwardRef<HTMLElement, ScoreRingsProps>(
     },
     ref
   ) {
-    const gps =
-      total ?? Math.round(footprint * 0.4 + local * 0.3 + regen * 0.3);
+    const gps = total;
     const center = size / 2;
     const strokeWidth = Math.max(2.5, Math.min(size * 0.05, 8));
     const gap = strokeWidth * 1.6;

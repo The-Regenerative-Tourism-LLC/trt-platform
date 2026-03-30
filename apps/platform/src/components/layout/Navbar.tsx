@@ -77,9 +77,7 @@ export function Navbar() {
     if (isAdminRoute && isAdmin) {
       return [
         { href: "/admin/dashboard", label: "Overview" },
-        { href: "/admin/operators", label: "Operators" },
         { href: "/admin/evidence", label: "Evidence" },
-        { href: "/admin/territories", label: "Territories" },
       ];
     }
 

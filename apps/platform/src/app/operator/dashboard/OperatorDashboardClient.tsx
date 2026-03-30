@@ -236,14 +236,9 @@ export function OperatorDashboardClient() {
                 />
                 <Separator />
                 <div className="flex justify-between text-sm">
-                  <span className="font-medium">Weighted Total</span>
+                  <span className="font-medium">Green Passport Score</span>
                   <span className="tabular-nums font-bold">
-                    {Math.round(
-                      score.p1Score * 0.4 +
-                        score.p2Score * 0.3 +
-                        score.p3Score * 0.3
-                    )}
-                    /100
+                    {score.gpsTotal}/100
                   </span>
                 </div>
               </CardContent>

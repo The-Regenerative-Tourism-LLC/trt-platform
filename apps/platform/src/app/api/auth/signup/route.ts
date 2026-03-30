@@ -60,6 +60,8 @@ export async function POST(req: NextRequest) {
           data: {
             userId: user.id,
             legalName: name,
+            photos: [],
+            amenities: [],
           },
         });
       } else {
