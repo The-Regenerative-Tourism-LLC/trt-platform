@@ -242,15 +242,33 @@ export function OperatorOnboardingClient() {
     enabled: step === 7,
   });
 
-  // Seed Zustand store with the operator's persisted territoryId so the
-  // submission payload always has it, even if the operator skips Step 0.
-  const resolvedTerritoryId: string | undefined =
-    onboardingData?.operator?.territoryId ?? undefined;
+  // Seed Zustand store from server-persisted operator profile on first load.
+  // This ensures resume works correctly even if localStorage was cleared.
+  const serverOperator = onboardingData?.operator;
   useEffect(() => {
-    if (resolvedTerritoryId && !data.territoryId) {
-      updateData({ territoryId: resolvedTerritoryId });
-    }
-  }, [resolvedTerritoryId, data.territoryId, updateData]);
+    if (!serverOperator) return;
+    const patch: Partial<import("@/store/onboarding-store").OnboardingFormData> = {};
+    if (serverOperator.operatorType && !data.operatorType) patch.operatorType = serverOperator.operatorType;
+    if (serverOperator.legalName && !data.legalName) patch.legalName = serverOperator.legalName;
+    if (serverOperator.tradingName && !data.tradingName) patch.tradingName = serverOperator.tradingName;
+    if (serverOperator.country && !data.country) patch.country = serverOperator.country;
+    if (serverOperator.destinationRegion && !data.destinationRegion) patch.destinationRegion = serverOperator.destinationRegion;
+    if (serverOperator.territoryId && !data.territoryId) patch.territoryId = serverOperator.territoryId;
+    if (serverOperator.yearOperationStart && !data.yearOperationStart) patch.yearOperationStart = serverOperator.yearOperationStart;
+    if (serverOperator.website && !data.website) patch.website = serverOperator.website;
+    if (serverOperator.primaryContactName && !data.primaryContactName) patch.primaryContactName = serverOperator.primaryContactName;
+    if (serverOperator.primaryContactEmail && !data.primaryContactEmail) patch.primaryContactEmail = serverOperator.primaryContactEmail;
+    if (serverOperator.accommodationCategory && !data.accommodationCategory) patch.accommodationCategory = serverOperator.accommodationCategory;
+    if (serverOperator.rooms != null && data.rooms == null) patch.rooms = serverOperator.rooms;
+    if (serverOperator.bedCapacity != null && data.bedCapacity == null) patch.bedCapacity = serverOperator.bedCapacity;
+    if (serverOperator.experienceTypes?.length && !data.experienceTypes?.length) patch.experienceTypes = serverOperator.experienceTypes;
+    if (serverOperator.ownershipType && !data.ownershipType) patch.ownershipType = serverOperator.ownershipType;
+    if (serverOperator.localEquityPct != null && data.localEquityPct == null) patch.localEquityPct = serverOperator.localEquityPct;
+    if (serverOperator.isChainMember != null && data.isChainMember == null) patch.isChainMember = serverOperator.isChainMember;
+    if (serverOperator.chainName && !data.chainName) patch.chainName = serverOperator.chainName;
+    if (Object.keys(patch).length > 0) updateData(patch);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverOperator]);
 
   // Infer normalisation bounds based on operator type
   const isTypeB = data.operatorType === "B";
@@ -269,6 +287,43 @@ export function OperatorOnboardingClient() {
       toast.error("Failed to save progress");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveProfileToServer = async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/v1/operator/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          legalName: data.legalName,
+          tradingName: data.tradingName,
+          country: data.country,
+          destinationRegion: data.destinationRegion,
+          territoryId: data.territoryId,
+          operatorType: data.operatorType,
+          yearOperationStart: data.yearOperationStart,
+          website: data.website,
+          primaryContactName: data.primaryContactName,
+          primaryContactEmail: data.primaryContactEmail,
+          accommodationCategory: data.accommodationCategory,
+          rooms: data.rooms,
+          bedCapacity: data.bedCapacity,
+          experienceTypes: data.experienceTypes,
+          ownershipType: data.ownershipType,
+          localEquityPct: data.localEquityPct,
+          isChainMember: data.isChainMember,
+          chainName: data.chainName,
+        }),
+      });
+      if (!res.ok) {
+        toast.error("Failed to save profile");
+        return false;
+      }
+      return true;
+    } catch {
+      toast.error("Failed to save profile");
+      return false;
     }
   };
 
@@ -352,6 +407,22 @@ export function OperatorOnboardingClient() {
 
   // Step 0: Operator Profile
   if (step === 0) {
+    const territories: Array<{ id: string; name: string; country: string | null }> =
+      onboardingData?.territories ?? [];
+
+    const handleStep0Next = async () => {
+      setSaving(true);
+      const ok = await saveProfileToServer();
+      setSaving(false);
+      if (ok) goNext();
+    };
+
+    const handleStep0Save = async () => {
+      setSaving(true);
+      await Promise.all([saveProgress(), saveProfileToServer()]);
+      setSaving(false);
+    };
+
     return (
       <StepShell
         title="Operator Profile"
@@ -359,10 +430,11 @@ export function OperatorOnboardingClient() {
         progress={progress}
         step={step}
         onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
+        onNext={handleStep0Next}
+        onSave={handleStep0Save}
         saving={saving}
       >
+        {/* ── Operator Type ── */}
         <FieldGroup label="Operator Type" hint="This determines which assessment modules apply.">
           <div className="grid gap-3">
             {Object.entries(OPERATOR_TYPES).map(([key, val]) => (
@@ -382,6 +454,7 @@ export function OperatorOnboardingClient() {
           </div>
         </FieldGroup>
 
+        {/* ── Identity ── */}
         <FieldGroup label="Legal Name">
           <input
             type="text"
@@ -402,6 +475,27 @@ export function OperatorOnboardingClient() {
           />
         </FieldGroup>
 
+        <FieldGroup label="Year Operations Started">
+          <NumberInput
+            value={data.yearOperationStart}
+            onChange={(v) => updateData({ yearOperationStart: v ?? undefined })}
+            placeholder="e.g. 2015"
+            min={1900}
+            max={new Date().getFullYear()}
+          />
+        </FieldGroup>
+
+        <FieldGroup label="Website">
+          <input
+            type="url"
+            value={data.website ?? ""}
+            onChange={(e) => updateData({ website: e.target.value })}
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            placeholder="https://example.com"
+          />
+        </FieldGroup>
+
+        {/* ── Location + Territory ── */}
         <div className="grid grid-cols-2 gap-3">
           <FieldGroup label="Country">
             <input
@@ -422,6 +516,151 @@ export function OperatorOnboardingClient() {
             />
           </FieldGroup>
         </div>
+
+        <FieldGroup
+          label="Territory"
+          hint="Select the territory for DPI context. This affects how your score is contextualised."
+        >
+          <select
+            value={data.territoryId ?? ""}
+            onChange={(e) => updateData({ territoryId: e.target.value || undefined })}
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="">— Select territory —</option>
+            {territories.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}{t.country ? ` (${t.country})` : ""}
+              </option>
+            ))}
+          </select>
+        </FieldGroup>
+
+        {/* ── Contact ── */}
+        <div className="grid grid-cols-2 gap-3">
+          <FieldGroup label="Primary Contact Name">
+            <input
+              type="text"
+              value={data.primaryContactName ?? ""}
+              onChange={(e) => updateData({ primaryContactName: e.target.value })}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Full name"
+            />
+          </FieldGroup>
+          <FieldGroup label="Primary Contact Email">
+            <input
+              type="email"
+              value={data.primaryContactEmail ?? ""}
+              onChange={(e) => updateData({ primaryContactEmail: e.target.value })}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="contact@example.com"
+            />
+          </FieldGroup>
+        </div>
+
+        {/* ── Operational ── */}
+        {data.operatorType !== "B" && (
+          <>
+            <FieldGroup label="Accommodation Category" hint="e.g. Eco-lodge, Boutique Hotel, Glamping">
+              <input
+                type="text"
+                value={data.accommodationCategory ?? ""}
+                onChange={(e) => updateData({ accommodationCategory: e.target.value })}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="e.g. Eco-lodge"
+              />
+            </FieldGroup>
+            <div className="grid grid-cols-2 gap-3">
+              <FieldGroup label="Number of Rooms">
+                <NumberInput
+                  value={data.rooms}
+                  onChange={(v) => updateData({ rooms: v ?? undefined })}
+                  placeholder="e.g. 12"
+                  min={0}
+                />
+              </FieldGroup>
+              <FieldGroup label="Bed Capacity">
+                <NumberInput
+                  value={data.bedCapacity}
+                  onChange={(v) => updateData({ bedCapacity: v ?? undefined })}
+                  placeholder="e.g. 24"
+                  min={0}
+                />
+              </FieldGroup>
+            </div>
+          </>
+        )}
+
+        {data.operatorType !== "A" && (
+          <FieldGroup label="Experience Types" hint="Comma-separated list of activities offered.">
+            <input
+              type="text"
+              value={data.experienceTypes?.join(", ") ?? ""}
+              onChange={(e) =>
+                updateData({
+                  experienceTypes: e.target.value
+                    ? e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
+                    : undefined,
+                })
+              }
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="e.g. Hiking, Kayaking, Wildlife"
+            />
+          </FieldGroup>
+        )}
+
+        {/* ── Ownership ── */}
+        <FieldGroup label="Ownership Type" hint="e.g. Sole proprietor, Partnership, NGO, Community-owned">
+          <input
+            type="text"
+            value={data.ownershipType ?? ""}
+            onChange={(e) => updateData({ ownershipType: e.target.value })}
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            placeholder="e.g. Sole proprietor"
+          />
+        </FieldGroup>
+
+        <FieldGroup label="Local Equity %" hint="Percentage of equity held by local residents or communities.">
+          <NumberInput
+            value={data.localEquityPct}
+            onChange={(v) => updateData({ localEquityPct: v ?? undefined })}
+            placeholder="e.g. 100"
+            min={0}
+            max={100}
+          />
+        </FieldGroup>
+
+        <FieldGroup label="Part of a chain or group?">
+          <div className="flex items-center gap-4">
+            {[
+              { label: "Independent", value: false },
+              { label: "Chain / Group member", value: true },
+            ].map(({ label, value }) => (
+              <button
+                key={String(value)}
+                onClick={() => updateData({ isChainMember: value, chainName: value ? data.chainName : undefined })}
+                className={`flex-1 rounded-xl border-2 p-3 text-sm text-left transition-all ${
+                  data.isChainMember === value
+                    ? "border-emerald-500 bg-emerald-50 font-medium"
+                    : "border-border hover:border-emerald-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
+
+        {data.isChainMember && (
+          <FieldGroup label="Chain / Group Name">
+            <input
+              type="text"
+              value={data.chainName ?? ""}
+              onChange={(e) => updateData({ chainName: e.target.value })}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Name of the chain or group"
+            />
+          </FieldGroup>
+        )}
       </StepShell>
     );
   }

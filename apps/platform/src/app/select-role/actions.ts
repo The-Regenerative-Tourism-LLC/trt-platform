@@ -50,7 +50,9 @@ export async function selectRoleAction(input: {
     if (effectiveRole === "operator") {
       const hasProfile = await prisma.operator.findUnique({ where: { userId } });
       if (!hasProfile) {
-        await prisma.operator.create({ data: { userId, legalName: displayName } });
+        await prisma.operator.create({
+          data: { userId, legalName: displayName, photos: [], amenities: [] },
+        });
       }
     } else {
       const hasProfile = await prisma.traveler.findUnique({ where: { userId } });
@@ -69,7 +71,9 @@ export async function selectRoleAction(input: {
     await tx.userRole.create({ data: { userId, role } });
 
     if (role === "operator") {
-      await tx.operator.create({ data: { userId, legalName: displayName } });
+      await tx.operator.create({
+        data: { userId, legalName: displayName, photos: [], amenities: [] },
+      });
     } else {
       await tx.traveler.create({ data: { userId, displayName } });
     }
