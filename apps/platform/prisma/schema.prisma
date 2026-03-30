@@ -196,22 +196,32 @@ model UserRole {
 // ── Territory ──────────────────────────────────────────────────────────────
 
 model Territory {
-  id                   String         @id @default(cuid())
-  name                 String
-  country              String?
-  touristIntensity     Decimal?       @db.Decimal(6, 2)
-  ecologicalSensitivity Decimal?      @db.Decimal(6, 2)
-  economicLeakageRate  Decimal?       @db.Decimal(6, 2)
-  regenerativePerformance Decimal?    @db.Decimal(6, 2)
-  compositeDpi         Decimal?       @db.Decimal(6, 2)
-  pressureLevel        PressureLevel?
-  operatorCohortSize   Int            @default(0)
-  dpiComputedAt        DateTime?
-  createdAt            DateTime       @default(now())
+  id                    String         @id @default(cuid())
+  name                  String
+  country               String?
 
-  operators            Operator[]
-  assessmentSnapshots  AssessmentSnapshot[]
-  dpiSnapshots         DpiSnapshot[]
+  // Destination presentation layer
+  slug                  String?        @unique
+  isAvailable           Boolean        @default(false)
+  description           String?        @db.Text
+  coverPhotoUrl         String?
+  displayOrder          Int            @default(999)
+  countryCode           String?        // ISO 3166-1 alpha-3 — used by DPI orchestrator
+
+  // DPI read model (denormalised from latest DpiSnapshot for fast display)
+  touristIntensity      Decimal?       @db.Decimal(6, 2)
+  ecologicalSensitivity Decimal?       @db.Decimal(6, 2)
+  economicLeakageRate   Decimal?       @db.Decimal(6, 2)
+  regenerativePerformance Decimal?     @db.Decimal(6, 2)
+  compositeDpi          Decimal?       @db.Decimal(6, 2)
+  pressureLevel         PressureLevel?
+  operatorCohortSize    Int            @default(0)
+  dpiComputedAt         DateTime?
+  createdAt             DateTime       @default(now())
+
+  operators             Operator[]
+  assessmentSnapshots   AssessmentSnapshot[]
+  dpiSnapshots          DpiSnapshot[]
 
   @@map("territories")
 }

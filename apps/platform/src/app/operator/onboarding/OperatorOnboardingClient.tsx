@@ -20,18 +20,21 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useOnboardingStore } from "@/store/onboarding-store";
-import { OPERATOR_TYPES, P3_CATEGORIES } from "@/lib/constants";
-import { normalizeValue, normalizeDiscreteScore } from "@/lib/engine/trt-scoring-engine";
-import { DEFAULT_METHODOLOGY_BUNDLE } from "@/lib/methodology/default-bundle";
+import { OPERATOR_TYPES, P3_CATEGORIES, computeCategoryScope, INDICATOR_LABELS } from "@/lib/constants";
+import {
+  previewNormalise,
+  type PreviewBounds,
+} from "@/lib/utils/preview-normalise";
+import {
+  PREVIEW_BOUNDS_ACCOMMODATION,
+  PREVIEW_BOUNDS_TOURS,
+} from "@/lib/constants/preview-bounds";
 import { toast } from "sonner";
 import Link from "next/link";
 
-const nb = DEFAULT_METHODOLOGY_BUNDLE.normalizationBounds;
-const nbTours = DEFAULT_METHODOLOGY_BUNDLE.normalizationBoundsTours!;
-
-const TOTAL_STEPS = 8; // 0=Profile, 1=Activity, 2=P1, 3=P2, 4=P3, 5=Evidence, 6=Delta, 7=Review
+const TOTAL_STEPS = 9; // 0=Profile, 1=Activity, 2=P1, 3=P2, 4=P3, 5=Evidence, 6=Delta, 7=LinkEvidence, 8=Review
 
 // ── Shared UI primitives ────────────────────────────────────────────────────
 
@@ -194,16 +197,14 @@ function NumberInput({
 }
 
 function ScorePreview({
-  label,
   rawValue,
   bounds,
 }: {
-  label: string;
   rawValue: number | undefined;
-  bounds: (typeof nb)[keyof typeof nb];
+  bounds: PreviewBounds;
 }) {
   if (rawValue == null) return null;
-  const score = normalizeValue(rawValue, bounds);
+  const score = previewNormalise(rawValue, bounds);
   const pct = score;
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -234,9 +235,26 @@ export function OperatorOnboardingClient() {
     queryFn: () => fetch("/api/v1/onboarding").then((r) => r.json()),
   });
 
+  // Load uploaded evidence (for Link Evidence step — only fetched when needed)
+  const { data: evidenceData } = useQuery({
+    queryKey: ["operator-evidence"],
+    queryFn: () => fetch("/api/v1/operator/evidence").then((r) => r.json()),
+    enabled: step === 7,
+  });
+
+  // Seed Zustand store with the operator's persisted territoryId so the
+  // submission payload always has it, even if the operator skips Step 0.
+  const resolvedTerritoryId: string | undefined =
+    onboardingData?.operator?.territoryId ?? undefined;
+  useEffect(() => {
+    if (resolvedTerritoryId && !data.territoryId) {
+      updateData({ territoryId: resolvedTerritoryId });
+    }
+  }, [resolvedTerritoryId, data.territoryId, updateData]);
+
   // Infer normalisation bounds based on operator type
   const isTypeB = data.operatorType === "B";
-  const bounds = isTypeB ? nbTours : nb;
+  const bounds = isTypeB ? PREVIEW_BOUNDS_TOURS : PREVIEW_BOUNDS_ACCOMMODATION;
 
   const saveProgress = async () => {
     setSaving(true);
@@ -258,8 +276,9 @@ export function OperatorOnboardingClient() {
     setSubmitting(true);
     try {
       const operator = onboardingData?.operator;
-      if (!operator?.id || !operator?.territoryId) {
-        toast.error("Operator profile incomplete");
+      const territoryId = data.territoryId ?? operator?.territoryId;
+      if (!operator?.id || !territoryId) {
+        toast.error("Operator profile incomplete — territory not assigned");
         return;
       }
 
@@ -268,8 +287,8 @@ export function OperatorOnboardingClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           operatorId: operator.id,
-          territoryId: operator.territoryId,
-          assessmentPeriodEnd: new Date().toISOString().slice(0, 10),
+          territoryId,
+          assessmentPeriodEnd: data.assessmentPeriodEnd ?? new Date().toISOString().slice(0, 10),
           operatorType: data.operatorType ?? "A",
           activityUnit: {
             guestNights: data.guestNights,
@@ -420,6 +439,19 @@ export function OperatorOnboardingClient() {
         onSave={saveProgress}
         saving={saving}
       >
+        <FieldGroup
+          label="Assessment Period End Date"
+          hint="The last day of the 12-month period your data covers (e.g. 31 December 2025)."
+        >
+          <input
+            type="date"
+            value={data.assessmentPeriodEnd ?? ""}
+            onChange={(e) => updateData({ assessmentPeriodEnd: e.target.value || undefined })}
+            max={new Date().toISOString().slice(0, 10)}
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </FieldGroup>
+
         {data.operatorType !== "B" && (
           <FieldGroup label="Total Guest-Nights" hint="12-month assessment period. Used to normalise P1 intensity metrics.">
             <NumberInput
@@ -460,6 +492,14 @@ export function OperatorOnboardingClient() {
                 max={100}
               />
             </FieldGroup>
+            {data.revenueSplitAccommodationPct != null &&
+              data.revenueSplitExperiencePct != null &&
+              Math.round(data.revenueSplitAccommodationPct + data.revenueSplitExperiencePct) !== 100 && (
+                <p className="text-sm text-amber-600">
+                  Revenue split must sum to 100% (currently{" "}
+                  {Math.round(data.revenueSplitAccommodationPct + data.revenueSplitExperiencePct)}%).
+                </p>
+              )}
           </>
         )}
       </StepShell>
@@ -491,7 +531,6 @@ export function OperatorOnboardingClient() {
             step={0.1}
           />
           <ScorePreview
-            label="Energy intensity score"
             rawValue={data.p1EnergyIntensity}
             bounds={bounds["p1_energy_intensity"]}
           />
@@ -509,7 +548,6 @@ export function OperatorOnboardingClient() {
             max={100}
           />
           <ScorePreview
-            label="Renewable score"
             rawValue={data.p1RenewablePct}
             bounds={bounds["p1_renewable_pct"]}
           />
@@ -527,7 +565,6 @@ export function OperatorOnboardingClient() {
             step={0.1}
           />
           <ScorePreview
-            label="Water intensity score"
             rawValue={data.p1WaterIntensity}
             bounds={bounds["p1_water_intensity"]}
           />
@@ -566,7 +603,6 @@ export function OperatorOnboardingClient() {
             max={100}
           />
           <ScorePreview
-            label="Waste diversion score"
             rawValue={data.p1WasteDiversionPct}
             bounds={bounds["p1_waste_diversion_pct"]}
           />
@@ -584,7 +620,6 @@ export function OperatorOnboardingClient() {
             step={0.1}
           />
           <ScorePreview
-            label="Carbon intensity score"
             rawValue={data.p1CarbonIntensity}
             bounds={bounds["p1_carbon_intensity"]}
           />
@@ -777,7 +812,13 @@ export function OperatorOnboardingClient() {
                       name="p3category"
                       value={cat.id}
                       checked={data.p3ContributionCategories?.includes(cat.id)}
-                      onChange={() => updateData({ p3ContributionCategories: [cat.id] })}
+                      onChange={() => {
+                        const selected = [cat.id];
+                        updateData({
+                          p3ContributionCategories: selected,
+                          p3CategoryScope: computeCategoryScope(selected),
+                        });
+                      }}
                       className="mt-0.5"
                     />
                     <div>
@@ -944,7 +985,155 @@ export function OperatorOnboardingClient() {
     );
   }
 
-  // Step 7: Review & Submit
+  // Step 7: Link Evidence
+  // Shows the operator's uploaded evidence files and lets them mark which
+  // ones to include in this assessment. The selection populates evidenceRefs[]
+  // in the Zustand store for inclusion in the POST /api/v1/score payload.
+  if (step === 7) {
+    const uploadedEvidence: Array<{
+      id: string;
+      indicatorId: string;
+      tier: "T1" | "T2" | "T3" | "Proxy";
+      fileName: string;
+      checksum: string;
+      verificationState: string;
+    }> = evidenceData?.evidence ?? [];
+
+    const selectedChecksums = new Set(
+      (data.evidenceRefs ?? []).map((r) => r.checksum)
+    );
+
+    const toggleEvidence = (ev: (typeof uploadedEvidence)[0]) => {
+      const current = data.evidenceRefs ?? [];
+      if (selectedChecksums.has(ev.checksum)) {
+        updateData({ evidenceRefs: current.filter((r) => r.checksum !== ev.checksum) });
+      } else {
+        updateData({
+          evidenceRefs: [
+            ...current,
+            {
+              indicatorId: ev.indicatorId,
+              tier: ev.tier,
+              checksum: ev.checksum,
+              verificationState: "pending" as const,
+            },
+          ],
+        });
+      }
+    };
+
+    return (
+      <StepShell
+        title="Link Evidence"
+        subtitle="Select which uploaded files to include in this assessment. Evidence is verified separately after submission."
+        progress={progress}
+        step={step}
+        onBack={goBack}
+        onNext={goNext}
+        onSave={saveProgress}
+        saving={saving}
+      >
+        {uploadedEvidence.length === 0 ? (
+          <div className="rounded-xl border bg-muted/30 p-5 space-y-3">
+            <p className="text-sm font-medium">No evidence files uploaded yet</p>
+            <p className="text-xs text-muted-foreground">
+              You can upload evidence in the{" "}
+              <Link href="/operator/evidence" className="text-emerald-600 underline" target="_blank">
+                Evidence Management
+              </Link>{" "}
+              section, then return here to link files to this assessment.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              You may submit your assessment without evidence and upload files afterward.
+              Note: T3 evidence must be verified before your P3 score is published.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Select the files that support your responses in this assessment.
+              You can include or exclude files below — unselected files remain in your evidence library.
+            </p>
+            {uploadedEvidence.map((ev) => {
+              const selected = selectedChecksums.has(ev.checksum);
+              const label = INDICATOR_LABELS[ev.indicatorId] ?? ev.indicatorId;
+              return (
+                <button
+                  key={ev.id}
+                  onClick={() => toggleEvidence(ev)}
+                  className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
+                    selected
+                      ? "border-emerald-500 bg-emerald-50"
+                      : "border-border hover:border-emerald-300"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{ev.fileName}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-xs font-mono px-1.5 py-0.5 rounded border ${
+                        ev.tier === "T1" ? "border-emerald-300 text-emerald-700 bg-emerald-50" :
+                        ev.tier === "T2" ? "border-amber-300 text-amber-700 bg-amber-50" :
+                        ev.tier === "T3" ? "border-blue-300 text-blue-700 bg-blue-50" :
+                        "border-border text-muted-foreground"
+                      }`}>
+                        {ev.tier}
+                      </span>
+                      <span className={`text-xs px-1.5 py-0.5 rounded border ${
+                        ev.verificationState === "verified"
+                          ? "border-emerald-300 text-emerald-700"
+                          : "border-border text-muted-foreground"
+                      }`}>
+                        {ev.verificationState}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+            <p className="text-xs text-muted-foreground pt-1">
+              {selectedChecksums.size} of {uploadedEvidence.length} file{uploadedEvidence.length !== 1 ? "s" : ""} selected
+            </p>
+          </div>
+        )}
+      </StepShell>
+    );
+  }
+
+  // Step 8: Review & Submit
+  const hasP1Data = !!(
+    data.p1EnergyIntensity != null ||
+    data.p1RenewablePct != null ||
+    data.p1WasteDiversionPct != null ||
+    data.p1CarbonIntensity != null
+  );
+  const hasP2Data = !!(
+    data.p2LocalEmploymentRate != null ||
+    data.p2LocalFbRate != null ||
+    data.p2DirectBookingRate != null
+  );
+  const hasP3Status = !!data.p3Status;
+  const revenueSplitValid =
+    data.operatorType !== "C" ||
+    (data.revenueSplitAccommodationPct != null &&
+      data.revenueSplitExperiencePct != null &&
+      Math.round(
+        (data.revenueSplitAccommodationPct ?? 0) +
+        (data.revenueSplitExperiencePct ?? 0)
+      ) === 100);
+
+  const canSubmit = !!(
+    data.operatorType &&
+    data.legalName &&
+    data.country &&
+    hasP1Data &&
+    hasP2Data &&
+    hasP3Status &&
+    revenueSplitValid
+  );
+
   return (
     <StepShell
       title="Review & Submit"
@@ -956,7 +1145,7 @@ export function OperatorOnboardingClient() {
       onSave={saveProgress}
       saving={submitting}
       isLast
-      canSubmit={!!(data.operatorType && data.legalName && data.country)}
+      canSubmit={canSubmit}
       onSubmit={handleSubmit}
     >
       <div className="space-y-4">
@@ -972,6 +1161,31 @@ export function OperatorOnboardingClient() {
           </div>
         </div>
 
+        <div className="rounded-xl border bg-card p-5 space-y-2">
+          <p className="text-sm font-semibold">Assessment Readiness</p>
+          <div className="space-y-1.5 text-sm">
+            {[
+              { label: "Operator profile", ok: !!(data.operatorType && data.legalName && data.country) },
+              { label: "Pillar 1 — at least one indicator", ok: hasP1Data },
+              { label: "Pillar 2 — at least one indicator", ok: hasP2Data },
+              { label: "Pillar 3 — status selected", ok: hasP3Status },
+              { label: "Revenue split sums to 100%", ok: revenueSplitValid, skip: data.operatorType !== "C" },
+              { label: "Evidence linked", ok: (data.evidenceRefs?.length ?? 0) > 0, warn: true },
+            ]
+              .filter((c) => !c.skip)
+              .map((c) => (
+                <div key={c.label} className="flex items-center gap-2">
+                  <span className={`text-base ${c.ok ? "text-emerald-600" : c.warn ? "text-amber-500" : "text-destructive"}`}>
+                    {c.ok ? "✓" : c.warn ? "⚠" : "✗"}
+                  </span>
+                  <span className={c.ok ? "" : c.warn ? "text-amber-700" : "text-destructive"}>
+                    {c.label}
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+
         <div className="rounded-xl border bg-muted/30 p-4">
           <p className="text-xs text-muted-foreground">
             Your assessment data will be submitted to the TRT Scoring Engine.
@@ -980,9 +1194,9 @@ export function OperatorOnboardingClient() {
           </p>
         </div>
 
-        {!(data.operatorType && data.legalName && data.country) && (
+        {!canSubmit && (
           <p className="text-sm text-amber-600">
-            Please complete at least Step 0 (Operator Profile) before submitting.
+            Please complete the required steps before submitting. See readiness checklist above.
           </p>
         )}
       </div>

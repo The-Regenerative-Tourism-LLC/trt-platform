@@ -19,8 +19,17 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   const isLoggedIn = !!session?.user?.id;
-  const needsRoleSelection = session?.user?.needsRoleSelection ?? false;
   const userRoles: string[] = session?.user?.roles ?? [];
+  const hasRole = userRoles.length > 0;
+  const needsRoleSelection = !hasRole;
+
+  console.log("[middleware]", pathname, {
+    isLoggedIn,
+    hasRole,
+    roles: userRoles,
+    needsRoleSelection_session: session?.user?.needsRoleSelection,
+    needsRoleSelection_derived: needsRoleSelection,
+  });
 
   const isAdminRoute = pathname.startsWith("/admin");
   const isOperatorRoute = pathname.startsWith("/operator");
@@ -43,12 +52,22 @@ export default auth((req) => {
 
   // ── Authenticated — role not yet assigned ────────────────────────────────────
   // New users that completed sign-up but haven't selected a role yet must finish
-  // role selection before accessing any role-scoped route.
+  // role selection before accessing any other matched route. This includes the
+  // root and auth pages — the needsRoleSelection check must not fall through to
+  // the isRootRoute/isAuthRoute block below (which would route to /select-role
+  // via getDashboardUrl anyway, but only for role-scoped routes — not for / or
+  // /login/signup which return NextResponse.next() in the old logic).
   if (needsRoleSelection && !isSelectRoleRoute) {
-    if (isAdminRoute || isOperatorRoute || isTravelerRoute) {
-      return NextResponse.redirect(new URL("/select-role", req.url));
-    }
-    return NextResponse.next();
+    return NextResponse.redirect(new URL("/select-role", req.url));
+  }
+
+  // ── Authenticated — role already assigned, visiting /select-role ─────────────
+  // A user who completed role selection should not be able to reach /select-role
+  // again. Without this guard they would land on /select-role with
+  // needsRoleSelection: false, see "Role already assigned" on retry, and have
+  // no way to navigate out. Send them directly to their dashboard.
+  if (isSelectRoleRoute && !needsRoleSelection) {
+    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
   // ── Authenticated — redirect away from auth/marketing pages ─────────────────

@@ -129,10 +129,12 @@ export async function runDpiComputation(
   const territory = await findTerritoryById(territoryId);
   if (!territory) throw new Error(`Territory not found: ${territoryId}`);
 
-  const countryCode = resolveCountryCode(
-    territory.country ?? "",
-    territory.name ?? ""
-  );
+  // Prefer the explicit countryCode field (set at territory creation) over the
+  // fragile name-matching fallback. The fallback remains for any territory
+  // records that predate the countryCode field.
+  const countryCode =
+    territory.countryCode ??
+    resolveCountryCode(territory.country ?? "", territory.name ?? "");
 
   let touristIntensity = 50;
   let ecologicalSensitivity = 50;

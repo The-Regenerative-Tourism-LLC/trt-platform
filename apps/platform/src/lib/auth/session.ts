@@ -10,7 +10,7 @@ import type { AppRole } from "@prisma/client";
 
 export interface SessionPayload {
   userId: string;
-  email: string;
+  email: string | null;
   role: AppRole;
 }
 

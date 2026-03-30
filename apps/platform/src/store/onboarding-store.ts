@@ -26,6 +26,7 @@ export interface OnboardingFormData {
   visitorDays?: number;
   revenueSplitAccommodationPct?: number;
   revenueSplitExperiencePct?: number;
+  assessmentPeriodEnd?: string; // ISO8601 date — 12-month period end
   accommodationCategory?: string;
   rooms?: number;
   bedCapacity?: number;
