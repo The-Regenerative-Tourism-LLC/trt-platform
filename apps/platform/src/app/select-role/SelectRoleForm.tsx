@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { selectRoleAction } from "./actions";
 
 type Role = "operator" | "traveler";
@@ -56,7 +55,6 @@ const ROLES = [
 
 export function SelectRoleForm() {
   const { update } = useSession();
-  const router = useRouter();
   const [selected, setSelected] = useState<Role | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -70,16 +68,27 @@ export function SelectRoleForm() {
     setError("");
     startTransition(async () => {
       try {
-        const formData = new FormData();
-        formData.set("role", selected);
-        await selectRoleAction(formData);
+        // The action is idempotent: if the user already had a role from a
+        // previous partial attempt it recovers the missing profile instead of
+        // throwing "Role already assigned".
+        await selectRoleAction({ role: selected });
 
-        // Refresh the JWT so the new role is reflected in the session
-        await update();
+        // Passing `{}` (any truthy value) forces Auth.js to POST to
+        // /api/auth/session, which triggers trigger === "update" in the jwt
+        // callback and reissues the cookie with the new role and
+        // needsRoleSelection: false. Calling update() with no argument sends
+        // a GET instead, which skips the jwt callback and leaves the old JWT
+        // cookie in place — causing middleware to redirect back here.
+        // update() resolves with the refreshed Session, which we use to
+        // determine the correct destination (the action may have found an
+        // existing role different from the one the user just clicked).
+        const newSession = await update({});
+        const effectiveRole = newSession?.user?.roles?.[0];
 
-        router.push(
-          selected === "operator" ? "/operator/dashboard" : "/traveler/dashboard"
-        );
+        // Full browser navigation so the next request carries the new cookie.
+        // router.push() risks the middleware seeing stale client-side state.
+        window.location.href =
+          effectiveRole === "operator" ? "/operator/onboarding" : "/traveler/discover";
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);

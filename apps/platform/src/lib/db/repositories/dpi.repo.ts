@@ -40,6 +40,13 @@ export async function findAllTerritories(): Promise<Territory[]> {
   return prisma.territory.findMany({ orderBy: { name: "asc" } });
 }
 
+export async function findAvailableTerritories(): Promise<Territory[]> {
+  return prisma.territory.findMany({
+    where: { isAvailable: true },
+    orderBy: { displayOrder: "asc" },
+  });
+}
+
 export async function upsertTerritoryDpiReadModel(
   territoryId: string,
   dpiData: {

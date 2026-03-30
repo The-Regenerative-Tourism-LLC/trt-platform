@@ -120,3 +120,58 @@ export const P3_CATEGORIES = [
     description: "Co-authored publications, field station support, monitoring datasets",
   },
 ];
+
+/**
+ * Human-readable labels for evidence indicator IDs.
+ * Used in the evidence linkage step to display which metric each file covers.
+ */
+export const INDICATOR_LABELS: Record<string, string> = {
+  p1_energy_intensity:    "1A — Energy Intensity",
+  p1_renewable_pct:       "1A — Renewable Energy %",
+  p1_water_intensity:     "1B — Water Intensity",
+  p1_recirculation:       "1B — Water Recirculation",
+  p1_waste_diversion_pct: "1C — Waste Diversion Rate",
+  p1_carbon_intensity:    "1D — Carbon Intensity",
+  p1_site_score:          "1E — Site & Land Use",
+  p2_local_employment:    "2A — Local Employment Rate",
+  p2_employment_quality:  "2A — Employment Quality",
+  p2_local_fb_rate:       "2B — Local F&B Procurement",
+  p2_local_nonfb_rate:    "2B — Local Non-F&B Procurement",
+  p2_direct_booking_rate: "2C — Direct Booking Rate",
+  p2_local_ownership_pct: "2C — Local Ownership %",
+  p2_community_score:     "2D — Community Integration",
+  p3_programme:           "3 — Regenerative Programme",
+};
+
+/**
+ * Pre-normalised categoryScope scores per P3 category.
+ *
+ * These represent the systemic leverage / breadth score (0–100) assigned to
+ * each category as defined in the Operator Assessment Form v3 methodology.
+ * When an operator engages multiple categories the highest single score is
+ * used; collective bonuses are handled separately in the engine.
+ *
+ * This mapping must be kept in sync with the MethodologyBundle version.
+ * Methodology version: 1.0.0
+ */
+export const P3_CATEGORY_SCOPE_SCORES: Record<string, number> = {
+  Cat1: 75,  // Ecological monitoring — high systemic leverage
+  Cat2: 100, // Habitat restoration — highest scope score
+  Cat3: 100, // Marine & coastal — highest scope score
+  Cat4: 50,  // Cultural heritage — medium scope
+  Cat5: 75,  // Regenerative agriculture — high scope
+  Cat6: 50,  // Community resilience — medium scope
+  Cat7: 75,  // Scientific co-production — high scope
+};
+
+/**
+ * Compute the pre-normalised categoryScope score (0–100) from a list of
+ * selected P3 category IDs. Returns the highest single-category score.
+ * Returns 0 if no categories are selected.
+ */
+export function computeCategoryScope(categoryIds: string[]): number {
+  if (!categoryIds.length) return 0;
+  return Math.max(
+    ...categoryIds.map((id) => P3_CATEGORY_SCOPE_SCORES[id] ?? 0)
+  );
+}

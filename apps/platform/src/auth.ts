@@ -92,14 +92,43 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.needsRoleSelection = roles.length === 0;
       }
 
+      // Self-heal: JWT may carry stale needsRoleSelection=true from a partial
+      // previous attempt. If roles are already in the token, trust them.
+      // Falls back to a DB re-check only when the token claims no roles exist.
+      // Wrapped in try/catch — Prisma is not available in Edge runtime contexts.
+      if (
+        token.needsRoleSelection === true &&
+        token.sub &&
+        !user &&
+        trigger !== "update"
+      ) {
+        const tokenRoles = token.roles as AppRole[] | undefined;
+        if (tokenRoles && tokenRoles.length > 0) {
+          // Roles are already present — stale flag, fix it without a DB round-trip
+          token.needsRoleSelection = false;
+        } else {
+          try {
+            const roles = await prisma.userRole.findMany({
+              where: { userId: token.sub },
+            });
+            if (roles.length > 0) {
+              token.roles = roles.map((r) => r.role) as AppRole[];
+              token.needsRoleSelection = false;
+            }
+          } catch {
+            // Prisma not available in Edge — will re-sync on next Node.js request
+          }
+        }
+      }
+
       return token;
     },
 
     async session({ session, token }) {
       session.user.id = token.sub!;
       session.user.roles = (token.roles as AppRole[]) ?? [];
-      session.user.needsRoleSelection =
-        (token.needsRoleSelection as boolean) ?? false;
+      // Derive needsRoleSelection from roles array — resilient to stale JWT field
+      session.user.needsRoleSelection = session.user.roles.length === 0;
       return session;
     },
   },
