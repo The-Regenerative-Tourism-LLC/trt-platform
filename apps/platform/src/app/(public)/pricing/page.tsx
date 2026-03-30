@@ -83,7 +83,7 @@ export default function PricingPage() {
                 </li>
               </ul>
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/auth/signup?role=operator">
+                <Link href="/signup?role=operator">
                   Start free assessment
                 </Link>
               </Button>
@@ -148,7 +148,7 @@ export default function PricingPage() {
                 </ul>
               </div>
               <Button className="w-full" asChild>
-                <Link href="/auth/signup?role=operator&plan=founder">
+                <Link href="/signup?role=operator&plan=founder">
                   Join founding cohort
                 </Link>
               </Button>
@@ -202,7 +202,7 @@ export default function PricingPage() {
                 </li>
               </ul>
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/auth/signup?role=operator">Get started</Link>
+                <Link href="/signup?role=operator">Get started</Link>
               </Button>
             </CardContent>
           </Card>

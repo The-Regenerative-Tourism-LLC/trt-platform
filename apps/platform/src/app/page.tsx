@@ -87,7 +87,7 @@ export default function LandingPage() {
               moment of booking.
             </p>
             <Link
-              href="/auth/signup?role=operator"
+              href="/signup?role=operator"
               className="inline-flex items-center bg-white text-foreground hover:bg-white/90 px-6 h-12 text-sm font-semibold mt-6 w-fit rounded-md transition-colors"
             >
               Get your score
@@ -234,7 +234,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <Link
-                href="/auth/signup?role=operator"
+                href="/signup?role=operator"
                 className="inline-flex items-center bg-white text-foreground hover:bg-white/90 px-6 h-11 text-sm font-semibold mt-4 rounded-md transition-colors"
               >
                 Create operator account
@@ -317,7 +317,7 @@ export default function LandingPage() {
                   they are the dataset that makes the map real.
                 </p>
                 <Link
-                  href="/auth/signup?role=operator"
+                  href="/signup?role=operator"
                   className="inline-flex items-center bg-white text-foreground hover:bg-white/90 px-6 h-11 text-sm font-semibold mt-5 w-fit rounded-md transition-colors"
                 >
                   Apply as Founding Operator
@@ -530,7 +530,7 @@ export default function LandingPage() {
                 assessment cycle.
               </p>
               <Link
-                href="/auth/signup?role=operator"
+                href="/signup?role=operator"
                 className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-6 h-11 text-sm font-semibold mt-6 rounded-md transition-colors"
               >
                 Sign your Forward Commitment
@@ -552,7 +552,7 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2 pt-2 border-t border-border">
                   <CheckCircle2 className="w-3.5 h-3.5 text-accent shrink-0" />
                   <span className="text-[10px] text-muted-foreground">
-                    15 baseline P3 points · Institutional matching · Guidance
+                    Forward Commitment declared · Institutional matching · Guidance
                     session included
                   </span>
                 </div>
@@ -580,7 +580,7 @@ export default function LandingPage() {
               Green Passport Score — regardless of location.
             </p>
             <Link
-              href="/auth/signup?role=operator"
+              href="/signup?role=operator"
               className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-6 h-12 text-sm font-semibold mt-8 rounded-md transition-colors"
             >
               Get your score — it&apos;s free to start
@@ -604,7 +604,7 @@ export default function LandingPage() {
             make your sustainability investment visible at the point of booking.
           </p>
           <Link
-            href="/auth/signup?role=operator"
+            href="/signup?role=operator"
             className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-6 h-12 text-sm font-semibold mt-6 rounded-md transition-colors"
           >
             Get your score

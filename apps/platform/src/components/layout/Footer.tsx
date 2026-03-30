@@ -40,13 +40,13 @@ export function Footer() {
                 Destinations
               </Link>
               <Link
-                href="/auth/signup?role=operator"
+                href="/signup?role=operator"
                 className="block text-sm text-white/50 hover:text-white transition-colors"
               >
                 Operator Signup
               </Link>
               <Link
-                href="/auth/signup?role=traveler"
+                href="/signup?role=traveler"
                 className="block text-sm text-white/50 hover:text-white transition-colors"
               >
                 Traveler Signup

@@ -13,6 +13,7 @@ import {
   findOperatorByUserId,
   updateOperator,
 } from "@/lib/db/repositories/operator.repo";
+import { findAvailableTerritories } from "@/lib/db/repositories/dpi.repo";
 import { z } from "zod";
 
 const OnboardingProgressSchema = z.object({
@@ -56,16 +57,20 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getSession();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const operator = await findOperatorByUserId(session.userId);
+    const [operator, territories] = await Promise.all([
+      findOperatorByUserId(session.userId),
+      findAvailableTerritories(),
+    ]);
+
     if (!operator) {
-      return NextResponse.json({ operator: null });
+      return NextResponse.json({ operator: null, territories });
     }
 
     return NextResponse.json({
@@ -73,12 +78,27 @@ export async function GET(req: NextRequest) {
         id: operator.id,
         legalName: operator.legalName,
         tradingName: operator.tradingName,
+        country: operator.country,
+        destinationRegion: operator.destinationRegion,
         operatorType: operator.operatorType,
         onboardingStep: operator.onboardingStep,
         onboardingData: operator.onboardingData,
         assessmentCycleCount: operator.assessmentCycleCount,
         territoryId: operator.territoryId,
+        yearOperationStart: operator.yearOperationStart,
+        website: operator.website,
+        primaryContactName: operator.primaryContactName,
+        primaryContactEmail: operator.primaryContactEmail,
+        accommodationCategory: operator.accommodationCategory,
+        rooms: operator.rooms,
+        bedCapacity: operator.bedCapacity,
+        experienceTypes: operator.experienceTypes,
+        ownershipType: operator.ownershipType,
+        localEquityPct: operator.localEquityPct,
+        isChainMember: operator.isChainMember,
+        chainName: operator.chainName,
       },
+      territories,
     });
   } catch (err) {
     console.error("[GET /api/v1/onboarding]", err);
