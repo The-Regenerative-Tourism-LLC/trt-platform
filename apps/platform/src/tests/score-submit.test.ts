@@ -158,11 +158,8 @@ describe("POST /api/v1/score", () => {
     expect(call.snapshotInput.assessmentCycle).toBe(2);
   });
 
-  it("stores delta data when delta is provided", async () => {
-    const delta = {
-      priorCycle: 1,
-      priorScores: { p1Score: 60, p2Score: 65, p3Score: 0 },
-    };
+  it("stores delta explanation when delta is provided", async () => {
+    const delta = { explanation: "Second cycle — improved water management" };
     vi.mocked(operatorRepo.findOperatorByUserId).mockResolvedValue({
       ...OPERATOR,
       assessmentCycleCount: 1,
@@ -172,8 +169,7 @@ describe("POST /api/v1/score", () => {
 
     const call = vi.mocked(orchestrator.runScoring).mock.calls[0][0];
     expect(call.snapshotInput.delta).not.toBeNull();
-    expect(call.snapshotInput.delta!.priorCycle).toBe(1);
-    expect(call.snapshotInput.delta!.priorScores).toEqual(delta.priorScores);
+    expect(call.snapshotInput.delta!.explanation).toBe(delta.explanation);
   });
 
   it("returns 401 when session is missing", async () => {
