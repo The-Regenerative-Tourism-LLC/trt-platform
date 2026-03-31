@@ -395,9 +395,8 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     );
   },
 
-  // Evidence upload — at least one evidence ref required
-  "evidence-upload": (d) =>
-    Array.isArray(d.evidenceRefs) && d.evidenceRefs.length > 0,
+  // Evidence upload — optional, operators may submit without evidence
+  "evidence-upload": (_d) => true,
 
   // Delta step — informational only for Cycle 2+, always passable
   "delta": (_d) => true,

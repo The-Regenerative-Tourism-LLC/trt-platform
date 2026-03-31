@@ -46,6 +46,23 @@ export default async function PublicGreenPassportPage({ params }: Props) {
     },
   });
 
+  // Load verified evidence for the latest published assessment (public-safe fields only)
+  const latestPublishedScore = operator?.scoreSnapshots[0] ?? null;
+  const verifiedEvidence = latestPublishedScore
+    ? await prisma.evidenceRef.findMany({
+        where: {
+          assessmentSnapshotId: latestPublishedScore.assessmentSnapshotId,
+          verificationState: "verified",
+        },
+        select: {
+          indicatorId: true,
+          tier: true,
+          verifiedAt: true,
+        },
+        orderBy: { indicatorId: "asc" },
+      })
+    : [];
+
   if (!operator || !operator.scoreSnapshots[0]) {
     notFound();
   }
@@ -345,6 +362,60 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Evidence Summary */}
+        {verifiedEvidence.length > 0 && (
+          <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <h2 className="text-sm font-semibold">Verified Evidence</h2>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {verifiedEvidence.length} item{verifiedEvidence.length !== 1 ? "s" : ""} verified
+              </span>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {verifiedEvidence.map((e) => {
+                const pillar = e.indicatorId.startsWith("p1_")
+                  ? { label: "P1", color: "bg-emerald-100 text-emerald-800 border-emerald-200" }
+                  : e.indicatorId.startsWith("p2_")
+                  ? { label: "P2", color: "bg-amber-100 text-amber-800 border-amber-200" }
+                  : e.indicatorId.startsWith("p3_")
+                  ? { label: "P3", color: "bg-teal-100 text-teal-800 border-teal-200" }
+                  : { label: "—", color: "bg-muted text-muted-foreground border-border" };
+
+                const tierColors: Record<string, string> = {
+                  T1: "bg-emerald-600 text-white",
+                  T2: "bg-blue-600 text-white",
+                  T3: "bg-purple-600 text-white",
+                  Proxy: "bg-zinc-500 text-white",
+                };
+
+                return (
+                  <div
+                    key={`${e.indicatorId}-${e.verifiedAt?.toISOString() ?? ""}`}
+                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs ${pillar.color}`}
+                  >
+                    <span className="font-semibold shrink-0">{pillar.label}</span>
+                    <span className="truncate flex-1 font-mono text-[10px]">
+                      {e.indicatorId.replace(/_/g, " ")}
+                    </span>
+                    {e.tier && (
+                      <span
+                        className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wide ${tierColors[e.tier] ?? "bg-zinc-400 text-white"}`}
+                      >
+                        {e.tier}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Indicator evidence has been reviewed and verified by a TRT assessor.
+              Tier 1 = primary source documents · Tier 2 = secondary data · Tier 3 = institutional partnership records.
+            </p>
           </div>
         )}
 

@@ -1,13 +1,14 @@
 /**
- * POST /api/v1/admin/evidence/[id]/verify
+ * POST /api/v1/admin/evidence/[id]/reject
  *
- * Admin action: transition an EvidenceRef from "pending" to "verified".
+ * Admin action: transition an EvidenceRef from "pending" to "rejected".
  *
- * Valid transition: pending → verified
+ * Valid transition: pending → rejected
  * Invalid transitions return 409 Conflict.
  *
- * After verification, publication eligibility is re-evaluated for the
- * ScoreSnapshot linked to the same AssessmentSnapshot.
+ * After rejection, publication eligibility is re-evaluated for the
+ * ScoreSnapshot linked to the same AssessmentSnapshot. A published score
+ * may be unpublished if rejecting this evidence removes T1 coverage.
  *
  * Authentication: admin role required.
  */
@@ -22,7 +23,7 @@ import {
 import { reevaluateScorePublication } from "@/lib/publication/publication-evaluator";
 import { logAuditEvent } from "@/lib/audit/logger";
 
-const VerifySchema = z.object({
+const RejectSchema = z.object({
   notes: z.string().optional(),
 });
 
@@ -34,7 +35,7 @@ export async function POST(
     const session = await requireRole("admin");
 
     const body = await req.json();
-    const parsed = VerifySchema.safeParse(body);
+    const parsed = RejectSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid request", details: parsed.error.flatten() },
@@ -53,17 +54,17 @@ export async function POST(
       return NextResponse.json(
         {
           error: "Invalid state transition",
-          detail: `Cannot verify evidence in state "${evidence.verificationState}". Only "pending" evidence can be verified.`,
+          detail: `Cannot reject evidence in state "${evidence.verificationState}". Only "pending" evidence can be rejected.`,
         },
         { status: 409 }
       );
     }
 
-    await updateVerificationState(evidenceId, "verified", session.userId);
+    await updateVerificationState(evidenceId, "rejected", session.userId);
 
     await logAuditEvent({
       actor: session.userId,
-      action: "evidence.verified",
+      action: "evidence.rejected",
       entityType: "EvidenceRef",
       entityId: evidenceId,
       payload: {
@@ -74,7 +75,7 @@ export async function POST(
       },
     });
 
-    // Re-evaluate publication eligibility for the linked ScoreSnapshot
+    // Re-evaluate publication eligibility — rejection may remove T1 coverage
     const publication = await reevaluateScorePublication(
       evidence.assessmentSnapshotId,
       evidence.assessmentSnapshot.operatorId
@@ -87,7 +88,7 @@ export async function POST(
         entityType: "ScoreSnapshot",
         entityId: publication.scoreSnapshotId,
         payload: {
-          trigger: "evidence.verified",
+          trigger: "evidence.rejected",
           evidenceRefId: evidenceId,
           publicationBlockedReason: publication.publicationBlockedReason,
         },
@@ -98,7 +99,7 @@ export async function POST(
       {
         success: true,
         evidenceRefId: evidenceId,
-        state: "verified",
+        state: "rejected",
         publication,
       },
       { status: 200 }
@@ -110,7 +111,7 @@ export async function POST(
     if (err instanceof Error && err.message.startsWith("Forbidden")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    console.error("[POST /api/v1/admin/evidence/[id]/verify]", err);
+    console.error("[POST /api/v1/admin/evidence/[id]/reject]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,13 +1,15 @@
 /**
- * POST /api/v1/admin/evidence/[id]/verify
+ * POST /api/v1/admin/evidence/[id]/lapse
  *
- * Admin action: transition an EvidenceRef from "pending" to "verified".
+ * Admin action: transition an EvidenceRef from "verified" to "lapsed".
+ * Used when previously-verified evidence expires or is superseded.
  *
- * Valid transition: pending → verified
+ * Valid transition: verified → lapsed
  * Invalid transitions return 409 Conflict.
  *
- * After verification, publication eligibility is re-evaluated for the
- * ScoreSnapshot linked to the same AssessmentSnapshot.
+ * After lapsing, publication eligibility is re-evaluated for the
+ * ScoreSnapshot linked to the same AssessmentSnapshot. A published score
+ * may be unpublished if lapsing this evidence removes T1 coverage.
  *
  * Authentication: admin role required.
  */
@@ -22,7 +24,7 @@ import {
 import { reevaluateScorePublication } from "@/lib/publication/publication-evaluator";
 import { logAuditEvent } from "@/lib/audit/logger";
 
-const VerifySchema = z.object({
+const LapseSchema = z.object({
   notes: z.string().optional(),
 });
 
@@ -34,7 +36,7 @@ export async function POST(
     const session = await requireRole("admin");
 
     const body = await req.json();
-    const parsed = VerifySchema.safeParse(body);
+    const parsed = LapseSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid request", details: parsed.error.flatten() },
@@ -49,21 +51,21 @@ export async function POST(
       return NextResponse.json({ error: "Evidence not found" }, { status: 404 });
     }
 
-    if (evidence.verificationState !== "pending") {
+    if (evidence.verificationState !== "verified") {
       return NextResponse.json(
         {
           error: "Invalid state transition",
-          detail: `Cannot verify evidence in state "${evidence.verificationState}". Only "pending" evidence can be verified.`,
+          detail: `Cannot lapse evidence in state "${evidence.verificationState}". Only "verified" evidence can be lapsed.`,
         },
         { status: 409 }
       );
     }
 
-    await updateVerificationState(evidenceId, "verified", session.userId);
+    await updateVerificationState(evidenceId, "lapsed", session.userId);
 
     await logAuditEvent({
       actor: session.userId,
-      action: "evidence.verified",
+      action: "evidence.lapsed",
       entityType: "EvidenceRef",
       entityId: evidenceId,
       payload: {
@@ -74,7 +76,7 @@ export async function POST(
       },
     });
 
-    // Re-evaluate publication eligibility for the linked ScoreSnapshot
+    // Re-evaluate publication eligibility — lapsing may remove T1 coverage
     const publication = await reevaluateScorePublication(
       evidence.assessmentSnapshotId,
       evidence.assessmentSnapshot.operatorId
@@ -87,7 +89,7 @@ export async function POST(
         entityType: "ScoreSnapshot",
         entityId: publication.scoreSnapshotId,
         payload: {
-          trigger: "evidence.verified",
+          trigger: "evidence.lapsed",
           evidenceRefId: evidenceId,
           publicationBlockedReason: publication.publicationBlockedReason,
         },
@@ -98,7 +100,7 @@ export async function POST(
       {
         success: true,
         evidenceRefId: evidenceId,
-        state: "verified",
+        state: "lapsed",
         publication,
       },
       { status: 200 }
@@ -110,7 +112,7 @@ export async function POST(
     if (err instanceof Error && err.message.startsWith("Forbidden")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    console.error("[POST /api/v1/admin/evidence/[id]/verify]", err);
+    console.error("[POST /api/v1/admin/evidence/[id]/lapse]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
