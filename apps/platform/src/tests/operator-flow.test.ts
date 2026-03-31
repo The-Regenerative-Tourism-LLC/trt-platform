@@ -260,22 +260,7 @@ describeFlow("Operator full lifecycle — E2E", () => {
   it("Cycle 2: runScoring creates a second ScoreSnapshot", async () => {
     const cycle1Score = await findLatestScoreByOperator(operatorId);
 
-    const delta = {
-      priorCycle: 1,
-      baselineScores: {
-        p1Score: Number(cycle1Score!.p1Score),
-        p2Score: Number(cycle1Score!.p2Score),
-        p3Score: Number(cycle1Score!.p3Score),
-        gpsTotal: Number(cycle1Score!.gpsTotal),
-      },
-      priorScores: {
-        p1Score: Number(cycle1Score!.p1Score),
-        p2Score: Number(cycle1Score!.p2Score),
-        p3Score: Number(cycle1Score!.p3Score),
-        gpsTotal: Number(cycle1Score!.gpsTotal),
-      },
-      currentScores: {},
-    };
+    const delta = { explanation: "Cycle 2 assessment — baseline locked from DB" };
 
     const result = await runScoring(buildScoringInput({ assessmentCycle: 2, delta }));
 

@@ -93,11 +93,10 @@ const ScoreRequestSchema = z.object({
     continuity: z.number().nullable(),
   }),
   p3Status: z.enum(["A", "B", "C", "D", "E"]),
-  // baselineScores intentionally excluded — loaded from DB by orchestrator
+  // baselineScores, priorCycle, priorScores all computed server-side — never trusted from client
   delta: z
     .object({
-      priorCycle: z.number().int().min(1),
-      priorScores: z.record(z.number()),
+      explanation: z.string().optional(),
     })
     .nullable(),
   evidence: z.array(
@@ -187,14 +186,7 @@ export async function POST(req: NextRequest) {
         },
         pillar3: data.pillar3,
         p3Status: data.p3Status,
-        delta: data.delta
-          ? {
-              priorCycle: data.delta.priorCycle,
-              baselineScores: {}, // overwritten from DB by orchestrator
-              priorScores: data.delta.priorScores,
-              currentScores: {},
-            }
-          : null,
+        delta: data.delta ? { explanation: data.delta.explanation } : null,
         evidence: data.evidence,
       },
     });
