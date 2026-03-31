@@ -84,6 +84,7 @@ export async function GET() {
         onboardingStep: operator.onboardingStep,
         onboardingData: operator.onboardingData,
         assessmentCycleCount: operator.assessmentCycleCount,
+        onboardingCompleted: operator.onboardingCompleted,
         territoryId: operator.territoryId,
         yearOperationStart: operator.yearOperationStart,
         website: operator.website,

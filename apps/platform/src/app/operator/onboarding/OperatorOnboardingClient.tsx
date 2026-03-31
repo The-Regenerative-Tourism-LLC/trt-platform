@@ -3,38 +3,108 @@
 /**
  * Operator Onboarding — Client Component
  *
- * Multi-step assessment form for Green Passport scoring.
+ * Multi-step assessment form collecting RAW onboarding data only.
+ * All scoring is delegated to POST /api/v1/score/preview (during onboarding)
+ * and POST /api/v1/score (final submission in review-submit step).
  *
- * Architecture compliance:
- * - This component ONLY collects form data and displays UI state
- * - Score computation is NEVER performed here
- * - On "Submit Assessment", data is posted to POST /api/v1/score
- * - The API route delegates to the scoring orchestrator
- * - The orchestrator invokes the TRT Scoring Engine
- * - The result (ScoreSnapshot) is persisted before being returned
- * - Onboarding progress is saved incrementally via POST /api/v1/onboarding
- *
- * Zustand store holds local UI state only.
- * TanStack Query manages server state.
+ * Navigation: stepId-based via onboarding-steps.ts helpers.
+ * Persistence: autosave via POST /api/v1/onboarding/draft after each step.
  */
 
 import { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useOnboardingStore } from "@/store/onboarding-store";
-import { OPERATOR_TYPES, P3_CATEGORIES, computeCategoryScope, INDICATOR_LABELS } from "@/lib/constants";
+import { useOnboardingStore, type OnboardingData } from "@/store/onboarding-store";
 import {
-  previewNormalise,
-  type PreviewBounds,
-} from "@/lib/utils/preview-normalise";
+  getVisibleSteps,
+  getVisibleStepNumber,
+  getStepById,
+  isLastStep,
+} from "@/lib/onboarding/onboarding-steps";
 import {
-  PREVIEW_BOUNDS_ACCOMMODATION,
-  PREVIEW_BOUNDS_TOURS,
-} from "@/lib/constants/preview-bounds";
+  OPERATOR_TYPES,
+  P3_CATEGORIES,
+  computeCategoryScope,
+  INDICATOR_LABELS,
+} from "@/lib/constants";
+import { usePreviewScore } from "@/hooks/usePreviewScore";
 import { toast } from "sonner";
 import Link from "next/link";
 
-const TOTAL_STEPS = 9; // 0=Profile, 1=Activity, 2=P1, 3=P2, 4=P3, 5=Evidence, 6=Delta, 7=LinkEvidence, 8=Review
+// ── Payload builder (score submission) ───────────────────────────────────────
+
+function buildScorePayload(
+  data: OnboardingData,
+  operatorId: string,
+  territoryId: string
+) {
+  return {
+    operatorId,
+    territoryId,
+    assessmentPeriodEnd:
+      data.assessmentPeriodEnd ?? new Date().toISOString().slice(0, 10),
+    operatorType: data.operatorType ?? "A",
+    activityUnit: {
+      guestNights: data.guestNights,
+      visitorDays: data.visitorDays,
+    },
+    revenueSplit:
+      data.operatorType === "C"
+        ? {
+            accommodationPct: data.revenueSplitAccommodationPct,
+            experiencePct: data.revenueSplitExperiencePct,
+          }
+        : undefined,
+    p1Raw: {
+      totalElectricityKwh: data.totalElectricityKwh,
+      totalGasKwh: data.totalGasKwh,
+      tourFuelType: data.tourFuelType,
+      tourFuelLitresPerMonth: data.tourFuelLitresPerMonth,
+      evKwhPerMonth: data.evKwhPerMonth,
+      totalWaterLitres: data.totalWaterLitres,
+      totalWasteKg: data.totalWasteKg,
+      wasteRecycledKg: data.wasteRecycledKg,
+      wasteCompostedKg: data.wasteCompostedKg,
+      wasteOtherDivertedKg: data.wasteOtherDivertedKg,
+      renewableOnsitePct: data.renewableOnsitePct,
+      renewableTariffPct: data.renewableTariffPct,
+      scope3TransportKgCo2e: data.scope3TransportKgCo2e,
+      recirculationScore: data.p1RecirculationScore ?? null,
+      siteScore: data.p1SiteScore ?? null,
+    },
+    p2Raw: {
+      totalFte: data.totalFte,
+      localFte: data.localFte,
+      permanentContractPct: data.permanentContractPct,
+      averageMonthlyWage: data.averageMonthlyWage,
+      minimumWage: data.minimumWage,
+      totalFbSpend: data.totalFbSpend,
+      localFbSpend: data.localFbSpend,
+      totalNonFbSpend: data.totalNonFbSpend,
+      localNonFbSpend: data.localNonFbSpend,
+      directBookingPct: data.directBookingPct,
+      localOwnershipPct: data.localEquityPct,
+      communityScore: data.communityScore,
+      foodServiceType: data.foodServiceType,
+      tourNoFbSpend: data.tourNoFbSpend,
+      tourNoNonFbSpend: data.tourNoNonFbSpend,
+      soloOperator: data.soloOperator,
+    },
+    pillar3: {
+      categoryScope: computeCategoryScope(
+        data.p3ContributionCategories ?? []
+      ),
+      traceability: data.p3Traceability ?? null,
+      additionality: data.p3Additionality ?? null,
+      continuity: data.p3Continuity ?? null,
+    },
+    p3Status: data.p3Status ?? "E",
+    delta: data.deltaExplanation
+      ? { explanation: data.deltaExplanation }
+      : null,
+    evidence: data.evidenceRefs ?? [],
+  };
+}
 
 // ── Shared UI primitives ────────────────────────────────────────────────────
 
@@ -43,11 +113,14 @@ function StepShell({
   title,
   subtitle,
   progress,
-  step,
+  stepNumber,
+  totalSteps,
+  isFirst,
   onBack,
   onNext,
   onSave,
   saving,
+  saved,
   isLast,
   canSubmit,
   onSubmit,
@@ -56,18 +129,20 @@ function StepShell({
   title: string;
   subtitle?: string;
   progress: number;
-  step: number;
+  stepNumber: number;
+  totalSteps: number;
+  isFirst: boolean;
   onBack: () => void;
   onNext: () => void;
   onSave: () => void;
   saving: boolean;
+  saved: boolean;
   isLast?: boolean;
   canSubmit?: boolean;
   onSubmit?: () => void;
 }) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Progress bar */}
       <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-muted">
         <div
           className="h-full bg-emerald-500 transition-all duration-500"
@@ -75,30 +150,30 @@ function StepShell({
         />
       </div>
 
-      {/* Top bar */}
       <div className="fixed top-1 left-0 right-0 z-40 bg-background/90 backdrop-blur-sm border-b">
         <div className="flex items-center justify-between px-4 py-3 max-w-3xl mx-auto">
-          {step > 0 ? (
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              ← Back
-            </button>
-          ) : (
-            <div className="w-14" />
-          )}
+          <button
+            onClick={onBack}
+            disabled={isFirst}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ← Back
+          </button>
           <span className="text-xs text-muted-foreground font-medium">
-            Step {step + 1} of {TOTAL_STEPS}
+            Step {stepNumber} of {totalSteps}
           </span>
           <div className="flex items-center gap-3">
-            <button
-              onClick={onSave}
-              disabled={saving}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
+            {saved ? (
+              <span className="text-xs text-emerald-600 font-medium">Saved</span>
+            ) : (
+              <button
+                onClick={onSave}
+                disabled={saving}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            )}
             <Link
               href="/operator/dashboard"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -109,20 +184,20 @@ function StepShell({
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 pt-16 pb-24 px-4">
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
             {subtitle && (
-              <p className="text-muted-foreground leading-relaxed">{subtitle}</p>
+              <p className="text-muted-foreground leading-relaxed">
+                {subtitle}
+              </p>
             )}
           </div>
           <div className="space-y-6">{children}</div>
         </div>
       </div>
 
-      {/* Bottom bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t">
         <div className="flex items-center justify-end px-4 py-3 max-w-3xl mx-auto">
           {isLast ? (
@@ -165,6 +240,9 @@ function FieldGroup({
   );
 }
 
+const inputCls =
+  "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
+
 function NumberInput({
   value,
   onChange,
@@ -174,7 +252,7 @@ function NumberInput({
   step,
 }: {
   value: number | undefined;
-  onChange: (v: number | null) => void;
+  onChange: (v: number | undefined) => void;
   placeholder?: string;
   min?: number;
   max?: number;
@@ -185,36 +263,41 @@ function NumberInput({
       type="number"
       value={value ?? ""}
       onChange={(e) =>
-        onChange(e.target.value === "" ? null : parseFloat(e.target.value))
+        onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
       }
       placeholder={placeholder}
       min={min}
       max={max}
       step={step}
-      className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+      className={inputCls}
     />
   );
 }
 
-function ScorePreview({
-  rawValue,
-  bounds,
+function BandSelector({
+  values,
+  selected,
+  onSelect,
 }: {
-  rawValue: number | undefined;
-  bounds: PreviewBounds;
+  values: number[];
+  selected: number | undefined;
+  onSelect: (v: number) => void;
 }) {
-  if (rawValue == null) return null;
-  const score = previewNormalise(rawValue, bounds);
-  const pct = score;
   return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <span className="tabular-nums font-medium">{score}/100</span>
+    <div className="flex gap-2 flex-wrap">
+      {values.map((v) => (
+        <button
+          key={v}
+          onClick={() => onSelect(v)}
+          className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
+            selected === v
+              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+              : "border-border hover:border-emerald-300"
+          }`}
+        >
+          {v}
+        </button>
+      ))}
     </div>
   );
 }
@@ -223,66 +306,89 @@ function ScorePreview({
 
 export function OperatorOnboardingClient() {
   const router = useRouter();
-  const { step, data, setStep, updateData, resetOnboarding } = useOnboardingStore();
+  const {
+    stepId,
+    data,
+    updateField,
+    nextStep,
+    previousStep,
+    saveDraft,
+    loadDraft,
+    resetOnboarding,
+  } = useOnboardingStore();
+
   const [saving, setSaving] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const { preview, loading: previewLoading, refreshPreview } = usePreviewScore(data);
 
-  const progress = ((step + 1) / TOTAL_STEPS) * 100;
+  const flashSaved = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
-  // Load existing operator data
+  const visibleSteps = getVisibleSteps(data);
+  const stepNumber = getVisibleStepNumber(stepId, data);
+  const totalSteps = visibleSteps.length;
+  const progress = totalSteps > 0 ? (stepNumber / totalSteps) * 100 : 0;
+  const currentStep = getStepById(stepId);
+  const first = stepNumber <= 1;
+  const last = isLastStep(stepId, data);
+
+  // ── Server queries ──────────────────────────────────────────────────────
+
   const { data: onboardingData } = useQuery({
     queryKey: ["onboarding"],
     queryFn: () => fetch("/api/v1/onboarding").then((r) => r.json()),
   });
 
-  // Load uploaded evidence (for Link Evidence step — only fetched when needed)
-  const { data: evidenceData } = useQuery({
-    queryKey: ["operator-evidence"],
-    queryFn: () => fetch("/api/v1/operator/evidence").then((r) => r.json()),
-    enabled: step === 7,
+  const { data: draftData } = useQuery({
+    queryKey: ["onboarding-draft"],
+    queryFn: () =>
+      fetch("/api/v1/onboarding/draft").then((r) => r.json()),
   });
 
-  // Seed Zustand store from server-persisted operator profile on first load.
-  // This ensures resume works correctly even if localStorage was cleared.
-  const serverOperator = onboardingData?.operator;
+  const { data: evidenceData } = useQuery({
+    queryKey: ["operator-evidence"],
+    queryFn: () =>
+      fetch("/api/v1/operator/evidence").then((r) => r.json()),
+    enabled: stepId === "evidence-upload",
+  });
+
+  // Redirect if onboarding already completed
   useEffect(() => {
-    if (!serverOperator) return;
-    const patch: Partial<import("@/store/onboarding-store").OnboardingFormData> = {};
-    if (serverOperator.operatorType && !data.operatorType) patch.operatorType = serverOperator.operatorType;
-    if (serverOperator.legalName && !data.legalName) patch.legalName = serverOperator.legalName;
-    if (serverOperator.tradingName && !data.tradingName) patch.tradingName = serverOperator.tradingName;
-    if (serverOperator.country && !data.country) patch.country = serverOperator.country;
-    if (serverOperator.destinationRegion && !data.destinationRegion) patch.destinationRegion = serverOperator.destinationRegion;
-    if (serverOperator.territoryId && !data.territoryId) patch.territoryId = serverOperator.territoryId;
-    if (serverOperator.yearOperationStart && !data.yearOperationStart) patch.yearOperationStart = serverOperator.yearOperationStart;
-    if (serverOperator.website && !data.website) patch.website = serverOperator.website;
-    if (serverOperator.primaryContactName && !data.primaryContactName) patch.primaryContactName = serverOperator.primaryContactName;
-    if (serverOperator.primaryContactEmail && !data.primaryContactEmail) patch.primaryContactEmail = serverOperator.primaryContactEmail;
-    if (serverOperator.accommodationCategory && !data.accommodationCategory) patch.accommodationCategory = serverOperator.accommodationCategory;
-    if (serverOperator.rooms != null && data.rooms == null) patch.rooms = serverOperator.rooms;
-    if (serverOperator.bedCapacity != null && data.bedCapacity == null) patch.bedCapacity = serverOperator.bedCapacity;
-    if (serverOperator.experienceTypes?.length && !data.experienceTypes?.length) patch.experienceTypes = serverOperator.experienceTypes;
-    if (serverOperator.ownershipType && !data.ownershipType) patch.ownershipType = serverOperator.ownershipType;
-    if (serverOperator.localEquityPct != null && data.localEquityPct == null) patch.localEquityPct = serverOperator.localEquityPct;
-    if (serverOperator.isChainMember != null && data.isChainMember == null) patch.isChainMember = serverOperator.isChainMember;
-    if (serverOperator.chainName && !data.chainName) patch.chainName = serverOperator.chainName;
-    if (Object.keys(patch).length > 0) updateData(patch);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverOperator]);
+    if (onboardingData?.operator?.onboardingCompleted === true) {
+      router.replace("/operator/dashboard");
+    }
+  }, [onboardingData, router]);
 
-  // Infer normalisation bounds based on operator type
-  const isTypeB = data.operatorType === "B";
-  const bounds = isTypeB ? PREVIEW_BOUNDS_TOURS : PREVIEW_BOUNDS_ACCOMMODATION;
+  // Hydrate from saved draft on mount
+  useEffect(() => {
+    if (!draftData?.draft) return;
+    const d = draftData.draft;
+    if (d.updatedAt && Object.keys(d.dataJson ?? {}).length > 0) {
+      loadDraft(d);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftData]);
 
-  const saveProgress = async () => {
+  // Refresh preview on gps-preview step entry
+  useEffect(() => {
+    if (stepId === "gps-preview") refreshPreview();
+  }, [stepId, refreshPreview]);
+
+  // ── Navigation handlers ─────────────────────────────────────────────────
+
+  const handleNext = async () => {
+    const advanced = nextStep();
+    if (!advanced) {
+      toast.error("Please complete all required fields before continuing.");
+      return;
+    }
     setSaving(true);
     try {
-      await fetch("/api/v1/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step, data }),
-      });
-      toast.success("Progress saved");
+      await saveDraft();
+      flashSaved();
+      refreshPreview();
     } catch {
       toast.error("Failed to save progress");
     } finally {
@@ -290,45 +396,33 @@ export function OperatorOnboardingClient() {
     }
   };
 
-  const saveProfileToServer = async (): Promise<boolean> => {
+  const handleBack = async () => {
+    previousStep();
+    setSaving(true);
     try {
-      const res = await fetch("/api/v1/operator/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          legalName: data.legalName,
-          tradingName: data.tradingName,
-          country: data.country,
-          destinationRegion: data.destinationRegion,
-          territoryId: data.territoryId,
-          operatorType: data.operatorType,
-          yearOperationStart: data.yearOperationStart,
-          website: data.website,
-          primaryContactName: data.primaryContactName,
-          primaryContactEmail: data.primaryContactEmail,
-          accommodationCategory: data.accommodationCategory,
-          rooms: data.rooms,
-          bedCapacity: data.bedCapacity,
-          experienceTypes: data.experienceTypes,
-          ownershipType: data.ownershipType,
-          localEquityPct: data.localEquityPct,
-          isChainMember: data.isChainMember,
-          chainName: data.chainName,
-        }),
-      });
-      if (!res.ok) {
-        toast.error("Failed to save profile");
-        return false;
-      }
-      return true;
+      await saveDraft();
+      flashSaved();
     } catch {
-      toast.error("Failed to save profile");
-      return false;
+      /* best effort */
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveDraft();
+      flashSaved();
+    } catch {
+      toast.error("Failed to save progress");
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleSubmit = async () => {
-    setSubmitting(true);
+    setSaving(true);
     try {
       const operator = onboardingData?.operator;
       const territoryId = data.territoryId ?? operator?.territoryId;
@@ -340,49 +434,10 @@ export function OperatorOnboardingClient() {
       const res = await fetch("/api/v1/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          operatorId: operator.id,
-          territoryId,
-          assessmentPeriodEnd: data.assessmentPeriodEnd ?? new Date().toISOString().slice(0, 10),
-          operatorType: data.operatorType ?? "A",
-          activityUnit: {
-            guestNights: data.guestNights,
-            visitorDays: data.visitorDays,
-          },
-          revenueSplit: {
-            accommodationPct: data.revenueSplitAccommodationPct,
-            experiencePct: data.revenueSplitExperiencePct,
-          },
-          pillar1: {
-            energyIntensity: data.p1EnergyIntensity ?? null,
-            renewablePct: data.p1RenewablePct ?? null,
-            waterIntensity: data.p1WaterIntensity ?? null,
-            recirculationScore: data.p1RecirculationScore ?? null,
-            wasteDiversionPct: data.p1WasteDiversionPct ?? null,
-            carbonIntensity: data.p1CarbonIntensity ?? null,
-            siteScore: data.p1SiteScore ?? null,
-          },
-          pillar2: {
-            localEmploymentRate: data.p2LocalEmploymentRate ?? null,
-            employmentQuality: data.p2EmploymentQuality ?? null,
-            localFbRate: data.p2LocalFbRate ?? null,
-            localNonfbRate: data.p2LocalNonfbRate ?? null,
-            directBookingRate: data.p2DirectBookingRate ?? null,
-            localOwnershipPct: data.p2LocalOwnershipPct ?? null,
-            communityScore: data.p2CommunityScore ?? null,
-          },
-          pillar3: {
-            categoryScope: data.p3CategoryScope ?? null,
-            traceability: data.p3Traceability ?? null,
-            additionality: data.p3Additionality ?? null,
-            continuity: data.p3Continuity ?? null,
-          },
-          p3Status: data.p3Status ?? "E",
-          delta: null, // Cycle 1 — no delta
-          evidence: data.evidenceRefs ?? [],
-        }),
+        body: JSON.stringify(
+          buildScorePayload(data, operator.id, territoryId)
+        ),
       });
-
       const json = await res.json();
       if (!res.ok) {
         toast.error(json.error ?? "Submission failed");
@@ -396,51 +451,35 @@ export function OperatorOnboardingClient() {
       toast.error("Failed to submit assessment");
       console.error(err);
     } finally {
-      setSubmitting(false);
+      setSaving(false);
     }
   };
 
-  const goNext = () => setStep(Math.min(step + 1, TOTAL_STEPS - 1));
-  const goBack = () => setStep(Math.max(step - 1, 0));
+  // ── Shared shell props ──────────────────────────────────────────────────
 
-  // ── Step renders ─────────────────────────────────────────────────────────
+  const shell = {
+    progress,
+    stepNumber,
+    totalSteps,
+    isFirst: first,
+    onBack: handleBack,
+    onNext: handleNext,
+    onSave: handleSave,
+    saving,
+    saved,
+  };
 
-  // Step 0: Operator Profile
-  if (step === 0) {
-    const territories: Array<{ id: string; name: string; country: string | null }> =
-      onboardingData?.territories ?? [];
+  // ── Step renders ────────────────────────────────────────────────────────
 
-    const handleStep0Next = async () => {
-      setSaving(true);
-      const ok = await saveProfileToServer();
-      setSaving(false);
-      if (ok) goNext();
-    };
-
-    const handleStep0Save = async () => {
-      setSaving(true);
-      await Promise.all([saveProgress(), saveProfileToServer()]);
-      setSaving(false);
-    };
-
+  if (stepId === "operator-type") {
     return (
-      <StepShell
-        title="Operator Profile"
-        subtitle="Tell us about your operation. This determines your scoring methodology."
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={handleStep0Next}
-        onSave={handleStep0Save}
-        saving={saving}
-      >
-        {/* ── Operator Type ── */}
-        <FieldGroup label="Operator Type" hint="This determines which assessment modules apply.">
+      <StepShell {...shell} title="Operator Type" subtitle="This determines which assessment modules apply to your operation.">
+        <FieldGroup label="Select your operator type">
           <div className="grid gap-3">
             {Object.entries(OPERATOR_TYPES).map(([key, val]) => (
               <button
                 key={key}
-                onClick={() => updateData({ operatorType: key as "A" | "B" | "C" })}
+                onClick={() => updateField({ operatorType: key as "A" | "B" | "C" })}
                 className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
                   data.operatorType === key
                     ? "border-emerald-500 bg-emerald-50"
@@ -453,195 +492,115 @@ export function OperatorOnboardingClient() {
             ))}
           </div>
         </FieldGroup>
+      </StepShell>
+    );
+  }
 
-        {/* ── Identity ── */}
+  if (stepId === "identity") {
+    const territories: Array<{ id: string; name: string; country: string | null }> =
+      onboardingData?.territories ?? [];
+    return (
+      <StepShell {...shell} title="Identity" subtitle="Legal identification and contact information.">
         <FieldGroup label="Legal Name">
-          <input
-            type="text"
-            value={data.legalName ?? ""}
-            onChange={(e) => updateData({ legalName: e.target.value })}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder="Registered legal name"
-          />
+          <input type="text" value={data.legalName ?? ""} onChange={(e) => updateField({ legalName: e.target.value })} className={inputCls} placeholder="Registered legal name" />
         </FieldGroup>
-
         <FieldGroup label="Trading Name (if different)">
-          <input
-            type="text"
-            value={data.tradingName ?? ""}
-            onChange={(e) => updateData({ tradingName: e.target.value })}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder="Name known to guests"
-          />
+          <input type="text" value={data.tradingName ?? ""} onChange={(e) => updateField({ tradingName: e.target.value })} className={inputCls} placeholder="Name known to guests" />
         </FieldGroup>
-
-        <FieldGroup label="Year Operations Started">
-          <NumberInput
-            value={data.yearOperationStart}
-            onChange={(v) => updateData({ yearOperationStart: v ?? undefined })}
-            placeholder="e.g. 2015"
-            min={1900}
-            max={new Date().getFullYear()}
-          />
-        </FieldGroup>
-
-        <FieldGroup label="Website">
-          <input
-            type="url"
-            value={data.website ?? ""}
-            onChange={(e) => updateData({ website: e.target.value })}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder="https://example.com"
-          />
-        </FieldGroup>
-
-        {/* ── Location + Territory ── */}
         <div className="grid grid-cols-2 gap-3">
           <FieldGroup label="Country">
-            <input
-              type="text"
-              value={data.country ?? ""}
-              onChange={(e) => updateData({ country: e.target.value })}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="e.g. Portugal"
-            />
+            <input type="text" value={data.country ?? ""} onChange={(e) => updateField({ country: e.target.value })} className={inputCls} placeholder="e.g. Portugal" />
           </FieldGroup>
           <FieldGroup label="Destination / Region">
-            <input
-              type="text"
-              value={data.destinationRegion ?? ""}
-              onChange={(e) => updateData({ destinationRegion: e.target.value })}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="e.g. Madeira"
-            />
+            <input type="text" value={data.destinationRegion ?? ""} onChange={(e) => updateField({ destinationRegion: e.target.value })} className={inputCls} placeholder="e.g. Madeira" />
           </FieldGroup>
         </div>
-
-        <FieldGroup
-          label="Territory"
-          hint="Select the territory for DPI context. This affects how your score is contextualised."
-        >
-          <select
-            value={data.territoryId ?? ""}
-            onChange={(e) => updateData({ territoryId: e.target.value || undefined })}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
+        <FieldGroup label="Territory" hint="Select the territory for DPI context.">
+          <select value={data.territoryId ?? ""} onChange={(e) => updateField({ territoryId: e.target.value || undefined })} className={inputCls}>
             <option value="">— Select territory —</option>
             {territories.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}{t.country ? ` (${t.country})` : ""}
-              </option>
+              <option key={t.id} value={t.id}>{t.name}{t.country ? ` (${t.country})` : ""}</option>
             ))}
           </select>
         </FieldGroup>
-
-        {/* ── Contact ── */}
+        <FieldGroup label="Year Operations Started">
+          <NumberInput value={data.yearOperationStart} onChange={(v) => updateField({ yearOperationStart: v })} placeholder="e.g. 2015" min={1900} max={new Date().getFullYear()} />
+        </FieldGroup>
+        <FieldGroup label="Website">
+          <input type="url" value={data.website ?? ""} onChange={(e) => updateField({ website: e.target.value })} className={inputCls} placeholder="https://example.com" />
+        </FieldGroup>
         <div className="grid grid-cols-2 gap-3">
           <FieldGroup label="Primary Contact Name">
-            <input
-              type="text"
-              value={data.primaryContactName ?? ""}
-              onChange={(e) => updateData({ primaryContactName: e.target.value })}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Full name"
-            />
+            <input type="text" value={data.primaryContactName ?? ""} onChange={(e) => updateField({ primaryContactName: e.target.value })} className={inputCls} placeholder="Full name" />
           </FieldGroup>
           <FieldGroup label="Primary Contact Email">
-            <input
-              type="email"
-              value={data.primaryContactEmail ?? ""}
-              onChange={(e) => updateData({ primaryContactEmail: e.target.value })}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="contact@example.com"
-            />
+            <input type="email" value={data.primaryContactEmail ?? ""} onChange={(e) => updateField({ primaryContactEmail: e.target.value })} className={inputCls} placeholder="contact@example.com" />
           </FieldGroup>
         </div>
+      </StepShell>
+    );
+  }
 
-        {/* ── Operational ── */}
-        {data.operatorType !== "B" && (
-          <>
-            <FieldGroup label="Accommodation Category" hint="e.g. Eco-lodge, Boutique Hotel, Glamping">
-              <input
-                type="text"
-                value={data.accommodationCategory ?? ""}
-                onChange={(e) => updateData({ accommodationCategory: e.target.value })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="e.g. Eco-lodge"
-              />
-            </FieldGroup>
-            <div className="grid grid-cols-2 gap-3">
-              <FieldGroup label="Number of Rooms">
-                <NumberInput
-                  value={data.rooms}
-                  onChange={(v) => updateData({ rooms: v ?? undefined })}
-                  placeholder="e.g. 12"
-                  min={0}
-                />
-              </FieldGroup>
-              <FieldGroup label="Bed Capacity">
-                <NumberInput
-                  value={data.bedCapacity}
-                  onChange={(v) => updateData({ bedCapacity: v ?? undefined })}
-                  placeholder="e.g. 24"
-                  min={0}
-                />
-              </FieldGroup>
-            </div>
-          </>
-        )}
-
-        {data.operatorType !== "A" && (
-          <FieldGroup label="Experience Types" hint="Comma-separated list of activities offered.">
-            <input
-              type="text"
-              value={data.experienceTypes?.join(", ") ?? ""}
-              onChange={(e) =>
-                updateData({
-                  experienceTypes: e.target.value
-                    ? e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
-                    : undefined,
-                })
-              }
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="e.g. Hiking, Kayaking, Wildlife"
-            />
+  if (stepId === "accommodation") {
+    return (
+      <StepShell {...shell} title="Accommodation" subtitle="Property details for accommodation operators.">
+        <FieldGroup label="Accommodation Category" hint="e.g. Eco-lodge, Boutique Hotel, Glamping">
+          <input type="text" value={data.accommodationCategory ?? ""} onChange={(e) => updateField({ accommodationCategory: e.target.value })} className={inputCls} placeholder="e.g. Eco-lodge" />
+        </FieldGroup>
+        <div className="grid grid-cols-2 gap-3">
+          <FieldGroup label="Number of Rooms">
+            <NumberInput value={data.rooms} onChange={(v) => updateField({ rooms: v })} placeholder="e.g. 12" min={1} />
           </FieldGroup>
-        )}
+          <FieldGroup label="Bed Capacity">
+            <NumberInput value={data.bedCapacity} onChange={(v) => updateField({ bedCapacity: v })} placeholder="e.g. 24" min={1} />
+          </FieldGroup>
+        </div>
+      </StepShell>
+    );
+  }
 
-        {/* ── Ownership ── */}
-        <FieldGroup label="Ownership Type" hint="e.g. Sole proprietor, Partnership, NGO, Community-owned">
+  if (stepId === "experience-types") {
+    return (
+      <StepShell {...shell} title="Experiences" subtitle="Types of experiences or tours you offer.">
+        <FieldGroup label="Experience Types" hint="Comma-separated list of activities offered.">
           <input
             type="text"
-            value={data.ownershipType ?? ""}
-            onChange={(e) => updateData({ ownershipType: e.target.value })}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            placeholder="e.g. Sole proprietor"
+            value={data.experienceTypes?.join(", ") ?? ""}
+            onChange={(e) =>
+              updateField({
+                experienceTypes: e.target.value
+                  ? e.target.value.split(",").map((s) => s.trim()).filter(Boolean)
+                  : undefined,
+              })
+            }
+            className={inputCls}
+            placeholder="e.g. Hiking, Kayaking, Wildlife"
           />
         </FieldGroup>
+      </StepShell>
+    );
+  }
 
-        <FieldGroup label="Local Equity %" hint="Percentage of equity held by local residents or communities.">
-          <NumberInput
-            value={data.localEquityPct}
-            onChange={(v) => updateData({ localEquityPct: v ?? undefined })}
-            placeholder="e.g. 100"
-            min={0}
-            max={100}
-          />
+  if (stepId === "ownership") {
+    return (
+      <StepShell {...shell} title="Ownership" subtitle="Ownership structure and local equity.">
+        <FieldGroup label="Ownership Type" hint="e.g. Sole proprietor, Partnership, NGO, Community-owned">
+          <input type="text" value={data.ownershipType ?? ""} onChange={(e) => updateField({ ownershipType: e.target.value })} className={inputCls} placeholder="e.g. Sole proprietor" />
         </FieldGroup>
-
+        <FieldGroup label="Local Equity %" hint="Percentage of equity held by residents within 50 km.">
+          <NumberInput value={data.localEquityPct} onChange={(v) => updateField({ localEquityPct: v })} placeholder="e.g. 100" min={0} max={100} />
+        </FieldGroup>
         <FieldGroup label="Part of a chain or group?">
           <div className="flex items-center gap-4">
-            {[
+            {([
               { label: "Independent", value: false },
               { label: "Chain / Group member", value: true },
-            ].map(({ label, value }) => (
+            ] as const).map(({ label, value }) => (
               <button
                 key={String(value)}
-                onClick={() => updateData({ isChainMember: value, chainName: value ? data.chainName : undefined })}
+                onClick={() => updateField({ isChainMember: value, chainName: value ? data.chainName : undefined })}
                 className={`flex-1 rounded-xl border-2 p-3 text-sm text-left transition-all ${
-                  data.isChainMember === value
-                    ? "border-emerald-500 bg-emerald-50 font-medium"
-                    : "border-border hover:border-emerald-300"
+                  data.isChainMember === value ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"
                 }`}
               >
                 {label}
@@ -649,94 +608,61 @@ export function OperatorOnboardingClient() {
             ))}
           </div>
         </FieldGroup>
-
         {data.isChainMember && (
           <FieldGroup label="Chain / Group Name">
-            <input
-              type="text"
-              value={data.chainName ?? ""}
-              onChange={(e) => updateData({ chainName: e.target.value })}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Name of the chain or group"
-            />
+            <input type="text" value={data.chainName ?? ""} onChange={(e) => updateField({ chainName: e.target.value })} className={inputCls} placeholder="Name of the chain or group" />
           </FieldGroup>
         )}
+        <FieldGroup label="Solo / owner-operator?" hint="If yes, employment metrics default to 100%.">
+          <div className="flex items-center gap-4">
+            {([
+              { label: "Yes — solo operator", value: true },
+              { label: "No — I have staff", value: false },
+            ] as const).map(({ label, value }) => (
+              <button
+                key={String(value)}
+                onClick={() => updateField({ soloOperator: value })}
+                className={`flex-1 rounded-xl border-2 p-3 text-sm text-left transition-all ${
+                  data.soloOperator === value ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </FieldGroup>
       </StepShell>
     );
   }
 
-  // Step 1: Activity Units (Section 0 data)
-  if (step === 1) {
+  if (stepId === "activity-unit") {
     return (
-      <StepShell
-        title="Activity Unit"
-        subtitle="Define your operational scale. This normalises your environmental intensity metrics."
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
-        saving={saving}
-      >
-        <FieldGroup
-          label="Assessment Period End Date"
-          hint="The last day of the 12-month period your data covers (e.g. 31 December 2025)."
-        >
-          <input
-            type="date"
-            value={data.assessmentPeriodEnd ?? ""}
-            onChange={(e) => updateData({ assessmentPeriodEnd: e.target.value || undefined })}
-            max={new Date().toISOString().slice(0, 10)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+      <StepShell {...shell} title="Activity Data" subtitle="Define your operational scale. This normalises intensity metrics.">
+        <FieldGroup label="Assessment Period End Date" hint="The last day of the 12-month period your data covers.">
+          <input type="date" value={data.assessmentPeriodEnd ?? ""} onChange={(e) => updateField({ assessmentPeriodEnd: e.target.value || undefined })} max={new Date().toISOString().slice(0, 10)} className={inputCls} />
         </FieldGroup>
-
         {data.operatorType !== "B" && (
-          <FieldGroup label="Total Guest-Nights" hint="12-month assessment period. Used to normalise P1 intensity metrics.">
-            <NumberInput
-              value={data.guestNights}
-              onChange={(v) => updateData({ guestNights: v ?? undefined })}
-              placeholder="e.g. 5000"
-              min={0}
-            />
+          <FieldGroup label="Total Guest-Nights" hint="12-month assessment period.">
+            <NumberInput value={data.guestNights} onChange={(v) => updateField({ guestNights: v })} placeholder="e.g. 5000" min={0} />
           </FieldGroup>
         )}
         {data.operatorType !== "A" && (
           <FieldGroup label="Total Visitor-Days" hint="12-month assessment period.">
-            <NumberInput
-              value={data.visitorDays}
-              onChange={(v) => updateData({ visitorDays: v ?? undefined })}
-              placeholder="e.g. 2000"
-              min={0}
-            />
+            <NumberInput value={data.visitorDays} onChange={(v) => updateField({ visitorDays: v })} placeholder="e.g. 2000" min={0} />
           </FieldGroup>
         )}
         {data.operatorType === "C" && (
           <>
             <FieldGroup label="Revenue Split — Accommodation %" hint="Proportion of total revenue from accommodation.">
-              <NumberInput
-                value={data.revenueSplitAccommodationPct}
-                onChange={(v) => updateData({ revenueSplitAccommodationPct: v ?? undefined })}
-                placeholder="e.g. 60"
-                min={0}
-                max={100}
-              />
+              <NumberInput value={data.revenueSplitAccommodationPct} onChange={(v) => updateField({ revenueSplitAccommodationPct: v })} placeholder="e.g. 60" min={0} max={100} />
             </FieldGroup>
             <FieldGroup label="Revenue Split — Experience %">
-              <NumberInput
-                value={data.revenueSplitExperiencePct}
-                onChange={(v) => updateData({ revenueSplitExperiencePct: v ?? undefined })}
-                placeholder="e.g. 40"
-                min={0}
-                max={100}
-              />
+              <NumberInput value={data.revenueSplitExperiencePct} onChange={(v) => updateField({ revenueSplitExperiencePct: v })} placeholder="e.g. 40" min={0} max={100} />
             </FieldGroup>
-            {data.revenueSplitAccommodationPct != null &&
-              data.revenueSplitExperiencePct != null &&
+            {data.revenueSplitAccommodationPct != null && data.revenueSplitExperiencePct != null &&
               Math.round(data.revenueSplitAccommodationPct + data.revenueSplitExperiencePct) !== 100 && (
                 <p className="text-sm text-amber-600">
-                  Revenue split must sum to 100% (currently{" "}
-                  {Math.round(data.revenueSplitAccommodationPct + data.revenueSplitExperiencePct)}%).
+                  Revenue split must sum to 100% (currently {Math.round(data.revenueSplitAccommodationPct + data.revenueSplitExperiencePct)}%).
                 </p>
               )}
           </>
@@ -745,293 +671,187 @@ export function OperatorOnboardingClient() {
     );
   }
 
-  // Step 2: Pillar 1 — Operational Footprint
-  if (step === 2) {
+  if (stepId === "p1-energy") {
     return (
-      <StepShell
-        title="Pillar 1: Operational Footprint"
-        subtitle="Energy, water, waste, carbon, and site management. Intensity metrics are normalised per activity unit."
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
-        saving={saving}
-      >
-        <FieldGroup
-          label="1A: Energy Intensity (kWh per activity unit)"
-          hint="Total electricity + fuel consumption divided by guest-nights or visitor-days."
-        >
-          <NumberInput
-            value={data.p1EnergyIntensity}
-            onChange={(v) => updateData({ p1EnergyIntensity: v ?? undefined })}
-            placeholder={isTypeB ? "e.g. 8" : "e.g. 25"}
-            min={0}
-            step={0.1}
-          />
-          <ScorePreview
-            rawValue={data.p1EnergyIntensity}
-            bounds={bounds["p1_energy_intensity"]}
-          />
+      <StepShell {...shell} title="Energy" subtitle="Total energy consumption and renewable share over the 12-month assessment period.">
+        <FieldGroup label="Total Electricity (kWh)" hint="Sum from all electricity bills for the 12-month period.">
+          <NumberInput value={data.totalElectricityKwh} onChange={(v) => updateField({ totalElectricityKwh: v })} placeholder="e.g. 45000" min={0} />
         </FieldGroup>
-
-        <FieldGroup
-          label="1A: Renewable Energy (%)"
-          hint="Percentage of total electricity from renewable sources (on-site or certified green tariff)."
-        >
-          <NumberInput
-            value={data.p1RenewablePct}
-            onChange={(v) => updateData({ p1RenewablePct: v ?? undefined })}
-            placeholder="e.g. 75"
-            min={0}
-            max={100}
-          />
-          <ScorePreview
-            rawValue={data.p1RenewablePct}
-            bounds={bounds["p1_renewable_pct"]}
-          />
+        <FieldGroup label="Total Gas / LPG / Fuel Oil (kWh)" hint="Convert: 1 m³ gas ≈ 10.5 kWh · 1 L LPG ≈ 7.1 kWh · 1 L heating oil ≈ 10.7 kWh">
+          <NumberInput value={data.totalGasKwh} onChange={(v) => updateField({ totalGasKwh: v })} placeholder="e.g. 12000" min={0} />
         </FieldGroup>
-
-        <FieldGroup
-          label="1B: Water Intensity (L per activity unit)"
-          hint="Total water consumption divided by activity units."
-        >
-          <NumberInput
-            value={data.p1WaterIntensity}
-            onChange={(v) => updateData({ p1WaterIntensity: v ?? undefined })}
-            placeholder={isTypeB ? "e.g. 3" : "e.g. 150"}
-            min={0}
-            step={0.1}
-          />
-          <ScorePreview
-            rawValue={data.p1WaterIntensity}
-            bounds={bounds["p1_water_intensity"]}
-          />
+        <FieldGroup label="On-site Renewable (%)" hint="Solar PV, wind, hydro, biomass generated on property.">
+          <NumberInput value={data.renewableOnsitePct} onChange={(v) => updateField({ renewableOnsitePct: v })} placeholder="e.g. 30" min={0} max={100} />
         </FieldGroup>
-
-        <FieldGroup
-          label="1B: Water Recirculation / Grey Water (0–3)"
-          hint="0 = none, 1 = basic collection, 2 = grey water reuse, 3 = closed-loop system."
-        >
-          <div className="flex gap-2">
-            {[0, 1, 2, 3].map((v) => (
+        <FieldGroup label="Certified Renewable Tariff (%)" hint="Green tariff with certificate of origin (GoO, REGO).">
+          <NumberInput value={data.renewableTariffPct} onChange={(v) => updateField({ renewableTariffPct: v })} placeholder="e.g. 50" min={0} max={100} />
+        </FieldGroup>
+        <FieldGroup label="Tour Transport Fuel Type" hint="If your operation provides guest transport.">
+          <div className="flex gap-2 flex-wrap">
+            {(["diesel", "petrol", "electric"] as const).map((ft) => (
               <button
-                key={v}
-                onClick={() => updateData({ p1RecirculationScore: v })}
-                className={`flex-1 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                  data.p1RecirculationScore === v
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-border hover:border-emerald-300"
+                key={ft}
+                onClick={() => updateField({ tourFuelType: ft })}
+                className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all capitalize ${
+                  data.tourFuelType === ft ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-border hover:border-emerald-300"
                 }`}
               >
-                {v}
+                {ft}
               </button>
             ))}
           </div>
         </FieldGroup>
+        {data.tourFuelType && data.tourFuelType !== "electric" && (
+          <FieldGroup label="Tour Fuel (litres/month)">
+            <NumberInput value={data.tourFuelLitresPerMonth} onChange={(v) => updateField({ tourFuelLitresPerMonth: v })} placeholder="e.g. 200" min={0} />
+          </FieldGroup>
+        )}
+        {data.tourFuelType === "electric" && (
+          <FieldGroup label="EV Charging (kWh/month)">
+            <NumberInput value={data.evKwhPerMonth} onChange={(v) => updateField({ evKwhPerMonth: v })} placeholder="e.g. 500" min={0} />
+          </FieldGroup>
+        )}
+      </StepShell>
+    );
+  }
 
-        <FieldGroup
-          label="1C: Waste Diversion Rate (%)"
-          hint="Percentage of total waste diverted from landfill (recycling, composting, reuse)."
-        >
-          <NumberInput
-            value={data.p1WasteDiversionPct}
-            onChange={(v) => updateData({ p1WasteDiversionPct: v ?? undefined })}
-            placeholder="e.g. 60"
-            min={0}
-            max={100}
-          />
-          <ScorePreview
-            rawValue={data.p1WasteDiversionPct}
-            bounds={bounds["p1_waste_diversion_pct"]}
-          />
+  if (stepId === "p1-water-waste") {
+    return (
+      <StepShell {...shell} title="Water & Waste" subtitle="Water consumption, waste generation, and diversion data.">
+        <FieldGroup label="Total Water Consumed (litres)" hint="12-month total from water meter or bills. 1 m³ = 1,000 litres.">
+          <NumberInput value={data.totalWaterLitres} onChange={(v) => updateField({ totalWaterLitres: v })} placeholder="e.g. 750000" min={0} />
         </FieldGroup>
-
-        <FieldGroup
-          label="1D: Carbon Intensity (kg CO₂e per activity unit)"
-          hint="Total Scope 1 + 2 emissions divided by activity units."
-        >
-          <NumberInput
-            value={data.p1CarbonIntensity}
-            onChange={(v) => updateData({ p1CarbonIntensity: v ?? undefined })}
-            placeholder={isTypeB ? "e.g. 5" : "e.g. 15"}
-            min={0}
-            step={0.1}
-          />
-          <ScorePreview
-            rawValue={data.p1CarbonIntensity}
-            bounds={bounds["p1_carbon_intensity"]}
-          />
+        <FieldGroup label="Water Recirculation Systems (0–3)" hint="Each active system: greywater recycling / rainwater harvesting / on-site wastewater treatment.">
+          <BandSelector values={[0, 1, 2, 3]} selected={data.p1RecirculationScore} onSelect={(v) => updateField({ p1RecirculationScore: v })} />
         </FieldGroup>
-
-        <FieldGroup
-          label="1E: Site & Land Use Score (0–4)"
-          hint="0 = conventional site, 1 = some native species, 2 = significant habitat, 3 = certified, 4 = active restoration."
-        >
-          <div className="flex gap-2">
-            {[0, 1, 2, 3, 4].map((v) => (
-              <button
-                key={v}
-                onClick={() => updateData({ p1SiteScore: v })}
-                className={`flex-1 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                  data.p1SiteScore === v
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-border hover:border-emerald-300"
-                }`}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
+        <FieldGroup label="Total Waste Generated (kg)" hint="12-month total from collection records.">
+          <NumberInput value={data.totalWasteKg} onChange={(v) => updateField({ totalWasteKg: v })} placeholder="e.g. 5000" min={0} />
+        </FieldGroup>
+        <FieldGroup label="Waste Recycled (kg)">
+          <NumberInput value={data.wasteRecycledKg} onChange={(v) => updateField({ wasteRecycledKg: v })} placeholder="e.g. 2000" min={0} />
+        </FieldGroup>
+        <FieldGroup label="Waste Composted (kg)">
+          <NumberInput value={data.wasteCompostedKg} onChange={(v) => updateField({ wasteCompostedKg: v })} placeholder="e.g. 1000" min={0} />
+        </FieldGroup>
+        <FieldGroup label="Other Waste Diverted (kg)" hint="Anaerobic digestion, reuse schemes, etc.">
+          <NumberInput value={data.wasteOtherDivertedKg} onChange={(v) => updateField({ wasteOtherDivertedKg: v })} placeholder="e.g. 500" min={0} />
         </FieldGroup>
       </StepShell>
     );
   }
 
-  // Step 3: Pillar 2 — Local Integration
-  if (step === 3) {
+  if (stepId === "p1-site-carbon") {
     return (
-      <StepShell
-        title="Pillar 2: Local Integration"
-        subtitle="Employment, procurement, revenue retention, and community engagement."
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
-        saving={saving}
-      >
-        <FieldGroup
-          label="2A: Local Employment Rate (%)"
-          hint="Percentage of permanent FTE roles held by people from the local community."
-        >
-          <NumberInput
-            value={data.p2LocalEmploymentRate}
-            onChange={(v) => updateData({ p2LocalEmploymentRate: v ?? undefined })}
-            placeholder="e.g. 60"
-            min={0}
-            max={100}
-          />
+      <StepShell {...shell} title="Site & Carbon" subtitle="Site land use assessment and Scope 3 transport emissions.">
+        <FieldGroup label="Site & Land Use Score (0–4)" hint="0 = degraded/high-footprint, 1 = below average, 2 = standard, 3 = low-impact, 4 = regenerative site.">
+          <BandSelector values={[0, 1, 2, 3, 4]} selected={data.p1SiteScore} onSelect={(v) => updateField({ p1SiteScore: v })} />
         </FieldGroup>
-
-        <FieldGroup
-          label="2A: Employment Quality Score (0–100)"
-          hint="Assessment of contracts, wages, training, and progression. Use provided rubric."
-        >
-          <NumberInput
-            value={data.p2EmploymentQuality}
-            onChange={(v) => updateData({ p2EmploymentQuality: v ?? undefined })}
-            placeholder="e.g. 70"
-            min={0}
-            max={100}
-          />
-        </FieldGroup>
-
-        <FieldGroup
-          label="2B: Local F&B Procurement Rate (%)"
-          hint="Percentage of food and beverage expenditure spent with local suppliers."
-        >
-          <NumberInput
-            value={data.p2LocalFbRate}
-            onChange={(v) => updateData({ p2LocalFbRate: v ?? undefined })}
-            placeholder="e.g. 55"
-            min={0}
-            max={100}
-          />
-        </FieldGroup>
-
-        <FieldGroup
-          label="2B: Local Non-F&B Procurement Rate (%)"
-          hint="Percentage of non-food goods/services expenditure spent with local suppliers."
-        >
-          <NumberInput
-            value={data.p2LocalNonfbRate}
-            onChange={(v) => updateData({ p2LocalNonfbRate: v ?? undefined })}
-            placeholder="e.g. 45"
-            min={0}
-            max={100}
-          />
-        </FieldGroup>
-
-        <FieldGroup
-          label="2C: Direct Booking Rate (%)"
-          hint="Percentage of bookings received directly (not via OTAs)."
-        >
-          <NumberInput
-            value={data.p2DirectBookingRate}
-            onChange={(v) => updateData({ p2DirectBookingRate: v ?? undefined })}
-            placeholder="e.g. 55"
-            min={0}
-            max={100}
-          />
-        </FieldGroup>
-
-        <FieldGroup
-          label="2C: Local Ownership (%)"
-          hint="Percentage of equity held by local/regional owners."
-        >
-          <NumberInput
-            value={data.p2LocalOwnershipPct}
-            onChange={(v) => updateData({ p2LocalOwnershipPct: v ?? undefined })}
-            placeholder="e.g. 80"
-            min={0}
-            max={100}
-          />
-        </FieldGroup>
-
-        <FieldGroup
-          label="2D: Community Integration Score (0–4)"
-          hint="0 = none, 1 = occasional, 2 = regular, 3 = structured programme, 4 = co-governance."
-        >
-          <div className="flex gap-2">
-            {[0, 1, 2, 3, 4].map((v) => (
-              <button
-                key={v}
-                onClick={() => updateData({ p2CommunityScore: v })}
-                className={`flex-1 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                  data.p2CommunityScore === v
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                    : "border-border hover:border-emerald-300"
-                }`}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
+        <FieldGroup label="Scope 3 Transport Emissions (kg CO₂e)" hint="Guest transport arranged by operator. Car km × 0.17 · Minibus km × 0.08 · EV km × 0.05">
+          <NumberInput value={data.scope3TransportKgCo2e} onChange={(v) => updateField({ scope3TransportKgCo2e: v })} placeholder="e.g. 1200" min={0} />
         </FieldGroup>
       </StepShell>
     );
   }
 
-  // Step 4: Pillar 3 — Regenerative Contribution
-  if (step === 4) {
+  if (stepId === "p2-employment") {
     return (
-      <StepShell
-        title="Pillar 3: Regenerative Contribution"
-        subtitle="Your contribution to ecological and cultural regeneration through institutional partnerships."
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
-        saving={saving}
-      >
-        <FieldGroup label="3A: Programme Status">
+      <StepShell {...shell} title="Employment" subtitle="Staff composition, local hiring, contracts, and wages.">
+        {data.soloOperator ? (
+          <div className="rounded-xl border bg-emerald-50 p-5">
+            <p className="text-sm text-emerald-800">Solo operator — employment metrics default to 100%.</p>
+          </div>
+        ) : (
+          <>
+            <FieldGroup label="Total Staff (FTE)" hint="Full-time equivalents. Part-time: 20hr/week = 0.5 FTE.">
+              <NumberInput value={data.totalFte} onChange={(v) => updateField({ totalFte: v })} placeholder="e.g. 8" min={0} step={0.5} />
+            </FieldGroup>
+            <FieldGroup label="Local Staff (FTE)" hint="Permanent residence within 30 km of property.">
+              <NumberInput value={data.localFte} onChange={(v) => updateField({ localFte: v })} placeholder="e.g. 6" min={0} step={0.5} />
+            </FieldGroup>
+            <FieldGroup label="Permanent Contract %" hint="Percentage of total staff on permanent or open-ended contracts.">
+              <NumberInput value={data.permanentContractPct} onChange={(v) => updateField({ permanentContractPct: v })} placeholder="e.g. 75" min={0} max={100} />
+            </FieldGroup>
+            <FieldGroup label="Average Monthly Wage (gross)" hint="Non-managerial staff, in local currency.">
+              <NumberInput value={data.averageMonthlyWage} onChange={(v) => updateField({ averageMonthlyWage: v })} placeholder="e.g. 1100" min={0} />
+            </FieldGroup>
+            <FieldGroup label="Local Minimum Wage" hint="Statutory minimum monthly wage (e.g. Portugal 2026: €870).">
+              <NumberInput value={data.minimumWage} onChange={(v) => updateField({ minimumWage: v })} placeholder="e.g. 870" min={0} />
+            </FieldGroup>
+          </>
+        )}
+      </StepShell>
+    );
+  }
+
+  if (stepId === "p2-procurement") {
+    return (
+      <StepShell {...shell} title="Procurement" subtitle="Local sourcing for food & beverage and non-F&B operations.">
+        <FieldGroup label="Do you have F&B operations?">
+          <div className="flex gap-4">
+            <button onClick={() => updateField({ tourNoFbSpend: false })} className={`flex-1 rounded-xl border-2 p-3 text-sm transition-all ${data.tourNoFbSpend === false ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"}`}>Yes</button>
+            <button onClick={() => updateField({ tourNoFbSpend: true })} className={`flex-1 rounded-xl border-2 p-3 text-sm transition-all ${data.tourNoFbSpend === true ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"}`}>No F&B</button>
+          </div>
+        </FieldGroup>
+        {!data.tourNoFbSpend && (
+          <>
+            <FieldGroup label="Total F&B Spend (EUR)" hint="12-month total from accounting records.">
+              <NumberInput value={data.totalFbSpend} onChange={(v) => updateField({ totalFbSpend: v })} placeholder="e.g. 30000" min={0} />
+            </FieldGroup>
+            <FieldGroup label="Local F&B Spend (EUR)" hint="Suppliers within 100 km.">
+              <NumberInput value={data.localFbSpend} onChange={(v) => updateField({ localFbSpend: v })} placeholder="e.g. 18000" min={0} />
+            </FieldGroup>
+          </>
+        )}
+        <FieldGroup label="Do you have non-F&B procurement?">
+          <div className="flex gap-4">
+            <button onClick={() => updateField({ tourNoNonFbSpend: false })} className={`flex-1 rounded-xl border-2 p-3 text-sm transition-all ${data.tourNoNonFbSpend === false ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"}`}>Yes</button>
+            <button onClick={() => updateField({ tourNoNonFbSpend: true })} className={`flex-1 rounded-xl border-2 p-3 text-sm transition-all ${data.tourNoNonFbSpend === true ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"}`}>No non-F&B procurement</button>
+          </div>
+        </FieldGroup>
+        {!data.tourNoNonFbSpend && (
+          <>
+            <FieldGroup label="Total Non-F&B Spend (EUR)" hint="Cleaning, toiletries, maintenance, linens — 12 months.">
+              <NumberInput value={data.totalNonFbSpend} onChange={(v) => updateField({ totalNonFbSpend: v })} placeholder="e.g. 15000" min={0} />
+            </FieldGroup>
+            <FieldGroup label="Local Non-F&B Spend (EUR)" hint="Suppliers within 100 km.">
+              <NumberInput value={data.localNonFbSpend} onChange={(v) => updateField({ localNonFbSpend: v })} placeholder="e.g. 8000" min={0} />
+            </FieldGroup>
+          </>
+        )}
+      </StepShell>
+    );
+  }
+
+  if (stepId === "p2-revenue-community") {
+    return (
+      <StepShell {...shell} title="Revenue & Community" subtitle="Booking channels and community integration.">
+        <FieldGroup label="Direct Booking Rate (%)" hint="Own website, phone, email — no OTA intermediary.">
+          <NumberInput value={data.directBookingPct} onChange={(v) => updateField({ directBookingPct: v })} placeholder="e.g. 55" min={0} max={100} />
+        </FieldGroup>
+        <FieldGroup label="Community Integration Score (0–4)" hint="0 = none, 1 = minimal, 2 = present, 3 = active engagement, 4 = deep integration.">
+          <BandSelector values={[0, 1, 2, 3, 4]} selected={data.communityScore} onSelect={(v) => updateField({ communityScore: v })} />
+        </FieldGroup>
+      </StepShell>
+    );
+  }
+
+  if (stepId === "p3-status") {
+    return (
+      <StepShell {...shell} title="P3 Status" subtitle="Your current regenerative contribution programme status.">
+        <FieldGroup label="Programme Status">
           <div className="grid gap-2">
-            {[
+            {([
               { id: "A", label: "Active programme with verified institutional partner" },
               { id: "B", label: "Active programme, institutional verification in progress" },
               { id: "C", label: "Internal programme (no institutional partner yet)" },
               { id: "D", label: "Forward commitment — planning to activate a programme" },
-              { id: "E", label: "Not applicable for this operator type" },
-            ].map(({ id, label }) => (
+              { id: "E", label: "No programme currently" },
+            ] as const).map(({ id, label }) => (
               <button
                 key={id}
-                onClick={() => updateData({ p3Status: id as "A" | "B" | "C" | "D" | "E" })}
+                onClick={() => updateField({ p3Status: id })}
                 className={`w-full rounded-xl border-2 p-3 text-left text-sm transition-all ${
-                  data.p3Status === id
-                    ? "border-emerald-500 bg-emerald-50"
-                    : "border-border hover:border-emerald-300"
+                  data.p3Status === id ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-300"
                 }`}
               >
                 <span className="font-semibold">Status {id}</span> — {label}
@@ -1039,196 +859,152 @@ export function OperatorOnboardingClient() {
             ))}
           </div>
         </FieldGroup>
+      </StepShell>
+    );
+  }
 
-        {data.p3Status && !["D", "E"].includes(data.p3Status) && (
+  if (stepId === "p3-programme") {
+    return (
+      <StepShell {...shell} title="Programme Details" subtitle="Details of your regenerative contribution programme.">
+        <FieldGroup label="Contribution Category">
+          <div className="space-y-2">
+            {P3_CATEGORIES.map((cat) => (
+              <label key={cat.id} className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={data.p3ContributionCategories?.includes(cat.id) ?? false}
+                  onChange={(e) => {
+                    const current = data.p3ContributionCategories ?? [];
+                    updateField({
+                      p3ContributionCategories: e.target.checked
+                        ? [...current, cat.id]
+                        : current.filter((c) => c !== cat.id),
+                    });
+                  }}
+                  className="mt-0.5"
+                />
+                <div>
+                  <div className="text-sm font-medium">{cat.label}</div>
+                  <div className="text-xs text-muted-foreground">{cat.description}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+        </FieldGroup>
+        <FieldGroup label="Programme Description" hint="What specifically do you do? Max 300 words.">
+          <textarea
+            value={data.p3ProgrammeDescription ?? ""}
+            onChange={(e) => updateField({ p3ProgrammeDescription: e.target.value })}
+            className={inputCls + " min-h-[120px] resize-y"}
+            placeholder="Describe the activity, not the intent..."
+          />
+        </FieldGroup>
+        <FieldGroup label="Programme Duration">
+          <select value={data.p3ProgrammeDuration ?? ""} onChange={(e) => updateField({ p3ProgrammeDuration: e.target.value || undefined })} className={inputCls}>
+            <option value="">— Select —</option>
+            <option value="<1">Less than 1 year</option>
+            <option value="1-3">1–3 years</option>
+            <option value=">3">More than 3 years</option>
+            <option value="starting">Starting now</option>
+          </select>
+        </FieldGroup>
+        <FieldGroup label="Geographic Scope">
+          <select value={data.p3GeographicScope ?? ""} onChange={(e) => updateField({ p3GeographicScope: e.target.value || undefined })} className={inputCls}>
+            <option value="">— Select —</option>
+            <option value="on-property">On-property only</option>
+            <option value="local">Immediate local area (&lt; 5 km)</option>
+            <option value="destination">Destination-wide</option>
+            <option value="cross-destination">Cross-destination</option>
+          </select>
+        </FieldGroup>
+        <FieldGroup label="Annual Budget (EUR)" hint="Amount or % of revenue committed.">
+          <NumberInput value={data.p3AnnualBudget} onChange={(v) => updateField({ p3AnnualBudget: v })} placeholder="e.g. 5000" min={0} />
+        </FieldGroup>
+        <FieldGroup label="Guests Participating Per Year">
+          <NumberInput value={data.p3GuestsParticipating} onChange={(v) => updateField({ p3GuestsParticipating: v })} placeholder="e.g. 200" min={0} />
+        </FieldGroup>
+        <FieldGroup label="Individual or Collective?">
+          <div className="flex gap-4">
+            <button onClick={() => updateField({ p3IsCollective: false })} className={`flex-1 rounded-xl border-2 p-3 text-sm transition-all ${data.p3IsCollective === false ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"}`}>Individual</button>
+            <button onClick={() => updateField({ p3IsCollective: true })} className={`flex-1 rounded-xl border-2 p-3 text-sm transition-all ${data.p3IsCollective === true ? "border-emerald-500 bg-emerald-50 font-medium" : "border-border hover:border-emerald-300"}`}>Collective</button>
+          </div>
+        </FieldGroup>
+        {data.p3IsCollective && (
           <>
-            <FieldGroup label="3A: Programme Category">
-              <div className="space-y-2">
-                {P3_CATEGORIES.map((cat) => (
-                  <label key={cat.id} className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors">
-                    <input
-                      type="radio"
-                      name="p3category"
-                      value={cat.id}
-                      checked={data.p3ContributionCategories?.includes(cat.id)}
-                      onChange={() => {
-                        const selected = [cat.id];
-                        updateData({
-                          p3ContributionCategories: selected,
-                          p3CategoryScope: computeCategoryScope(selected),
-                        });
-                      }}
-                      className="mt-0.5"
-                    />
-                    <div>
-                      <div className="text-sm font-medium">{cat.label}</div>
-                      <div className="text-xs text-muted-foreground">{cat.description}</div>
-                    </div>
-                  </label>
-                ))}
-              </div>
+            <FieldGroup label="Collective Size">
+              <select value={data.p3CollectiveSize ?? ""} onChange={(e) => updateField({ p3CollectiveSize: e.target.value || undefined })} className={inputCls}>
+                <option value="">— Select —</option>
+                <option value="2-4">2–4 operators</option>
+                <option value="5+">5+ operators / destination-wide</option>
+              </select>
             </FieldGroup>
-
-            <FieldGroup
-              label="3B: Institutional Traceability Score"
-              hint="Based on verification tier of your institutional partner."
-            >
-              <div className="flex gap-2 flex-wrap">
-                {[0, 25, 50, 75, 100].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => updateData({ p3Traceability: v })}
-                    className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                      data.p3Traceability === v
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                        : "border-border hover:border-emerald-300"
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
+            <FieldGroup label="Total Collective Budget (EUR)">
+              <NumberInput value={data.p3CollectiveTotalBudget} onChange={(v) => updateField({ p3CollectiveTotalBudget: v })} placeholder="e.g. 12000" min={0} />
             </FieldGroup>
-
-            <FieldGroup
-              label="3C: Additionality Score"
-              hint="Evidence that your contribution exceeds business-as-usual."
-            >
-              <div className="flex gap-2 flex-wrap">
-                {[0, 25, 50, 75, 100].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => updateData({ p3Additionality: v })}
-                    className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                      data.p3Additionality === v
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                        : "border-border hover:border-emerald-300"
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            </FieldGroup>
-
-            <FieldGroup
-              label="3D: Continuity & Commitment Score"
-              hint="Duration and contractual commitment of the programme."
-            >
-              <div className="flex gap-2 flex-wrap">
-                {[0, 25, 50, 75, 100].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => updateData({ p3Continuity: v })}
-                    className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                      data.p3Continuity === v
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                        : "border-border hover:border-emerald-300"
-                    }`}
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
+            <FieldGroup label="Your Share (%)">
+              <NumberInput value={data.p3CollectiveSharePct} onChange={(v) => updateField({ p3CollectiveSharePct: v })} placeholder="e.g. 25" min={0} max={100} />
             </FieldGroup>
           </>
         )}
-
-        {data.p3Status === "D" && (
-          <div className="rounded-xl border bg-amber-50 p-4 space-y-2">
-            <p className="text-sm font-semibold text-amber-800">Forward Commitment</p>
-            <p className="text-xs text-amber-700">
-              You have selected Status D. A Forward Commitment Record will be created.
-              P3 score will be 0 for this cycle. Your GPS will be based on P1 and P2 only.
-            </p>
-          </div>
-        )}
+        <FieldGroup label="Administering Institution" hint="Name of the institution that validates your contribution.">
+          <input type="text" value={data.p3InstitutionName ?? ""} onChange={(e) => updateField({ p3InstitutionName: e.target.value })} className={inputCls} placeholder="e.g. University of Madeira" />
+        </FieldGroup>
       </StepShell>
     );
   }
 
-  // Step 5: Evidence
-  if (step === 5) {
+  if (stepId === "p3-evidence-quality") {
     return (
-      <StepShell
-        title="Evidence & Documentation"
-        subtitle="Evidence is verified separately. Submit references now and upload files in the Evidence section."
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
-        saving={saving}
-      >
-        <div className="rounded-xl border bg-muted/30 p-5 space-y-3">
-          <p className="text-sm font-medium">Evidence Tiers</p>
-          <div className="space-y-2 text-xs text-muted-foreground">
-            {[
-              { tier: "T1", desc: "Required on submission — utility bills, invoices, certifications" },
-              { tier: "T2", desc: "Required within 60 days — secondary verification documents" },
-              { tier: "T3", desc: "Required for P3 score — institutional contribution records" },
-              { tier: "Proxy", desc: "Accepted for small operators — proxy calculations with correction factor" },
-            ].map((t) => (
-              <div key={t.tier} className="flex gap-2">
-                <span className="font-mono font-semibold w-8 shrink-0">{t.tier}</span>
-                <span>{t.desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          You can upload evidence files in the{" "}
-          <Link href="/operator/evidence" className="text-emerald-600 underline">
-            Evidence Management
-          </Link>{" "}
-          section after submitting your assessment.
-        </p>
+      <StepShell {...shell} title="Evidence Quality" subtitle="Institutional traceability, additionality, and continuity of your programme.">
+        <FieldGroup label="Institutional Traceability (0–100)" hint="0 = self-reported, 25 = NGO informal, 50 = NGO formal, 75 = academic institution, 100 = multiple institutions.">
+          <BandSelector values={[0, 25, 50, 75, 100]} selected={data.p3Traceability} onSelect={(v) => updateField({ p3Traceability: v })} />
+        </FieldGroup>
+        <FieldGroup label="Additionality (0–100)" hint="0 = no additionality, 25 = low, 50 = moderate, 75 = high, 100 = full additionality.">
+          <BandSelector values={[0, 25, 50, 75, 100]} selected={data.p3Additionality} onSelect={(v) => updateField({ p3Additionality: v })} />
+        </FieldGroup>
+        <FieldGroup label="Continuity & Commitment (0–100)" hint="0 = ad hoc, 25 = initial, 50 = developing, 75 = established, 100 = long-term embedded.">
+          <BandSelector values={[0, 25, 50, 75, 100]} selected={data.p3Continuity} onSelect={(v) => updateField({ p3Continuity: v })} />
+        </FieldGroup>
       </StepShell>
     );
   }
 
-  // Step 6: Delta (Cycle 2+ only — skip on Cycle 1)
-  if (step === 6) {
-    const cycleCount = onboardingData?.operator?.assessmentCycleCount ?? 0;
+  if (stepId === "p3-forward-commitment") {
     return (
-      <StepShell
-        title="Section 4: Directional Change"
-        subtitle={
-          cycleCount === 0
-            ? "This is your baseline assessment. DPS will be computed from Cycle 2 onwards."
-            : "Compare your current performance to the prior cycle."
-        }
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
-        saving={saving}
-      >
-        {cycleCount === 0 ? (
-          <div className="rounded-xl border bg-muted/30 p-5">
-            <p className="text-sm text-muted-foreground">
-              As your first assessment (Cycle 1), your DPS = 0 by definition.
-              Baseline scores will be locked from this submission to enable
-              future directional comparison.
-            </p>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Delta computation will be performed automatically from your locked
-            baseline scores. The TRT Scoring Engine computes DPS-1, DPS-2, and
-            DPS-3 from the submitted data.
+      <StepShell {...shell} title="Forward Commitment" subtitle="Status D — declare your commitment to activating a regenerative contribution programme.">
+        <div className="rounded-xl border bg-amber-50 p-4 space-y-2">
+          <p className="text-sm font-semibold text-amber-800">Forward Commitment Record</p>
+          <p className="text-xs text-amber-700">
+            P3 score will be 0 for this cycle. Your GPS will be computed from P1 and P2 only, renormalised to 0–100.
           </p>
-        )}
+        </div>
+        <FieldGroup label="Preferred Contribution Category" hint="Which category fits your territory and operation?">
+          <select value={data.forwardCommitmentPreferredCategory ?? ""} onChange={(e) => updateField({ forwardCommitmentPreferredCategory: e.target.value || undefined })} className={inputCls}>
+            <option value="">— Select —</option>
+            {P3_CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>{c.label}</option>
+            ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup label="Territory Context" hint="Describe the ecological, cultural, or scientific need in your territory. Max 200 words.">
+          <textarea
+            value={data.forwardCommitmentTerritoryContext ?? ""}
+            onChange={(e) => updateField({ forwardCommitmentTerritoryContext: e.target.value })}
+            className={inputCls + " min-h-[100px] resize-y"}
+            placeholder="Why does this category fit your context?"
+          />
+        </FieldGroup>
+        <FieldGroup label="Target Activation Cycle" hint="Which assessment cycle do you commit to having a partner active?">
+          <NumberInput value={data.forwardCommitmentTargetCycle} onChange={(v) => updateField({ forwardCommitmentTargetCycle: v })} placeholder="e.g. 2" min={2} />
+        </FieldGroup>
+        <FieldGroup label="Authorised Signatory">
+          <input type="text" value={data.forwardCommitmentSignatory ?? ""} onChange={(e) => updateField({ forwardCommitmentSignatory: e.target.value })} className={inputCls} placeholder="Full name and date" />
+        </FieldGroup>
       </StepShell>
     );
   }
 
-  // Step 7: Link Evidence
-  // Shows the operator's uploaded evidence files and lets them mark which
-  // ones to include in this assessment. The selection populates evidenceRefs[]
-  // in the Zustand store for inclusion in the POST /api/v1/score payload.
-  if (step === 7) {
+  if (stepId === "evidence-upload") {
     const uploadedEvidence: Array<{
       id: string;
       indicatorId: string;
@@ -1238,61 +1014,38 @@ export function OperatorOnboardingClient() {
       verificationState: string;
     }> = evidenceData?.evidence ?? [];
 
-    const selectedChecksums = new Set(
-      (data.evidenceRefs ?? []).map((r) => r.checksum)
-    );
+    const selectedChecksums = new Set((data.evidenceRefs ?? []).map((r) => r.checksum));
 
     const toggleEvidence = (ev: (typeof uploadedEvidence)[0]) => {
       const current = data.evidenceRefs ?? [];
       if (selectedChecksums.has(ev.checksum)) {
-        updateData({ evidenceRefs: current.filter((r) => r.checksum !== ev.checksum) });
+        updateField({ evidenceRefs: current.filter((r) => r.checksum !== ev.checksum) });
       } else {
-        updateData({
+        updateField({
           evidenceRefs: [
             ...current,
-            {
-              indicatorId: ev.indicatorId,
-              tier: ev.tier,
-              checksum: ev.checksum,
-              verificationState: "pending" as const,
-            },
+            { indicatorId: ev.indicatorId, tier: ev.tier, checksum: ev.checksum, verificationState: "pending" as const },
           ],
         });
       }
     };
 
     return (
-      <StepShell
-        title="Link Evidence"
-        subtitle="Select which uploaded files to include in this assessment. Evidence is verified separately after submission."
-        progress={progress}
-        step={step}
-        onBack={goBack}
-        onNext={goNext}
-        onSave={saveProgress}
-        saving={saving}
-      >
+      <StepShell {...shell} title="Evidence Upload" subtitle="Link uploaded evidence files to this assessment.">
         {uploadedEvidence.length === 0 ? (
           <div className="rounded-xl border bg-muted/30 p-5 space-y-3">
             <p className="text-sm font-medium">No evidence files uploaded yet</p>
             <p className="text-xs text-muted-foreground">
-              You can upload evidence in the{" "}
-              <Link href="/operator/evidence" className="text-emerald-600 underline" target="_blank">
-                Evidence Management
-              </Link>{" "}
-              section, then return here to link files to this assessment.
+              Upload evidence in the{" "}
+              <Link href="/operator/evidence" className="text-emerald-600 underline" target="_blank">Evidence Management</Link>{" "}
+              section, then return here to link files.
             </p>
             <p className="text-xs text-muted-foreground">
-              You may submit your assessment without evidence and upload files afterward.
-              Note: T3 evidence must be verified before your P3 score is published.
+              You may submit without evidence and upload afterward. T3 evidence must be verified before P3 score is published.
             </p>
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">
-              Select the files that support your responses in this assessment.
-              You can include or exclude files below — unselected files remain in your evidence library.
-            </p>
             {uploadedEvidence.map((ev) => {
               const selected = selectedChecksums.has(ev.checksum);
               const label = INDICATOR_LABELS[ev.indicatorId] ?? ev.indicatorId;
@@ -1301,9 +1054,7 @@ export function OperatorOnboardingClient() {
                   key={ev.id}
                   onClick={() => toggleEvidence(ev)}
                   className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
-                    selected
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-border hover:border-emerald-300"
+                    selected ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-300"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -1313,20 +1064,14 @@ export function OperatorOnboardingClient() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={`text-xs font-mono px-1.5 py-0.5 rounded border ${
-                        ev.tier === "T1" ? "border-emerald-300 text-emerald-700 bg-emerald-50" :
-                        ev.tier === "T2" ? "border-amber-300 text-amber-700 bg-amber-50" :
-                        ev.tier === "T3" ? "border-blue-300 text-blue-700 bg-blue-50" :
-                        "border-border text-muted-foreground"
-                      }`}>
-                        {ev.tier}
-                      </span>
-                      <span className={`text-xs px-1.5 py-0.5 rounded border ${
-                        ev.verificationState === "verified"
-                          ? "border-emerald-300 text-emerald-700"
+                        ev.tier === "T1" ? "border-emerald-300 text-emerald-700 bg-emerald-50"
+                          : ev.tier === "T2" ? "border-amber-300 text-amber-700 bg-amber-50"
+                          : ev.tier === "T3" ? "border-blue-300 text-blue-700 bg-blue-50"
                           : "border-border text-muted-foreground"
-                      }`}>
-                        {ev.verificationState}
-                      </span>
+                      }`}>{ev.tier}</span>
+                      <span className={`text-xs px-1.5 py-0.5 rounded border ${
+                        ev.verificationState === "verified" ? "border-emerald-300 text-emerald-700" : "border-border text-muted-foreground"
+                      }`}>{ev.verificationState}</span>
                     </div>
                   </div>
                 </button>
@@ -1341,103 +1086,329 @@ export function OperatorOnboardingClient() {
     );
   }
 
-  // Step 8: Review & Submit
-  const hasP1Data = !!(
-    data.p1EnergyIntensity != null ||
-    data.p1RenewablePct != null ||
-    data.p1WasteDiversionPct != null ||
-    data.p1CarbonIntensity != null
-  );
-  const hasP2Data = !!(
-    data.p2LocalEmploymentRate != null ||
-    data.p2LocalFbRate != null ||
-    data.p2DirectBookingRate != null
-  );
-  const hasP3Status = !!data.p3Status;
-  const revenueSplitValid =
-    data.operatorType !== "C" ||
-    (data.revenueSplitAccommodationPct != null &&
-      data.revenueSplitExperiencePct != null &&
-      Math.round(
-        (data.revenueSplitAccommodationPct ?? 0) +
-        (data.revenueSplitExperiencePct ?? 0)
-      ) === 100);
+  if (stepId === "delta") {
+    const { data: priorScoreData, isLoading: priorLoading } = useQuery({
+      queryKey: ["operator-prior-scores"],
+      queryFn: () =>
+        fetch("/api/v1/operator/prior-scores").then((r) => r.json()),
+    });
 
-  const canSubmit = !!(
-    data.operatorType &&
-    data.legalName &&
-    data.country &&
-    hasP1Data &&
-    hasP2Data &&
-    hasP3Status &&
-    revenueSplitValid
-  );
+    const priorScore: {
+      gpsScore: number;
+      pillar1Score: number;
+      pillar2Score: number;
+      pillar3Score: number;
+      methodologyVersion: string;
+      createdAt: string;
+    } | null = priorScoreData?.priorScore ?? null;
 
-  return (
-    <StepShell
-      title="Review & Submit"
-      subtitle="Review your assessment before submitting. Scores will be computed by the TRT Scoring Engine."
-      progress={progress}
-      step={step}
-      onBack={goBack}
-      onNext={goNext}
-      onSave={saveProgress}
-      saving={submitting}
-      isLast
-      canSubmit={canSubmit}
-      onSubmit={handleSubmit}
-    >
-      <div className="space-y-4">
-        <div className="rounded-xl border bg-card p-5 space-y-3">
-          <p className="text-sm font-semibold">Operator Profile</p>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="text-muted-foreground">Type</div>
-            <div>{OPERATOR_TYPES[data.operatorType ?? "A"]?.label ?? "—"}</div>
-            <div className="text-muted-foreground">Name</div>
-            <div>{data.tradingName || data.legalName || "—"}</div>
-            <div className="text-muted-foreground">Location</div>
-            <div>{data.destinationRegion ? `${data.destinationRegion}, ${data.country}` : "—"}</div>
+    return (
+      <StepShell
+        {...shell}
+        title="Directional Change"
+        subtitle="Compare your current performance to the prior assessment cycle."
+      >
+        {priorLoading ? (
+          <div className="rounded-xl border bg-muted/30 p-5">
+            <p className="text-sm text-muted-foreground">Loading prior scores...</p>
           </div>
-        </div>
+        ) : !priorScore ? (
+          <div className="rounded-xl border bg-muted/30 p-5">
+            <p className="text-sm text-muted-foreground">
+              This is your first assessment cycle. Delta comparison will be available next cycle.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-xl border bg-card p-5 space-y-3">
+              <div className="flex items-baseline justify-between">
+                <p className="text-sm font-semibold">Previous Assessment</p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(priorScore.createdAt).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div className="text-muted-foreground">Previous GPS</div>
+                <div className="font-semibold tabular-nums">{Math.round(priorScore.gpsScore)}</div>
 
-        <div className="rounded-xl border bg-card p-5 space-y-2">
-          <p className="text-sm font-semibold">Assessment Readiness</p>
-          <div className="space-y-1.5 text-sm">
-            {[
-              { label: "Operator profile", ok: !!(data.operatorType && data.legalName && data.country) },
-              { label: "Pillar 1 — at least one indicator", ok: hasP1Data },
-              { label: "Pillar 2 — at least one indicator", ok: hasP2Data },
-              { label: "Pillar 3 — status selected", ok: hasP3Status },
-              { label: "Revenue split sums to 100%", ok: revenueSplitValid, skip: data.operatorType !== "C" },
-              { label: "Evidence linked", ok: (data.evidenceRefs?.length ?? 0) > 0, warn: true },
-            ]
-              .filter((c) => !c.skip)
-              .map((c) => (
-                <div key={c.label} className="flex items-center gap-2">
-                  <span className={`text-base ${c.ok ? "text-emerald-600" : c.warn ? "text-amber-500" : "text-destructive"}`}>
-                    {c.ok ? "✓" : c.warn ? "⚠" : "✗"}
-                  </span>
-                  <span className={c.ok ? "" : c.warn ? "text-amber-700" : "text-destructive"}>
-                    {c.label}
-                  </span>
+                <div className="text-muted-foreground">Previous P1 — Footprint</div>
+                <div className="tabular-nums">{Math.round(priorScore.pillar1Score)}</div>
+
+                <div className="text-muted-foreground">Previous P2 — Integration</div>
+                <div className="tabular-nums">{Math.round(priorScore.pillar2Score)}</div>
+
+                <div className="text-muted-foreground">Previous P3 — Regenerative</div>
+                <div className="tabular-nums">{Math.round(priorScore.pillar3Score)}</div>
+
+                <div className="text-muted-foreground">Methodology</div>
+                <div className="font-mono text-xs">{priorScore.methodologyVersion}</div>
+              </div>
+            </div>
+
+            <FieldGroup
+              label="Explain major changes since last cycle"
+              hint="Optional. Describe significant operational, structural, or programme changes that affected your scores."
+            >
+              <textarea
+                value={data.deltaExplanation ?? ""}
+                onChange={(e) =>
+                  updateField({ deltaExplanation: e.target.value || undefined })
+                }
+                className={inputCls + " min-h-[120px] resize-y"}
+                placeholder="e.g. Installed 40 kW solar array, reducing energy intensity by ~30%. Added two local F&B suppliers..."
+              />
+            </FieldGroup>
+
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <p className="text-xs text-muted-foreground">
+                Delta Performance Score (DPS) is computed automatically by the TRT Scoring Engine from your locked Cycle 1 baseline.
+              </p>
+            </div>
+          </div>
+        )}
+      </StepShell>
+    );
+  }
+
+  if (stepId === "gps-preview") {
+    return (
+      <StepShell {...shell} title="GPS Preview" subtitle="Estimated Green Passport Score based on your current data.">
+        {previewLoading || !preview ? (
+          <div className="rounded-xl border bg-muted/30 p-5">
+            <p className="text-sm text-muted-foreground">Loading preview scores...</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="rounded-xl border bg-card p-6 text-center space-y-2">
+              <p className="text-4xl font-bold tabular-nums">{Math.round(preview.gpsScore)}</p>
+              <p className="text-sm text-muted-foreground capitalize">{preview.gpsBand?.replace(/_/g, " ") ?? "—"}</p>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {([
+                { label: "P1 — Footprint", score: preview.pillar1Score, weight: "40%" },
+                { label: "P2 — Integration", score: preview.pillar2Score, weight: "30%" },
+                { label: "P3 — Regenerative", score: preview.pillar3Score, weight: "30%" },
+              ] as const).map((p) => (
+                <div key={p.label} className="rounded-xl border bg-card p-4 text-center space-y-1">
+                  <p className="text-2xl font-bold tabular-nums">{Math.round(p.score)}</p>
+                  <p className="text-xs text-muted-foreground">{p.label}</p>
+                  <p className="text-xs text-muted-foreground">({p.weight})</p>
                 </div>
               ))}
+            </div>
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <p className="text-xs text-muted-foreground">
+                Preview scores are estimates. Final GPS is computed by the TRT Scoring Engine after submission and evidence verification. Methodology: {preview.methodologyVersion}.
+              </p>
+            </div>
           </div>
-        </div>
-
-        <div className="rounded-xl border bg-muted/30 p-4">
-          <p className="text-xs text-muted-foreground">
-            Your assessment data will be submitted to the TRT Scoring Engine.
-            Scores are computed deterministically and an immutable ScoreSnapshot
-            will be created. The engine uses the current MethodologyBundle v1.0.0.
-          </p>
-        </div>
-
-        {!canSubmit && (
-          <p className="text-sm text-amber-600">
-            Please complete the required steps before submitting. See readiness checklist above.
-          </p>
         )}
+      </StepShell>
+    );
+  }
+
+  if (stepId === "review-submit") {
+    const hasP1 = data.totalElectricityKwh != null || data.totalGasKwh != null;
+    const hasP2 = data.totalFte != null || data.soloOperator === true;
+    const hasP3 = !!data.p3Status;
+    const splitValid =
+      data.operatorType !== "C" ||
+      (data.revenueSplitAccommodationPct != null &&
+        data.revenueSplitExperiencePct != null &&
+        Math.abs(
+          (data.revenueSplitAccommodationPct ?? 0) +
+            (data.revenueSplitExperiencePct ?? 0) -
+            100
+        ) < 1);
+    const dataComplete = !!(
+      data.operatorType &&
+      data.legalName &&
+      data.country &&
+      hasP1 &&
+      hasP2 &&
+      hasP3 &&
+      splitValid
+    );
+
+    const [declarationChecked, setDeclarationChecked] = useState(false);
+    const canSubmit = dataComplete && declarationChecked;
+
+    const evidenceCount = data.evidenceRefs?.length ?? 0;
+
+    const p3StatusLabel: Record<string, string> = {
+      A: "Status A — Active, verified institutional partner",
+      B: "Status B — Active, verification in progress",
+      C: "Status C — Internal programme",
+      D: "Status D — Forward commitment",
+      E: "Status E — No programme",
+    };
+
+    return (
+      <StepShell
+        {...shell}
+        title="Review & Submit"
+        subtitle="Review your assessment before submitting."
+        isLast
+        canSubmit={canSubmit}
+        onSubmit={handleSubmit}
+      >
+        <div className="space-y-4">
+
+          {/* ── Operator summary ── */}
+          <div className="rounded-xl border bg-card p-5 space-y-3">
+            <p className="text-sm font-semibold">Operator Summary</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div className="text-muted-foreground">Type</div>
+              <div>{OPERATOR_TYPES[data.operatorType ?? "A"]?.label ?? "—"}</div>
+
+              <div className="text-muted-foreground">Name</div>
+              <div>{data.tradingName || data.legalName || "—"}</div>
+
+              <div className="text-muted-foreground">Country</div>
+              <div>{data.country ?? "—"}</div>
+
+              <div className="text-muted-foreground">Region</div>
+              <div>{data.destinationRegion ?? "—"}</div>
+
+              {data.operatorType !== "B" && data.guestNights != null && (
+                <>
+                  <div className="text-muted-foreground">Guest-nights</div>
+                  <div>{data.guestNights.toLocaleString()}</div>
+                </>
+              )}
+
+              {data.operatorType !== "A" && data.visitorDays != null && (
+                <>
+                  <div className="text-muted-foreground">Visitor-days</div>
+                  <div>{data.visitorDays.toLocaleString()}</div>
+                </>
+              )}
+
+              <div className="text-muted-foreground">P3 Status</div>
+              <div>{data.p3Status ? p3StatusLabel[data.p3Status] ?? data.p3Status : "—"}</div>
+
+              <div className="text-muted-foreground">Evidence linked</div>
+              <div>{evidenceCount > 0 ? `${evidenceCount} file${evidenceCount !== 1 ? "s" : ""}` : "None"}</div>
+            </div>
+          </div>
+
+          {/* ── GPS preview ── */}
+          {preview && (
+            <div className="rounded-xl border bg-card p-5 space-y-3">
+              <p className="text-sm font-semibold">Estimated GPS Score</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold tabular-nums">{Math.round(preview.gpsScore)}</span>
+                <span className="text-sm text-muted-foreground capitalize">{preview.gpsBand?.replace(/_/g, " ")}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center text-sm">
+                {([
+                  { label: "P1 Footprint", score: preview.pillar1Score },
+                  { label: "P2 Integration", score: preview.pillar2Score },
+                  { label: "P3 Regenerative", score: preview.pillar3Score },
+                ] as const).map((p) => (
+                  <div key={p.label} className="rounded-lg border bg-muted/30 p-2 space-y-0.5">
+                    <div className="text-lg font-semibold tabular-nums">{Math.round(p.score)}</div>
+                    <div className="text-xs text-muted-foreground">{p.label}</div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Estimate only. Final GPS is computed by the TRT Scoring Engine after submission and evidence verification.
+              </p>
+            </div>
+          )}
+
+          {/* ── Readiness checklist ── */}
+          <div className="rounded-xl border bg-card p-5 space-y-2">
+            <p className="text-sm font-semibold">Assessment Readiness</p>
+            <div className="space-y-1.5 text-sm">
+              {[
+                { label: "Operator profile complete", ok: !!(data.operatorType && data.legalName && data.country) },
+                { label: "Pillar 1 — energy data provided", ok: hasP1 },
+                { label: "Pillar 2 — employment data provided", ok: hasP2 },
+                { label: "Pillar 3 — status selected", ok: hasP3 },
+                { label: "Revenue split sums to 100%", ok: splitValid, skip: data.operatorType !== "C" },
+                { label: "Evidence linked", ok: evidenceCount > 0, warn: true },
+              ]
+                .filter((c) => !("skip" in c && c.skip))
+                .map((c) => (
+                  <div key={c.label} className="flex items-center gap-2">
+                    <span className={`text-base ${
+                      c.ok
+                        ? "text-emerald-600"
+                        : "warn" in c && c.warn
+                        ? "text-amber-500"
+                        : "text-destructive"
+                    }`}>
+                      {c.ok ? "✓" : "warn" in c && c.warn ? "⚠" : "✗"}
+                    </span>
+                    <span className={
+                      c.ok
+                        ? ""
+                        : "warn" in c && c.warn
+                        ? "text-amber-700"
+                        : "text-destructive"
+                    }>
+                      {c.label}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+
+          {/* ── Declaration ── */}
+          <div className={`rounded-xl border p-4 transition-colors ${
+            declarationChecked ? "border-emerald-400 bg-emerald-50" : "border-border bg-card"
+          }`}>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={declarationChecked}
+                onChange={(e) => setDeclarationChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-600"
+              />
+              <span className="text-sm leading-relaxed">
+                I confirm that the information submitted is accurate and verifiable, and I understand that
+                publication depends on evidence verification.
+              </span>
+            </label>
+          </div>
+
+          {/* ── Submission notes ── */}
+          <div className="rounded-xl border bg-muted/30 p-4">
+            <p className="text-xs text-muted-foreground">
+              Your raw assessment data will be submitted to the TRT Scoring Engine.
+              P1 intensities and P2 rates are derived server-side. An immutable ScoreSnapshot will be created with{" "}
+              <span className="font-medium">isPublished = false</span> pending T1 evidence verification.
+            </p>
+          </div>
+
+          {/* ── Blocking message ── */}
+          {!dataComplete && (
+            <p className="text-sm text-amber-600">
+              Please complete the required steps before submitting.
+            </p>
+          )}
+          {dataComplete && !declarationChecked && (
+            <p className="text-sm text-amber-600">
+              Please confirm the declaration above to enable submission.
+            </p>
+          )}
+
+        </div>
+      </StepShell>
+    );
+  }
+
+  // Fallback for unknown step
+  return (
+    <StepShell {...shell} title={currentStep?.label ?? "Unknown Step"} subtitle="This step is not yet implemented.">
+      <div className="rounded-xl border bg-muted/30 p-5">
+        <p className="text-sm text-muted-foreground">Step &quot;{stepId}&quot; has no UI implementation yet.</p>
       </div>
     </StepShell>
   );

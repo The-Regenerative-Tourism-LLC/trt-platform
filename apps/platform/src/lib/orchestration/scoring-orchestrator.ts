@@ -33,8 +33,12 @@ import { createAssessmentSnapshot } from "../db/repositories/assessment.repo";
 import {
   createScoreSnapshot,
   findCycle1ScoreByOperator,
+  findLatestScoreByOperator,
 } from "../db/repositories/score.repo";
-import { findVerifiedT3Evidence } from "../db/repositories/evidence.repo";
+import {
+  createEvidenceRef,
+  findVerifiedT3Evidence,
+} from "../db/repositories/evidence.repo";
 import { incrementAssessmentCycle } from "../db/repositories/operator.repo";
 import { createForwardCommitmentRecord } from "../db/repositories/forward-commitment.repo";
 import { logAuditEvent } from "../audit/logger";
@@ -98,16 +102,70 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
   }
 
   // ── Step 1: Build the immutable AssessmentSnapshot ─────────────────────
-  // For Cycle 2+, delta.baselineScores will be overwritten from DB below.
+  // delta is always null in the hash — full DeltaBlock is assembled from DB below.
   const assessmentSnapshot = buildAssessmentSnapshot(input.snapshotInput, createdAt);
 
-  // ── Step 2: Persist the AssessmentSnapshot ─────────────────────────────
+  // ── Step 2: For Cycle 2+, lock baseline and prior scores from DB ────────
+  // SECURITY: priorCycle, baselineScores, and priorScores are NEVER trusted from the client.
+  // Both are loaded exclusively from persisted ScoreSnapshot records.
+  let lockedDelta: ReturnType<typeof buildDeltaBlock> | null = null;
+
+  if (assessmentSnapshot.assessmentCycle > 1) {
+    const [cycle1Score, latestScore] = await Promise.all([
+      findCycle1ScoreByOperator(input.operatorId),
+      findLatestScoreByOperator(input.operatorId),
+    ]);
+
+    if (!cycle1Score) {
+      throw new Error(
+        `Cannot score Cycle ${assessmentSnapshot.assessmentCycle}: no Cycle 1 ScoreSnapshot found for operator ${input.operatorId}`
+      );
+    }
+
+    const trace = cycle1Score.computationTrace as Record<string, unknown> | null;
+    if (!trace) {
+      throw new Error(
+        "Cycle 1 ScoreSnapshot has no computationTrace — cannot lock baseline scores"
+      );
+    }
+
+    const baselineScores: Record<string, number> = {
+      ...(trace.p1SubScores as Record<string, number> ?? {}),
+      ...(trace.p2SubScores as Record<string, number> ?? {}),
+      p3: Number(cycle1Score.p3Score),
+    };
+
+    // Prior scores come from the most recent ScoreSnapshot, falling back to baseline
+    let priorScores = baselineScores;
+    if (latestScore) {
+      const latestTrace = latestScore.computationTrace as Record<string, unknown> | null;
+      if (latestTrace) {
+        priorScores = {
+          ...(latestTrace.p1SubScores as Record<string, number> ?? {}),
+          ...(latestTrace.p2SubScores as Record<string, number> ?? {}),
+          p3: Number(latestScore.p3Score),
+        };
+      }
+    }
+
+    lockedDelta = buildDeltaBlock({
+      priorCycle: assessmentSnapshot.assessmentCycle - 1,
+      baselineScores,
+      priorScores,
+    });
+  }
+
+  const lockedSnapshot = lockedDelta
+    ? { ...assessmentSnapshot, delta: lockedDelta }
+    : assessmentSnapshot;
+
+  // ── Step 3: Persist the AssessmentSnapshot (with server-locked delta) ───
   const persistedAssessment = await createAssessmentSnapshot({
     operator: { connect: { id: input.operatorId } },
     territory: { connect: { id: input.territoryId } },
     assessmentCycle: assessmentSnapshot.assessmentCycle,
     assessmentPeriodEnd: new Date(assessmentSnapshot.assessmentPeriodEnd),
-    operatorType: assessmentSnapshot.operatorType as any,
+    operatorType: assessmentSnapshot.operatorType as "A" | "B" | "C",
     guestNights: assessmentSnapshot.activityUnit.guestNights,
     visitorDays: assessmentSnapshot.activityUnit.visitorDays,
     revenueSplitAccommodationPct: assessmentSnapshot.revenueSplit?.accommodationPct,
@@ -132,54 +190,38 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     p2CommunityScore: assessmentSnapshot.pillar2.communityScore,
 
     // Pillar 3
-    p3Status: assessmentSnapshot.p3Status as any,
+    p3Status: assessmentSnapshot.p3Status as "A" | "B" | "C" | "D" | "E",
     p3CategoryScope: assessmentSnapshot.pillar3.categoryScope,
     p3Traceability: assessmentSnapshot.pillar3.traceability,
     p3Additionality: assessmentSnapshot.pillar3.additionality,
     p3Continuity: assessmentSnapshot.pillar3.continuity,
 
-    // Delta — will be DB-locked for Cycle 2+ below
-    deltaPriorCycle: assessmentSnapshot.delta?.priorCycle,
-    deltaBaselineScores: assessmentSnapshot.delta?.baselineScores as any,
-    deltaPriorScores: assessmentSnapshot.delta?.priorScores as any,
-    deltaCurrentScores: assessmentSnapshot.delta?.currentScores as any,
+    // Delta — server-locked values, plus optional operator explanation
+    deltaExplanation: input.snapshotInput.delta?.explanation,
+    deltaPriorCycle: lockedDelta?.priorCycle,
+    deltaBaselineScores: lockedDelta?.baselineScores as Record<string, number> | undefined,
+    deltaPriorScores: lockedDelta?.priorScores as Record<string, number> | undefined,
+    deltaCurrentScores: lockedDelta?.currentScores as Record<string, number> | undefined,
 
     snapshotHash: assessmentSnapshot.snapshotHash,
   });
 
-  // ── Step 3: Lock baselineScores from Cycle 1 ScoreSnapshot (Cycle 2+) ──
-  // SECURITY: We never trust client-supplied baselineScores.
-  // The authoritative baseline is always the persisted Cycle 1 ScoreSnapshot.
-  let lockedSnapshot = assessmentSnapshot;
-
-  if (assessmentSnapshot.assessmentCycle > 1) {
-    const cycle1Score = await findCycle1ScoreByOperator(input.operatorId);
-    if (!cycle1Score) {
-      throw new Error(
-        `Cannot score Cycle ${assessmentSnapshot.assessmentCycle}: no Cycle 1 ScoreSnapshot found for operator ${input.operatorId}`
-      );
-    }
-
-    const trace = cycle1Score.computationTrace as Record<string, any> | null;
-    if (!trace) {
-      throw new Error(
-        "Cycle 1 ScoreSnapshot has no computationTrace — cannot lock baseline scores"
-      );
-    }
-
-    const baselineScores: Record<string, number> = {
-      ...(trace.p1SubScores ?? {}),
-      ...(trace.p2SubScores ?? {}),
-      p3: Number(cycle1Score.p3Score),
-    };
-
-    const lockedDelta = buildDeltaBlock({
-      priorCycle: 1,
-      baselineScores,
-      priorScores: assessmentSnapshot.delta?.priorScores ?? baselineScores,
-    });
-
-    lockedSnapshot = { ...assessmentSnapshot, delta: lockedDelta };
+  // ── Step 3b: Persist evidence refs (append-only, never updated) ─────────
+  if (input.snapshotInput.evidence.length > 0) {
+    await Promise.all(
+      input.snapshotInput.evidence.map((e) =>
+        createEvidenceRef({
+          assessmentSnapshot: { connect: { id: persistedAssessment.id } },
+          operator: { connect: { id: input.operatorId } },
+          indicatorId: e.indicatorId,
+          tier: e.tier as "T1" | "T2" | "T3" | "Proxy",
+          checksum: e.checksum,
+          verificationState: (e.verificationState ?? "pending") as "pending" | "verified" | "rejected" | "lapsed",
+          proxyMethod: e.proxyMethod,
+          proxyCorrectionFactor: e.proxyCorrectionFactor,
+        })
+      )
+    );
   }
 
   // ── Step 4: Load active DPI snapshot for territory ─────────────────────

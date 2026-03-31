@@ -2,8 +2,12 @@
  * POST /api/v1/score
  *
  * Orchestrates a full scoring run for an operator assessment.
- * This route validates, delegates to the orchestrator, and returns the result.
- * It does NOT compute scores itself — that is exclusively the engine's responsibility.
+ * This route validates, derives P1/P2 indicators from raw inputs,
+ * then delegates to the orchestrator for persistence and engine invocation.
+ *
+ * SECURITY: Derived indicator values (intensities, rates) are NEVER
+ * trusted from the client. Only raw onboarding data is accepted.
+ * All derivation happens server-side via computeP1Intensities() and computeP2Rates().
  *
  * Authentication: operator role required.
  * The operator must own the target operatorId.
@@ -11,60 +15,106 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { runScoring } from "@/lib/orchestration/scoring-orchestrator";
-import { AssessmentSnapshotSchema } from "@/lib/validation/assessment.schema";
 import { requireSession } from "@/lib/auth/session";
-import { findOperatorByUserId } from "@/lib/db/repositories/operator.repo";
+import {
+  findOperatorByUserId,
+  markOnboardingCompleted,
+} from "@/lib/db/repositories/operator.repo";
+import { computeP1Intensities } from "@/lib/computation/p1-derive";
+import { computeP2Rates } from "@/lib/computation/p2-derive";
 import { z } from "zod";
+
+// ── Raw P1 inputs (no derived values accepted from client) ────────────────────
+
+const RawP1Schema = z.object({
+  totalElectricityKwh: z.number().nonnegative().optional(),
+  totalGasKwh: z.number().nonnegative().optional(),
+  tourFuelType: z.enum(["diesel", "petrol", "electric"]).optional(),
+  tourFuelLitresPerMonth: z.number().nonnegative().optional(),
+  evKwhPerMonth: z.number().nonnegative().optional(),
+  totalWaterLitres: z.number().nonnegative().optional(),
+  totalWasteKg: z.number().nonnegative().optional(),
+  wasteRecycledKg: z.number().nonnegative().optional(),
+  wasteCompostedKg: z.number().nonnegative().optional(),
+  wasteOtherDivertedKg: z.number().nonnegative().optional(),
+  renewableOnsitePct: z.number().min(0).max(100).optional(),
+  renewableTariffPct: z.number().min(0).max(100).optional(),
+  scope3TransportKgCo2e: z.number().nonnegative().optional(),
+  /** Discrete 0–3 rubric score — not derivable from raw data */
+  recirculationScore: z.number().int().min(0).max(3).nullable(),
+  /** Discrete 0–4 rubric score — not derivable from raw data */
+  siteScore: z.number().int().min(0).max(4).nullable(),
+});
+
+// ── Raw P2 inputs (no derived values accepted from client) ────────────────────
+
+const RawP2Schema = z.object({
+  totalFte: z.number().nonnegative().optional(),
+  localFte: z.number().nonnegative().optional(),
+  permanentContractPct: z.number().min(0).max(100).optional(),
+  averageMonthlyWage: z.number().nonnegative().optional(),
+  minimumWage: z.number().nonnegative().optional(),
+  totalFbSpend: z.number().nonnegative().optional(),
+  localFbSpend: z.number().nonnegative().optional(),
+  totalNonFbSpend: z.number().nonnegative().optional(),
+  localNonFbSpend: z.number().nonnegative().optional(),
+  directBookingPct: z.number().min(0).max(100).optional(),
+  localOwnershipPct: z.number().min(0).max(100).optional(),
+  communityScore: z.number().min(0).max(100).optional(),
+  foodServiceType: z.string().optional(),
+  tourNoFbSpend: z.boolean().optional(),
+  tourNoNonFbSpend: z.boolean().optional(),
+  soloOperator: z.boolean().optional(),
+});
+
+// ── Full request schema ───────────────────────────────────────────────────────
 
 const ScoreRequestSchema = z.object({
   operatorId: z.string().min(1),
   territoryId: z.string().min(1),
   assessmentPeriodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  pillar1: z.object({
-    energyIntensity: z.number().nullable(),
-    renewablePct: z.number().nullable(),
-    waterIntensity: z.number().nullable(),
-    recirculationScore: z.number().int().min(0).max(3).nullable(),
-    wasteDiversionPct: z.number().nullable(),
-    carbonIntensity: z.number().nullable(),
-    siteScore: z.number().int().min(0).max(4).nullable(),
+  operatorType: z.enum(["A", "B", "C"]),
+  activityUnit: z.object({
+    guestNights: z.number().nonnegative().optional(),
+    visitorDays: z.number().nonnegative().optional(),
   }),
-  pillar2: z.object({
-    localEmploymentRate: z.number().nullable(),
-    employmentQuality: z.number().nullable(),
-    localFbRate: z.number().nullable(),
-    localNonfbRate: z.number().nullable(),
-    directBookingRate: z.number().nullable(),
-    localOwnershipPct: z.number().nullable(),
-    communityScore: z.number().int().min(0).max(4).nullable(),
-  }),
+  revenueSplit: z
+    .object({
+      accommodationPct: z.number().min(0).max(100).optional(),
+      experiencePct: z.number().min(0).max(100).optional(),
+    })
+    .optional(),
+  p1Raw: RawP1Schema,
+  p2Raw: RawP2Schema,
   pillar3: z.object({
-    categoryScope: z.number().nullable(),
+    categoryScope: z.number().min(0).max(100).nullable(),
     traceability: z.number().nullable(),
     additionality: z.number().nullable(),
     continuity: z.number().nullable(),
   }),
   p3Status: z.enum(["A", "B", "C", "D", "E"]),
-  operatorType: z.enum(["A", "B", "C"]),
-  activityUnit: z.object({
-    guestNights: z.number().optional(),
-    visitorDays: z.number().optional(),
-  }),
-  revenueSplit: z.object({
-    accommodationPct: z.number().optional(),
-    experiencePct: z.number().optional(),
-  }).optional(),
-  // baselineScores intentionally excluded — loaded from DB by orchestrator
-  delta: z.object({
-    priorCycle: z.number().int().min(1),
-    priorScores: z.record(z.number()),
-  }).nullable(),
-  evidence: z.array(z.object({
-    indicatorId: z.string(),
-    tier: z.enum(["T1", "T2", "T3", "Proxy"]),
-    checksum: z.string(),
-    verificationState: z.enum(["pending", "verified", "rejected", "lapsed"]),
-  })),
+  // baselineScores, priorCycle, priorScores all computed server-side — never trusted from client
+  delta: z
+    .object({
+      explanation: z.string().optional(),
+    })
+    .nullable(),
+  evidence: z.array(
+    z.object({
+      indicatorId: z.string().min(1),
+      // Accept both "Proxy" (internal enum) and "PROXY" (client-friendly alias)
+      tier: z
+        .enum(["T1", "T2", "T3", "Proxy", "PROXY"])
+        .transform((t): "T1" | "T2" | "T3" | "Proxy" => (t === "PROXY" ? "Proxy" : t)),
+      checksum: z.string().optional(),
+      verificationState: z
+        .enum(["pending", "verified", "rejected", "lapsed"])
+        .optional()
+        .default("pending"),
+      proxyMethod: z.string().optional(),
+      proxyCorrectionFactor: z.number().positive().optional(),
+    })
+  ).default([]),
 });
 
 export async function POST(req: NextRequest) {
@@ -89,6 +139,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // ── Derive P1 indicators server-side — client raw values only ────────
+    const derivedP1 = computeP1Intensities({
+      ...data.p1Raw,
+      operatorType: data.operatorType,
+      guestNights: data.activityUnit.guestNights,
+      visitorDays: data.activityUnit.visitorDays,
+      revenueSplitAccommodationPct: data.revenueSplit?.accommodationPct,
+      revenueSplitExperiencePct: data.revenueSplit?.experiencePct,
+      // siteScore is a discrete rubric score — passed through to pillar1 directly, not used in derivation
+      siteScore: data.p1Raw.siteScore ?? undefined,
+    });
+
+    // ── Derive P2 rates server-side — client raw values only ─────────────
+    const derivedP2 = computeP2Rates(data.p2Raw);
+
     // ── Delegate to orchestrator ─────────────────────────────────────────
     const result = await runScoring({
       operatorId: data.operatorId,
@@ -101,21 +166,33 @@ export async function POST(req: NextRequest) {
         revenueSplit: data.revenueSplit,
         assessmentCycle: (operator.assessmentCycleCount ?? 0) + 1,
         assessmentPeriodEnd: data.assessmentPeriodEnd,
-        pillar1: data.pillar1,
-        pillar2: data.pillar2,
+        pillar1: {
+          energyIntensity: derivedP1.energyIntensity,
+          renewablePct: derivedP1.renewablePct,
+          waterIntensity: derivedP1.waterIntensity,
+          recirculationScore: data.p1Raw.recirculationScore,
+          wasteDiversionPct: derivedP1.wasteDiversionPct,
+          carbonIntensity: derivedP1.carbonIntensity,
+          siteScore: data.p1Raw.siteScore,
+        },
+        pillar2: {
+          localEmploymentRate: derivedP2.localEmploymentRate,
+          employmentQuality: derivedP2.employmentQuality,
+          localFbRate: derivedP2.localFbRate,
+          localNonfbRate: derivedP2.localNonFbRate,
+          directBookingRate: derivedP2.directBookingRate,
+          localOwnershipPct: derivedP2.localOwnershipPct,
+          communityScore: derivedP2.communityScore,
+        },
         pillar3: data.pillar3,
         p3Status: data.p3Status,
-        delta: data.delta
-          ? {
-              priorCycle: data.delta.priorCycle,
-              baselineScores: {}, // overwritten from DB by orchestrator
-              priorScores: data.delta.priorScores,
-              currentScores: {},
-            }
-          : null,
+        delta: data.delta ? { explanation: data.delta.explanation } : null,
         evidence: data.evidence,
       },
     });
+
+    // Mark onboarding as completed so the operator cannot re-enter the onboarding flow
+    await markOnboardingCompleted(data.operatorId);
 
     return NextResponse.json({ success: true, result }, { status: 201 });
   } catch (err) {

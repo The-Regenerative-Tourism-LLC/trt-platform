@@ -98,12 +98,48 @@ const TERRITORIES = [
     dpi: null, // No DpiSnapshot seeded — admin triggers computation when ready
   },
   {
+    name: "Algarve",
+    country: "Portugal",
+    countryCode: "PRT",
+    slug: "algarve",
+    isAvailable: false,
+    displayOrder: 3,
+    description:
+      "Portugal's southern coastline, known for its limestone cliffs, " +
+      "golden beaches, and a growing movement toward regenerative coastal tourism.",
+    dpi: null,
+  },
+  {
+    name: "Lisbon",
+    country: "Portugal",
+    countryCode: "PRT",
+    slug: "lisbon",
+    isAvailable: false,
+    displayOrder: 4,
+    description:
+      "Portugal's capital and cultural hub, blending historic neighbourhoods " +
+      "with a vibrant urban regenerative hospitality scene.",
+    dpi: null,
+  },
+  {
+    name: "Porto",
+    country: "Portugal",
+    countryCode: "PRT",
+    slug: "porto",
+    isAvailable: false,
+    displayOrder: 5,
+    description:
+      "A UNESCO-listed riverside city renowned for its wine culture, " +
+      "independent hospitality scene, and community-rooted tourism operators.",
+    dpi: null,
+  },
+  {
     name: "Alentejo",
     country: "Portugal",
     countryCode: "PRT",
     slug: "alentejo",
     isAvailable: false,
-    displayOrder: 3,
+    displayOrder: 6,
     description:
       "Portugal's vast interior plains, known for cork oak forests, " +
       "dark sky reserves, and regenerative agriculture practices rooted " +
@@ -120,56 +156,44 @@ async function main() {
   const territoryIds: Record<string, string> = {};
 
   for (const t of TERRITORIES) {
-    const existing = await prisma.territory.findFirst({
-      where: { slug: t.slug },
-    });
-
-    let territory;
-    if (existing) {
-      // Update availability and presentation fields in case they've changed.
-      // DPI read model is NOT updated here — that is owned by the DPI orchestrator.
-      territory = await prisma.territory.update({
-        where: { id: existing.id },
-        data: {
-          name: t.name,
-          country: t.country,
-          countryCode: t.countryCode,
-          slug: t.slug,
-          isAvailable: t.isAvailable,
-          displayOrder: t.displayOrder,
-          description: t.description,
-        },
-      });
-      log(`Territory updated:`, `${territory.name} (${t.isAvailable ? "available" : "coming soon"})`);
-    } else {
-      const dpiFields = t.dpi
-        ? {
+    const dpiFields = t.dpi
+      ? (() => {
+          const { composite, pressureLevel } = computeDpiComposite(t.dpi);
+          return {
             touristIntensity: t.dpi.touristIntensity,
             ecologicalSensitivity: t.dpi.ecologicalSensitivity,
             economicLeakageRate: t.dpi.economicLeakageRate,
             regenerativePerformance: t.dpi.regenerativePerf,
-            ...computeDpiComposite(t.dpi),
-            compositeDpi: computeDpiComposite(t.dpi).composite,
-            pressureLevel: computeDpiComposite(t.dpi).pressureLevel,
+            compositeDpi: composite,
+            pressureLevel,
             operatorCohortSize: t.dpi.operatorCohortSize,
             dpiComputedAt: new Date(),
-          }
-        : {};
+          };
+        })()
+      : {};
 
-      territory = await prisma.territory.create({
-        data: {
-          name: t.name,
-          country: t.country,
-          countryCode: t.countryCode,
-          slug: t.slug,
-          isAvailable: t.isAvailable,
-          displayOrder: t.displayOrder,
-          description: t.description,
-          ...dpiFields,
-        },
-      });
-      log(`Territory created:`, `${territory.name} (${t.isAvailable ? "available" : "coming soon"})`);
-    }
+    const territory = await prisma.territory.upsert({
+      where: { slug: t.slug },
+      update: {
+        name: t.name,
+        country: t.country,
+        countryCode: t.countryCode,
+        isAvailable: t.isAvailable,
+        displayOrder: t.displayOrder,
+        description: t.description,
+      },
+      create: {
+        name: t.name,
+        country: t.country,
+        countryCode: t.countryCode,
+        slug: t.slug,
+        isAvailable: t.isAvailable,
+        displayOrder: t.displayOrder,
+        description: t.description,
+        ...dpiFields,
+      },
+    });
+    log(`Territory upserted:`, `${territory.name} (${t.isAvailable ? "available" : "coming soon"})`);
 
     territoryIds[t.slug] = territory.id;
   }
@@ -302,6 +326,9 @@ async function main() {
   console.log("  Destinations:");
   console.log("    Madeira          — available (DPI 77, high pressure)");
   console.log("    Azores           — coming soon");
+  console.log("    Algarve          — coming soon");
+  console.log("    Lisbon           — coming soon");
+  console.log("    Porto            — coming soon");
   console.log("    Alentejo         — coming soon");
   console.log("\n  Credentials:");
   console.log("    admin@trt-local.dev       Admin1234!");
