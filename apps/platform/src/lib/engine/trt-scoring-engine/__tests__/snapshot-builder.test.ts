@@ -84,6 +84,45 @@ describe("buildAssessmentSnapshot", () => {
     expect(snapshot.p3Status).toBe(input.p3Status);
     expect(snapshot.delta).toBeNull();
   });
+
+  it("pillar1Exp is included in the hash — two snapshots differing only in pillar1Exp produce different hashes", () => {
+    const ts = "2026-01-01T00:00:00Z";
+    const p1Exp = {
+      energyIntensity: 5,
+      renewablePct: 80,
+      waterIntensity: 20,
+      recirculationScore: 3,
+      wasteDiversionPct: 90,
+      carbonIntensity: 2,
+      siteScore: 4,
+    };
+    const withExp = buildAssessmentSnapshot({ ...input, pillar1Exp: p1Exp }, ts);
+    const withoutExp = buildAssessmentSnapshot(input, ts);
+    expect(withExp.snapshotHash).not.toBe(withoutExp.snapshotHash);
+  });
+
+  it("pillar1Exp is preserved in the returned snapshot", () => {
+    const p1Exp = {
+      energyIntensity: 5,
+      renewablePct: 80,
+      waterIntensity: 20,
+      recirculationScore: 3,
+      wasteDiversionPct: 90,
+      carbonIntensity: 2,
+      siteScore: 4,
+    };
+    const snapshot = buildAssessmentSnapshot({ ...input, pillar1Exp: p1Exp }, "2026-01-01T00:00:00Z");
+    expect(snapshot.pillar1Exp).toEqual(p1Exp);
+  });
+
+  it("two snapshots with different pillar1Exp values produce different hashes", () => {
+    const ts = "2026-01-01T00:00:00Z";
+    const p1ExpA = { energyIntensity: 5, renewablePct: 80, waterIntensity: 20, recirculationScore: 3, wasteDiversionPct: 90, carbonIntensity: 2, siteScore: 4 };
+    const p1ExpB = { energyIntensity: 15, renewablePct: 30, waterIntensity: 80, recirculationScore: 1, wasteDiversionPct: 20, carbonIntensity: 8, siteScore: 1 };
+    const snapA = buildAssessmentSnapshot({ ...input, pillar1Exp: p1ExpA }, ts);
+    const snapB = buildAssessmentSnapshot({ ...input, pillar1Exp: p1ExpB }, ts);
+    expect(snapA.snapshotHash).not.toBe(snapB.snapshotHash);
+  });
 });
 
 describe("buildDeltaBlock", () => {

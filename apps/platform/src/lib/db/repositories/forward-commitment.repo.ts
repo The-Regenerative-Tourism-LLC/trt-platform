@@ -12,11 +12,23 @@ import type { ForwardCommitmentRecord } from "@prisma/client";
 export async function createForwardCommitmentRecord(params: {
   operatorId: string;
   assessmentCycle: number;
+  preferredCategory?: string;
+  territoryContext?: string;
+  preferredInstitutionType?: string;
+  targetActivationCycle?: number;
+  authorisedSignatory?: string;
+  signedAt?: Date;
 }): Promise<ForwardCommitmentRecord> {
   return prisma.forwardCommitmentRecord.create({
     data: {
       operator: { connect: { id: params.operatorId } },
       assessmentCycle: params.assessmentCycle,
+      preferredCategory: params.preferredCategory,
+      territoryContext: params.territoryContext,
+      preferredInstitutionType: params.preferredInstitutionType,
+      targetActivationCycle: params.targetActivationCycle,
+      authorisedSignatory: params.authorisedSignatory,
+      signedAt: params.signedAt,
     },
   });
 }

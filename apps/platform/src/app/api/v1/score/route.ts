@@ -20,7 +20,10 @@ import {
   findOperatorByUserId,
   markOnboardingCompleted,
 } from "@/lib/db/repositories/operator.repo";
-import { computeP1Intensities } from "@/lib/computation/p1-derive";
+import {
+  computeP1Intensities,
+  computeTypeCDualP1Intensities,
+} from "@/lib/computation/p1-derive";
 import { computeP2Rates } from "@/lib/computation/p2-derive";
 import { z } from "zod";
 
@@ -115,6 +118,17 @@ const ScoreRequestSchema = z.object({
       proxyCorrectionFactor: z.number().positive().optional(),
     })
   ).default([]),
+  /** Required for Status D: forward commitment declaration fields */
+  forwardCommitment: z
+    .object({
+      preferredCategory: z.string().optional(),
+      territoryContext: z.string().optional(),
+      preferredInstitutionType: z.string().optional(),
+      targetActivationCycle: z.number().int().positive().optional(),
+      authorisedSignatory: z.string().optional(),
+      signedAt: z.string().optional(),
+    })
+    .optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -140,16 +154,25 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Derive P1 indicators server-side — client raw values only ────────
-    const derivedP1 = computeP1Intensities({
+    // Type C: compute two separate indicator sets (acc = guest_nights AoU, exp = visitor_days AoU)
+    const rawP1Base = {
       ...data.p1Raw,
       operatorType: data.operatorType,
       guestNights: data.activityUnit.guestNights,
       visitorDays: data.activityUnit.visitorDays,
       revenueSplitAccommodationPct: data.revenueSplit?.accommodationPct,
       revenueSplitExperiencePct: data.revenueSplit?.experiencePct,
-      // siteScore is a discrete rubric score — passed through to pillar1 directly, not used in derivation
       siteScore: data.p1Raw.siteScore ?? undefined,
-    });
+    };
+
+    let derivedP1Acc = computeP1Intensities(rawP1Base);
+    let derivedP1Exp: typeof derivedP1Acc | undefined;
+
+    if (data.operatorType === "C") {
+      const dual = computeTypeCDualP1Intensities(rawP1Base);
+      derivedP1Acc = dual.acc;
+      derivedP1Exp = dual.exp;
+    }
 
     // ── Derive P2 rates server-side — client raw values only ─────────────
     const derivedP2 = computeP2Rates(data.p2Raw);
@@ -159,6 +182,7 @@ export async function POST(req: NextRequest) {
       operatorId: data.operatorId,
       territoryId: data.territoryId,
       actorUserId: session.userId,
+      forwardCommitment: data.forwardCommitment,
       snapshotInput: {
         operatorId: data.operatorId,
         operatorType: data.operatorType,
@@ -167,14 +191,27 @@ export async function POST(req: NextRequest) {
         assessmentCycle: (operator.assessmentCycleCount ?? 0) + 1,
         assessmentPeriodEnd: data.assessmentPeriodEnd,
         pillar1: {
-          energyIntensity: derivedP1.energyIntensity,
-          renewablePct: derivedP1.renewablePct,
-          waterIntensity: derivedP1.waterIntensity,
+          energyIntensity: derivedP1Acc.energyIntensity,
+          renewablePct: derivedP1Acc.renewablePct,
+          waterIntensity: derivedP1Acc.waterIntensity,
           recirculationScore: data.p1Raw.recirculationScore,
-          wasteDiversionPct: derivedP1.wasteDiversionPct,
-          carbonIntensity: derivedP1.carbonIntensity,
+          wasteDiversionPct: derivedP1Acc.wasteDiversionPct,
+          carbonIntensity: derivedP1Acc.carbonIntensity,
           siteScore: data.p1Raw.siteScore,
         },
+        ...(derivedP1Exp
+          ? {
+              pillar1Exp: {
+                energyIntensity: derivedP1Exp.energyIntensity,
+                renewablePct: derivedP1Exp.renewablePct,
+                waterIntensity: derivedP1Exp.waterIntensity,
+                recirculationScore: data.p1Raw.recirculationScore,
+                wasteDiversionPct: derivedP1Exp.wasteDiversionPct,
+                carbonIntensity: derivedP1Exp.carbonIntensity,
+                siteScore: data.p1Raw.siteScore,
+              },
+            }
+          : {}),
         pillar2: {
           localEmploymentRate: derivedP2.localEmploymentRate,
           employmentQuality: derivedP2.employmentQuality,
