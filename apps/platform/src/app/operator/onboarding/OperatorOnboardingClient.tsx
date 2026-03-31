@@ -11,9 +11,9 @@
  * Persistence: autosave via POST /api/v1/onboarding/draft after each step.
  */
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOnboardingStore, type OnboardingData } from "@/store/onboarding-store";
 import {
   getVisibleSteps,
@@ -320,6 +320,17 @@ export function OperatorOnboardingClient() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const { preview, loading: previewLoading, refreshPreview } = usePreviewScore(data);
+  const queryClient = useQueryClient();
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(false);
+  const [evidenceForm, setEvidenceForm] = useState({
+    indicatorId: "",
+    tier: "T1" as "T1" | "T2" | "T3" | "Proxy",
+    fileName: "",
+    storagePath: "",
+    checksum: "",
+  });
+  const [evidenceSubmitting, setEvidenceSubmitting] = useState(false);
 
   const flashSaved = () => {
     setSaved(true);
@@ -354,6 +365,13 @@ export function OperatorOnboardingClient() {
     enabled: stepId === "evidence-upload",
   });
 
+  const { data: priorScoreData, isLoading: priorLoading } = useQuery({
+    queryKey: ["operator-prior-scores"],
+    queryFn: () =>
+      fetch("/api/v1/operator/prior-scores").then((r) => r.json()),
+    enabled: stepId === "delta",
+  });
+
   // Redirect if onboarding already completed
   useEffect(() => {
     if (onboardingData?.operator?.onboardingCompleted === true) {
@@ -361,12 +379,14 @@ export function OperatorOnboardingClient() {
     }
   }, [onboardingData, router]);
 
-  // Hydrate from saved draft on mount
+  // Hydrate from saved draft on mount; reset for new operators to clear stale localStorage
   useEffect(() => {
-    if (!draftData?.draft) return;
-    const d = draftData.draft;
-    if (d.updatedAt && Object.keys(d.dataJson ?? {}).length > 0) {
+    if (draftData === undefined) return; // still loading
+    const d = draftData?.draft;
+    if (d?.updatedAt && Object.keys(d.dataJson ?? {}).length > 0) {
       loadDraft(d);
+    } else {
+      resetOnboarding();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftData]);
@@ -375,6 +395,22 @@ export function OperatorOnboardingClient() {
   useEffect(() => {
     if (stepId === "gps-preview") refreshPreview();
   }, [stepId, refreshPreview]);
+
+  // Debounced autosave on field changes (silent — no UI state update)
+  useEffect(() => {
+    if (!isMountedRef.current) {
+      isMountedRef.current = true;
+      return;
+    }
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(() => {
+      saveDraft().catch(() => {/* best effort */});
+    }, 1500);
+    return () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   // ── Navigation handlers ─────────────────────────────────────────────────
 
@@ -452,6 +488,37 @@ export function OperatorOnboardingClient() {
       console.error(err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ── Evidence inline upload ─────────────────────────────────────────────
+
+  const latestSnapshotId = evidenceData?.latestAssessmentSnapshotId ?? null;
+
+  const handleEvidenceFileSubmit = async () => {
+    if (!latestSnapshotId || !evidenceForm.indicatorId || !evidenceForm.fileName || !evidenceForm.storagePath || !evidenceForm.checksum) {
+      toast.error("Please complete all evidence fields");
+      return;
+    }
+    setEvidenceSubmitting(true);
+    try {
+      const res = await fetch("/api/v1/evidence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assessmentSnapshotId: latestSnapshotId, ...evidenceForm }),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        toast.error(json.error ?? "Evidence submission failed");
+        return;
+      }
+      toast.success("Evidence file added");
+      setEvidenceForm({ indicatorId: "", tier: "T1", fileName: "", storagePath: "", checksum: "" });
+      queryClient.invalidateQueries({ queryKey: ["operator-evidence"] });
+    } catch {
+      toast.error("Failed to submit evidence");
+    } finally {
+      setEvidenceSubmitting(false);
     }
   };
 
@@ -1031,17 +1098,14 @@ export function OperatorOnboardingClient() {
     };
 
     return (
-      <StepShell {...shell} title="Evidence Upload" subtitle="Link uploaded evidence files to this assessment.">
+      <StepShell {...shell} title="Evidence Upload" subtitle="Link evidence files to this assessment. You may submit without evidence — T3 evidence must be verified before P3 score is published.">
         {uploadedEvidence.length === 0 ? (
-          <div className="rounded-xl border bg-muted/30 p-5 space-y-3">
-            <p className="text-sm font-medium">No evidence files uploaded yet</p>
+          <div className="rounded-xl border bg-muted/30 p-5 space-y-2">
+            <p className="text-sm font-medium">No evidence files linked yet</p>
             <p className="text-xs text-muted-foreground">
-              Upload evidence in the{" "}
+              Add files below or visit{" "}
               <Link href="/operator/evidence" className="text-emerald-600 underline" target="_blank">Evidence Management</Link>{" "}
-              section, then return here to link files.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              You may submit without evidence and upload afterward. T3 evidence must be verified before P3 score is published.
+              to upload and return here to link them.
             </p>
           </div>
         ) : (
@@ -1082,17 +1146,86 @@ export function OperatorOnboardingClient() {
             </p>
           </div>
         )}
+
+        {/* Inline evidence file upload */}
+        <div className="rounded-xl border bg-card p-5 space-y-4">
+          <p className="text-sm font-semibold">Add evidence file</p>
+          {!latestSnapshotId ? (
+            <p className="text-xs text-muted-foreground">
+              Evidence files can be uploaded after your first assessment submission. You may also use{" "}
+              <Link href="/operator/evidence" className="text-emerald-600 underline" target="_blank">Evidence Management</Link>{" "}
+              to pre-register files.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <FieldGroup label="Indicator">
+                  <select
+                    value={evidenceForm.indicatorId}
+                    onChange={(e) => setEvidenceForm((f) => ({ ...f, indicatorId: e.target.value }))}
+                    className={inputCls}
+                  >
+                    <option value="">— Select indicator —</option>
+                    {Object.entries(INDICATOR_LABELS).map(([id, label]) => (
+                      <option key={id} value={id}>{label}</option>
+                    ))}
+                  </select>
+                </FieldGroup>
+                <FieldGroup label="Tier">
+                  <select
+                    value={evidenceForm.tier}
+                    onChange={(e) => setEvidenceForm((f) => ({ ...f, tier: e.target.value as "T1" | "T2" | "T3" | "Proxy" }))}
+                    className={inputCls}
+                  >
+                    <option value="T1">T1 — Primary</option>
+                    <option value="T2">T2 — Secondary</option>
+                    <option value="T3">T3 — Institutional</option>
+                    <option value="Proxy">Proxy</option>
+                  </select>
+                </FieldGroup>
+              </div>
+              <FieldGroup label="File name">
+                <input
+                  type="text"
+                  value={evidenceForm.fileName}
+                  onChange={(e) => setEvidenceForm((f) => ({ ...f, fileName: e.target.value }))}
+                  className={inputCls}
+                  placeholder="e.g. energy_bill_jan_2024.pdf"
+                />
+              </FieldGroup>
+              <FieldGroup label="Storage path" hint="Path or URL in your document storage.">
+                <input
+                  type="text"
+                  value={evidenceForm.storagePath}
+                  onChange={(e) => setEvidenceForm((f) => ({ ...f, storagePath: e.target.value }))}
+                  className={inputCls}
+                  placeholder="e.g. documents/energy/bill_jan_2024.pdf"
+                />
+              </FieldGroup>
+              <FieldGroup label="Checksum (SHA-256)" hint="File integrity hash.">
+                <input
+                  type="text"
+                  value={evidenceForm.checksum}
+                  onChange={(e) => setEvidenceForm((f) => ({ ...f, checksum: e.target.value }))}
+                  className={inputCls}
+                  placeholder="abc123..."
+                />
+              </FieldGroup>
+              <button
+                onClick={handleEvidenceFileSubmit}
+                disabled={evidenceSubmitting}
+                className="w-full rounded-lg border-2 border-emerald-500 bg-emerald-50 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 transition-colors"
+              >
+                {evidenceSubmitting ? "Submitting..." : "Add evidence file"}
+              </button>
+            </div>
+          )}
+        </div>
       </StepShell>
     );
   }
 
   if (stepId === "delta") {
-    const { data: priorScoreData, isLoading: priorLoading } = useQuery({
-      queryKey: ["operator-prior-scores"],
-      queryFn: () =>
-        fetch("/api/v1/operator/prior-scores").then((r) => r.json()),
-    });
-
     const priorScore: {
       gpsScore: number;
       pillar1Score: number;
