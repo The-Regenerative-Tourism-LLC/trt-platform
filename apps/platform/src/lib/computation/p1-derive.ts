@@ -69,8 +69,9 @@ function safeDiv(numerator: number, denominator: number): number {
  *
  * - Type A (accommodation): guest-nights
  * - Type B (experience only): visitor-days
- * - Type C (mixed): weighted average of guest-nights and visitor-days
- *   by revenue split. Falls back to guest-nights if split is unavailable.
+ * - Type C (mixed): NOT used directly — Type C uses two separate AoUs
+ *   (guest_nights for accommodation side, visitor_days for experience side).
+ *   Falls back to guest-nights if neither is present.
  */
 function deriveActivityUnit(raw: RawP1Inputs): number {
   const gn = raw.guestNights ?? 0;
@@ -79,29 +80,15 @@ function deriveActivityUnit(raw: RawP1Inputs): number {
   if (raw.operatorType === "A") return gn;
   if (raw.operatorType === "B") return vd;
 
-  // Type C — weighted by revenue split
-  const accPct = raw.revenueSplitAccommodationPct ?? null;
-  const expPct = raw.revenueSplitExperiencePct ?? null;
-
-  if (accPct !== null && expPct !== null) {
-    const total = accPct + expPct;
-    if (total > 0) {
-      return (gn * accPct + vd * expPct) / total;
-    }
-  }
-
-  // Fallback: use guest-nights if revenue split not provided
+  // Type C fallback — should not be called in normal flow (use computeTypeCDualP1Intensities)
   return gn > 0 ? gn : vd;
 }
 
 /**
- * Converts raw Pillar 1 inputs into derived indicator values ready for engine consumption.
- * All results are rounded to 2 decimal places.
- * Divide-by-zero returns 0.
+ * Core intensity computation given an explicit Activity Unit denominator.
+ * Used internally by computeP1Intensities and computeTypeCDualP1Intensities.
  */
-export function computeP1Intensities(raw: RawP1Inputs): DerivedP1Indicators {
-  const aou = deriveActivityUnit(raw);
-
+function computeIntensitiesWithAoU(raw: RawP1Inputs, aou: number): DerivedP1Indicators {
   // ── Energy ──────────────────────────────────────────────────────────────
   const totalEnergyKwh = (raw.totalElectricityKwh ?? 0) + (raw.totalGasKwh ?? 0);
   const energyIntensity = round2(safeDiv(totalEnergyKwh, aou));
@@ -121,23 +108,18 @@ export function computeP1Intensities(raw: RawP1Inputs): DerivedP1Indicators {
   const wasteDiversionPct = round2(safeDiv(wasteDiverted, raw.totalWasteKg ?? 0) * 100);
 
   // ── Carbon intensity ─────────────────────────────────────────────────────
-  // Scope 2: electricity × grid factor
   const scope2ElectricityKgCo2e =
     (raw.totalElectricityKwh ?? 0) * GRID_EMISSION_FACTOR_KG_CO2E_PER_KWH;
 
-  // Scope 2: transport fuel (liquid fuels only)
   let fuelKgCo2e = 0;
   if (raw.tourFuelType && raw.tourFuelType !== "electric" && raw.tourFuelLitresPerMonth) {
     const factor = FUEL_EMISSION_FACTORS[raw.tourFuelType];
-    // tourFuelLitresPerMonth × 12 months
     fuelKgCo2e = raw.tourFuelLitresPerMonth * 12 * factor;
   }
 
-  // Scope 2: EV charging (included in electricity grid factor)
   const evScope2KgCo2e =
     ((raw.evKwhPerMonth ?? 0) * 12) * GRID_EMISSION_FACTOR_KG_CO2E_PER_KWH;
 
-  // Scope 3: operator-reported transport
   const scope3KgCo2e = raw.scope3TransportKgCo2e ?? 0;
 
   const totalCarbonKgCo2e = scope2ElectricityKgCo2e + fuelKgCo2e + evScope2KgCo2e + scope3KgCo2e;
@@ -153,5 +135,39 @@ export function computeP1Intensities(raw: RawP1Inputs): DerivedP1Indicators {
     wasteDiversionPct,
     carbonIntensity,
     siteScore,
+  };
+}
+
+/**
+ * Converts raw Pillar 1 inputs into derived indicator values ready for engine consumption.
+ * All results are rounded to 2 decimal places.
+ * Divide-by-zero returns 0.
+ *
+ * For Type C operators, use computeTypeCDualP1Intensities instead.
+ */
+export function computeP1Intensities(raw: RawP1Inputs): DerivedP1Indicators {
+  const aou = deriveActivityUnit(raw);
+  return computeIntensitiesWithAoU(raw, aou);
+}
+
+export interface DualP1Indicators {
+  /** Accommodation-side indicators derived using guest_nights as AoU */
+  readonly acc: DerivedP1Indicators;
+  /** Experience-side indicators derived using visitor_days as AoU */
+  readonly exp: DerivedP1Indicators;
+}
+
+/**
+ * Type C only: derives two separate P1 indicator sets using distinct Activity Units.
+ * - acc: guest_nights as denominator (accommodation operational footprint)
+ * - exp: visitor_days as denominator (experience operational footprint)
+ * These are combined by revenue split in the scoring engine (compute-score.ts).
+ */
+export function computeTypeCDualP1Intensities(raw: RawP1Inputs): DualP1Indicators {
+  const gn = raw.guestNights ?? 0;
+  const vd = raw.visitorDays ?? 0;
+  return {
+    acc: computeIntensitiesWithAoU(raw, gn),
+    exp: computeIntensitiesWithAoU(raw, vd),
   };
 }

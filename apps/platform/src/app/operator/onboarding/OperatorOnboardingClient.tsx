@@ -19,7 +19,6 @@ import {
   getVisibleSteps,
   getVisibleStepNumber,
   getStepById,
-  isLastStep,
 } from "@/lib/onboarding/onboarding-steps";
 import {
   OPERATOR_TYPES,
@@ -115,7 +114,6 @@ function StepShell({
   progress,
   stepNumber,
   totalSteps,
-  isFirst,
   onBack,
   onNext,
   onSave,
@@ -131,7 +129,6 @@ function StepShell({
   progress: number;
   stepNumber: number;
   totalSteps: number;
-  isFirst: boolean;
   onBack: () => void;
   onNext: () => void;
   onSave: () => void;
@@ -154,8 +151,7 @@ function StepShell({
         <div className="flex items-center justify-between px-4 py-3 max-w-3xl mx-auto">
           <button
             onClick={onBack}
-            disabled={isFirst}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Back
           </button>
@@ -343,7 +339,6 @@ export function OperatorOnboardingClient() {
   const progress = totalSteps > 0 ? (stepNumber / totalSteps) * 100 : 0;
   const currentStep = getStepById(stepId);
   const first = stepNumber <= 1;
-  const last = isLastStep(stepId, data);
 
   // ── Server queries ──────────────────────────────────────────────────────
 
@@ -433,6 +428,10 @@ export function OperatorOnboardingClient() {
   };
 
   const handleBack = async () => {
+    if (first) {
+      router.push("/operator/dashboard");
+      return;
+    }
     previousStep();
     setSaving(true);
     try {
@@ -528,7 +527,6 @@ export function OperatorOnboardingClient() {
     progress,
     stepNumber,
     totalSteps,
-    isFirst: first,
     onBack: handleBack,
     onNext: handleNext,
     onSave: handleSave,

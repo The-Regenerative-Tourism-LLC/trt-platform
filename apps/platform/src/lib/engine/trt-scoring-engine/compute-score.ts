@@ -49,15 +49,45 @@ export function computeScore(
   methodology: MethodologyBundle
 ): Omit<ScoreSnapshot, "assessmentSnapshotId" | "inputHash" | "methodologyHash" | "createdAt"> {
   // ── Pillar scores ──────────────────────────────────────────────────────
-  const p1Result = computeP1(assessment.pillar1, assessment.operatorType, methodology);
+  // Type C: P1 computed as two separate modules (acc + exp), blended by revenue split.
+  const pw = methodology.pillarWeights;
+  let p1AccResult: ReturnType<typeof computeP1> | undefined;
+  let p1ExpResult: ReturnType<typeof computeP1> | undefined;
+  let p1Result: ReturnType<typeof computeP1>;
+
+  if (
+    assessment.operatorType === "C" &&
+    assessment.pillar1Exp !== undefined &&
+    assessment.revenueSplit?.accommodationPct !== undefined &&
+    assessment.revenueSplit?.experiencePct !== undefined
+  ) {
+    const accFrac = assessment.revenueSplit.accommodationPct / 100;
+    const expFrac = assessment.revenueSplit.experiencePct / 100;
+    p1AccResult = computeP1(assessment.pillar1, "A", methodology);
+    p1ExpResult = computeP1(assessment.pillar1Exp, "B", methodology);
+    p1Result = {
+      score: p1AccResult.score * accFrac + p1ExpResult.score * expFrac,
+      subScores: {
+        p1a: p1AccResult.subScores.p1a * accFrac + p1ExpResult.subScores.p1a * expFrac,
+        p1b: p1AccResult.subScores.p1b * accFrac + p1ExpResult.subScores.p1b * expFrac,
+        p1c: p1AccResult.subScores.p1c * accFrac + p1ExpResult.subScores.p1c * expFrac,
+        p1d: p1AccResult.subScores.p1d * accFrac + p1ExpResult.subScores.p1d * expFrac,
+        p1e: p1AccResult.subScores.p1e * accFrac + p1ExpResult.subScores.p1e * expFrac,
+        waterRecirc:
+          p1AccResult.subScores.waterRecirc * accFrac +
+          p1ExpResult.subScores.waterRecirc * expFrac,
+      },
+    };
+  } else {
+    p1Result = computeP1(assessment.pillar1, assessment.operatorType, methodology);
+  }
+
   const p2Result = computeP2(assessment.pillar2, assessment.operatorType, methodology);
   const p3Result = computeP3(assessment.pillar3, assessment.p3Status, methodology);
 
   // ── GPS base (weighted pillar total) ──────────────────────────────────
   // Type C operators: P2 and P3 scored separately under accommodation (Type A)
   // and experience (Type B) normalization bounds, blended by revenue split.
-  const pw = methodology.pillarWeights;
-
   let effectiveP2Score = p2Result.score;
   let effectiveP3Score = p3Result.score;
 
@@ -115,7 +145,21 @@ export function computeScore(
 
   // ── GPS total (clamped 0-100) ──────────────────────────────────────────
   // R6: clamp first, then round — rounding applied only once at the final step
-  const gpsRaw = gpsBase + (dpsTotal ?? 0);
+  //
+  // Status D: P3 is excluded from the cycle entirely. GPS is renormalized from
+  // P1 + P2 only (divided by their combined weight 0.70) to keep the result on
+  // a 0–100 scale. The standard 0.40/0.30/0.30 formula with P3=0 is NOT used.
+  let gpsRaw: number;
+  let statusDRenormalized = false;
+  if (assessment.p3Status === "D") {
+    const activePillarWeight = pw.p1 + pw.p2; // 0.40 + 0.30 = 0.70
+    gpsRaw =
+      (p1Result.score * pw.p1 + effectiveP2Score * pw.p2) / activePillarWeight +
+      (dpsTotal ?? 0);
+    statusDRenormalized = true;
+  } else {
+    gpsRaw = gpsBase + (dpsTotal ?? 0);
+  }
   const gpsClamped = clamp(gpsRaw, 0, 100);
   const gpsTotal = Math.round(gpsClamped);
   const gpsBand = getGpsBand(gpsTotal, methodology.bandThresholds);
@@ -130,6 +174,9 @@ export function computeScore(
     p3Weighted: effectiveP3Score * pw.p3,
     gpsBase,
     ...(dpsComponents ? { dpsComponents } : {}),
+    ...(p1AccResult ? { p1AccSubScores: p1AccResult.subScores } : {}),
+    ...(p1ExpResult ? { p1ExpSubScores: p1ExpResult.subScores } : {}),
+    ...(statusDRenormalized ? { statusDRenormalized: true } : {}),
   };
 
   return {

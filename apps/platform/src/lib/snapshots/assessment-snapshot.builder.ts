@@ -27,6 +27,11 @@ export interface AssessmentSnapshotInput {
 
   // Pillar responses
   pillar1: P1Responses;
+  /**
+   * Type C only: experience-side P1 indicators (visitor_days AoU).
+   * When provided, the engine computes two separate P1 scores and blends by revenue split.
+   */
+  pillar1Exp?: P1Responses;
   pillar2: P2Responses;
   pillar3: P3Responses;
   p3Status: "A" | "B" | "C" | "D" | "E";
@@ -57,6 +62,7 @@ export function buildAssessmentSnapshot(
     assessmentCycle: input.assessmentCycle,
     assessmentPeriodEnd: input.assessmentPeriodEnd,
     pillar1: input.pillar1,
+    ...(input.pillar1Exp !== undefined ? { pillar1Exp: input.pillar1Exp } : {}),
     pillar2: input.pillar2,
     pillar3: input.pillar3,
     p3Status: input.p3Status,
