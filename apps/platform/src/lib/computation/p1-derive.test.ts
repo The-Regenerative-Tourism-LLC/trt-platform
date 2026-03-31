@@ -142,9 +142,15 @@ describe("Type B — visitor-days as AoU", () => {
 });
 
 // ── Type C (mixed) ────────────────────────────────────────────────────────────
+//
+// NOTE: Type C operators must use computeTypeCDualP1Intensities() to produce two
+// separate indicator sets (acc + exp). computeP1Intensities() for Type C falls back
+// to guestNights as the denominator and is only used in legacy/test paths.
 
-describe("Type C — weighted AoU by revenue split", () => {
-  it("computes weighted AoU from revenue split", () => {
+describe("Type C — computeP1Intensities fallback (no blended AoU)", () => {
+  it("falls back to guestNights when called directly (not blended AoU)", () => {
+    // computeP1Intensities on Type C now falls back to guest_nights, not blended AoU.
+    // For proper Type C computation, use computeTypeCDualP1Intensities().
     const raw: RawP1Inputs = {
       operatorType: "C",
       guestNights: 1000,
@@ -153,9 +159,9 @@ describe("Type C — weighted AoU by revenue split", () => {
       revenueSplitExperiencePct: 40,
       totalElectricityKwh: 10000,
     };
-    // aou = (1000*60 + 2000*40) / (60+40) = (60000+80000)/100 = 1400
-    // energyIntensity = 10000 / 1400 ≈ 7.14
-    expect(computeP1Intensities(raw).energyIntensity).toBeCloseTo(7.14, 1);
+    // Uses guestNights=1000 (fallback), NOT the blended AoU (1400)
+    // energyIntensity = 10000 / 1000 = 10
+    expect(computeP1Intensities(raw).energyIntensity).toBe(10);
   });
 
   it("falls back to guestNights when revenue split not provided", () => {

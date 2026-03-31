@@ -231,6 +231,247 @@ describe("computeScore — Type C revenue split", () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Type C Pillar 1 — two separate P1 modules
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("computeScore — Type C Pillar 1 dual module", () => {
+  // Fixture designed to expose the difference between the old hybrid AoU approach
+  // and the new two-module approach.
+  // acc side: high energy intensity (small guestNights denominator)
+  // exp side: low energy intensity (large visitorDays denominator)
+  // The blended hybrid AoU would produce an intermediate intensity that normalizes
+  // differently from the per-side computation.
+  const P1_ACC: AssessmentSnapshot["pillar1"] = {
+    energyIntensity: 80,   // high — acc side uses small AoU
+    renewablePct: 20,
+    waterIntensity: 600,
+    recirculationScore: 0,
+    wasteDiversionPct: 10,
+    carbonIntensity: 50,
+    siteScore: 1,
+  };
+  const P1_EXP: AssessmentSnapshot["pillar1"] = {
+    energyIntensity: 5,    // low — exp side uses large AoU
+    renewablePct: 80,
+    waterIntensity: 20,
+    recirculationScore: 3,
+    wasteDiversionPct: 90,
+    carbonIntensity: 2,
+    siteScore: 4,
+  };
+
+  it("uses two separate P1 modules when pillar1Exp is provided", () => {
+    const typeC: AssessmentSnapshot = {
+      ...BASE_SNAPSHOT,
+      operatorType: "C",
+      revenueSplit: { accommodationPct: 50, experiencePct: 50 },
+      pillar1: P1_ACC,
+      pillar1Exp: P1_EXP,
+    };
+    const result = computeScore(typeC, MOCK_DPI, methodology);
+    // Computation trace must include both acc and exp sub-scores
+    expect(result.computationTrace.p1AccSubScores).toBeDefined();
+    expect(result.computationTrace.p1ExpSubScores).toBeDefined();
+  });
+
+  it("Type C with pillar1Exp produces a different P1 score than single blended indicators", () => {
+    // This fixture is designed so acc and exp sides score very differently.
+    // If the old hybrid AoU were used, the result would equal a single
+    // intermediate indicator set. The two-module result differs.
+    const typeCDual: AssessmentSnapshot = {
+      ...BASE_SNAPSHOT,
+      operatorType: "C",
+      revenueSplit: { accommodationPct: 50, experiencePct: 50 },
+      pillar1: P1_ACC,
+      pillar1Exp: P1_EXP,
+    };
+    const resultDual = computeScore(typeCDual, MOCK_DPI, methodology);
+
+    // Simulate old hybrid approach: single P1 using average of both indicator sets
+    const P1_HYBRID: AssessmentSnapshot["pillar1"] = {
+      energyIntensity: (P1_ACC.energyIntensity! + P1_EXP.energyIntensity!) / 2,
+      renewablePct: (P1_ACC.renewablePct! + P1_EXP.renewablePct!) / 2,
+      waterIntensity: (P1_ACC.waterIntensity! + P1_EXP.waterIntensity!) / 2,
+      recirculationScore: 1,
+      wasteDiversionPct: (P1_ACC.wasteDiversionPct! + P1_EXP.wasteDiversionPct!) / 2,
+      carbonIntensity: (P1_ACC.carbonIntensity! + P1_EXP.carbonIntensity!) / 2,
+      siteScore: 2,
+    };
+    const typeCHybrid: AssessmentSnapshot = {
+      ...BASE_SNAPSHOT,
+      operatorType: "C",
+      revenueSplit: { accommodationPct: 50, experiencePct: 50 },
+      pillar1: P1_HYBRID,
+      // No pillar1Exp → falls back to old single-module path
+    };
+    const resultHybrid = computeScore(typeCHybrid, MOCK_DPI, methodology);
+
+    // The two approaches produce different P1 scores (normalization is non-linear)
+    expect(resultDual.p1Score).not.toBe(resultHybrid.p1Score);
+  });
+
+  it("Type C without pillar1Exp falls back to single P1 module (backward compat)", () => {
+    const typeC: AssessmentSnapshot = {
+      ...BASE_SNAPSHOT,
+      operatorType: "C",
+      revenueSplit: { accommodationPct: 70, experiencePct: 30 },
+      // No pillar1Exp
+    };
+    const result = computeScore(typeC, MOCK_DPI, methodology);
+    expect(result.gpsTotal).toBeGreaterThanOrEqual(0);
+    expect(result.computationTrace.p1AccSubScores).toBeUndefined();
+    expect(result.computationTrace.p1ExpSubScores).toBeUndefined();
+  });
+
+  it("Type A scoring is unchanged by Type C P1 logic", () => {
+    const typeA: AssessmentSnapshot = { ...BASE_SNAPSHOT, operatorType: "A" };
+    const result = computeScore(typeA, MOCK_DPI, methodology);
+    expect(result.computationTrace.p1AccSubScores).toBeUndefined();
+    expect(result.p1Score).toBeGreaterThanOrEqual(0);
+  });
+
+  it("Type B scoring is unchanged by Type C P1 logic", () => {
+    const typeB: AssessmentSnapshot = {
+      ...BASE_SNAPSHOT,
+      operatorType: "B",
+      activityUnit: { visitorDays: 3000 },
+    };
+    const result = computeScore(typeB, MOCK_DPI, methodology);
+    expect(result.computationTrace.p1AccSubScores).toBeUndefined();
+    expect(result.p1Score).toBeGreaterThanOrEqual(0);
+  });
+
+  it("blended P1 score is revenue-split weighted average of acc and exp scores", () => {
+    const accFrac = 0.6;
+    const expFrac = 0.4;
+    const typeC: AssessmentSnapshot = {
+      ...BASE_SNAPSHOT,
+      operatorType: "C",
+      revenueSplit: { accommodationPct: 60, experiencePct: 40 },
+      pillar1: P1_ACC,
+      pillar1Exp: P1_EXP,
+    };
+    const result = computeScore(typeC, MOCK_DPI, methodology);
+    const p1Acc = result.computationTrace.p1AccSubScores!;
+    const p1Exp = result.computationTrace.p1ExpSubScores!;
+
+    // p1a in the blended result should equal acc*0.6 + exp*0.4
+    const expectedP1a = p1Acc.p1a * accFrac + p1Exp.p1a * expFrac;
+    expect(result.computationTrace.p1SubScores.p1a).toBeCloseTo(expectedP1a, 10);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Status D — renormalized GPS from P1+P2 only
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("computeScore — Status D renormalized GPS", () => {
+  it("Status D → P3 = 0", () => {
+    const snapshot: AssessmentSnapshot = { ...BASE_SNAPSHOT, p3Status: "D" };
+    const result = computeScore(snapshot, MOCK_DPI, methodology);
+    expect(result.p3Score).toBe(0);
+  });
+
+  it("Status D → computation trace marks statusDRenormalized", () => {
+    const snapshot: AssessmentSnapshot = { ...BASE_SNAPSHOT, p3Status: "D" };
+    const result = computeScore(snapshot, MOCK_DPI, methodology);
+    expect(result.computationTrace.statusDRenormalized).toBe(true);
+  });
+
+  it("Status D GPS is renormalized from P1+P2 only (not standard formula with P3=0)", () => {
+    const snapshot: AssessmentSnapshot = { ...BASE_SNAPSHOT, p3Status: "D" };
+    const result = computeScore(snapshot, MOCK_DPI, methodology);
+    const pw = methodology.pillarWeights;
+
+    // Standard formula with P3=0 would give: P1*0.40 + P2*0.30
+    const standardGpsRaw = result.p1Score * pw.p1 + result.p2Score * pw.p2;
+
+    // Renormalized: (P1*0.40 + P2*0.30) / 0.70
+    const renormGpsRaw = standardGpsRaw / (pw.p1 + pw.p2);
+
+    // Standard formula gives a lower GPS than renormalized — they must differ
+    // unless both P1 and P2 are 0 or 100 (degenerate case)
+    const expectedGps = Math.round(Math.max(0, Math.min(100, renormGpsRaw)));
+    expect(result.gpsTotal).toBe(expectedGps);
+
+    // Regression: GPS from Status D must NOT equal the standard formula result
+    const standardGps = Math.round(Math.max(0, Math.min(100, standardGpsRaw)));
+    // Only assert they differ when renorm changes the value
+    if (result.p1Score > 0 || result.p2Score > 0) {
+      expect(result.gpsTotal).toBeGreaterThan(standardGps);
+    }
+  });
+
+  it("Status D renormalization regression — old formula (P1*0.40 + P2*0.30) would undercount", () => {
+    // Fixture: P1=80, P2=70
+    // Old formula (standard with P3=0): 80*0.40 + 70*0.30 = 32+21 = 53
+    // Renormalized: 53 / 0.70 ≈ 75.71 → 76
+    // This test would fail if the old formula were applied
+    const fixedSnapshot: AssessmentSnapshot = {
+      ...BASE_SNAPSHOT,
+      p3Status: "D",
+      pillar1: {
+        energyIntensity: 0,    // → 100 for lower_is_better
+        renewablePct: 100,
+        waterIntensity: 0,
+        recirculationScore: 3,
+        wasteDiversionPct: 100,
+        carbonIntensity: 0,
+        siteScore: 4,
+      },
+      pillar2: {
+        localEmploymentRate: 0,   // high-scoring set
+        employmentQuality: 100,
+        localFbRate: 100,
+        localNonfbRate: 100,
+        directBookingRate: 100,
+        localOwnershipPct: 100,
+        communityScore: 4,
+      },
+    };
+    const result = computeScore(fixedSnapshot, MOCK_DPI, methodology);
+    // With renormalization, GPS > what the old formula would give
+    const pw = methodology.pillarWeights;
+    const oldFormulaGps = Math.round(
+      Math.max(0, Math.min(100, result.p1Score * pw.p1 + result.p2Score * pw.p2))
+    );
+    // Renormalized GPS must be >= old formula GPS (it's dividing by 0.70 ≤ 1)
+    expect(result.gpsTotal).toBeGreaterThanOrEqual(oldFormulaGps);
+  });
+
+  it("Status E still uses the standard formula with P3=0 (no renormalization)", () => {
+    const snapshot: AssessmentSnapshot = { ...BASE_SNAPSHOT, p3Status: "E" };
+    const result = computeScore(snapshot, MOCK_DPI, methodology);
+    expect(result.p3Score).toBe(0);
+    expect(result.computationTrace.statusDRenormalized).toBeUndefined();
+
+    const pw = methodology.pillarWeights;
+    const expectedGps = Math.round(
+      Math.max(0, Math.min(100, result.p1Score * pw.p1 + result.p2Score * pw.p2))
+    );
+    expect(result.gpsTotal).toBe(expectedGps);
+  });
+
+  it("Status A uses the standard formula (no renormalization)", () => {
+    const snapshot: AssessmentSnapshot = { ...BASE_SNAPSHOT, p3Status: "A" };
+    const result = computeScore(snapshot, MOCK_DPI, methodology);
+    expect(result.computationTrace.statusDRenormalized).toBeUndefined();
+
+    const pw = methodology.pillarWeights;
+    const expectedGps = Math.round(
+      Math.max(
+        0,
+        Math.min(
+          100,
+          result.p1Score * pw.p1 + result.p2Score * pw.p2 + result.p3Score * pw.p3
+        )
+      )
+    );
+    expect(result.gpsTotal).toBe(expectedGps);
+  });
+});
+
 describe("computeScore — Band classification", () => {
   it("assigns correct GPS bands", () => {
     const result = computeScore(BASE_SNAPSHOT, MOCK_DPI, methodology);

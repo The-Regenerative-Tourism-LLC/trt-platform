@@ -129,6 +129,12 @@ export interface AssessmentSnapshot {
   readonly assessmentPeriodEnd: string; // ISO8601 date
 
   readonly pillar1: P1Responses;
+  /**
+   * Type C only: experience-side P1 indicators derived using visitor_days as AoU.
+   * When present, the engine computes two separate P1 scores (acc + exp) and blends
+   * them by revenue split. pillar1 is the accommodation-side (guest_nights AoU).
+   */
+  readonly pillar1Exp?: P1Responses;
   readonly pillar2: P2Responses;
   readonly pillar3: P3Responses;
   readonly p3Status: "A" | "B" | "C" | "D" | "E";
@@ -184,6 +190,12 @@ export interface ComputationTrace {
     readonly dps2: number;
     readonly dps3: number;
   };
+  /** Type C only: accommodation-side (guest_nights AoU) P1 sub-scores before blending */
+  readonly p1AccSubScores?: Record<string, number>;
+  /** Type C only: experience-side (visitor_days AoU) P1 sub-scores before blending */
+  readonly p1ExpSubScores?: Record<string, number>;
+  /** True when GPS was renormalized using P1+P2 only (Status D) */
+  readonly statusDRenormalized?: boolean;
 }
 
 export interface ScoreSnapshot {

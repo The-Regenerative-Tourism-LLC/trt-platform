@@ -59,11 +59,22 @@ const FALLBACK_DPI: DpiSnapshot = {
   createdAt: new Date().toISOString(),
 };
 
+export interface ForwardCommitmentInput {
+  preferredCategory?: string;
+  territoryContext?: string;
+  preferredInstitutionType?: string;
+  targetActivationCycle?: number;
+  authorisedSignatory?: string;
+  signedAt?: string; // ISO date string
+}
+
 export interface ScoringInput {
   operatorId: string;
   territoryId: string;
   actorUserId: string;
   snapshotInput: AssessmentSnapshotInput;
+  /** Required fields for ForwardCommitmentRecord when p3Status = "D" */
+  forwardCommitment?: ForwardCommitmentInput;
 }
 
 export interface ScoringResult {
@@ -318,10 +329,20 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
   });
 
   // ── Step 10: Create ForwardCommitmentRecord for Status D ───────────────
+  // Persist complete record — not just operatorId + assessmentCycle.
   if (p3Status === "D") {
     await createForwardCommitmentRecord({
       operatorId: input.operatorId,
       assessmentCycle: lockedSnapshot.assessmentCycle,
+      preferredCategory: input.forwardCommitment?.preferredCategory,
+      territoryContext:
+        input.forwardCommitment?.territoryContext ?? input.territoryId,
+      preferredInstitutionType: input.forwardCommitment?.preferredInstitutionType,
+      targetActivationCycle: input.forwardCommitment?.targetActivationCycle,
+      authorisedSignatory: input.forwardCommitment?.authorisedSignatory,
+      signedAt: input.forwardCommitment?.signedAt
+        ? new Date(input.forwardCommitment.signedAt)
+        : undefined,
     });
   }
 
