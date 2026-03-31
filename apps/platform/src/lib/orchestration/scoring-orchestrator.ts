@@ -38,6 +38,7 @@ import {
 import {
   createEvidenceRef,
   findVerifiedT3Evidence,
+  findT1EvidenceCoverageBySnapshot,
 } from "../db/repositories/evidence.repo";
 import { incrementAssessmentCycle } from "../db/repositories/operator.repo";
 import { createForwardCommitmentRecord } from "../db/repositories/forward-commitment.repo";
@@ -278,10 +279,18 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     finalGpsTotal = Math.round(Math.max(0, Math.min(100, gpsRaw)));
   }
 
-  // ── Step 9: ScoreSnapshot is ALWAYS created with isPublished = false ───
-  // Publication requires explicit admin action after T1 evidence verification.
+  // ── Step 9: Evaluate T1 evidence coverage for publication eligibility ──
+  // A score is published only if the operator submitted at least one T1 evidence
+  // item for each of the three pillars (identified by p1_/p2_/p3_ prefix).
+  // If the T3 gate already blocked publication, skip the T1 check.
+  let isPublished = false;
   if (!publicationBlockedReason) {
-    publicationBlockedReason = "Pending T1 evidence verification";
+    const t1Coverage = await findT1EvidenceCoverageBySnapshot(persistedAssessment.id);
+    if (t1Coverage.p1 && t1Coverage.p2 && t1Coverage.p3) {
+      isPublished = true;
+    } else {
+      publicationBlockedReason = "Insufficient Tier 1 evidence coverage";
+    }
   }
 
   const persistedScore = await createScoreSnapshot({
@@ -304,7 +313,7 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     dpiScore: engineResult.dpiScore,
     dpiPressureLevel: engineResult.dpiPressureLevel as any,
     computationTrace: engineResult.computationTrace as any,
-    isPublished: false,
+    isPublished,
     publicationBlockedReason,
   });
 
@@ -330,7 +339,7 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
       gpsTotal: finalGpsTotal,
       gpsBand: engineResult.gpsBand,
       methodologyVersion: methodology.version,
-      isPublished: false,
+      isPublished,
       publicationBlockedReason,
     },
   });
