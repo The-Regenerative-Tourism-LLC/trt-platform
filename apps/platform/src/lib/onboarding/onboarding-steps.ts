@@ -12,6 +12,7 @@
 
 export type OperatorType = "A" | "B" | "C";
 export type P3Status = "A" | "B" | "C" | "D" | "E";
+export type EvidenceTier = "T1" | "T2" | "T3" | "Proxy";
 
 /** Subset of onboarding draft dataJson used by validation functions. */
 export interface OnboardingData {
@@ -51,14 +52,18 @@ export interface OnboardingData {
   revenueSplitExperiencePct?: number;
   assessmentPeriodEnd?: string;
 
+  // Step 1 — Location (part of identity)
+  address?: string;
+
   // Step 6 — P1: Energy
   totalElectricityKwh?: number;
   totalGasKwh?: number;
   renewableOnsitePct?: number;
   renewableTariffPct?: number;
-  tourFuelType?: "diesel" | "petrol" | "electric";
+  tourFuelType?: string;
   tourFuelLitresPerMonth?: number;
   evKwhPerMonth?: number;
+  evidenceTierEnergy?: EvidenceTier;
 
   // Step 7 — P1: Water & Waste
   totalWaterLitres?: number;
@@ -67,10 +72,16 @@ export interface OnboardingData {
   wasteCompostedKg?: number;
   wasteOtherDivertedKg?: number;
   p1RecirculationScore?: number;
+  noSingleUsePlastics?: boolean;
+  foodWasteProgramme?: boolean;
+  wasteEducation?: boolean;
+  evidenceTierWater?: EvidenceTier;
+  evidenceTierWaste?: EvidenceTier;
 
   // Step 8 — P1: Site & Carbon
   scope3TransportKgCo2e?: number;
   p1SiteScore?: number;
+  evidenceTierCarbon?: EvidenceTier;
 
   // Step 9 — P2: Employment
   totalFte?: number;
@@ -88,9 +99,17 @@ export interface OnboardingData {
   tourNoFbSpend?: boolean;
   tourNoNonFbSpend?: boolean;
 
+  // Step 9 — P2: Employment (evidence)
+  evidenceTierEmployment?: EvidenceTier;
+
+  // Step 10 — P2: Procurement (evidence)
+  evidenceTierProcurement?: EvidenceTier;
+
   // Step 11 — P2: Revenue & Community
   directBookingPct?: number;
   communityScore?: number;
+  evidenceTierRevenue?: EvidenceTier;
+  evidenceTierCommunity?: EvidenceTier;
 
   // Step 12 — P3: Status
   p3Status?: P3Status;
@@ -116,8 +135,10 @@ export interface OnboardingData {
   // Step 15 — Forward commitment (Status D)
   forwardCommitmentPreferredCategory?: string;
   forwardCommitmentTerritoryContext?: string;
+  forwardCommitmentPreferredInstitutionType?: string;
   forwardCommitmentTargetCycle?: number;
   forwardCommitmentSignatory?: string;
+  forwardCommitmentSignedAt?: string;
 
   // Step 16 — Evidence upload
   evidenceRefs?: Array<{
@@ -135,6 +156,14 @@ export interface OnboardingData {
   // Step 18 — GPS preview (read-only, no validation required)
 
   // Step 19 — Review & submit
+
+  // ── Internal UI state (persisted in draft for resume) ───────────────────
+  /** @internal Type B accommodation gate shown */
+  _accomGateShown?: boolean;
+  /** @internal Type B confirmed no accommodation */
+  _confirmsNoAccommodation?: boolean;
+  /** @internal Type B gate warning shown */
+  _accomGateWarn?: boolean;
 }
 
 // ── Step definitions ──────────────────────────────────────────────────────────
@@ -417,3 +446,95 @@ export function validateStep(id: string, data: OnboardingData): boolean {
   if (!validator) return true;
   return validator(data);
 }
+
+// ── Section labels (for UX context display) ───────────────────────────────────
+
+// ── Section groups (for section progress bar) ─────────────────────────────────
+
+export interface SectionGroup {
+  readonly id: string;
+  readonly label: string;
+  readonly shortLabel: string;
+  readonly stepIds: readonly string[];
+}
+
+/**
+ * Ordered sections shown in the onboarding progress bar.
+ * Does not include the roadmap pre-step (handled in the UI layer).
+ */
+export const SECTION_GROUPS: readonly SectionGroup[] = [
+  {
+    id: "profile",
+    label: "Your Profile",
+    shortLabel: "Profile",
+    stepIds: ["operator-type", "identity", "accommodation", "experience-types", "ownership"],
+  },
+  {
+    id: "activity",
+    label: "Activity Data",
+    shortLabel: "Activity",
+    stepIds: ["activity-unit"],
+  },
+  {
+    id: "pillar1",
+    label: "Operational Footprint",
+    shortLabel: "P1",
+    stepIds: ["p1-energy", "p1-water-waste", "p1-site-carbon"],
+  },
+  {
+    id: "pillar2",
+    label: "Local Integration",
+    shortLabel: "P2",
+    stepIds: ["p2-employment", "p2-procurement", "p2-revenue-community"],
+  },
+  {
+    id: "pillar3",
+    label: "Regenerative Contribution",
+    shortLabel: "P3",
+    stepIds: ["p3-status", "p3-programme", "p3-evidence-quality", "p3-forward-commitment"],
+  },
+  {
+    id: "evidence",
+    label: "Evidence",
+    shortLabel: "Evidence",
+    stepIds: ["evidence-upload", "delta"],
+  },
+  {
+    id: "submit",
+    label: "Review & Submit",
+    shortLabel: "Submit",
+    stepIds: ["gps-preview", "review-submit"],
+  },
+] as const;
+
+/** Returns the section group for a given step id. */
+export function getSectionForStep(stepId: string): SectionGroup | undefined {
+  return SECTION_GROUPS.find((g) => (g.stepIds as readonly string[]).includes(stepId));
+}
+
+/**
+ * Maps each step id to its section label.
+ * Used to show contextual "section name · step title" in the onboarding header.
+ */
+export const STEP_SECTIONS: Readonly<Record<string, string>> = {
+  "operator-type":           "Your Profile",
+  "identity":                "Your Profile",
+  "accommodation":           "Your Profile",
+  "experience-types":        "Your Profile",
+  "ownership":               "Your Profile",
+  "activity-unit":           "Activity Data",
+  "p1-energy":               "Pillar 1 — Operational Footprint",
+  "p1-water-waste":          "Pillar 1 — Operational Footprint",
+  "p1-site-carbon":          "Pillar 1 — Operational Footprint",
+  "p2-employment":           "Pillar 2 — Local Integration",
+  "p2-procurement":          "Pillar 2 — Local Integration",
+  "p2-revenue-community":    "Pillar 2 — Local Integration",
+  "p3-status":               "Pillar 3 — Regenerative Contribution",
+  "p3-programme":            "Pillar 3 — Regenerative Contribution",
+  "p3-evidence-quality":     "Pillar 3 — Regenerative Contribution",
+  "p3-forward-commitment":   "Pillar 3 — Regenerative Contribution",
+  "evidence-upload":         "Evidence",
+  "delta":                   "Prior Cycle",
+  "gps-preview":             "Score Preview",
+  "review-submit":           "Review & Submit",
+};

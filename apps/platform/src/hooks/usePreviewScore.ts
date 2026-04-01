@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { OnboardingData } from "@/lib/onboarding/onboarding-steps";
-import { computeCategoryScope } from "@/lib/constants";
 
 export interface PreviewScores {
   pillar1Score: number;
@@ -65,9 +64,7 @@ export function buildPreviewPayload(data: OnboardingData) {
       soloOperator: data.soloOperator,
     },
     p3: {
-      categoryScope: computeCategoryScope(
-        data.p3ContributionCategories ?? []
-      ),
+      contributionCategories: data.p3ContributionCategories ?? [],
       traceability: data.p3Traceability ?? null,
       additionality: data.p3Additionality ?? null,
       continuity: data.p3Continuity ?? null,
