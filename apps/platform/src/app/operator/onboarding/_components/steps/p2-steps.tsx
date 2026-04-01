@@ -48,6 +48,15 @@ export function P2EmploymentStep({
         />
       </FieldGroup>
 
+      <FieldGroup label="Seasonal operation (primary income in part of the year)?">
+        <TogglePair
+          value={data.seasonalOperator}
+          trueLabel="Yes — seasonal"
+          falseLabel="No — year-round"
+          onChange={(v) => updateField({ seasonalOperator: v })}
+        />
+      </FieldGroup>
+
       {data.soloOperator ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
           <p className="text-sm font-medium text-emerald-800">Solo operator</p>
@@ -245,9 +254,73 @@ export function P2ProcurementStep({
   );
 }
 
-// ── P2: Revenue & Community ───────────────────────────────────────────────────
+// ── P2: Revenue ───────────────────────────────────────────────────────────────
 
-export function P2RevenueCommunityStep({
+export function P2RevenueStep({
+  data,
+  updateField,
+  shell,
+  floatingGps,
+}: StepProps) {
+  return (
+    <StepShell
+      {...shell}
+      title="Revenue & bookings"
+      subtitle="Indicator 2C · 20% of Pillar 2. Booking volume and direct channel share."
+    >
+      {floatingGps}
+      <FieldGroup
+        label="Total bookings (count)"
+        hint="Number of completed bookings in the assessment period."
+      >
+        <NumberInput
+          value={data.totalBookingsCount}
+          onChange={(v) => updateField({ totalBookingsCount: v })}
+          placeholder="e.g. 420"
+          min={0}
+          step={1}
+        />
+      </FieldGroup>
+      <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors">
+        <input
+          type="checkbox"
+          checked={data.allDirectBookings === true}
+          onChange={(e) =>
+            updateField({
+              allDirectBookings: e.target.checked,
+              directBookingPct: e.target.checked ? 100 : data.directBookingPct === 100 ? undefined : data.directBookingPct,
+            })
+          }
+          className="mt-0.5 accent-emerald-600"
+        />
+        <span className="text-sm font-medium">All bookings are direct</span>
+      </label>
+      {!data.allDirectBookings && (
+        <FieldGroup
+          label="Direct booking rate (%)"
+          hint="Bookings via your own website, phone, or email — excluding OTAs."
+        >
+          <NumberInput
+            value={data.directBookingPct}
+            onChange={(v) => updateField({ directBookingPct: v })}
+            placeholder="e.g. 55"
+            min={0}
+            max={100}
+          />
+        </FieldGroup>
+      )}
+      <EvidenceTierSelector
+        value={data.evidenceTierRevenue}
+        onChange={(v: EvidenceTier) => updateField({ evidenceTierRevenue: v })}
+        label="Evidence quality — revenue data"
+      />
+    </StepShell>
+  );
+}
+
+// ── P2: Community ─────────────────────────────────────────────────────────────
+
+export function P2CommunityStep({
   data,
   updateField,
   shell,
@@ -257,80 +330,32 @@ export function P2RevenueCommunityStep({
   return (
     <StepShell
       {...shell}
-      title="Revenue & community"
-      subtitle="Indicators 2C (20% of P2 · GPS 6%) and 2D (15% of P2 · GPS 4.5%). Booking channels, local ownership, and community integration."
+      title="Community"
+      subtitle="Indicator 2D · 15% of Pillar 2. Local community integration."
     >
       {floatingGps}
-
-      {/* Revenue — 2C */}
-      <div className="space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-          How guests find and book you — 2C
-        </p>
-        <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors">
-          <input
-            type="checkbox"
-            checked={data.directBookingPct === 100}
-            onChange={(e) =>
-              updateField({
-                directBookingPct: e.target.checked ? 100 : undefined,
-              })
-            }
-            className="mt-0.5 accent-emerald-600"
-          />
-          <span className="text-sm font-medium">All bookings are direct (100%)</span>
-        </label>
-        {data.directBookingPct !== 100 && (
-          <FieldGroup
-            label="Direct booking rate (%)"
-            hint="Percentage of bookings via your own website, phone, or email — excluding OTA intermediaries."
-          >
-            <NumberInput
-              value={data.directBookingPct}
-              onChange={(v) => updateField({ directBookingPct: v })}
-              placeholder="e.g. 55"
-              min={0}
-              max={100}
-            />
-          </FieldGroup>
-        )}
-        <EvidenceTierSelector
-          value={data.evidenceTierRevenue}
-          onChange={(v: EvidenceTier) => updateField({ evidenceTierRevenue: v })}
-          label="Evidence quality — revenue data"
+      <FieldGroup
+        label="Community integration score"
+        hint="How actively is your business embedded in local community life?"
+      >
+        <BandSelector
+          values={[4, 3, 2, 1, 0]}
+          labels={[
+            "4 Deeply integrated",
+            "3 Active engagement",
+            "2 Moderate presence",
+            "1 Minimal interaction",
+            "0 No engagement",
+          ]}
+          selected={data.communityScore}
+          onSelect={(v) => updateField({ communityScore: v })}
         />
-      </div>
-
-      {/* Community — 2D */}
-      <div className="space-y-4 border-t border-border/50 pt-5">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-          Community engagement — 2D
-        </p>
-        <FieldGroup
-          label="Community integration score"
-          hint="How actively is your business embedded in and contributing to local community life?"
-        >
-          <BandSelector
-            values={[4, 3, 2, 1, 0]}
-            labels={[
-              "4 Deeply integrated",
-              "3 Active engagement",
-              "2 Moderate presence",
-              "1 Minimal interaction",
-              "0 No engagement",
-            ]}
-            selected={data.communityScore}
-            onSelect={(v) => updateField({ communityScore: v })}
-          />
-        </FieldGroup>
-        <EvidenceTierSelector
-          value={data.evidenceTierCommunity}
-          onChange={(v: EvidenceTier) => updateField({ evidenceTierCommunity: v })}
-          label="Evidence quality — community data"
-        />
-      </div>
-
-      {/* Pillar 2 summary */}
+      </FieldGroup>
+      <EvidenceTierSelector
+        value={data.evidenceTierCommunity}
+        onChange={(v: EvidenceTier) => updateField({ evidenceTierCommunity: v })}
+        label="Evidence quality — community data"
+      />
       {preview && (
         <div className="rounded-xl border bg-card p-5 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

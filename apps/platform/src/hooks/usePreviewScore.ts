@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { OnboardingData } from "@/lib/onboarding/onboarding-steps";
+import { waterPracticesToRecirculationScore } from "@/lib/onboarding/onboarding-steps";
 
 export interface PreviewScores {
   pillar1Score: number;
@@ -32,6 +33,10 @@ export function buildPreviewPayload(data: OnboardingData) {
       operatorType: data.operatorType ?? "A",
       totalElectricityKwh: data.totalElectricityKwh,
       totalGasKwh: data.totalGasKwh,
+      gridExportKwh: data.gridExportKwh,
+      officeElectricityKwh: data.officeElectricityKwh,
+      tourNoTransport: data.tourNoTransport,
+      tourNoFixedBase: data.tourNoFixedBase,
       tourFuelType: data.tourFuelType,
       tourFuelLitresPerMonth: data.tourFuelLitresPerMonth,
       evKwhPerMonth: data.evKwhPerMonth,
@@ -51,10 +56,13 @@ export function buildPreviewPayload(data: OnboardingData) {
       permanentContractPct: data.permanentContractPct,
       averageMonthlyWage: data.averageMonthlyWage,
       minimumWage: data.minimumWage,
+      seasonalOperator: data.seasonalOperator,
       totalFbSpend: data.totalFbSpend,
       localFbSpend: data.localFbSpend,
       totalNonFbSpend: data.totalNonFbSpend,
       localNonFbSpend: data.localNonFbSpend,
+      totalBookingsCount: data.totalBookingsCount,
+      allDirectBookings: data.allDirectBookings,
       directBookingPct: data.directBookingPct,
       localOwnershipPct: data.localEquityPct,
       communityScore: data.communityScore,
@@ -70,7 +78,7 @@ export function buildPreviewPayload(data: OnboardingData) {
       continuity: data.p3Continuity ?? null,
     },
     p3Status: data.p3Status ?? "E",
-    recirculationScore: data.p1RecirculationScore ?? null,
+    recirculationScore: waterPracticesToRecirculationScore(data),
   };
 }
 
@@ -95,7 +103,15 @@ export function usePreviewScore(data: OnboardingData) {
         signal: controller.signal,
       });
       if (res.ok) {
-        setPreview((await res.json()) as PreviewScores);
+        const json = (await res.json()) as PreviewScores & { preview?: boolean };
+        setPreview({
+          pillar1Score: json.pillar1Score,
+          pillar2Score: json.pillar2Score,
+          pillar3Score: json.pillar3Score,
+          gpsScore: json.gpsScore,
+          gpsBand: json.gpsBand,
+          methodologyVersion: json.methodologyVersion,
+        });
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;

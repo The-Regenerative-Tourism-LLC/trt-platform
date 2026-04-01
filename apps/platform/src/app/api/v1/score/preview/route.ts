@@ -23,6 +23,7 @@ import { computeScore } from "@/lib/engine/trt-scoring-engine";
 import { loadActiveBundle } from "@/lib/methodology/methodology-bundle.loader";
 import { findLatestDpiByTerritory } from "@/lib/db/repositories/dpi.repo";
 import type { DpiSnapshot } from "@/lib/engine/trt-scoring-engine/types";
+import { computeCategoryScope } from "@/lib/constants";
 import { z } from "zod";
 
 // ── Validation schema ─────────────────────────────────────────────────────────
@@ -35,7 +36,11 @@ const RawP1Schema = z.object({
   revenueSplitExperiencePct: z.number().min(0).max(100).optional(),
   totalElectricityKwh: z.number().nonnegative().optional(),
   totalGasKwh: z.number().nonnegative().optional(),
-  tourFuelType: z.enum(["diesel", "petrol", "electric"]).optional(),
+  gridExportKwh: z.number().nonnegative().optional(),
+  officeElectricityKwh: z.number().nonnegative().optional(),
+  tourNoTransport: z.boolean().optional(),
+  tourNoFixedBase: z.boolean().optional(),
+  tourFuelType: z.string().optional(),
   tourFuelLitresPerMonth: z.number().nonnegative().optional(),
   evKwhPerMonth: z.number().nonnegative().optional(),
   totalWaterLitres: z.number().nonnegative().optional(),
@@ -66,10 +71,14 @@ const RawP2Schema = z.object({
   tourNoFbSpend: z.boolean().optional(),
   tourNoNonFbSpend: z.boolean().optional(),
   soloOperator: z.boolean().optional(),
+  seasonalOperator: z.boolean().optional(),
+  totalBookingsCount: z.number().int().nonnegative().optional(),
+  allDirectBookings: z.boolean().optional(),
 });
 
 const P3Schema = z.object({
-  categoryScope: z.number().min(0).max(100).nullable(),
+  categoryScope: z.number().min(0).max(100).nullable().optional(),
+  contributionCategories: z.array(z.string()).optional(),
   traceability: z.number().nullable(),
   additionality: z.number().nullable(),
   continuity: z.number().nullable(),
@@ -178,7 +187,11 @@ export async function POST(req: NextRequest) {
           communityScore: derivedP2.communityScore,
         },
         pillar3: {
-          categoryScope: d.p3.categoryScope,
+          categoryScope:
+            d.p3.categoryScope ??
+            (d.p3.contributionCategories && d.p3.contributionCategories.length > 0
+              ? computeCategoryScope(d.p3.contributionCategories)
+              : null),
           traceability: d.p3.traceability,
           additionality: d.p3.additionality,
           continuity: d.p3.continuity,

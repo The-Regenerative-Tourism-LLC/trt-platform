@@ -25,6 +25,7 @@ import {
   computeTypeCDualP1Intensities,
 } from "@/lib/computation/p1-derive";
 import { computeP2Rates } from "@/lib/computation/p2-derive";
+import { computeCategoryScope } from "@/lib/constants";
 import { z } from "zod";
 
 // ── Raw P1 inputs (no derived values accepted from client) ────────────────────
@@ -32,7 +33,11 @@ import { z } from "zod";
 const RawP1Schema = z.object({
   totalElectricityKwh: z.number().nonnegative().optional(),
   totalGasKwh: z.number().nonnegative().optional(),
-  tourFuelType: z.enum(["diesel", "petrol", "electric"]).optional(),
+  gridExportKwh: z.number().nonnegative().optional(),
+  officeElectricityKwh: z.number().nonnegative().optional(),
+  tourNoTransport: z.boolean().optional(),
+  tourNoFixedBase: z.boolean().optional(),
+  tourFuelType: z.string().optional(),
   tourFuelLitresPerMonth: z.number().nonnegative().optional(),
   evKwhPerMonth: z.number().nonnegative().optional(),
   totalWaterLitres: z.number().nonnegative().optional(),
@@ -43,10 +48,13 @@ const RawP1Schema = z.object({
   renewableOnsitePct: z.number().min(0).max(100).optional(),
   renewableTariffPct: z.number().min(0).max(100).optional(),
   scope3TransportKgCo2e: z.number().nonnegative().optional(),
-  /** Discrete 0–3 rubric score — not derivable from raw data */
-  recirculationScore: z.number().int().min(0).max(3).nullable(),
-  /** Discrete 0–4 rubric score — not derivable from raw data */
-  siteScore: z.number().int().min(0).max(4).nullable(),
+  waterGreywater: z.boolean().optional(),
+  waterRainwater: z.boolean().optional(),
+  waterWastewaterTreatment: z.boolean().optional(),
+  /** Discrete 0–3 — may be derived server-side from raw water flags elsewhere */
+  recirculationScore: z.number().int().min(0).max(3).nullable().optional(),
+  /** Discrete 0–4 rubric score */
+  siteScore: z.number().int().min(0).max(4).nullable().optional(),
 });
 
 // ── Raw P2 inputs (no derived values accepted from client) ────────────────────
@@ -68,6 +76,17 @@ const RawP2Schema = z.object({
   tourNoFbSpend: z.boolean().optional(),
   tourNoNonFbSpend: z.boolean().optional(),
   soloOperator: z.boolean().optional(),
+  seasonalOperator: z.boolean().optional(),
+  totalBookingsCount: z.number().int().nonnegative().optional(),
+  allDirectBookings: z.boolean().optional(),
+});
+
+const Pillar3SubmitSchema = z.object({
+  categoryScope: z.number().min(0).max(100).nullable().optional(),
+  contributionCategories: z.array(z.string()).optional(),
+  traceability: z.number().nullable(),
+  additionality: z.number().nullable(),
+  continuity: z.number().nullable(),
 });
 
 // ── Full request schema ───────────────────────────────────────────────────────
@@ -87,14 +106,18 @@ const ScoreRequestSchema = z.object({
       experiencePct: z.number().min(0).max(100).optional(),
     })
     .optional(),
+  photoRefs: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        storageRef: z.string().min(1),
+        fileName: z.string().optional(),
+      })
+    )
+    .optional(),
   p1Raw: RawP1Schema,
   p2Raw: RawP2Schema,
-  pillar3: z.object({
-    categoryScope: z.number().min(0).max(100).nullable(),
-    traceability: z.number().nullable(),
-    additionality: z.number().nullable(),
-    continuity: z.number().nullable(),
-  }),
+  pillar3: z.union([Pillar3SubmitSchema, z.null()]),
   p3Status: z.enum(["A", "B", "C", "D", "E"]),
   // baselineScores, priorCycle, priorScores all computed server-side — never trusted from client
   delta: z
@@ -130,6 +153,34 @@ const ScoreRequestSchema = z.object({
     })
     .optional(),
 });
+
+function normalizePillar3ForEngine(
+  pillar3: z.infer<typeof Pillar3SubmitSchema> | null
+): {
+  categoryScope: number | null;
+  traceability: number | null;
+  additionality: number | null;
+  continuity: number | null;
+} {
+  if (pillar3 === null) {
+    return {
+      categoryScope: null,
+      traceability: null,
+      additionality: null,
+      continuity: null,
+    };
+  }
+  const cats = pillar3.contributionCategories;
+  const categoryScope =
+    pillar3.categoryScope ??
+    (cats && cats.length > 0 ? computeCategoryScope(cats) : null);
+  return {
+    categoryScope,
+    traceability: pillar3.traceability,
+    additionality: pillar3.additionality,
+    continuity: pillar3.continuity,
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -177,6 +228,8 @@ export async function POST(req: NextRequest) {
     // ── Derive P2 rates server-side — client raw values only ─────────────
     const derivedP2 = computeP2Rates(data.p2Raw);
 
+    const pillar3ForEngine = normalizePillar3ForEngine(data.pillar3);
+
     // ── Delegate to orchestrator ─────────────────────────────────────────
     const result = await runScoring({
       operatorId: data.operatorId,
@@ -221,7 +274,7 @@ export async function POST(req: NextRequest) {
           localOwnershipPct: derivedP2.localOwnershipPct,
           communityScore: derivedP2.communityScore,
         },
-        pillar3: data.pillar3,
+        pillar3: pillar3ForEngine,
         p3Status: data.p3Status,
         delta: data.delta ? { explanation: data.delta.explanation } : null,
         evidence: data.evidence,
