@@ -13,7 +13,7 @@
  *   5. Methodology bundle v1.0.0.
  *
  * Seed accounts:
- *   admin@trt-local.dev    / Admin1234!
+ *   admin@theregenerativetourism.com    / Admin1234!
  *   operator@trt-local.dev / Operator1234!
  *   traveler@trt-local.dev / Traveler1234!
  *
@@ -239,9 +239,9 @@ async function main() {
 
   const adminHash = await bcrypt.hash("Admin1234!", 12);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@trt-local.dev" },
+    where: { email: "admin@theregenerativetourism.com" },
     update: {},
-    create: { name: "Admin", email: "admin@trt-local.dev", passwordHash: adminHash },
+    create: { name: "Admin", email: "admin@theregenerativetourism.com", passwordHash: adminHash },
   });
   await prisma.userRole.upsert({
     where: { userId_role: { userId: admin.id, role: "admin" } },
@@ -331,7 +331,7 @@ async function main() {
   console.log("    Porto            — coming soon");
   console.log("    Alentejo         — coming soon");
   console.log("\n  Credentials:");
-  console.log("    admin@trt-local.dev       Admin1234!");
+  console.log("    admin@theregenerativetourism.com       Admin1234!");
   console.log("    operator@trt-local.dev    Operator1234!");
   console.log("    traveler@trt-local.dev    Traveler1234!");
   console.log("");

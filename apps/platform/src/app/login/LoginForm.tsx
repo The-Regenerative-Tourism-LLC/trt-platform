@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
+import Link from "next/link";
 
 const LoginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -143,12 +144,20 @@ export function LoginForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1.5"
-          >
-            Password
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <input
             id="password"
             type="password"
