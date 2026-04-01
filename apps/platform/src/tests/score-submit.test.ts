@@ -73,12 +73,7 @@ function validPayload(overrides: Record<string, unknown> = {}) {
       directBookingPct: 50,
       communityScore: 3,
     },
-    pillar3: {
-      categoryScope: null,
-      traceability: null,
-      additionality: null,
-      continuity: null,
-    },
+    pillar3: null,
     p3Status: "E",
     delta: null,
     evidence: [],

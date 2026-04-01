@@ -31,6 +31,12 @@ export interface RawP2Inputs {
   tourNoNonFbSpend?: boolean;
   /** If true, solo/owner-operator — employment metrics default to 100 */
   soloOperator?: boolean;
+  /** Seasonal operation — raw flag for audit context */
+  seasonalOperator?: boolean;
+  /** Total bookings in assessment period — raw context */
+  totalBookingsCount?: number;
+  /** All bookings via direct channels */
+  allDirectBookings?: boolean;
 }
 
 export interface DerivedP2Indicators {
@@ -100,7 +106,9 @@ export function computeP2Rates(raw: RawP2Inputs): DerivedP2Indicators {
   }
 
   // ── Direct booking rate ───────────────────────────────────────────────────
-  const directBookingRate = clamp(raw.directBookingPct ?? 0);
+  const directBookingRate = raw.allDirectBookings
+    ? 100
+    : clamp(raw.directBookingPct ?? 0);
 
   // ── Local ownership ───────────────────────────────────────────────────────
   const localOwnershipPct = clamp(raw.localOwnershipPct ?? 0);
