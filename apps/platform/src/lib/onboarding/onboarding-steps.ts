@@ -1,7 +1,7 @@
 /**
  * Onboarding Step Configuration and Navigation Engine
  *
- * Single source of truth for the 20-step operator onboarding flow.
+ * Single source of truth for the operator onboarding flow (Lovable parity).
  * No scoring logic. No UI. Pure step definitions + navigation helpers
  * + field-level validation per step.
  *
@@ -29,6 +29,11 @@ export interface OnboardingData {
   website?: string;
   primaryContactName?: string;
   primaryContactEmail?: string;
+  /** Average published nightly rate (optional raw input) */
+  pricePerNight?: number;
+  /** WGS84 — optional raw input */
+  latitude?: number;
+  longitude?: number;
 
   // Step 2 — Operator profile (Type A / C)
   accommodationCategory?: string;
@@ -52,12 +57,23 @@ export interface OnboardingData {
   revenueSplitExperiencePct?: number;
   assessmentPeriodEnd?: string;
 
+  /** Property / experience photos — references only (no file bytes). First item = cover. */
+  photoRefs?: Array<{ id: string; storageRef: string; fileName?: string }>;
+
   // Step 1 — Location (part of identity)
   address?: string;
 
   // Step 6 — P1: Energy
   totalElectricityKwh?: number;
   totalGasKwh?: number;
+  /** kWh exported to grid (annual) */
+  gridExportKwh?: number;
+  /** Office / ancillary electricity (annual kWh), separate from main property meter if applicable */
+  officeElectricityKwh?: number;
+  /** Type B: no guest transport with own vehicles */
+  tourNoTransport?: boolean;
+  /** Type B: no fixed base — skips water step */
+  tourNoFixedBase?: boolean;
   renewableOnsitePct?: number;
   renewableTariffPct?: number;
   tourFuelType?: string;
@@ -65,23 +81,32 @@ export interface OnboardingData {
   evKwhPerMonth?: number;
   evidenceTierEnergy?: EvidenceTier;
 
-  // Step 7 — P1: Water & Waste
+  // Step 7 — P1: Water (practices = raw booleans; legacy p1RecirculationScore optional for old drafts)
   totalWaterLitres?: number;
+  waterGreywater?: boolean;
+  waterRainwater?: boolean;
+  waterWastewaterTreatment?: boolean;
+  /** @deprecated Legacy band score — not collected in UI; use water practice booleans */
+  p1RecirculationScore?: number;
+  evidenceTierWater?: EvidenceTier;
+
+  // P1: Waste
   totalWasteKg?: number;
   wasteRecycledKg?: number;
   wasteCompostedKg?: number;
   wasteOtherDivertedKg?: number;
-  p1RecirculationScore?: number;
   noSingleUsePlastics?: boolean;
   foodWasteProgramme?: boolean;
   wasteEducation?: boolean;
-  evidenceTierWater?: EvidenceTier;
   evidenceTierWaste?: EvidenceTier;
 
-  // Step 8 — P1: Site & Carbon
+  // P1: Carbon (scope 3 context)
   scope3TransportKgCo2e?: number;
-  p1SiteScore?: number;
   evidenceTierCarbon?: EvidenceTier;
+
+  // P1: Site / land use
+  p1SiteScore?: number;
+  evidenceTierSite?: EvidenceTier;
 
   // Step 9 — P2: Employment
   totalFte?: number;
@@ -89,6 +114,7 @@ export interface OnboardingData {
   permanentContractPct?: number;
   averageMonthlyWage?: number;
   minimumWage?: number;
+  seasonalOperator?: boolean;
 
   // Step 10 — P2: Procurement
   totalFbSpend?: number;
@@ -105,11 +131,27 @@ export interface OnboardingData {
   // Step 10 — P2: Procurement (evidence)
   evidenceTierProcurement?: EvidenceTier;
 
-  // Step 11 — P2: Revenue & Community
+  // Step 11 — P2: Revenue
+  totalBookingsCount?: number;
+  allDirectBookings?: boolean;
   directBookingPct?: number;
-  communityScore?: number;
   evidenceTierRevenue?: EvidenceTier;
+
+  // P2: Community
+  communityScore?: number;
   evidenceTierCommunity?: EvidenceTier;
+
+  /** Evidence readiness checklist (confirmation only, before GPS preview) */
+  evidenceChecklistElectricity?: boolean;
+  evidenceChecklistGasFuel?: boolean;
+  evidenceChecklistWater?: boolean;
+  evidenceChecklistWaste?: boolean;
+  evidenceChecklistEmployment?: boolean;
+  evidenceChecklistSupplier?: boolean;
+  evidenceChecklistBooking?: boolean;
+  evidenceChecklistOwnership?: boolean;
+  /** Required when p3Status is A, B, or C */
+  evidenceChecklistP3?: boolean;
 
   // Step 12 — P3: Status
   p3Status?: P3Status;
@@ -166,6 +208,20 @@ export interface OnboardingData {
   _accomGateWarn?: boolean;
 }
 
+/**
+ * Wire-format mapping of raw water-practice booleans to the 0–3 discrete field
+ * accepted by the scoring API. Not used for display scoring.
+ */
+export function waterPracticesToRecirculationScore(d: OnboardingData): number | null {
+  const g = d.waterGreywater;
+  const r = d.waterRainwater;
+  const w = d.waterWastewaterTreatment;
+  if (g === undefined && r === undefined && w === undefined) {
+    return typeof d.p1RecirculationScore === "number" ? d.p1RecirculationScore : null;
+  }
+  return [g, r, w].filter((x) => x === true).length;
+}
+
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 export interface OnboardingStep {
@@ -190,12 +246,17 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     condition: (d) => d.operatorType === "B" || d.operatorType === "C" },
   { id: "ownership",           label: "Ownership" },
   { id: "activity-unit",       label: "Activity Data" },
+  { id: "photos",              label: "Photos" },
   { id: "p1-energy",           label: "Energy" },
-  { id: "p1-water-waste",      label: "Water & Waste" },
-  { id: "p1-site-carbon",      label: "Site & Carbon" },
+  { id: "p1-water",            label: "Water",
+    condition: (d) => !(d.operatorType === "B" && d.tourNoFixedBase === true) },
+  { id: "p1-waste",            label: "Waste" },
+  { id: "p1-carbon",           label: "Carbon" },
+  { id: "p1-site",             label: "Site & Land Use" },
   { id: "p2-employment",       label: "Employment" },
   { id: "p2-procurement",      label: "Procurement" },
-  { id: "p2-revenue-community", label: "Revenue & Community" },
+  { id: "p2-revenue",          label: "Revenue" },
+  { id: "p2-community",        label: "Community" },
   { id: "p3-status",           label: "P3 Status" },
   { id: "p3-programme",        label: "Programme Details",
     condition: (d) => d.p3Status === "A" || d.p3Status === "B" || d.p3Status === "C" },
@@ -204,6 +265,7 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
   { id: "p3-forward-commitment", label: "Forward Commitment",
     condition: (d) => d.p3Status === "D" },
   { id: "evidence-upload",     label: "Evidence Upload" },
+  { id: "evidence-checklist",  label: "Evidence Checklist" },
   { id: "delta",               label: "Prior Cycle",
     condition: (d) => typeof d.assessmentCycle === "number" && d.assessmentCycle > 1 },
   { id: "gps-preview",         label: "GPS Preview" },
@@ -354,19 +416,52 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     return Math.abs(acc + exp - 100) < 0.01;
   },
 
-  "p1-energy": (d) =>
-    // At minimum one energy source must be provided
-    isNonNegativeNumber(d.totalElectricityKwh) || isNonNegativeNumber(d.totalGasKwh),
+  "photos": (d) =>
+    Array.isArray(d.photoRefs) &&
+    d.photoRefs.length >= 1 &&
+    d.photoRefs.every((p) => isNonEmpty(p.storageRef)),
 
-  "p1-water-waste": (d) =>
-    isNonNegativeNumber(d.totalWaterLitres) &&
-    isNonNegativeNumber(d.totalWasteKg) &&
-    typeof d.p1RecirculationScore === "number",
+  "p1-energy": (d) => {
+    const gridOffice =
+      isNonNegativeNumber(d.officeElectricityKwh) ||
+      isNonNegativeNumber(d.gridExportKwh);
+    const accEleGas =
+      isNonNegativeNumber(d.totalElectricityKwh) ||
+      isNonNegativeNumber(d.totalGasKwh);
+    if (d.operatorType === "B") {
+      const baseEle = accEleGas || gridOffice;
+      const transportOk =
+        d.tourNoTransport === true ||
+        d.tourFuelType === "no_vehicle" ||
+        (d.tourFuelType === "electric" && isNonNegativeNumber(d.evKwhPerMonth)) ||
+        (!!d.tourFuelType &&
+          d.tourFuelType !== "electric" &&
+          d.tourFuelType !== "no_vehicle" &&
+          isNonNegativeNumber(d.tourFuelLitresPerMonth));
+      return baseEle || transportOk;
+    }
+    return accEleGas || gridOffice;
+  },
 
-  "p1-site-carbon": (d) =>
+  "p1-water": (d) => {
+    if (d.operatorType === "B" && d.tourNoFixedBase === true) return true;
+    return (
+      isNonNegativeNumber(d.totalWaterLitres) &&
+      typeof d.waterGreywater === "boolean" &&
+      typeof d.waterRainwater === "boolean" &&
+      typeof d.waterWastewaterTreatment === "boolean"
+    );
+  },
+
+  "p1-waste": (d) => isNonNegativeNumber(d.totalWasteKg),
+
+  "p1-carbon": (_d) => true,
+
+  "p1-site": (d) =>
     typeof d.p1SiteScore === "number" &&
     d.p1SiteScore >= 0 &&
-    d.p1SiteScore <= 4,
+    d.p1SiteScore <= 4 &&
+    !!d.evidenceTierSite,
 
   "p2-employment": (d) => {
     // Solo operators bypass employment fields
@@ -386,9 +481,13 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     return fbOk && nonFbOk;
   },
 
-  "p2-revenue-community": (d) =>
-    isNonNegativeNumber(d.directBookingPct) &&
-    typeof d.communityScore === "number",
+  "p2-revenue": (d) =>
+    isPositiveNumber(d.totalBookingsCount) &&
+    (d.allDirectBookings === true || isNonNegativeNumber(d.directBookingPct)) &&
+    !!d.evidenceTierRevenue,
+
+  "p2-community": (d) =>
+    typeof d.communityScore === "number" && !!d.evidenceTierCommunity,
 
   "p3-status": (d) =>
     d.p3Status === "A" ||
@@ -426,6 +525,22 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
 
   // Evidence upload — optional, operators may submit without evidence
   "evidence-upload": (_d) => true,
+
+  "evidence-checklist": (d) => {
+    const base =
+      d.evidenceChecklistElectricity === true &&
+      d.evidenceChecklistGasFuel === true &&
+      d.evidenceChecklistWater === true &&
+      d.evidenceChecklistWaste === true &&
+      d.evidenceChecklistEmployment === true &&
+      d.evidenceChecklistSupplier === true &&
+      d.evidenceChecklistBooking === true &&
+      d.evidenceChecklistOwnership === true;
+    const p3Need =
+      d.p3Status === "A" || d.p3Status === "B" || d.p3Status === "C";
+    const p3Ok = !p3Need || d.evidenceChecklistP3 === true;
+    return base && p3Ok;
+  },
 
   // Delta step — informational only for Cycle 2+, always passable
   "delta": (_d) => true,
@@ -473,19 +588,19 @@ export const SECTION_GROUPS: readonly SectionGroup[] = [
     id: "activity",
     label: "Activity Data",
     shortLabel: "Activity",
-    stepIds: ["activity-unit"],
+    stepIds: ["activity-unit", "photos"],
   },
   {
     id: "pillar1",
     label: "Operational Footprint",
     shortLabel: "P1",
-    stepIds: ["p1-energy", "p1-water-waste", "p1-site-carbon"],
+    stepIds: ["p1-energy", "p1-water", "p1-waste", "p1-carbon", "p1-site"],
   },
   {
     id: "pillar2",
     label: "Local Integration",
     shortLabel: "P2",
-    stepIds: ["p2-employment", "p2-procurement", "p2-revenue-community"],
+    stepIds: ["p2-employment", "p2-procurement", "p2-revenue", "p2-community"],
   },
   {
     id: "pillar3",
@@ -497,7 +612,7 @@ export const SECTION_GROUPS: readonly SectionGroup[] = [
     id: "evidence",
     label: "Evidence",
     shortLabel: "Evidence",
-    stepIds: ["evidence-upload", "delta"],
+    stepIds: ["evidence-upload", "evidence-checklist", "delta"],
   },
   {
     id: "submit",
@@ -523,17 +638,22 @@ export const STEP_SECTIONS: Readonly<Record<string, string>> = {
   "experience-types":        "Your Profile",
   "ownership":               "Your Profile",
   "activity-unit":           "Activity Data",
+  "photos":                  "Activity Data",
   "p1-energy":               "Pillar 1 — Operational Footprint",
-  "p1-water-waste":          "Pillar 1 — Operational Footprint",
-  "p1-site-carbon":          "Pillar 1 — Operational Footprint",
+  "p1-water":                "Pillar 1 — Operational Footprint",
+  "p1-waste":                "Pillar 1 — Operational Footprint",
+  "p1-carbon":               "Pillar 1 — Operational Footprint",
+  "p1-site":                 "Pillar 1 — Operational Footprint",
   "p2-employment":           "Pillar 2 — Local Integration",
   "p2-procurement":          "Pillar 2 — Local Integration",
-  "p2-revenue-community":    "Pillar 2 — Local Integration",
+  "p2-revenue":              "Pillar 2 — Local Integration",
+  "p2-community":            "Pillar 2 — Local Integration",
   "p3-status":               "Pillar 3 — Regenerative Contribution",
   "p3-programme":            "Pillar 3 — Regenerative Contribution",
   "p3-evidence-quality":     "Pillar 3 — Regenerative Contribution",
   "p3-forward-commitment":   "Pillar 3 — Regenerative Contribution",
   "evidence-upload":         "Evidence",
+  "evidence-checklist":      "Evidence",
   "delta":                   "Prior Cycle",
   "gps-preview":             "Score Preview",
   "review-submit":           "Review & Submit",

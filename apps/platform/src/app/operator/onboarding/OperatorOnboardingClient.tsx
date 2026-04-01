@@ -26,6 +26,7 @@ import {
   getVisibleStepNumber,
   getStepById,
   validateStep,
+  waterPracticesToRecirculationScore,
 } from "@/lib/onboarding/onboarding-steps";
 import { usePreviewScore } from "@/hooks/usePreviewScore";
 import { toast } from "sonner";
@@ -39,16 +40,20 @@ import {
   ExperienceTypesStep,
   OwnershipStep,
   ActivityUnitStep,
+  PhotosStep,
 } from "./_components/steps/profile-steps";
 import {
   P1EnergyStep,
-  P1WaterWasteStep,
-  P1SiteCarbonStep,
+  P1WaterStep,
+  P1WasteStep,
+  P1CarbonStep,
+  P1SiteStep,
 } from "./_components/steps/p1-steps";
 import {
   P2EmploymentStep,
   P2ProcurementStep,
-  P2RevenueCommunityStep,
+  P2RevenueStep,
+  P2CommunityStep,
 } from "./_components/steps/p2-steps";
 import {
   P3StatusStep,
@@ -58,6 +63,7 @@ import {
 } from "./_components/steps/p3-steps";
 import {
   EvidenceUploadStep,
+  EvidenceChecklistStep,
   DeltaStep,
 } from "./_components/steps/evidence-steps";
 import {
@@ -90,9 +96,14 @@ export function buildScorePayload(
             experiencePct: data.revenueSplitExperiencePct,
           }
         : undefined,
+    photoRefs: data.photoRefs ?? [],
     p1Raw: {
       totalElectricityKwh: data.totalElectricityKwh,
       totalGasKwh: data.totalGasKwh,
+      gridExportKwh: data.gridExportKwh,
+      officeElectricityKwh: data.officeElectricityKwh,
+      tourNoTransport: data.tourNoTransport,
+      tourNoFixedBase: data.tourNoFixedBase,
       tourFuelType: data.tourFuelType,
       tourFuelLitresPerMonth: data.tourFuelLitresPerMonth,
       evKwhPerMonth: data.evKwhPerMonth,
@@ -104,7 +115,10 @@ export function buildScorePayload(
       renewableOnsitePct: data.renewableOnsitePct,
       renewableTariffPct: data.renewableTariffPct,
       scope3TransportKgCo2e: data.scope3TransportKgCo2e,
-      recirculationScore: data.p1RecirculationScore ?? null,
+      waterGreywater: data.waterGreywater,
+      waterRainwater: data.waterRainwater,
+      waterWastewaterTreatment: data.waterWastewaterTreatment,
+      recirculationScore: waterPracticesToRecirculationScore(data),
       siteScore: data.p1SiteScore ?? null,
     },
     p2Raw: {
@@ -113,10 +127,13 @@ export function buildScorePayload(
       permanentContractPct: data.permanentContractPct,
       averageMonthlyWage: data.averageMonthlyWage,
       minimumWage: data.minimumWage,
+      seasonalOperator: data.seasonalOperator,
       totalFbSpend: data.totalFbSpend,
       localFbSpend: data.localFbSpend,
       totalNonFbSpend: data.totalNonFbSpend,
       localNonFbSpend: data.localNonFbSpend,
+      totalBookingsCount: data.totalBookingsCount,
+      allDirectBookings: data.allDirectBookings,
       directBookingPct: data.directBookingPct,
       localOwnershipPct: data.localEquityPct,
       communityScore: data.communityScore,
@@ -125,13 +142,16 @@ export function buildScorePayload(
       tourNoNonFbSpend: data.tourNoNonFbSpend,
       soloOperator: data.soloOperator,
     },
-    pillar3: {
-      status: data.p3Status ?? "E",
-      contributionCategories: data.p3ContributionCategories ?? [],
-      traceability: data.p3Traceability ?? null,
-      additionality: data.p3Additionality ?? null,
-      continuity: data.p3Continuity ?? null,
-    },
+    p3Status: data.p3Status ?? "E",
+    pillar3:
+      data.p3Status === "A" || data.p3Status === "B" || data.p3Status === "C"
+        ? {
+            contributionCategories: data.p3ContributionCategories ?? [],
+            traceability: data.p3Traceability ?? null,
+            additionality: data.p3Additionality ?? null,
+            continuity: data.p3Continuity ?? null,
+          }
+        : null,
     delta: data.deltaExplanation
       ? { explanation: data.deltaExplanation }
       : null,
@@ -160,6 +180,7 @@ export function OperatorOnboardingClient() {
     updateField,
     nextStep,
     previousStep,
+    setStepId,
     saveDraft,
     loadDraft,
     resetOnboarding,
@@ -335,9 +356,20 @@ export function OperatorOnboardingClient() {
   // ── Shared props ────────────────────────────────────────────────────────
 
   const GPS_FLOAT_STEPS = new Set([
-    "p1-site-carbon", "p2-employment", "p2-procurement", "p2-revenue-community",
-    "p3-status", "p3-programme", "p3-evidence-quality", "p3-forward-commitment",
-    "evidence-upload", "delta",
+    "p1-waste",
+    "p1-carbon",
+    "p1-site",
+    "p2-employment",
+    "p2-procurement",
+    "p2-revenue",
+    "p2-community",
+    "p3-status",
+    "p3-programme",
+    "p3-evidence-quality",
+    "p3-forward-commitment",
+    "evidence-upload",
+    "evidence-checklist",
+    "delta",
   ]);
   const showGpsFloat = GPS_FLOAT_STEPS.has(stepId) && preview != null;
 
@@ -415,18 +447,26 @@ export function OperatorOnboardingClient() {
       return <OwnershipStep {...stepProps} />;
     case "activity-unit":
       return <ActivityUnitStep {...stepProps} />;
+    case "photos":
+      return <PhotosStep {...stepProps} />;
     case "p1-energy":
       return <P1EnergyStep {...stepProps} />;
-    case "p1-water-waste":
-      return <P1WaterWasteStep {...stepProps} />;
-    case "p1-site-carbon":
-      return <P1SiteCarbonStep {...stepProps} preview={preview} />;
+    case "p1-water":
+      return <P1WaterStep {...stepProps} />;
+    case "p1-waste":
+      return <P1WasteStep {...stepProps} />;
+    case "p1-carbon":
+      return <P1CarbonStep {...stepProps} />;
+    case "p1-site":
+      return <P1SiteStep {...stepProps} preview={preview} />;
     case "p2-employment":
       return <P2EmploymentStep {...stepProps} />;
     case "p2-procurement":
       return <P2ProcurementStep {...stepProps} />;
-    case "p2-revenue-community":
-      return <P2RevenueCommunityStep {...stepProps} preview={preview} />;
+    case "p2-revenue":
+      return <P2RevenueStep {...stepProps} />;
+    case "p2-community":
+      return <P2CommunityStep {...stepProps} preview={preview} />;
     case "p3-status":
       return <P3StatusStep {...stepProps} />;
     case "p3-programme":
@@ -437,6 +477,8 @@ export function OperatorOnboardingClient() {
       return <P3ForwardCommitmentStep {...stepProps} />;
     case "evidence-upload":
       return <EvidenceUploadStep {...stepProps} evidenceData={evidenceData} />;
+    case "evidence-checklist":
+      return <EvidenceChecklistStep {...stepProps} />;
     case "delta":
       return (
         <DeltaStep
@@ -464,6 +506,7 @@ export function OperatorOnboardingClient() {
           declarationChecked={declarationChecked}
           onDeclarationChange={setDeclarationChecked}
           onSubmit={handleSubmit}
+          onEditSection={setStepId}
         />
       );
     default:

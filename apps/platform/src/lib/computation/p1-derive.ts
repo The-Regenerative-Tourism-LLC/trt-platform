@@ -26,7 +26,11 @@ export interface RawP1Inputs {
   revenueSplitExperiencePct?: number;
   totalElectricityKwh?: number;
   totalGasKwh?: number;
-  tourFuelType?: "diesel" | "petrol" | "electric";
+  /** Surplus kWh exported to grid (annual) — reduces net grid draw */
+  gridExportKwh?: number;
+  /** Additional metered electricity (e.g. office), added to main total */
+  officeElectricityKwh?: number;
+  tourFuelType?: string;
   tourFuelLitresPerMonth?: number;
   evKwhPerMonth?: number;
   totalWaterLitres?: number;
@@ -90,7 +94,13 @@ function deriveActivityUnit(raw: RawP1Inputs): number {
  */
 function computeIntensitiesWithAoU(raw: RawP1Inputs, aou: number): DerivedP1Indicators {
   // ── Energy ──────────────────────────────────────────────────────────────
-  const totalEnergyKwh = (raw.totalElectricityKwh ?? 0) + (raw.totalGasKwh ?? 0);
+  const netElectricityKwh = Math.max(
+    0,
+    (raw.totalElectricityKwh ?? 0) +
+      (raw.officeElectricityKwh ?? 0) -
+      (raw.gridExportKwh ?? 0)
+  );
+  const totalEnergyKwh = netElectricityKwh + (raw.totalGasKwh ?? 0);
   const energyIntensity = round2(safeDiv(totalEnergyKwh, aou));
 
   // ── Renewable % ─────────────────────────────────────────────────────────
@@ -109,12 +119,20 @@ function computeIntensitiesWithAoU(raw: RawP1Inputs, aou: number): DerivedP1Indi
 
   // ── Carbon intensity ─────────────────────────────────────────────────────
   const scope2ElectricityKgCo2e =
-    (raw.totalElectricityKwh ?? 0) * GRID_EMISSION_FACTOR_KG_CO2E_PER_KWH;
+    netElectricityKwh * GRID_EMISSION_FACTOR_KG_CO2E_PER_KWH;
 
   let fuelKgCo2e = 0;
-  if (raw.tourFuelType && raw.tourFuelType !== "electric" && raw.tourFuelLitresPerMonth) {
-    const factor = FUEL_EMISSION_FACTORS[raw.tourFuelType];
-    fuelKgCo2e = raw.tourFuelLitresPerMonth * 12 * factor;
+  if (
+    raw.tourFuelType &&
+    raw.tourFuelType !== "electric" &&
+    raw.tourFuelType !== "no_vehicle" &&
+    raw.tourFuelLitresPerMonth
+  ) {
+    const ft = raw.tourFuelType as keyof typeof FUEL_EMISSION_FACTORS;
+    const factor = FUEL_EMISSION_FACTORS[ft];
+    if (factor != null) {
+      fuelKgCo2e = raw.tourFuelLitresPerMonth * 12 * factor;
+    }
   }
 
   const evScope2KgCo2e =

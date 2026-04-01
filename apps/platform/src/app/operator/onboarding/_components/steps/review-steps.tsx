@@ -116,6 +116,7 @@ interface ReviewSubmitProps {
   declarationChecked: boolean;
   onDeclarationChange: (v: boolean) => void;
   onSubmit: () => void;
+  onEditSection?: (stepId: string) => void;
 }
 
 export function ReviewSubmitStep({
@@ -125,6 +126,7 @@ export function ReviewSubmitStep({
   declarationChecked,
   onDeclarationChange,
   onSubmit,
+  onEditSection,
 }: ReviewSubmitProps) {
   const hasP1 = data.totalElectricityKwh != null || data.totalGasKwh != null;
   const hasP2 = data.totalFte != null || data.soloOperator === true;
@@ -138,10 +140,13 @@ export function ReviewSubmitStep({
           (data.revenueSplitExperiencePct ?? 0) -
           100
       ) < 1);
+  const hasPhotos = (data.photoRefs?.length ?? 0) >= 1;
+
   const dataComplete = !!(
     data.operatorType &&
     data.legalName &&
     data.country &&
+    hasPhotos &&
     hasP1 &&
     hasP2 &&
     hasP3 &&
@@ -161,14 +166,24 @@ export function ReviewSubmitStep({
 
   const ReviewSection = ({
     title,
+    editStepId,
     children,
   }: {
     title: string;
+    editStepId?: string;
     children: ReactNode;
   }) => (
     <div className="rounded-xl border bg-card overflow-hidden">
-      <div className="px-4 py-3 bg-muted/40 border-b">
+      <div className="px-4 py-3 bg-muted/40 border-b flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
+        {editStepId && onEditSection && (
+          <button
+            onClick={() => onEditSection(editStepId)}
+            className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+          >
+            Edit →
+          </button>
+        )}
       </div>
       <div className="px-4 py-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm">{children}</div>
     </div>
@@ -220,21 +235,44 @@ export function ReviewSubmitStep({
         )}
 
         {/* Profile */}
-        <ReviewSection title="Your Profile">
+        <ReviewSection title="Your Profile" editStepId="operator-type">
           <Row label="Type" value={OPERATOR_TYPES[data.operatorType ?? "A"]?.label} />
           <Row label="Name" value={data.tradingName || data.legalName} />
           <Row label="Country" value={data.country} />
           <Row label="Region" value={data.destinationRegion} />
+        </ReviewSection>
+
+        {/* Activity */}
+        <ReviewSection title="Activity Data" editStepId="activity-unit">
           {data.operatorType !== "B" && data.guestNights != null && (
             <Row label="Guest-nights" value={data.guestNights.toLocaleString()} />
           )}
           {data.operatorType !== "A" && data.visitorDays != null && (
             <Row label="Visitor-days" value={data.visitorDays.toLocaleString()} />
           )}
+          {data.operatorType === "C" && (
+            <>
+              <Row label="Accommodation %" value={data.revenueSplitAccommodationPct != null ? `${data.revenueSplitAccommodationPct}%` : null} />
+              <Row label="Experience %" value={data.revenueSplitExperiencePct != null ? `${data.revenueSplitExperiencePct}%` : null} />
+            </>
+          )}
+          <Row label="Assessment period end" value={data.assessmentPeriodEnd} />
+        </ReviewSection>
+
+        {/* Photos */}
+        <ReviewSection title="Photos" editStepId="photos">
+          <Row
+            label="Images (cover first)"
+            value={
+              (data.photoRefs?.length ?? 0) > 0
+                ? `${data.photoRefs!.length} reference${data.photoRefs!.length !== 1 ? "s" : ""}`
+                : "None"
+            }
+          />
         </ReviewSection>
 
         {/* P1 */}
-        <ReviewSection title="Pillar 1 — Operational Footprint">
+        <ReviewSection title="Pillar 1 — Operational Footprint" editStepId="p1-energy">
           <Row
             label="Electricity"
             value={
@@ -259,11 +297,21 @@ export function ReviewSubmitStep({
                 : null
             }
           />
+          <Row
+            label="Water practices"
+            value={[
+              data.waterGreywater ? "Greywater" : null,
+              data.waterRainwater ? "Rainwater" : null,
+              data.waterWastewaterTreatment ? "Wastewater treatment" : null,
+            ]
+              .filter(Boolean)
+              .join(", ") || "—"}
+          />
           <Row label="Site score" value={data.p1SiteScore != null ? `${data.p1SiteScore}/4` : null} />
         </ReviewSection>
 
         {/* P2 */}
-        <ReviewSection title="Pillar 2 — Local Integration">
+        <ReviewSection title="Pillar 2 — Local Integration" editStepId="p2-employment">
           {data.soloOperator ? (
             <>
               <span className="text-muted-foreground col-span-2 text-xs italic">Solo operator — employment defaults to 100%</span>
@@ -284,16 +332,37 @@ export function ReviewSubmitStep({
                 : null
             }
           />
-          <Row label="Direct booking" value={data.directBookingPct != null ? `${data.directBookingPct}%` : null} />
+          <Row label="Bookings (count)" value={data.totalBookingsCount?.toLocaleString() ?? null} />
+          <Row
+            label="Direct booking"
+            value={
+              data.allDirectBookings
+                ? "100% (all direct)"
+                : data.directBookingPct != null
+                ? `${data.directBookingPct}%`
+                : null
+            }
+          />
+          <Row label="Seasonal operator" value={data.seasonalOperator === true ? "Yes" : data.seasonalOperator === false ? "No" : null} />
         </ReviewSection>
 
         {/* P3 */}
-        <ReviewSection title="Pillar 3 — Regenerative Contribution">
+        <ReviewSection title="Pillar 3 — Regenerative Contribution" editStepId="p3-status">
           <Row label="Status" value={data.p3Status ? p3StatusLabel[data.p3Status] : null} />
           {(data.p3Status === "A" || data.p3Status === "B" || data.p3Status === "C") && (
             <Row label="Programme" value={data.p3ProgrammeDescription?.slice(0, 60) ?? null} />
           )}
           <Row label="Evidence files" value={evidenceCount > 0 ? `${evidenceCount} linked` : "None"} />
+        </ReviewSection>
+
+        {/* Evidence */}
+        <ReviewSection title="Evidence" editStepId="evidence-upload">
+          <Row label="Files linked" value={evidenceCount > 0 ? `${evidenceCount} file${evidenceCount !== 1 ? "s" : ""}` : "None"} />
+          {evidenceCount === 0 && (
+            <span className="text-xs text-amber-600 col-span-2">
+              Evidence upload is optional but recommended for score publication.
+            </span>
+          )}
         </ReviewSection>
 
         {/* Readiness checklist */}
@@ -305,6 +374,7 @@ export function ReviewSubmitStep({
                 label: "Operator profile complete",
                 ok: !!(data.operatorType && data.legalName && data.country),
               },
+              { label: "At least one photo reference", ok: hasPhotos },
               { label: "Pillar 1 — energy data provided", ok: hasP1 },
               { label: "Pillar 2 — employment data provided", ok: hasP2 },
               { label: "Pillar 3 — status selected", ok: hasP3 },

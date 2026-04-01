@@ -33,6 +33,12 @@ export function RoadmapScreen({
       desc: "How you actively improve the place you depend on.",
       done: !!data.p3Status,
     },
+    {
+      icon: "📎",
+      label: "Evidence & Review",
+      desc: "Upload supporting documents and review your assessment before submission.",
+      done: (data.evidenceRefs?.length ?? 0) > 0,
+    },
   ];
 
   return (

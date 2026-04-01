@@ -144,11 +144,19 @@ export function StepShell({
       <div className="flex-1 pt-14 pb-28 px-4">
         <div className="max-w-2xl mx-auto py-8 space-y-6">
           <div className="space-y-2">
-            {sectionLabel && (
-              <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-                {sectionLabel}
-              </p>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                Step {stepNumber} of {totalSteps}
+              </span>
+              {sectionLabel && (
+                <>
+                  <span className="text-xs text-muted-foreground/40">·</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
+                    {sectionLabel}
+                  </span>
+                </>
+              )}
+            </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
             {subtitle && (
               <p className="text-muted-foreground leading-relaxed">{subtitle}</p>

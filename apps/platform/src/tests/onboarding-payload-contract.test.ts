@@ -23,9 +23,15 @@ function completeData(): OnboardingData {
     territoryId: "ter-1",
     assessmentPeriodEnd: "2025-12-31",
     guestNights: 3000,
+    photoRefs: [{ id: "p1", storageRef: "https://x.example/img.jpg" }],
     totalElectricityKwh: 20000,
     totalGasKwh: 5000,
+    officeElectricityKwh: 0,
+    gridExportKwh: 100,
     totalWaterLitres: 100000,
+    waterGreywater: true,
+    waterRainwater: true,
+    waterWastewaterTreatment: false,
     totalWasteKg: 2000,
     wasteRecycledKg: 800,
     wasteCompostedKg: 200,
@@ -34,16 +40,17 @@ function completeData(): OnboardingData {
     renewableTariffPct: 20,
     scope3TransportKgCo2e: 500,
     p1SiteScore: 3,
-    p1RecirculationScore: 2,
     totalFte: 6,
     localFte: 5,
     permanentContractPct: 80,
     averageMonthlyWage: 1000,
     minimumWage: 870,
+    seasonalOperator: false,
     totalFbSpend: 20000,
     localFbSpend: 14000,
     totalNonFbSpend: 8000,
     localNonFbSpend: 5000,
+    totalBookingsCount: 500,
     directBookingPct: 65,
     localEquityPct: 100,
     communityScore: 3,
@@ -217,58 +224,124 @@ describe("EvidenceTier type — aligns with evidence ref contract", () => {
   });
 });
 
-// ── 4. buildScorePayload — pillar3 includes status ────────────────────────────
+// ── 4. buildScorePayload — p3Status + pillar3 contract ────────────────────────
 
-describe("buildScorePayload — pillar3 contract", () => {
-  it("includes status inside pillar3 object", () => {
+describe("buildScorePayload — p3Status / pillar3 contract", () => {
+  it("sends p3Status at the top level", () => {
     const data = completeData();
     const payload = buildScorePayload(data, "op-1", "ter-1");
 
-    expect(payload.pillar3.status).toBe("A");
+    expect(payload.p3Status).toBe("A");
   });
 
-  it("does not have p3Status at the top level", () => {
-    const data = completeData();
-    const payload = buildScorePayload(data, "op-1", "ter-1");
-
-    expect((payload as Record<string, unknown>).p3Status).toBeUndefined();
-  });
-
-  it("defaults status to 'E' when p3Status is undefined", () => {
+  it("defaults p3Status to 'E' when undefined", () => {
     const data = completeData();
     data.p3Status = undefined;
     const payload = buildScorePayload(data, "op-1", "ter-1");
 
-    expect(payload.pillar3.status).toBe("E");
+    expect(payload.p3Status).toBe("E");
   });
 
-  it("sends contributionCategories as raw array alongside status", () => {
+  it("sends pillar3 object for status A/B/C with raw categories (no categoryScope)", () => {
+    for (const status of ["A", "B", "C"] as const) {
+      const data = completeData();
+      data.p3Status = status;
+      data.p3ContributionCategories = ["Cat1", "Cat3"];
+      const payload = buildScorePayload(data, "op-1", "ter-1");
+
+      expect(payload.pillar3).toEqual({
+        contributionCategories: ["Cat1", "Cat3"],
+        traceability: 75,
+        additionality: 50,
+        continuity: 75,
+      });
+      expect((payload.pillar3 as Record<string, unknown>).status).toBeUndefined();
+      expect((payload.pillar3 as Record<string, unknown>).categoryScope).toBeUndefined();
+    }
+  });
+
+  it("sends pillar3 as null for status D", () => {
     const data = completeData();
-    data.p3ContributionCategories = ["Cat1", "Cat3"];
+    data.p3Status = "D";
     const payload = buildScorePayload(data, "op-1", "ter-1");
 
-    expect(payload.pillar3).toEqual({
-      status: "A",
-      contributionCategories: ["Cat1", "Cat3"],
-      traceability: 75,
-      additionality: 50,
-      continuity: 75,
-    });
+    expect(payload.pillar3).toBeNull();
+    expect(payload.p3Status).toBe("D");
   });
 
-  it("does not include categoryScope in pillar3", () => {
+  it("sends pillar3 as null for status E", () => {
     const data = completeData();
+    data.p3Status = "E";
     const payload = buildScorePayload(data, "op-1", "ter-1");
 
-    expect((payload.pillar3 as Record<string, unknown>).categoryScope).toBeUndefined();
+    expect(payload.pillar3).toBeNull();
+    expect(payload.p3Status).toBe("E");
   });
 
-  it("passes all P3 status values correctly (A through E)", () => {
+  it("sends pillar3 as null when p3Status is undefined (defaults to E)", () => {
+    const data = completeData();
+    data.p3Status = undefined;
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+
+    expect(payload.pillar3).toBeNull();
+    expect(payload.p3Status).toBe("E");
+  });
+
+  it("does not include status inside pillar3 for A/B/C", () => {
+    const data = completeData();
+    data.p3Status = "A";
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+
+    expect(payload.pillar3).not.toBeNull();
+    expect((payload.pillar3 as Record<string, unknown>).status).toBeUndefined();
+  });
+
+  it("passes all P3 status values at top level (A through E)", () => {
     for (const status of ["A", "B", "C", "D", "E"] as const) {
       const data = completeData();
       data.p3Status = status;
       const payload = buildScorePayload(data, "op-1", "ter-1");
-      expect(payload.pillar3.status).toBe(status);
+      expect(payload.p3Status).toBe(status);
     }
+  });
+
+  it("sends forwardCommitment for status D only", () => {
+    const data = completeData();
+    data.p3Status = "D";
+    data.forwardCommitmentPreferredCategory = "Cat1";
+    data.forwardCommitmentSignatory = "Jane Doe";
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+
+    expect(payload.forwardCommitment).toBeDefined();
+    expect(payload.forwardCommitment?.preferredCategory).toBe("Cat1");
+  });
+
+  it("does not send forwardCommitment for status A", () => {
+    const data = completeData();
+    data.p3Status = "A";
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+
+    expect(payload.forwardCommitment).toBeUndefined();
+  });
+});
+
+describe("Water practices → recirculationScore (API wire mapping only)", () => {
+  it("tallies true water checkboxes into recirculationScore for submit and preview", () => {
+    const data = completeData();
+    data.waterGreywater = true;
+    data.waterRainwater = false;
+    data.waterWastewaterTreatment = true;
+    expect(buildScorePayload(data, "op-1", "ter-1").p1Raw.recirculationScore).toBe(2);
+    expect(buildPreviewPayload(data).recirculationScore).toBe(2);
+  });
+});
+
+describe("buildScorePayload — extended raw fields", () => {
+  it("includes photoRefs, grid/office energy, and P2 booking fields as raw input", () => {
+    const payload = buildScorePayload(completeData(), "op-1", "ter-1");
+    expect(payload.photoRefs).toHaveLength(1);
+    expect(payload.p1Raw.gridExportKwh).toBe(100);
+    expect(payload.p1Raw.waterGreywater).toBe(true);
+    expect(payload.p2Raw.totalBookingsCount).toBe(500);
   });
 });

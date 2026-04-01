@@ -16,6 +16,63 @@ interface StepProps {
   shell: StepShellBaseProps;
 }
 
+// ── Evidence checklist (confirmation only) ───────────────────────────────────
+
+const CHECKLIST_ROWS: Array<{
+  label: string;
+  field:
+    | "evidenceChecklistElectricity"
+    | "evidenceChecklistGasFuel"
+    | "evidenceChecklistWater"
+    | "evidenceChecklistWaste"
+    | "evidenceChecklistEmployment"
+    | "evidenceChecklistSupplier"
+    | "evidenceChecklistBooking"
+    | "evidenceChecklistOwnership"
+    | "evidenceChecklistP3";
+}> = [
+  { label: "Electricity bills (or equivalent)", field: "evidenceChecklistElectricity" },
+  { label: "Gas / fuel records", field: "evidenceChecklistGasFuel" },
+  { label: "Water bills / meter data", field: "evidenceChecklistWater" },
+  { label: "Waste records", field: "evidenceChecklistWaste" },
+  { label: "Employment documents (where applicable)", field: "evidenceChecklistEmployment" },
+  { label: "Supplier invoices (procurement)", field: "evidenceChecklistSupplier" },
+  { label: "Booking / revenue breakdown", field: "evidenceChecklistBooking" },
+  { label: "Ownership documents", field: "evidenceChecklistOwnership" },
+  { label: "P3 programme documentation (if applicable)", field: "evidenceChecklistP3" },
+];
+
+export function EvidenceChecklistStep({ data, updateField, shell }: StepProps) {
+  const showP3 = data.p3Status === "A" || data.p3Status === "B" || data.p3Status === "C";
+
+  return (
+    <StepShell
+      {...shell}
+      title="Evidence readiness"
+      subtitle="Confirm you understand which documents support your assessment. This is not a file upload — link files on the previous step if needed."
+    >
+      <div className="space-y-3">
+        {CHECKLIST_ROWS.filter((row) => row.field !== "evidenceChecklistP3" || showP3).map(
+          (row) => (
+            <label
+              key={row.field}
+              className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
+            >
+              <input
+                type="checkbox"
+                checked={data[row.field] === true}
+                onChange={(e) => updateField({ [row.field]: e.target.checked })}
+                className="mt-0.5 accent-emerald-600 shrink-0"
+              />
+              <span className="text-sm leading-snug">{row.label}</span>
+            </label>
+          )
+        )}
+      </div>
+    </StepShell>
+  );
+}
+
 // ── Evidence Upload ───────────────────────────────────────────────────────────
 
 interface EvidenceUploadProps extends StepProps {

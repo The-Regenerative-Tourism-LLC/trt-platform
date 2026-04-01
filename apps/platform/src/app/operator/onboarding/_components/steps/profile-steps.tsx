@@ -212,6 +212,32 @@ export function IdentityStep({
           max={new Date().getFullYear()}
         />
       </FieldGroup>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <FieldGroup label="Typical price / night (optional)" hint="Published rate in your currency.">
+          <NumberInput
+            value={data.pricePerNight}
+            onChange={(v) => updateField({ pricePerNight: v })}
+            placeholder="e.g. 120"
+            min={0}
+          />
+        </FieldGroup>
+        <FieldGroup label="Latitude (optional)" hint="WGS84 decimal degrees.">
+          <NumberInput
+            value={data.latitude}
+            onChange={(v) => updateField({ latitude: v })}
+            placeholder="e.g. 37.02"
+            step={0.000001}
+          />
+        </FieldGroup>
+        <FieldGroup label="Longitude (optional)">
+          <NumberInput
+            value={data.longitude}
+            onChange={(v) => updateField({ longitude: v })}
+            placeholder="e.g. -7.93"
+            step={0.000001}
+          />
+        </FieldGroup>
+      </div>
 
       {/* Location section */}
       <div className="border-t border-border/50 pt-5 space-y-4">
@@ -611,6 +637,119 @@ export function ActivityUnitStep({
             )}
         </>
       )}
+    </StepShell>
+  );
+}
+
+// ── Photos (references only) ──────────────────────────────────────────────────
+
+function newPhotoId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `photo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export function PhotosStep({ data, updateField, shell }: StepProps) {
+  const photos = data.photoRefs ?? [];
+
+  const addPhoto = () => {
+    updateField({ photoRefs: [...photos, { id: newPhotoId(), storageRef: "" }] });
+  };
+
+  const removePhoto = (id: string) => {
+    updateField({ photoRefs: photos.filter((p) => p.id !== id) });
+  };
+
+  const patchPhoto = (
+    id: string,
+    patch: Partial<{ storageRef: string; fileName: string }>
+  ) => {
+    updateField({
+      photoRefs: photos.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+    });
+  };
+
+  const setCover = (id: string) => {
+    const ix = photos.findIndex((p) => p.id === id);
+    if (ix <= 0) return;
+    const next = [...photos];
+    const [row] = next.splice(ix, 1);
+    next.unshift(row);
+    updateField({ photoRefs: next });
+  };
+
+  return (
+    <StepShell
+      {...shell}
+      title="Photos"
+      subtitle="Add at least one image. Store files in your storage and paste references here — we only save references, not file bytes."
+    >
+      <Tip icon="📷">
+        The first photo in the list is your cover image. You can reorder with &quot;Set as cover&quot;.
+      </Tip>
+      <div className="space-y-4">
+        {photos.map((p, index) => (
+          <div key={p.id} className="rounded-xl border bg-card p-4 space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-semibold text-emerald-600">
+                {index === 0 ? "Cover image" : `Photo ${index + 1}`}
+              </span>
+              <div className="flex gap-2">
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCover(p.id)}
+                    className="text-xs font-medium text-emerald-600 hover:underline"
+                  >
+                    Set as cover
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removePhoto(p.id)}
+                  className="text-xs text-muted-foreground hover:text-destructive"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+            <FieldGroup label="Optional — pick file to capture display name (not uploaded)">
+              <input
+                type="file"
+                accept="image/*"
+                className={inputCls + " py-2 file:mr-3 file:text-sm"}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) patchPhoto(p.id, { fileName: f.name });
+                  e.target.value = "";
+                }}
+              />
+            </FieldGroup>
+            <FieldGroup
+              label="Storage reference or URL"
+              hint="Required. Path or public URL where the image is stored."
+            >
+              <input
+                type="text"
+                value={p.storageRef}
+                onChange={(e) => patchPhoto(p.id, { storageRef: e.target.value })}
+                className={inputCls}
+                placeholder="https://… or bucket/path/photo.jpg"
+              />
+            </FieldGroup>
+            {p.fileName && (
+              <p className="text-xs text-muted-foreground">Label: {p.fileName}</p>
+            )}
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={addPhoto}
+        className="w-full rounded-xl border-2 border-dashed border-border py-3 text-sm font-medium text-muted-foreground hover:border-emerald-300 hover:text-emerald-700 transition-colors"
+      >
+        + Add photo
+      </button>
     </StepShell>
   );
 }

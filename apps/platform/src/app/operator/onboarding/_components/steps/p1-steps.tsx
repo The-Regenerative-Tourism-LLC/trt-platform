@@ -8,6 +8,7 @@ import {
   FieldGroup,
   NumberInput,
   BandSelector,
+  TogglePair,
   Tip,
   EvidenceTierSelector,
 } from "../primitives";
@@ -37,6 +38,34 @@ export function P1EnergyStep({
       {floatingGps}
       {data.operatorType === "B" ? (
         <>
+          <FieldGroup label="No guest transport with your own vehicles?">
+            <TogglePair
+              value={data.tourNoTransport}
+              trueLabel="Yes — no tour transport"
+              falseLabel="No — we use vehicles"
+              onChange={(v) =>
+                updateField({
+                  tourNoTransport: v,
+                  ...(v
+                    ? {
+                        tourFuelType: undefined,
+                        tourFuelLitresPerMonth: undefined,
+                        evKwhPerMonth: undefined,
+                      }
+                    : {}),
+                })
+              }
+            />
+          </FieldGroup>
+          <FieldGroup label="No fixed base (office / property) for water-intensive operations?">
+            <TogglePair
+              value={data.tourNoFixedBase}
+              trueLabel="Yes — no fixed base"
+              falseLabel="No — we have a fixed base"
+              onChange={(v) => updateField({ tourNoFixedBase: v })}
+            />
+          </FieldGroup>
+          {!data.tourNoTransport && (
           <FieldGroup
             label="Tour transport fuel type"
             hint="How do you transport guests? Select the primary fuel type."
@@ -59,7 +88,8 @@ export function P1EnergyStep({
               ))}
             </div>
           </FieldGroup>
-          {data.tourFuelType && data.tourFuelType !== "electric" && data.tourFuelType !== "no_vehicle" && (
+          )}
+          {!data.tourNoTransport && data.tourFuelType && data.tourFuelType !== "electric" && data.tourFuelType !== "no_vehicle" && (
             <FieldGroup label="Tour fuel (litres per month)" hint="Average monthly fuel used for guest transport.">
               <NumberInput
                 value={data.tourFuelLitresPerMonth}
@@ -69,7 +99,7 @@ export function P1EnergyStep({
               />
             </FieldGroup>
           )}
-          {data.tourFuelType === "electric" && (
+          {!data.tourNoTransport && data.tourFuelType === "electric" && (
             <FieldGroup label="EV charging (kWh per month)" hint="Electricity used for electric vehicle fleet.">
               <NumberInput
                 value={data.evKwhPerMonth}
@@ -84,9 +114,20 @@ export function P1EnergyStep({
             hint="Annual electricity for your office or base location, if applicable."
           >
             <NumberInput
-              value={data.totalElectricityKwh}
-              onChange={(v) => updateField({ totalElectricityKwh: v })}
+              value={data.officeElectricityKwh}
+              onChange={(v) => updateField({ officeElectricityKwh: v })}
               placeholder="e.g. 3 000"
+              min={0}
+            />
+          </FieldGroup>
+          <FieldGroup
+            label="Electricity exported to grid (kWh / year)"
+            hint="If you feed surplus generation into the grid."
+          >
+            <NumberInput
+              value={data.gridExportKwh}
+              onChange={(v) => updateField({ gridExportKwh: v })}
+              placeholder="e.g. 0"
               min={0}
             />
           </FieldGroup>
@@ -101,6 +142,28 @@ export function P1EnergyStep({
               value={data.totalElectricityKwh}
               onChange={(v) => updateField({ totalElectricityKwh: v })}
               placeholder="e.g. 45 000"
+              min={0}
+            />
+          </FieldGroup>
+          <FieldGroup
+            label="Office / ancillary electricity (kWh)"
+            hint="Optional separate meter or outbuilding, if not included above."
+          >
+            <NumberInput
+              value={data.officeElectricityKwh}
+              onChange={(v) => updateField({ officeElectricityKwh: v })}
+              placeholder="e.g. 0"
+              min={0}
+            />
+          </FieldGroup>
+          <FieldGroup
+            label="Electricity exported to grid (kWh / year)"
+            hint="Surplus generation fed into the grid."
+          >
+            <NumberInput
+              value={data.gridExportKwh}
+              onChange={(v) => updateField({ gridExportKwh: v })}
+              placeholder="e.g. 0"
               min={0}
             />
           </FieldGroup>
@@ -204,9 +267,67 @@ export function P1EnergyStep({
   );
 }
 
-// ── P1: Water & Waste ─────────────────────────────────────────────────────────
+// ── P1: Water ─────────────────────────────────────────────────────────────────
 
-export function P1WaterWasteStep({
+export function P1WaterStep({
+  data,
+  updateField,
+  shell,
+  floatingGps,
+}: StepProps) {
+  return (
+    <StepShell
+      {...shell}
+      title="Water"
+      subtitle="Indicator 1B · 25% of Pillar 1. Consumption and water stewardship practices."
+    >
+      {floatingGps}
+      <FieldGroup
+        label="Total water consumed (litres)"
+        hint="From water meter or utility bills. 1 m³ = 1 000 litres."
+      >
+        <NumberInput
+          value={data.totalWaterLitres}
+          onChange={(v) => updateField({ totalWaterLitres: v })}
+          placeholder="e.g. 750 000"
+          min={0}
+        />
+      </FieldGroup>
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Water stewardship practices</p>
+        {(
+          [
+            { key: "waterGreywater" as const, label: "Greywater capture / reuse" },
+            { key: "waterRainwater" as const, label: "Rainwater harvesting" },
+            { key: "waterWastewaterTreatment" as const, label: "On-site wastewater treatment" },
+          ] as const
+        ).map((item) => (
+          <label
+            key={item.key}
+            className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={data[item.key] === true}
+              onChange={(e) => updateField({ [item.key]: e.target.checked })}
+              className="mt-0.5 accent-emerald-600"
+            />
+            <span className="text-sm">{item.label}</span>
+          </label>
+        ))}
+      </div>
+      <EvidenceTierSelector
+        value={data.evidenceTierWater}
+        onChange={(v: EvidenceTier) => updateField({ evidenceTierWater: v })}
+        label="Evidence quality — water data"
+      />
+    </StepShell>
+  );
+}
+
+// ── P1: Waste ─────────────────────────────────────────────────────────────────
+
+export function P1WasteStep({
   data,
   updateField,
   shell,
@@ -224,139 +345,130 @@ export function P1WaterWasteStep({
   return (
     <StepShell
       {...shell}
-      title="Water & waste"
-      subtitle="Indicator 1B (25% of P1) and 1C (20% of P1). Water consumption, waste generation, and diversion over the 12-month period."
+      title="Waste"
+      subtitle="Indicator 1C · 20% of Pillar 1. Waste generation and diversion."
     >
       {floatingGps}
-
-      {/* Water section */}
-      <div className="space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-          Water — Indicator 1B · GPS impact 10%
-        </p>
-        <FieldGroup
-          label="Total water consumed (litres)"
-          hint="From water meter or utility bills. 1 m³ = 1 000 litres."
-        >
+      <Tip icon="🗑️">
+        Estimate annual waste from bag count × weight, container volume × collections, or waste
+        contractor invoices.
+      </Tip>
+      <FieldGroup
+        label="Total waste generated (kg)"
+        hint="From waste collection invoices or on-site weighing records."
+      >
+        <NumberInput
+          value={data.totalWasteKg}
+          onChange={(v) => updateField({ totalWasteKg: v })}
+          placeholder="e.g. 5 000"
+          min={0}
+        />
+      </FieldGroup>
+      <div className="grid grid-cols-3 gap-3">
+        <FieldGroup label="Recycled (kg)">
           <NumberInput
-            value={data.totalWaterLitres}
-            onChange={(v) => updateField({ totalWaterLitres: v })}
-            placeholder="e.g. 750 000"
+            value={data.wasteRecycledKg}
+            onChange={(v) => updateField({ wasteRecycledKg: v })}
+            placeholder="e.g. 2 000"
             min={0}
           />
         </FieldGroup>
-        <FieldGroup
-          label="Water recirculation systems"
-          hint="Each active system adds 3.3 points to your water sub-score."
-        >
-          <BandSelector
-            values={[0, 1, 2, 3]}
-            labels={["0 — none", "1 system", "2 systems", "3 systems"]}
-            selected={data.p1RecirculationScore}
-            onSelect={(v) => updateField({ p1RecirculationScore: v })}
-          />
-        </FieldGroup>
-        <EvidenceTierSelector
-          value={data.evidenceTierWater}
-          onChange={(v: EvidenceTier) => updateField({ evidenceTierWater: v })}
-          label="Evidence quality — water data"
-        />
-      </div>
-
-      {/* Waste section */}
-      <div className="space-y-4 border-t border-border/50 pt-5">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-          Waste — Indicator 1C · GPS impact 8%
-        </p>
-        <Tip icon="🗑️">
-          Estimate annual waste from bag count × weight, container volume ×
-          collections, or waste contractor invoices.
-        </Tip>
-        <FieldGroup
-          label="Total waste generated (kg)"
-          hint="From waste collection invoices or on-site weighing records."
-        >
+        <FieldGroup label="Composted (kg)">
           <NumberInput
-            value={data.totalWasteKg}
-            onChange={(v) => updateField({ totalWasteKg: v })}
-            placeholder="e.g. 5 000"
+            value={data.wasteCompostedKg}
+            onChange={(v) => updateField({ wasteCompostedKg: v })}
+            placeholder="e.g. 1 000"
             min={0}
           />
         </FieldGroup>
-        <div className="grid grid-cols-3 gap-3">
-          <FieldGroup label="Recycled (kg)">
-            <NumberInput
-              value={data.wasteRecycledKg}
-              onChange={(v) => updateField({ wasteRecycledKg: v })}
-              placeholder="e.g. 2 000"
-              min={0}
-            />
-          </FieldGroup>
-          <FieldGroup label="Composted (kg)">
-            <NumberInput
-              value={data.wasteCompostedKg}
-              onChange={(v) => updateField({ wasteCompostedKg: v })}
-              placeholder="e.g. 1 000"
-              min={0}
-            />
-          </FieldGroup>
-          <FieldGroup label="Other diverted (kg)" hint="Anaerobic digestion, reuse.">
-            <NumberInput
-              value={data.wasteOtherDivertedKg}
-              onChange={(v) => updateField({ wasteOtherDivertedKg: v })}
-              placeholder="e.g. 500"
-              min={0}
-            />
-          </FieldGroup>
-        </div>
-        {wasteWarning && (
-          <p className="text-sm text-amber-600">
-            Diverted waste ({totalDiverted.toLocaleString()} kg) exceeds total waste.
-          </p>
-        )}
-
-        {/* Bonus waste practices */}
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">
-            Bonus practices (each adds to your waste sub-score)
-          </p>
-          {([
-            { key: "noSingleUsePlastics", label: "No single-use plastics policy" },
-            { key: "foodWasteProgramme", label: "Active food waste reduction programme" },
-            { key: "wasteEducation", label: "Guest waste education / signage" },
-          ] as const).map((item) => (
-            <label
-              key={item.key}
-              className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={
-                  data[item.key] === true
-                }
-                onChange={(e) =>
-                  updateField({ [item.key]: e.target.checked })
-                }
-                className="mt-0.5 accent-emerald-600"
-              />
-              <span className="text-sm">{item.label}</span>
-            </label>
-          ))}
-        </div>
-
-        <EvidenceTierSelector
-          value={data.evidenceTierWaste}
-          onChange={(v: EvidenceTier) => updateField({ evidenceTierWaste: v })}
-          label="Evidence quality — waste data"
-        />
+        <FieldGroup label="Other diverted (kg)" hint="Anaerobic digestion, reuse.">
+          <NumberInput
+            value={data.wasteOtherDivertedKg}
+            onChange={(v) => updateField({ wasteOtherDivertedKg: v })}
+            placeholder="e.g. 500"
+            min={0}
+          />
+        </FieldGroup>
       </div>
+      {wasteWarning && (
+        <p className="text-sm text-amber-600">
+          Diverted waste ({totalDiverted.toLocaleString()} kg) exceeds total waste.
+        </p>
+      )}
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Bonus practices</p>
+        {(
+          [
+            { key: "noSingleUsePlastics" as const, label: "No single-use plastics policy" },
+            { key: "foodWasteProgramme" as const, label: "Active food waste reduction programme" },
+            { key: "wasteEducation" as const, label: "Guest waste education / signage" },
+          ] as const
+        ).map((item) => (
+          <label
+            key={item.key}
+            className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
+          >
+            <input
+              type="checkbox"
+              checked={data[item.key] === true}
+              onChange={(e) => updateField({ [item.key]: e.target.checked })}
+              className="mt-0.5 accent-emerald-600"
+            />
+            <span className="text-sm">{item.label}</span>
+          </label>
+        ))}
+      </div>
+      <EvidenceTierSelector
+        value={data.evidenceTierWaste}
+        onChange={(v: EvidenceTier) => updateField({ evidenceTierWaste: v })}
+        label="Evidence quality — waste data"
+      />
     </StepShell>
   );
 }
 
-// ── P1: Site & Carbon ─────────────────────────────────────────────────────────
+// ── P1: Carbon (scope 3 context) ─────────────────────────────────────────────
 
-export function P1SiteCarbonStep({
+export function P1CarbonStep({
+  data,
+  updateField,
+  shell,
+  floatingGps,
+}: StepProps) {
+  return (
+    <StepShell
+      {...shell}
+      title="Carbon context"
+      subtitle="Indicator 1D · optional Scope 3 transport for reporting context."
+    >
+      {floatingGps}
+      <Tip icon="🌍">
+        Scope 1 &amp; 2 emissions are calculated server-side from your energy data. Add Scope 3
+        (transport you arrange) here if applicable.
+      </Tip>
+      <FieldGroup
+        label="Scope 3 transport emissions (kg CO₂e)"
+        hint="Guest transport arranged by you (not guests' flights). Optional."
+      >
+        <NumberInput
+          value={data.scope3TransportKgCo2e}
+          onChange={(v) => updateField({ scope3TransportKgCo2e: v })}
+          placeholder="e.g. 1 200"
+          min={0}
+        />
+      </FieldGroup>
+      <EvidenceTierSelector
+        value={data.evidenceTierCarbon}
+        onChange={(v: EvidenceTier) => updateField({ evidenceTierCarbon: v })}
+        label="Evidence quality — carbon data"
+      />
+    </StepShell>
+  );
+}
+
+// ── P1: Site & land use ───────────────────────────────────────────────────────
+
+export function P1SiteStep({
   data,
   updateField,
   shell,
@@ -367,7 +479,7 @@ export function P1SiteCarbonStep({
     <StepShell
       {...shell}
       title="Site & land use"
-      subtitle="Indicator 1E · 10% of Pillar 1 · GPS impact 4%. Plus carbon context and a summary of your Pillar 1 inputs."
+      subtitle="Indicator 1E · 10% of Pillar 1. Ecological quality of your site."
     >
       {floatingGps}
       <FieldGroup
@@ -387,30 +499,11 @@ export function P1SiteCarbonStep({
           onSelect={(v) => updateField({ p1SiteScore: v })}
         />
       </FieldGroup>
-
-      <div className="border-t border-border/50 pt-5 space-y-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-          Carbon context — Indicator 1D · GPS impact 6%
-        </p>
-        <Tip icon="🌍">
-          Scope 1 &amp; 2 emissions are auto-calculated from your energy data.
-          You can optionally add Scope 3 (transport arranged by you) for context —
-          it appears on your report but does not affect the 1D sub-score.
-        </Tip>
-        <FieldGroup
-          label="Scope 3 transport emissions (kg CO₂e)"
-          hint="Guest transport arranged by you (not guests' flights). Optional."
-        >
-          <NumberInput
-            value={data.scope3TransportKgCo2e}
-            onChange={(v) => updateField({ scope3TransportKgCo2e: v })}
-            placeholder="e.g. 1 200"
-            min={0}
-          />
-        </FieldGroup>
-      </div>
-
-      {/* Pillar 1 summary */}
+      <EvidenceTierSelector
+        value={data.evidenceTierSite}
+        onChange={(v: EvidenceTier) => updateField({ evidenceTierSite: v })}
+        label="Evidence quality — site / land use"
+      />
       {preview && (
         <div className="rounded-xl border bg-card p-5 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -425,12 +518,6 @@ export function P1SiteCarbonStep({
           </p>
         </div>
       )}
-
-      <EvidenceTierSelector
-        value={data.evidenceTierCarbon}
-        onChange={(v: EvidenceTier) => updateField({ evidenceTierCarbon: v })}
-        label="Evidence quality — carbon data"
-      />
     </StepShell>
   );
 }

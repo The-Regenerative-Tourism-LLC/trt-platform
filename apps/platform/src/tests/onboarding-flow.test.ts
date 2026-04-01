@@ -45,11 +45,24 @@ function typeAData(): Partial<OnboardingData> {
     localEquityPct: 100,
     assessmentPeriodEnd: "2024-12-31",
     guestNights: 1200,
+    photoRefs: [{ id: "ph-1", storageRef: "https://storage.example.com/cover.jpg" }],
     totalElectricityKwh: 8000,
+    officeElectricityKwh: 0,
+    gridExportKwh: 0,
     totalWaterLitres: 50000,
+    waterGreywater: false,
+    waterRainwater: true,
+    waterWastewaterTreatment: false,
     totalWasteKg: 1200,
-    p1RecirculationScore: 50,
+    wasteRecycledKg: 400,
+    wasteCompostedKg: 200,
+    wasteOtherDivertedKg: 100,
     p1SiteScore: 2,
+    evidenceTierEnergy: "T2",
+    evidenceTierWater: "T2",
+    evidenceTierWaste: "T2",
+    evidenceTierCarbon: "T2",
+    evidenceTierSite: "T2",
     soloOperator: false,
     totalFte: 4,
     localFte: 4,
@@ -60,9 +73,20 @@ function typeAData(): Partial<OnboardingData> {
     localFbSpend: 9000,
     totalNonFbSpend: 5000,
     localNonFbSpend: 3000,
+    totalBookingsCount: 400,
     directBookingPct: 60,
+    evidenceTierRevenue: "T2",
     communityScore: 3,
+    evidenceTierCommunity: "T2",
     p3Status: "E",
+    evidenceChecklistElectricity: true,
+    evidenceChecklistGasFuel: true,
+    evidenceChecklistWater: true,
+    evidenceChecklistWaste: true,
+    evidenceChecklistEmployment: true,
+    evidenceChecklistSupplier: true,
+    evidenceChecklistBooking: true,
+    evidenceChecklistOwnership: true,
   };
 }
 
@@ -74,21 +98,39 @@ function typeBData(): Partial<OnboardingData> {
     primaryContactName: "João Silva",
     primaryContactEmail: "joao@trail.pt",
     territoryId: "ter-1",
-    experienceTypes: ["hiking", "wildlife"],
+    experienceTypes: ["hiking_trekking", "nature_wildlife"],
     ownershipType: "independent",
     localEquityPct: 100,
     assessmentPeriodEnd: "2024-12-31",
     visitorDays: 800,
-    totalElectricityKwh: 2000,
+    photoRefs: [{ id: "ph-b1", storageRef: "https://storage.example.com/tour.jpg" }],
+    tourNoTransport: true,
+    tourNoFixedBase: false,
+    officeElectricityKwh: 2000,
+    totalElectricityKwh: 0,
+    gridExportKwh: 0,
     totalWaterLitres: 10000,
+    waterGreywater: true,
+    waterRainwater: false,
+    waterWastewaterTreatment: false,
     totalWasteKg: 300,
-    p1RecirculationScore: 25,
+    wasteRecycledKg: 100,
+    wasteCompostedKg: 50,
+    wasteOtherDivertedKg: 0,
     p1SiteScore: 1,
+    evidenceTierEnergy: "T2",
+    evidenceTierWater: "T2",
+    evidenceTierWaste: "T2",
+    evidenceTierCarbon: "T2",
+    evidenceTierSite: "T2",
     soloOperator: true,
     tourNoFbSpend: true,
     tourNoNonFbSpend: true,
+    totalBookingsCount: 200,
     directBookingPct: 75,
+    evidenceTierRevenue: "T2",
     communityScore: 2,
+    evidenceTierCommunity: "T2",
     p3Status: "A",
     p3ContributionCategories: ["Cat1"],
     p3ProgrammeDescription: "Reforestation programme.",
@@ -96,14 +138,23 @@ function typeBData(): Partial<OnboardingData> {
     p3Traceability: 75,
     p3Additionality: 50,
     p3Continuity: 75,
+    evidenceChecklistElectricity: true,
+    evidenceChecklistGasFuel: true,
+    evidenceChecklistWater: true,
+    evidenceChecklistWaste: true,
+    evidenceChecklistEmployment: true,
+    evidenceChecklistSupplier: true,
+    evidenceChecklistBooking: true,
+    evidenceChecklistOwnership: true,
+    evidenceChecklistP3: true,
   };
 }
 
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 describe("ONBOARDING_STEPS", () => {
-  it("has 20 steps defined", () => {
-    expect(ONBOARDING_STEPS).toHaveLength(20);
+  it("has 25 steps defined", () => {
+    expect(ONBOARDING_STEPS).toHaveLength(25);
   });
 
   it("first step is operator-type", () => {
@@ -164,13 +215,13 @@ describe("getNextStep", () => {
     expect(next?.id).toBe("p3-programme");
   });
 
-  it("skips delta step for cycle 1 operator (no assessmentCycle)", () => {
+  it("goes to evidence-checklist after evidence-upload for cycle 1", () => {
     const next = getNextStep("evidence-upload", {});
-    expect(next?.id).toBe("gps-preview");
+    expect(next?.id).toBe("evidence-checklist");
   });
 
-  it("includes delta step for cycle 2+ operator", () => {
-    const next = getNextStep("evidence-upload", { assessmentCycle: 2 });
+  it("includes delta after evidence-checklist for cycle 2+ operator", () => {
+    const next = getNextStep("evidence-checklist", { assessmentCycle: 2 });
     expect(next?.id).toBe("delta");
   });
 
