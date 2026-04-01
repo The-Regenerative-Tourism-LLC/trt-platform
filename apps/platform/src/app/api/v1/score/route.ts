@@ -247,10 +247,10 @@ export async function POST(req: NextRequest) {
           energyIntensity: derivedP1Acc.energyIntensity,
           renewablePct: derivedP1Acc.renewablePct,
           waterIntensity: derivedP1Acc.waterIntensity,
-          recirculationScore: data.p1Raw.recirculationScore,
+          recirculationScore: data.p1Raw.recirculationScore ?? null,
           wasteDiversionPct: derivedP1Acc.wasteDiversionPct,
           carbonIntensity: derivedP1Acc.carbonIntensity,
-          siteScore: data.p1Raw.siteScore,
+          siteScore: data.p1Raw.siteScore ?? null,
         },
         ...(derivedP1Exp
           ? {
@@ -258,10 +258,10 @@ export async function POST(req: NextRequest) {
                 energyIntensity: derivedP1Exp.energyIntensity,
                 renewablePct: derivedP1Exp.renewablePct,
                 waterIntensity: derivedP1Exp.waterIntensity,
-                recirculationScore: data.p1Raw.recirculationScore,
+                recirculationScore: data.p1Raw.recirculationScore ?? null,
                 wasteDiversionPct: derivedP1Exp.wasteDiversionPct,
                 carbonIntensity: derivedP1Exp.carbonIntensity,
-                siteScore: data.p1Raw.siteScore,
+                siteScore: data.p1Raw.siteScore ?? null,
               },
             }
           : {}),
