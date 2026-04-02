@@ -69,19 +69,19 @@ const BAND_OPTIONS = [
 
 function bandBgClass(band: string): string {
   const map: Record<string, string> = {
-    regenerative_leader: "bg-emerald-600",
-    regenerative_practice: "bg-green-600",
-    advancing: "bg-teal-600",
-    developing: "bg-amber-600",
-    not_yet_published: "bg-zinc-400",
+    regenerative_leader: "bg-primary",
+    regenerative_practice: "bg-primary/80",
+    advancing: "bg-primary/60",
+    developing: "bg-muted-foreground",
+    not_yet_published: "bg-muted-foreground/60",
   };
-  return map[band] ?? "bg-zinc-400";
+  return map[band] ?? "bg-muted-foreground/60";
 }
 
 function pressureColor(level: string | null): string {
-  if (level === "high") return "text-red-600";
-  if (level === "moderate") return "text-amber-600";
-  return "text-emerald-600";
+  if (level === "high") return "text-destructive";
+  if (level === "moderate") return "text-[hsl(var(--trt-amber))]";
+  return "text-accent";
 }
 
 export function DiscoverClient({ operators, territories }: Props) {
@@ -141,7 +141,7 @@ export function DiscoverClient({ operators, territories }: Props) {
       {/* Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Compass className="h-6 w-6 text-emerald-600" />
+          <Compass className="h-6 w-6 text-accent" />
           <h1 className="text-3xl font-bold tracking-tight">Discover</h1>
         </div>
         <p className="text-muted-foreground">
@@ -179,7 +179,7 @@ export function DiscoverClient({ operators, territories }: Props) {
               <select
                 value={bandFilter}
                 onChange={(e) => setBandFilter(e.target.value)}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {BAND_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -193,7 +193,7 @@ export function DiscoverClient({ operators, territories }: Props) {
               <select
                 value={territoryFilter}
                 onChange={(e) => setTerritoryFilter(e.target.value)}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">All territories</option>
                 {territories.map((t) => (
@@ -208,7 +208,7 @@ export function DiscoverClient({ operators, territories }: Props) {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as "score" | "recent" | "name")}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="score">Highest Score</option>
                 <option value="recent">Most Recent</option>
@@ -316,8 +316,8 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
             style={{ backgroundImage: `url(${op.coverPhotoUrl})` }}
           />
         ) : (
-          <div className="h-44 w-full bg-gradient-to-br from-emerald-100 via-teal-50 to-emerald-50 flex items-center justify-center">
-            <Leaf className="h-10 w-10 text-emerald-300" />
+          <div className="h-44 w-full bg-secondary flex items-center justify-center">
+            <Leaf className="h-10 w-10 text-muted-foreground/40" />
           </div>
         )}
 
@@ -346,7 +346,7 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
       <div className="p-4 flex flex-col gap-2.5 flex-1">
         {/* Name + location */}
         <div>
-          <p className="font-semibold leading-tight group-hover:text-emerald-700 transition-colors">
+          <p className="font-semibold leading-tight group-hover:text-primary transition-colors">
             {op.tradingName ?? op.legalName}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
@@ -359,9 +359,9 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
         {/* Mini pillar bars */}
         <div className="space-y-1 mt-auto">
           {[
-            { label: "P1 Footprint", color: "bg-emerald-500" },
-            { label: "P2 Integration", color: "bg-amber-500" },
-            { label: "P3 Contribution", color: "bg-teal-500" },
+            { label: "P1 Footprint", color: "bg-[hsl(var(--gps-footprint))]" },
+            { label: "P2 Integration", color: "bg-[hsl(var(--gps-local))]" },
+            { label: "P3 Contribution", color: "bg-[hsl(var(--gps-regen))]" },
           ].map((p, i) => {
             const value = i === 0 ? 0 : 0; // Pillar scores not in the card data
             return null; // Only show if we have pillar data
@@ -376,7 +376,7 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
             </span>
           )}
           {op.activities.length > 0 && (
-            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-foreground border border-border">
               {op.activities.length} experience{op.activities.length !== 1 ? "s" : ""}
             </span>
           )}

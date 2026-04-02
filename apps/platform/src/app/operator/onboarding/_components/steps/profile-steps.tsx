@@ -75,8 +75,8 @@ export function OperatorTypeStep({
             }}
             className={`w-full rounded-xl border-2 p-5 text-left transition-all ${
               data.operatorType === opt.key
-                ? "border-emerald-500 bg-emerald-50 shadow-sm ring-1 ring-emerald-200"
-                : "border-border hover:border-emerald-300 hover:bg-muted/20"
+                ? "border-foreground bg-secondary shadow-sm ring-1 ring-primary/30"
+                : "border-border hover:border-primary/40 hover:bg-muted/20"
             }`}
           >
             <div className="flex items-center gap-2 flex-wrap">
@@ -92,7 +92,7 @@ export function OperatorTypeStep({
 
       {/* Type B accommodation gate */}
       {showAccomGate && (
-        <div className="rounded-xl border-2 border-emerald-300 bg-emerald-50/50 p-5 space-y-4">
+        <div className="rounded-xl border-2 border-primary/40 bg-secondary/50 p-5 space-y-4">
           <p className="text-sm font-medium">
             Does your operation include any overnight accommodation that guests pay for?
           </p>
@@ -112,14 +112,14 @@ export function OperatorTypeStep({
                   _accomGateWarn: false,
                 })
               }
-              className="rounded-xl px-4 py-2 text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+              className="rounded-xl px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               No
             </button>
           </div>
           {data._accomGateWarn && (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-4 space-y-3">
-              <p className="text-sm text-red-800">
+            <div className="rounded-xl bg-destructive/10 border border-destructive/30 p-4 space-y-3">
+              <p className="text-sm text-destructive">
                 It looks like you may be a combined operator. Please select Type C (Both).
               </p>
               <button
@@ -130,7 +130,7 @@ export function OperatorTypeStep({
                     _accomGateWarn: false,
                   })
                 }
-                className="rounded-xl px-4 py-2 text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                className="rounded-xl px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               >
                 Go back and select Type C
               </button>
@@ -140,9 +140,9 @@ export function OperatorTypeStep({
       )}
 
       {confirmedNoAccom && (
-        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center gap-2">
-          <span className="text-emerald-600">✓</span>
-          <span className="text-sm text-emerald-700">
+        <div className="rounded-xl bg-secondary border border-primary/30 p-3 flex items-center gap-2">
+          <span className="text-primary">✓</span>
+          <span className="text-sm text-primary">
             Confirmed: no paid accommodation
           </span>
         </div>
@@ -241,7 +241,7 @@ export function IdentityStep({
 
       {/* Location section */}
       <div className="border-t border-border/50 pt-5 space-y-4">
-        <p className="text-sm font-medium text-emerald-600">Location</p>
+        <p className="text-sm font-medium text-primary">Location</p>
         <FieldGroup
           label={data.operatorType === "B" ? "Meeting point / base address" : "Full address"}
         >
@@ -348,8 +348,8 @@ export function AccommodationStep({
               onClick={() => updateField({ accommodationCategory: cat.id })}
               className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${
                 selectedCat === cat.id
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                  : "border-border hover:border-emerald-300"
+                  ? "border-foreground bg-secondary text-foreground"
+                  : "border-border hover:border-primary/40"
               }`}
             >
               {cat.label}
@@ -392,8 +392,8 @@ export function AccommodationStep({
               onClick={() => updateField({ foodServiceType: fs.id })}
               className={`rounded-xl border-2 p-3 text-sm text-center transition-all ${
                 data.foodServiceType === fs.id
-                  ? "border-emerald-500 bg-emerald-50 font-medium text-emerald-800"
-                  : "border-border hover:border-emerald-300"
+                  ? "border-foreground bg-secondary font-medium text-foreground"
+                  : "border-border hover:border-primary/40"
               }`}
             >
               {fs.label}
@@ -449,8 +449,8 @@ export function ExperienceTypesStep({
               }
               className={`rounded-xl border-2 p-3 text-left transition-all ${
                 isSelected
-                  ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                  : "border-border hover:border-emerald-300 hover:bg-muted/20"
+                  ? "border-foreground bg-secondary shadow-sm"
+                  : "border-border hover:border-primary/40 hover:bg-muted/20"
               }`}
             >
               <span className="text-xl block mb-1">{sub.icon}</span>
@@ -683,7 +683,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
       {/* ── Accommodation details (A/C) */}
       {showAccom && (
         <div className="space-y-4 pb-2 border-b border-border/50">
-          <p className="text-sm font-semibold text-emerald-700">Accommodation</p>
+          <p className="text-sm font-semibold text-primary">Accommodation</p>
           <FieldGroup label="Property type" hint="Select the category that best describes your property.">
             <div className="flex flex-wrap gap-2">
               {ACCOM_CATEGORIES_MERGED.map((cat) => (
@@ -692,8 +692,8 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                   onClick={() => updateField({ accommodationCategory: cat.id })}
                   className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${
                     data.accommodationCategory === cat.id
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                      : "border-border hover:border-emerald-300"
+                      ? "border-foreground bg-secondary text-foreground"
+                      : "border-border hover:border-primary/40"
                   }`}
                 >
                   {cat.label}
@@ -722,8 +722,8 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                   onClick={() => updateField({ foodServiceType: fs.id })}
                   className={`rounded-xl border-2 p-3 text-sm text-center transition-all ${
                     data.foodServiceType === fs.id
-                      ? "border-emerald-500 bg-emerald-50 font-medium text-emerald-800"
-                      : "border-border hover:border-emerald-300"
+                      ? "border-foreground bg-secondary font-medium text-foreground"
+                      : "border-border hover:border-primary/40"
                   }`}
                 >
                   {fs.label}
@@ -737,7 +737,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
       {/* ── Experience types (B/C) */}
       {showExp && (
         <div className="space-y-4 pb-2 border-b border-border/50">
-          <p className="text-sm font-semibold text-emerald-700">Experience types</p>
+          <p className="text-sm font-semibold text-primary">Experience types</p>
           <p className="text-xs text-muted-foreground">Select all that apply.</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {EXPERIENCE_SUBCATEGORIES_MERGED.map((sub) => {
@@ -754,8 +754,8 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                   }
                   className={`rounded-xl border-2 p-3 text-left transition-all ${
                     isSelected
-                      ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                      : "border-border hover:border-emerald-300 hover:bg-muted/20"
+                      ? "border-foreground bg-secondary shadow-sm"
+                      : "border-border hover:border-primary/40 hover:bg-muted/20"
                   }`}
                 >
                   <span className="text-xl block mb-1">{sub.icon}</span>
@@ -769,7 +769,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
 
       {/* ── Ownership */}
       <div className="space-y-4 pb-2 border-b border-border/50">
-        <p className="text-sm font-semibold text-emerald-700">Ownership</p>
+        <p className="text-sm font-semibold text-primary">Ownership</p>
         <FieldGroup label="Ownership type" hint="How is the business legally structured?">
           <select
             value={data.ownershipType ?? ""}
@@ -815,7 +815,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
 
       {/* ── Annual activity */}
       <div className="space-y-4">
-        <p className="text-sm font-semibold text-emerald-700">Annual activity</p>
+        <p className="text-sm font-semibold text-primary">Annual activity</p>
         <FieldGroup label="Assessment period end date" hint="The last day of the 12-month period your operational data covers.">
           <input
             type="date"
@@ -900,7 +900,7 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
       subtitle="Add photos of your property or experiences. The first image will be your cover photo on your Green Passport profile."
     >
       {/* Upload zone */}
-      <label className="block w-full rounded-xl border-2 border-dashed border-border hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer p-8 text-center">
+      <label className="block w-full rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer p-8 text-center">
         <input type="file" accept="image/*" multiple className="sr-only" onChange={handleFileInput} />
         <div className="space-y-2">
           <div className="text-3xl">📷</div>
@@ -922,11 +922,11 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
               <div
                 key={p.id}
                 className={`relative rounded-xl border-2 overflow-hidden bg-muted/30 aspect-square flex flex-col items-center justify-center p-3 ${
-                  index === 0 ? "border-emerald-500" : "border-border"
+                  index === 0 ? "border-primary" : "border-border"
                 }`}
               >
                 {index === 0 && (
-                  <span className="absolute top-1.5 left-1.5 text-[10px] font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded-full">
+                  <span className="absolute top-1.5 left-1.5 text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
                     Cover
                   </span>
                 )}
@@ -939,7 +939,7 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
                     <button
                       type="button"
                       onClick={() => setCover(p.id)}
-                      className="text-[10px] font-medium text-emerald-600 hover:underline"
+                      className="text-[10px] font-medium text-primary hover:underline"
                     >
                       Set cover
                     </button>

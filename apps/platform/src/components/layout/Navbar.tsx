@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Menu,
   X,
@@ -43,7 +44,15 @@ function getInitials(name: string | null | undefined): string {
 export function Navbar() {
   const { user, loading, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const isAdmin = user?.roles?.includes("admin");
   const isOperator = user?.roles?.includes("operator");
@@ -63,13 +72,28 @@ export function Navbar() {
         : "text-muted-foreground hover:text-foreground hover:bg-secondary"
     );
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   function getNavLinks() {
     if (!user) {
       return [
         { href: "/discover", label: "Discover" },
         { href: "/destinations", label: "Destinations" },
         { href: "/methodology", label: "Methodology" },
-        { href: "/leaderboard", label: "Leaderboard" },
+        { href: "/leaderboard", label: "Impact Record" },
         { href: "/pricing", label: "Pricing" },
       ];
     }
@@ -93,7 +117,7 @@ export function Navbar() {
     return [
       { href: "/discover", label: "Discover" },
       { href: "/destinations", label: "Destinations" },
-      { href: "/leaderboard", label: "Leaderboard" },
+      { href: "/leaderboard", label: "Impact Record" },
       { href: "/methodology", label: "Methodology" },
     ];
   }
@@ -103,206 +127,215 @@ export function Navbar() {
   const initials = getInitials(user?.name ?? user?.email);
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <div className="container mx-auto max-w-7xl flex items-center justify-between h-14 px-5 md:px-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-accent-foreground text-xs font-bold">
-            GP
-          </div>
-          <span className="hidden sm:inline font-semibold text-sm tracking-tight">
-            Green Passport
-          </span>
-        </Link>
+    <>
+      <nav
+        className={cn(
+          "sticky top-0 z-50 transition-all duration-300",
+          scrolled
+            ? "bg-cream/95 backdrop-blur-xl shadow-sm border-b border-border/40"
+            : "bg-cream/80 backdrop-blur-xl",
+          mobileOpen && "z-[60]"
+        )}
+      >
+        <div className="container mx-auto max-w-7xl flex items-center justify-between h-14 px-5 md:px-6">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 shrink-0 relative z-[60]"
+          >
+            <Image
+              src="/assets/logo-regenerative-tourism-black.svg"
+              alt="Green Passport"
+              width={120}
+              height={28}
+              className="h-7 w-auto"
+              priority
+            />
+          </Link>
 
-        {/* Desktop nav links — centered */}
-        <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((l) => (
-            <Link key={l.href} href={l.href} className={linkCls(l.href)}>
-              {l.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* Desktop right side */}
-        <div className="hidden md:flex items-center gap-2">
-          {!loading && !user && (
-            <Button
-              size="sm"
-              className="rounded-full font-semibold"
-              asChild
-            >
-              <Link href="/login">Join</Link>
-            </Button>
-          )}
-
-          {!loading && user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-semibold hover:opacity-90 transition-opacity">
-                  {initials}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <p className="text-sm font-medium">{displayName}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
-                  {user.role && (
-                    <span className="inline-flex items-center gap-1 mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {isOperator ? (
-                        <Building2 className="w-3 h-3" />
-                      ) : isAdmin ? (
-                        <Shield className="w-3 h-3" />
-                      ) : (
-                        <Compass className="w-3 h-3" />
-                      )}
-                      {user.role}
-                    </span>
-                  )}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-
-                {isOperator && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/operator/dashboard"
-                        className="cursor-pointer"
-                      >
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Operator Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/operator/evidence"
-                        className="cursor-pointer"
-                      >
-                        <FileCheck className="w-4 h-4 mr-2" />
-                        Evidence
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {isTraveler && !isOperator && (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/traveler/dashboard"
-                        className="cursor-pointer"
-                      >
-                        <LayoutDashboard className="w-4 h-4 mr-2" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/traveler/discover" className="cursor-pointer">
-                        <User className="w-4 h-4 mr-2" />
-                        My Impact
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                {isAdmin && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/admin/dashboard"
-                        className="cursor-pointer"
-                      >
-                        <Shield className="w-4 h-4 mr-2" />
-                        Admin Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                <DropdownMenuItem asChild>
-                  <Link href="/discover" className="cursor-pointer">
-                    <Search className="w-4 h-4 mr-2" />
-                    Discover
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/destinations" className="cursor-pointer">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Destinations
-                  </Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={signOut}
-                  className="cursor-pointer text-destructive focus:text-destructive"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden p-2 rounded-full hover:bg-secondary"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? (
-            <X className="w-5 h-5" />
-          ) : (
-            <Menu className="w-5 h-5" />
-          )}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border/50 bg-background">
-          <div className="container mx-auto px-5 py-4 flex flex-col gap-1">
-            {navLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={cn(
-                  "flex items-center px-3 py-2.5 rounded-xl text-sm transition-colors",
-                  isActive(l.href)
-                    ? "bg-foreground/[0.06] text-foreground font-medium"
-                    : "text-muted-foreground active:bg-foreground/[0.04]"
-                )}
-                onClick={() => setMobileOpen(false)}
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+            {!loading && !user && (
+              <Button
+                className="rounded-lg font-semibold bg-black text-cream hover:bg-black/90 h-10 px-5"
+                asChild
               >
-                {l.label}
-              </Link>
-            ))}
+                <Link href="/login">Join</Link>
+              </Button>
+            )}
 
-            <div className="mt-2 pt-3 border-t border-border/50">
-              {user ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] font-semibold">
-                      {initials}
-                    </div>
-                    <span className="text-sm text-muted-foreground truncate max-w-[180px]">
+            {!loading && user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-semibold hover:opacity-90 transition-opacity">
+                    {initials}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <p className="text-sm font-medium">{displayName}</p>
+                    <p className="text-xs text-muted-foreground">
                       {user.email}
-                    </span>
-                  </div>
+                    </p>
+                    {user.role && (
+                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {isOperator ? (
+                          <Building2 className="w-3 h-3" />
+                        ) : isAdmin ? (
+                          <Shield className="w-3 h-3" />
+                        ) : (
+                          <Compass className="w-3 h-3" />
+                        )}
+                        {user.role}
+                      </span>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+
+                  {isOperator && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/operator/dashboard"
+                          className="cursor-pointer"
+                        >
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          Operator Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/operator/evidence"
+                          className="cursor-pointer"
+                        >
+                          <FileCheck className="w-4 h-4 mr-2" />
+                          Evidence
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  {isTraveler && !isOperator && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/traveler/dashboard"
+                          className="cursor-pointer"
+                        >
+                          <LayoutDashboard className="w-4 h-4 mr-2" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/traveler/discover"
+                          className="cursor-pointer"
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          My Impact
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/admin/dashboard"
+                          className="cursor-pointer"
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+
+                  <DropdownMenuItem asChild>
+                    <Link href="/discover" className="cursor-pointer">
+                      <Search className="w-4 h-4 mr-2" />
+                      Discover
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/destinations" className="cursor-pointer">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Destinations
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={signOut}
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            <button
+              className="p-2 rounded-full hover:bg-secondary relative z-[60]"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Full-screen overlay menu */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[55] flex mobile-overlay-enter">
+          {/* Left panel with nav links */}
+          <div className="w-[65%] max-w-[420px] bg-cream flex flex-col justify-between h-full pt-20 pb-8 px-6 md:px-10 mobile-panel-enter">
+            <nav className="flex flex-col gap-1">
+              {navLinks.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "block text-[2rem] leading-[1.15] font-bold tracking-tight py-1 transition-opacity",
+                    isActive(l.href)
+                      ? "text-black"
+                      : "text-black/60 hover:text-black active:text-black"
+                  )}
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="space-y-3">
+              {user ? (
+                <div className="space-y-1">
+                  <p className="text-[10px] uppercase tracking-widest text-black/30">
+                    Signed in
+                  </p>
+                  <p className="text-xs text-black/60 truncate">{user.email}</p>
                   <button
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
                     onClick={() => {
                       signOut();
                       setMobileOpen(false);
                     }}
+                    className="text-xs text-black/40 hover:text-black transition-colors mt-1"
                   >
                     Sign out
                   </button>
                 </div>
               ) : (
                 <Button
-                  className="w-full rounded-full font-semibold h-10"
+                  className="w-full rounded-lg bg-black text-cream hover:bg-black/90 font-semibold h-11"
                   asChild
                 >
                   <Link
@@ -315,8 +348,14 @@ export function Navbar() {
               )}
             </div>
           </div>
+
+          {/* Right side — blurred backdrop */}
+          <div
+            className="flex-1 bg-background/60 backdrop-blur-md"
+            onClick={() => setMobileOpen(false)}
+          />
         </div>
       )}
-    </nav>
+    </>
   );
 }

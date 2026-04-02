@@ -59,7 +59,7 @@ interface Props {
 }
 
 const TIER_STYLES: Record<string, string> = {
-  T1: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  T1: "bg-secondary text-primary border-primary/20",
   T2: "bg-blue-100 text-blue-800 border-blue-200",
   T3: "bg-teal-100 text-teal-800 border-teal-200",
   Proxy: "bg-purple-100 text-purple-800 border-purple-200",
@@ -67,9 +67,9 @@ const TIER_STYLES: Record<string, string> = {
 
 const STATE_CONFIG: Record<VerificationState, { icon: typeof Clock; color: string; bgColor: string }> = {
   pending: { icon: Clock, color: "text-amber-600", bgColor: "bg-amber-100 text-amber-800" },
-  verified: { icon: CheckCircle2, color: "text-emerald-600", bgColor: "bg-emerald-100 text-emerald-800" },
-  rejected: { icon: XCircle, color: "text-red-600", bgColor: "bg-red-100 text-red-800" },
-  lapsed: { icon: AlertCircle, color: "text-zinc-500", bgColor: "bg-zinc-100 text-zinc-600" },
+  verified: { icon: CheckCircle2, color: "text-primary", bgColor: "bg-secondary text-primary" },
+  rejected: { icon: XCircle, color: "text-destructive", bgColor: "bg-destructive/10 text-destructive" },
+  lapsed: { icon: AlertCircle, color: "text-muted-foreground", bgColor: "bg-muted text-muted-foreground" },
 };
 
 function TierBadge({ tier }: { tier: EvidenceTier | null }) {
@@ -196,7 +196,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
           {visiblePending.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center space-y-3">
-                <CheckCircle2 className="h-10 w-10 text-emerald-300 mx-auto" />
+                <CheckCircle2 className="h-10 w-10 text-primary/40 mx-auto" />
                 <p className="text-sm text-muted-foreground">
                   No evidence pending review. All clear!
                 </p>
@@ -250,7 +250,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
                       <div className="flex gap-2 pt-1 mt-auto">
                         <Button
                           size="sm"
-                          className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
                           disabled={isLoading}
                           onClick={() => handleAction(e.id, "verify")}
                         >
@@ -264,7 +264,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 border-red-300 text-red-700 hover:bg-red-50"
+                          className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
                           disabled={isLoading}
                           onClick={() => handleAction(e.id, "reject")}
                         >

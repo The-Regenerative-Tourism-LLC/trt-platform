@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 function MethodologyFallback() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <span className="w-8 h-8 rounded-full border-2 border-emerald-200 border-t-emerald-600 animate-spin" />
+      <span className="w-8 h-8 rounded-full border-2 border-border border-t-primary animate-spin" />
     </div>
   );
 }

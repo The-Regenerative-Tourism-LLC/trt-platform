@@ -32,15 +32,22 @@ function Badge({ className, children }: BadgeProps) {
 
 export function GPSBandBadge({ band }: { band: GreenPassportBand }) {
   const config = GPS_BAND_CONFIG[band];
+  const variantMap: Record<GreenPassportBand, string> = {
+    regenerative_leader: "leader",
+    regenerative_practice: "practice",
+    advancing: "advancing",
+    developing: "developing",
+    not_yet_published: "unpublished",
+  };
   return (
     <Badge
       className={cn(
-        "text-white",
-        band === "regenerative_leader" && "bg-emerald-600",
-        band === "regenerative_practice" && "bg-green-600",
-        band === "advancing" && "bg-teal-600",
-        band === "developing" && "bg-amber-600",
-        band === "not_yet_published" && "bg-zinc-500"
+        "border-transparent",
+        band === "regenerative_leader" && "bg-band-leader text-green-foreground",
+        band === "regenerative_practice" && "bg-band-practice text-teal-foreground",
+        band === "advancing" && "bg-band-advancing text-secondary-foreground",
+        band === "developing" && "bg-band-developing text-amber-foreground",
+        band === "not_yet_published" && "bg-band-unpublished text-muted-foreground"
       )}
     >
       {config.label}
@@ -53,11 +60,12 @@ export function DPSBandBadge({ band }: { band: DpsBand }) {
   return (
     <Badge
       className={cn(
-        band === "accelerating" && "bg-emerald-100 text-emerald-800",
-        band === "progressing" && "bg-teal-100 text-teal-800",
-        band === "stable" && "bg-zinc-100 text-zinc-700",
-        band === "regressing" && "bg-orange-100 text-orange-800",
-        band === "critical" && "bg-red-100 text-red-800"
+        "border-transparent",
+        band === "accelerating" && "bg-dps-accelerating text-green-foreground",
+        band === "progressing" && "bg-dps-progressing text-teal-foreground",
+        band === "stable" && "bg-dps-stable text-secondary-foreground",
+        band === "regressing" && "bg-dps-regressing text-amber-foreground",
+        band === "critical" && "bg-dps-critical text-destructive-foreground"
       )}
     >
       {config.arrow} {config.label}
@@ -70,9 +78,10 @@ export function PressureBadge({ level }: { level: string }) {
   return (
     <Badge
       className={cn(
-        level === "low" && "bg-emerald-100 text-emerald-800",
-        level === "moderate" && "bg-amber-100 text-amber-800",
-        level === "high" && "bg-red-100 text-red-800"
+        "border-transparent",
+        level === "low" && "bg-pressure-low text-green-foreground",
+        level === "moderate" && "bg-pressure-moderate text-amber-foreground",
+        level === "high" && "bg-pressure-high text-destructive-foreground"
       )}
     >
       {config.label}
@@ -90,25 +99,11 @@ export function GPSScoreDisplay({
   size?: "default" | "lg";
 }) {
   const config = GPS_BAND_CONFIG[band];
-  const colorMap: Record<GreenPassportBand, string> = {
-    regenerative_leader: "text-emerald-600",
-    regenerative_practice: "text-green-600",
-    advancing: "text-teal-600",
-    developing: "text-amber-600",
-    not_yet_published: "text-zinc-500",
-  };
-
   return (
     <div className="flex flex-col items-center gap-2">
-      <span
-        className={cn(
-          "font-bold tabular-nums",
-          size === "lg" ? "text-6xl" : "text-4xl",
-          colorMap[band]
-        )}
-      >
-        {score}
-      </span>
+      <div className={`${size === "lg" ? "score-number-lg" : "score-number"} animate-score-count`}>
+        <span>{score}</span>
+      </div>
       <GPSBandBadge band={band} />
     </div>
   );
@@ -128,16 +123,16 @@ export function PillarBar({
   const weighted = Math.round(score * weight * 10) / 10;
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-sm">
-        <span className="font-medium">{label}</span>
-        <span className="tabular-nums text-muted-foreground">
+      <div className="flex justify-between gap-2 text-xs sm:text-sm">
+        <span className="font-medium truncate">{label}</span>
+        <span className="data-mono text-muted-foreground shrink-0">
           {score}/100 · {Math.round(weight * 100)}% = {weighted}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-muted overflow-hidden">
+      <div className="h-3 rounded-full bg-muted overflow-hidden">
         <div
-          className={cn("h-full rounded-full transition-all duration-700", colorClass)}
-          style={{ width: `${score}%` }}
+          className={cn("pillar-bar", colorClass)}
+          style={{ width: `${score}%`, "--bar-width": `${score}%` } as React.CSSProperties}
         />
       </div>
     </div>
@@ -155,12 +150,12 @@ export function GPSCircle({
 }) {
   const r = size * 0.44;
   const circumference = 2 * Math.PI * r;
-  const colorMap: Record<GreenPassportBand, string> = {
-    regenerative_leader: "stroke-emerald-500",
-    regenerative_practice: "stroke-green-500",
-    advancing: "stroke-teal-500",
-    developing: "stroke-amber-500",
-    not_yet_published: "stroke-zinc-400",
+  const strokeColorMap: Record<GreenPassportBand, string> = {
+    regenerative_leader: "hsl(var(--band-leader))",
+    regenerative_practice: "hsl(var(--band-practice))",
+    advancing: "hsl(var(--band-advancing))",
+    developing: "hsl(var(--band-developing))",
+    not_yet_published: "hsl(var(--band-unpublished))",
   };
 
   return (
@@ -179,7 +174,7 @@ export function GPSCircle({
           cy={size / 2}
           r={r}
           fill="none"
-          className={colorMap[band]}
+          stroke={strokeColorMap[band]}
           strokeWidth={size * 0.047}
           strokeLinecap="round"
           strokeDasharray={circumference}

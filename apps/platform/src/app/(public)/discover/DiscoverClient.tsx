@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { GPS_BAND_CONFIG, OPERATOR_TYPES } from "@/lib/constants";
@@ -112,19 +113,21 @@ export function DiscoverClient({
   return (
     <>
       {/* Hero */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, hsl(var(--navy)), hsl(80 15% 22%), hsl(var(--navy)))",
-        }}
-      >
-        <div className="container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-24 space-y-4">
-          <p className="editorial-label text-white/25">Discover</p>
+      <section className="relative overflow-hidden">
+        <Image
+          src="/assets/discover-hero-seixal.jpg"
+          alt="Discover operators"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/85" />
+        <div className="relative z-10 container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-24 space-y-4">
+          <p className="editorial-label text-white/50">Discover</p>
           <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05] max-w-2xl text-white">
             Verified regenerative operators
           </h1>
-          <p className="text-sm text-white/40 max-w-lg leading-relaxed">
+          <p className="text-sm text-white/50 max-w-lg leading-relaxed">
             Browse operators with verified Green Passport Scores. Filter by
             territory, band, or type — and find operators doing real work.
           </p>

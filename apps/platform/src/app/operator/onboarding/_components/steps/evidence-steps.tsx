@@ -62,7 +62,7 @@ export function EvidenceChecklistStep({ data, updateField, shell }: StepProps) {
                 type="checkbox"
                 checked={data[row.field] === true}
                 onChange={(e) => updateField({ [row.field]: e.target.checked })}
-                className="mt-0.5 accent-emerald-600 shrink-0"
+                className="mt-0.5 accent-primary shrink-0"
               />
               <span className="text-sm leading-snug">{row.label}</span>
             </label>
@@ -168,7 +168,7 @@ export function EvidenceUploadStep({
             Use{" "}
             <Link
               href="/operator/evidence"
-              className="text-emerald-600 underline"
+              className="text-primary underline"
               target="_blank"
             >
               Evidence Management
@@ -186,7 +186,7 @@ export function EvidenceUploadStep({
                 key={ev.id}
                 onClick={() => toggleEvidence(ev)}
                 className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
-                  selected ? "border-emerald-500 bg-emerald-50" : "border-border hover:border-emerald-300"
+                  selected ? "border-foreground bg-secondary" : "border-border hover:border-primary/40"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -198,7 +198,7 @@ export function EvidenceUploadStep({
                     <span
                       className={`text-xs font-mono px-1.5 py-0.5 rounded border ${
                         ev.tier === "T1"
-                          ? "border-emerald-300 text-emerald-700 bg-emerald-50"
+                          ? "border-primary/40 text-primary bg-secondary"
                           : ev.tier === "T2"
                           ? "border-amber-300 text-amber-700 bg-amber-50"
                           : ev.tier === "T3"
@@ -211,7 +211,7 @@ export function EvidenceUploadStep({
                     <span
                       className={`text-xs px-1.5 py-0.5 rounded border ${
                         ev.verificationState === "verified"
-                          ? "border-emerald-300 text-emerald-700"
+                          ? "border-primary/40 text-primary"
                           : "border-border text-muted-foreground"
                       }`}
                     >
@@ -238,7 +238,7 @@ export function EvidenceUploadStep({
             in{" "}
             <Link
               href="/operator/evidence"
-              className="text-emerald-600 underline"
+              className="text-primary underline"
               target="_blank"
             >
               Evidence Management
@@ -318,7 +318,7 @@ export function EvidenceUploadStep({
             <button
               onClick={handleEvidenceFileSubmit}
               disabled={evidenceSubmitting}
-              className="w-full rounded-lg border-2 border-emerald-500 bg-emerald-50 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 transition-colors"
+              className="w-full rounded-lg border-2 border-primary bg-secondary py-2 text-sm font-medium text-primary hover:bg-secondary/80 disabled:opacity-50 transition-colors"
             >
               {evidenceSubmitting ? "Submitting…" : "Add evidence file"}
             </button>

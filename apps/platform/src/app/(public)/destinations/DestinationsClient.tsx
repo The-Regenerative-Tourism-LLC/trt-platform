@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, TrendingUp, Leaf, Globe, Lock } from "lucide-react";
+
+const DESTINATION_IMAGES: Record<string, string> = {
+  "madeira": "/assets/dest-madeira.jpg",
+  "azores": "/assets/dest-azores.jpg",
+  "misiones": "/assets/dest-misiones.jpg",
+  "continental portugal": "/assets/dest-continental-portugal.jpg",
+};
 
 interface Territory {
   id: string;
@@ -40,19 +48,21 @@ export function DestinationsClient({
   return (
     <>
       {/* Hero */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, hsl(var(--navy)), hsl(80 15% 22%), hsl(var(--navy)))",
-        }}
-      >
-        <div className="container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-24 space-y-4">
-          <p className="editorial-label text-white/25">Explore</p>
+      <section className="relative overflow-hidden">
+        <Image
+          src="/assets/destinations-hero-surf.jpg"
+          alt="Destinations"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/65 to-black/80" />
+        <div className="relative z-10 container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-24 space-y-4">
+          <p className="editorial-label text-white/50">Explore</p>
           <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05] max-w-2xl text-white">
             Destination pressure index
           </h1>
-          <p className="text-sm text-white/40 max-w-lg leading-relaxed">
+          <p className="text-sm text-white/50 max-w-lg leading-relaxed">
             Every destination has a measurable pressure score — combining tourist
             intensity, ecological sensitivity, economic leakage, and
             regenerative performance.
@@ -133,15 +143,22 @@ function LiveDestinationCard({ territory: t }: { territory: Territory }) {
     { label: "Leakage", value: t.economicLeakageRate, icon: Globe },
   ];
 
+  const imgSrc = DESTINATION_IMAGES[(t.name || "").toLowerCase()];
+
   return (
     <div className="border border-border overflow-hidden rounded-xl card-interactive">
-      <div
-        className="relative aspect-[16/10] overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, hsl(80 30% 28%), hsl(80 25% 38%), hsl(60 20% 32%))",
-        }}
-      >
+      <div className="relative aspect-[16/10] overflow-hidden">
+        {imgSrc ? (
+          <Image
+            src={imgSrc}
+            alt={t.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(80,30%,28%)] to-[hsl(60,20%,32%)]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
         {t.compositeDpi != null && (
           <div className="absolute top-4 right-4 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded">
             <span className="text-white font-mono text-xs font-bold">
@@ -207,15 +224,22 @@ function ComingSoonCard({ territory: t }: { territory: Territory }) {
     { label: "Leakage", value: t.economicLeakageRate, icon: Globe },
   ];
 
+  const imgSrc = DESTINATION_IMAGES[(t.name || "").toLowerCase()];
+
   return (
     <div className="border border-border overflow-hidden rounded-xl opacity-75 cursor-default">
-      <div
-        className="relative aspect-[16/10] overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, hsl(80 20% 28%), hsl(80 15% 38%), hsl(60 15% 32%))",
-        }}
-      >
+      <div className="relative aspect-[16/10] overflow-hidden">
+        {imgSrc ? (
+          <Image
+            src={imgSrc}
+            alt={t.name}
+            fill
+            className="object-cover grayscale"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(80,20%,28%)] to-[hsl(60,15%,32%)]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
         {t.compositeDpi != null && (
           <div className="absolute top-4 right-4 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded">
             <span className="text-white font-mono text-xs font-bold">
