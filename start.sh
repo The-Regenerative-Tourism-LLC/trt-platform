@@ -13,6 +13,12 @@
 #   AUTH_SECRET    — Auth.js signing secret
 #   PORT           — TCP port (Railway injects this; Next.js reads it automatically)
 #   HOSTNAME       — bind address (set to 0.0.0.0 in Dockerfile ENV)
+#
+# MONOREPO NOTE:
+#   Next.js standalone output preserves the workspace directory structure.
+#   The app lives at apps/platform/ in the monorepo, so server.js is emitted
+#   at .next/standalone/apps/platform/server.js — NOT at the standalone root.
+#   All paths below reflect this structure.
 
 set -e
 
@@ -42,5 +48,8 @@ echo "==> Migrations applied."
 # `exec` replaces this shell process so the server becomes PID 1, ensuring
 # Railway's SIGTERM on deploy triggers a clean graceful shutdown.
 # PORT and HOSTNAME are read from the environment (set in Dockerfile + Railway).
+#
+# server.js is at apps/platform/server.js inside the container because the
+# standalone output mirrors the monorepo workspace path.
 echo "==> Starting server on ${HOSTNAME:-0.0.0.0}:${PORT:-3000}..."
-exec node server.js
+exec node apps/platform/server.js
