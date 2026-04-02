@@ -115,7 +115,7 @@ export function OperatorDashboardClient() {
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -124,7 +124,7 @@ export function OperatorDashboardClient() {
     // Show spinner while redirect is in progress
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -157,7 +157,7 @@ export function OperatorDashboardClient() {
               Evidence
             </Link>
           </Button>
-          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" asChild>
+          <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
             <Link href="/operator/onboarding">
               {(operator.assessmentCycleCount ?? 0) > 0
                 ? "New Assessment"
@@ -172,8 +172,8 @@ export function OperatorDashboardClient() {
       {operator.operatorCode && (
         <Card>
           <CardContent className="flex items-center gap-4 py-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-              <QrCode className="w-6 h-6 text-emerald-600" />
+            <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+              <QrCode className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium">Operator Code</p>
@@ -202,7 +202,7 @@ export function OperatorDashboardClient() {
                   variant={score.isPublished ? "default" : "secondary"}
                   className={
                     score.isPublished
-                      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                      ? "bg-secondary text-primary border-primary/20"
                       : "bg-amber-100 text-amber-700 border-amber-200"
                   }
                 >
@@ -236,7 +236,7 @@ export function OperatorDashboardClient() {
                   label="P1 Operational Footprint"
                   score={score.p1Score}
                   weight={0.4}
-                  colorClass="bg-emerald-500"
+                  colorClass="bg-primary"
                 />
                 <PillarBar
                   label="P2 Local Integration"
@@ -287,7 +287,7 @@ export function OperatorDashboardClient() {
                     ].map((d) => (
                       <div
                         key={d.label}
-                        className="rounded-xl bg-muted p-3 text-center"
+                        className="rounded-lg bg-muted p-3 text-center"
                       >
                         <span className="text-xl font-bold tabular-nums">
                           {d.value != null
@@ -352,14 +352,14 @@ export function OperatorDashboardClient() {
                     return (
                       <div
                         key={label}
-                        className="rounded-xl bg-muted p-3 text-center space-y-1"
+                        className="rounded-lg bg-muted p-3 text-center space-y-1"
                       >
                         <span
                           className={`text-xl font-bold tabular-nums ${
                             neutral
                               ? "text-muted-foreground"
                               : positive
-                              ? "text-emerald-600"
+                              ? "text-primary"
                               : "text-destructive"
                           }`}
                         >
@@ -435,7 +435,7 @@ export function OperatorDashboardClient() {
                   ].map((m) => (
                     <div
                       key={m.label}
-                      className="rounded-xl bg-muted p-3 text-center"
+                      className="rounded-lg bg-muted p-3 text-center"
                     >
                       <span className="text-lg font-bold tabular-nums">
                         {m.value ?? "—"}
@@ -494,8 +494,8 @@ function NoAssessmentState() {
   return (
     <Card>
       <CardContent className="py-12 text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-emerald-50 mx-auto flex items-center justify-center">
-          <Zap className="w-8 h-8 text-emerald-600" />
+        <div className="w-16 h-16 rounded-full bg-secondary mx-auto flex items-center justify-center">
+          <Zap className="w-8 h-8 text-primary" />
         </div>
         <p className="font-semibold text-lg">Your assessment is being processed.</p>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
@@ -523,7 +523,7 @@ function QuickActionCard({
   const content = (
     <Card className={`transition-shadow ${disabled ? "opacity-50" : "hover:shadow-md cursor-pointer"}`}>
       <CardContent className="py-5 flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0 text-emerald-600">
+        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-primary">
           {icon}
         </div>
         <div>

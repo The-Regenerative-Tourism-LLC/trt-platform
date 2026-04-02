@@ -72,8 +72,8 @@ export function BandSelector({
           onClick={() => onSelect(v)}
           className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
             selected === v
-              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-              : "border-border hover:border-emerald-300"
+              ? "border-foreground bg-secondary text-foreground"
+              : "border-border hover:border-primary/40"
           }`}
         >
           {labels ? labels[i] : v}
@@ -105,8 +105,8 @@ export function TogglePair({
           onClick={() => onChange(val)}
           className={`flex-1 rounded-xl border-2 p-3 text-sm text-center transition-all ${
             value === val
-              ? "border-emerald-500 bg-emerald-50 font-medium text-emerald-800"
-              : "border-border hover:border-emerald-300"
+              ? "border-foreground bg-secondary font-medium text-foreground"
+              : "border-border hover:border-primary/40"
           }`}
         >
           {label}
@@ -228,8 +228,8 @@ export function EvidenceTierSelector({
             onClick={() => onChange(tier.value)}
             className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
               value === tier.value
-                ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                : "border-border hover:border-emerald-300 text-muted-foreground"
+                ? "border-foreground bg-secondary text-foreground"
+                : "border-border hover:border-primary/40 text-muted-foreground"
             }`}
           >
             {tier.label}

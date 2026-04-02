@@ -40,7 +40,7 @@ export default async function AdminDashboardPage() {
         ].map((s) => (
           <div
             key={s.label}
-            className={`rounded-2xl border p-4 text-center ${
+            className={`rounded-lg border border-border p-4 text-center ${
               s.alert ? "border-amber-300 bg-amber-50" : "bg-card"
             }`}
           >
@@ -79,7 +79,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Recent scores */}
-      <div className="rounded-2xl border bg-card">
+      <div className="rounded-lg border border-border bg-card shadow-sm">
         <div className="p-4 border-b">
           <h2 className="font-semibold">Recent Score Computations</h2>
         </div>

@@ -44,7 +44,7 @@ export function P3StatusStep({
             id: "A" as const,
             label: "Status A",
             desc: "Active programme with a verified institutional partner. Full P3 scoring available.",
-            badge: "bg-emerald-100 text-emerald-700",
+            badge: "bg-secondary text-primary",
           },
           {
             id: "B" as const,
@@ -76,8 +76,8 @@ export function P3StatusStep({
             onClick={() => updateField({ p3Status: id })}
             className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
               data.p3Status === id
-                ? "border-emerald-500 bg-emerald-50 shadow-sm ring-1 ring-emerald-200"
-                : "border-border hover:border-emerald-300 hover:bg-muted/20"
+                ? "border-foreground bg-secondary shadow-sm ring-1 ring-primary/30"
+                : "border-border hover:border-primary/40 hover:bg-muted/20"
             }`}
           >
             <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export function P3ProgrammeStep({
     >
       {floatingGps}
       {data.p3Status === "C" && (
-        <div className="rounded-xl border-2 border-amber-200 bg-amber-50 p-4 space-y-1">
+        <div className="rounded-xl border-2 border-amber-200 bg-amber-50/80 p-4 space-y-1">
           <p className="text-sm font-semibold text-amber-800">
             Status C — Traceability cap
           </p>
@@ -143,7 +143,7 @@ export function P3ProgrammeStep({
                       : current.filter((c) => c !== cat.id),
                   });
                 }}
-                className="mt-0.5 accent-emerald-600"
+                className="mt-0.5 accent-primary"
               />
               <div>
                 <div className="text-sm font-medium">{cat.label}</div>

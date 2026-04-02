@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { SignupForm } from "./SignupForm";
 
 export const metadata: Metadata = {
@@ -7,51 +9,39 @@ export const metadata: Metadata = {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 mb-4 shadow-lg">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
+    <div className="min-h-screen flex flex-col fm-cream">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-20">
+        <div className="w-full max-w-lg space-y-8">
+          <div className="space-y-2">
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/assets/logo-regenerative-tourism-black.svg"
+                alt="Green Passport"
+                width={130}
+                height={30}
+                className="h-7 w-auto"
               />
-            </svg>
+            </Link>
+            <h1 className="fm-sub-heading text-foreground">
+              Create your account.
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Join the verification layer for regenerative tourism.
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Green Passport</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Regenerative Tourism Platform
-          </p>
-        </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">
-            Create your account
-          </h2>
-          <p className="text-sm text-gray-500 mb-6">
-            Join the regenerative tourism movement
-          </p>
           <SignupForm />
-        </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Already have an account?{" "}
-          <a
-            href="/login"
-            className="text-emerald-600 font-medium hover:text-emerald-700"
-          >
-            Sign in
-          </a>
-        </p>
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <a
+              href="/login"
+              className="text-foreground font-medium hover:underline"
+            >
+              Sign in
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

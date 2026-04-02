@@ -79,8 +79,8 @@ export function P1EnergyStep({
                   }
                   className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
                     data.tourFuelType === ft
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                      : "border-border hover:border-emerald-300"
+                      ? "border-foreground bg-secondary text-foreground"
+                      : "border-border hover:border-primary/40"
                   }`}
                 >
                   {ft === "no_vehicle" ? "No vehicle" : ft === "marine_diesel" ? "Marine diesel" : ft.charAt(0).toUpperCase() + ft.slice(1)}
@@ -221,8 +221,8 @@ export function P1EnergyStep({
                   }
                   className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all capitalize ${
                     data.tourFuelType === ft
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                      : "border-border hover:border-emerald-300"
+                      ? "border-foreground bg-secondary text-foreground"
+                      : "border-border hover:border-primary/40"
                   }`}
                 >
                   {ft}
@@ -310,7 +310,7 @@ export function P1WaterStep({
               type="checkbox"
               checked={data[item.key] === true}
               onChange={(e) => updateField({ [item.key]: e.target.checked })}
-              className="mt-0.5 accent-emerald-600"
+              className="mt-0.5 accent-primary"
             />
             <span className="text-sm">{item.label}</span>
           </label>
@@ -412,7 +412,7 @@ export function P1WasteStep({
               type="checkbox"
               checked={data[item.key] === true}
               onChange={(e) => updateField({ [item.key]: e.target.checked })}
-              className="mt-0.5 accent-emerald-600"
+              className="mt-0.5 accent-primary"
             />
             <span className="text-sm">{item.label}</span>
           </label>
@@ -509,7 +509,7 @@ export function P1SiteStep({
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Pillar 1 — Operational Footprint Summary
           </p>
-          <div className="text-2xl font-bold tabular-nums text-emerald-600">
+          <div className="text-2xl font-bold tabular-nums text-primary">
             {Math.round(preview.pillar1Score)}
             <span className="text-sm font-normal text-muted-foreground ml-1">/ 100</span>
           </div>

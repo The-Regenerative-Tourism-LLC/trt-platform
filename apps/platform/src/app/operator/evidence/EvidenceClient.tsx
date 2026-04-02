@@ -71,7 +71,7 @@ const PILLAR_GROUPS: PillarGroup[] = [
     pillar: "P1",
     name: "Operational Footprint",
     weight: "40%",
-    colorClass: "bg-emerald-500",
+    colorClass: "bg-primary",
     indicators: [
       { id: "p1_1a_energy_intensity", label: "1A Energy Intensity", tier: "T1" },
       { id: "p1_1a_renewable_pct", label: "1A Renewable Share", tier: "T1" },
@@ -112,7 +112,7 @@ const PILLAR_GROUPS: PillarGroup[] = [
 ];
 
 const TIER_INFO: Record<EvidenceTier, { label: string; color: string }> = {
-  T1: { label: "T1 Primary", color: "bg-emerald-100 text-emerald-800" },
+  T1: { label: "T1 Primary", color: "bg-secondary text-primary" },
   T2: { label: "T2 Secondary", color: "bg-blue-100 text-blue-800" },
   T3: { label: "T3 Institutional", color: "bg-teal-100 text-teal-800" },
   Proxy: { label: "Proxy", color: "bg-purple-100 text-purple-800" },
@@ -120,9 +120,9 @@ const TIER_INFO: Record<EvidenceTier, { label: string; color: string }> = {
 
 const STATE_ICON: Record<VerificationState, { icon: typeof CheckCircle2; color: string }> = {
   pending: { icon: Clock, color: "text-amber-500" },
-  verified: { icon: CheckCircle2, color: "text-emerald-500" },
-  rejected: { icon: XCircle, color: "text-red-500" },
-  lapsed: { icon: AlertTriangle, color: "text-zinc-400" },
+  verified: { icon: CheckCircle2, color: "text-primary" },
+  rejected: { icon: XCircle, color: "text-destructive" },
+  lapsed: { icon: AlertTriangle, color: "text-muted-foreground/60" },
 };
 
 function fetchEvidence(): Promise<EvidenceApiResponse> {
@@ -221,7 +221,7 @@ export function EvidenceClient() {
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -273,7 +273,7 @@ export function EvidenceClient() {
           <Progress value={coveragePct} className="h-2" />
           <div className="flex gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="w-2 h-2 rounded-full bg-primary" />
               {verified} verified
             </span>
             <span className="flex items-center gap-1">
@@ -363,12 +363,12 @@ export function EvidenceClient() {
                               variant="outline"
                               className={`text-[10px] ${
                                 state === "verified"
-                                  ? "bg-emerald-50 text-emerald-700"
+                                  ? "bg-secondary text-primary"
                                   : state === "pending"
                                     ? "bg-amber-50 text-amber-700"
                                     : state === "rejected"
-                                      ? "bg-red-50 text-red-700"
-                                      : "bg-zinc-50 text-zinc-500"
+                                      ? "bg-destructive/10 text-destructive"
+                                      : "bg-muted text-muted-foreground"
                               }`}
                             >
                               {state.charAt(0).toUpperCase() + state.slice(1)}
@@ -434,7 +434,7 @@ export function EvidenceClient() {
                           <div className="flex gap-2">
                             <Button
                               size="sm"
-                              className="bg-emerald-600 hover:bg-emerald-700"
+                              className="bg-primary text-primary-foreground hover:bg-primary/90"
                               disabled={mutation.isPending || !fileName.trim() || !checksum.trim() || !data?.latestAssessmentSnapshotId}
                               onClick={() => handleSubmit(ind.id)}
                             >

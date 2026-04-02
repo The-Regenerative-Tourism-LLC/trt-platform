@@ -392,7 +392,7 @@ export function OperatorOnboardingClient() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-muted">
-          <div className="h-full w-1/3 bg-emerald-500/40 animate-pulse" />
+          <div className="h-full w-1/3 bg-primary/40 animate-pulse" />
         </div>
         <div className="fixed top-0.5 left-0 right-0 z-40 bg-background/90 border-b h-11" />
         <div className="flex-1 pt-14 pb-28 px-4">

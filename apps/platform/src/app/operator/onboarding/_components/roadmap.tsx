@@ -47,7 +47,7 @@ export function RoadmapScreen({
         <div className="max-w-2xl mx-auto w-full space-y-8">
 
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-200">
+            <div className="inline-flex items-center gap-2 bg-secondary text-primary text-xs font-semibold px-3 py-1 rounded-full border border-primary/30">
               Green Passport Assessment
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
@@ -69,7 +69,7 @@ export function RoadmapScreen({
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                     s.done
-                      ? "bg-emerald-100 text-emerald-600"
+                      ? "bg-secondary text-primary"
                       : "bg-muted text-muted-foreground"
                   }`}
                 >
@@ -86,7 +86,7 @@ export function RoadmapScreen({
                   </p>
                 </div>
                 {s.done && (
-                  <span className="text-[10px] font-semibold text-emerald-600 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0">
+                  <span className="text-[10px] font-semibold text-primary border border-primary/30 bg-secondary px-2 py-0.5 rounded-full shrink-0">
                     Started
                   </span>
                 )}
@@ -103,7 +103,7 @@ export function RoadmapScreen({
 
           <button
             onClick={onStart}
-            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-10 py-3 rounded-xl transition-colors text-base"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-3 rounded-xl transition-colors text-base"
           >
             Start assessment →
           </button>

@@ -17,11 +17,11 @@ export default function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-        <p className="text-red-600 text-sm mb-4">
+      <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+        <p className="text-destructive text-sm mb-4">
           Invalid reset link. Please request a new one.
         </p>
-        <Link href="/forgot-password" className="text-green-700 text-sm font-medium hover:underline">
+        <Link href="/forgot-password" className="text-foreground text-sm font-medium hover:underline">
           Request new reset link
         </Link>
       </div>
@@ -69,17 +69,17 @@ export default function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
-        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-          <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+          <svg className="w-6 h-6 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Password updated</h2>
-        <p className="text-gray-500 text-sm mb-4">
+        <h2 className="text-lg font-semibold text-foreground mb-2">Password updated</h2>
+        <p className="text-muted-foreground text-sm mb-4">
           Your password has been successfully changed. Redirecting to login…
         </p>
-        <Link href="/login" className="text-green-700 text-sm font-medium hover:underline">
+        <Link href="/login" className="text-foreground text-sm font-medium hover:underline">
           Go to login now
         </Link>
       </div>
@@ -87,10 +87,10 @@ export default function ResetPasswordForm() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+    <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <label htmlFor="password" className="block text-sm font-medium text-foreground">
             New password
           </label>
           <input
@@ -100,12 +100,12 @@ export default function ResetPasswordForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Min. 8 characters"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+            className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-2">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground">
             Confirm new password
           </label>
           <input
@@ -115,18 +115,18 @@ export default function ResetPasswordForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Repeat your password"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+            className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
 
         {error && (
-          <p className="text-red-600 text-sm">{error}</p>
+          <p className="text-destructive text-sm">{error}</p>
         )}
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full bg-primary text-primary-foreground text-sm font-semibold py-3 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? "Updating…" : "Set new password"}
         </button>
