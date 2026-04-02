@@ -39,16 +39,16 @@ export function SectionProgress({ stepId }: { stepId: string }) {
             {i > 0 && (
               <div
                 className={`h-px w-3 mx-0.5 shrink-0 ${
-                  isPast ? "bg-emerald-400" : "bg-border"
+                  isPast ? "bg-primary/80" : "bg-border"
                 }`}
               />
             )}
             <span
               className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap transition-colors ${
                 isCurrent
-                  ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                  ? "bg-secondary text-primary border border-primary/30"
                   : isPast
-                  ? "text-emerald-600"
+                  ? "text-primary"
                   : "text-muted-foreground/40"
               }`}
             >
@@ -106,7 +106,7 @@ export function StepShell({
       {/* Thin progress bar */}
       <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-muted">
         <div
-          className="h-full bg-emerald-500 transition-all duration-500"
+          className="h-full bg-primary transition-all duration-500"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -115,8 +115,8 @@ export function StepShell({
       <div className="fixed top-0.5 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-b">
         <div className="flex items-center justify-between px-4 py-2.5 max-w-4xl mx-auto gap-3">
           {/* Step counter (mobile) */}
-          <span className="text-xs text-muted-foreground shrink-0 sm:hidden font-medium">
-            {stepNumber}/{totalSteps}
+          <span className="text-xs text-muted-foreground shrink-0 sm:hidden font-mono font-medium">
+            {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
           </span>
 
           {/* Section progress (desktop) */}
@@ -125,7 +125,7 @@ export function StepShell({
           {/* Save status + close */}
           <div className="flex items-center gap-3 ml-auto sm:ml-0 shrink-0">
             {saved ? (
-              <span className="text-xs text-emerald-600 font-medium">Saved ✓</span>
+              <span className="text-xs text-primary font-medium">Saved ✓</span>
             ) : saving ? (
               <span className="text-xs text-muted-foreground">Saving…</span>
             ) : null}
@@ -145,13 +145,13 @@ export function StepShell({
         <div className="max-w-2xl mx-auto py-8 space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                Step {stepNumber} of {totalSteps}
+              <span className="text-xs font-mono font-medium text-muted-foreground tabular-nums">
+                {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
               </span>
               {sectionLabel && (
                 <>
                   <span className="text-xs text-muted-foreground/40">·</span>
-                  <span className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-primary">
                     {sectionLabel}
                   </span>
                 </>
@@ -183,7 +183,7 @@ export function StepShell({
             <button
               onClick={onSubmit}
               disabled={saving || !canSubmit}
-              className="bg-emerald-600 text-white font-semibold px-8 py-2.5 rounded-xl disabled:opacity-50 hover:bg-emerald-700 transition-colors"
+              className="bg-primary text-primary-foreground font-semibold px-8 py-2.5 rounded-xl disabled:opacity-50 hover:bg-primary/90 transition-colors"
             >
               {saving ? "Submitting…" : "Submit Assessment"}
             </button>
@@ -236,7 +236,7 @@ export function GpsFloatingCard({
     not_yet_published: "Not Yet Published",
   };
   const bandColors: Record<string, string> = {
-    regenerative_leader: "text-emerald-600",
+    regenerative_leader: "text-primary",
     regenerative_practice: "text-teal-600",
     advancing: "text-sky-600",
     developing: "text-amber-600",
@@ -261,7 +261,7 @@ export function GpsFloatingCard({
         </div>
         <div className="space-y-1.5">
           {([
-            { label: "P1 Footprint", score: p1, color: "bg-emerald-500" },
+            { label: "P1 Footprint", score: p1, color: "bg-primary" },
             { label: "P2 Integration", score: p2, color: "bg-teal-500" },
             { label: "P3 Regenerative", score: p3, color: "bg-sky-500" },
           ] as const).map((p) => (

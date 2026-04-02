@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ArrowRight } from "lucide-react";
 
 const LoginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -70,16 +73,16 @@ export function LoginForm() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Google OAuth */}
       <button
         type="button"
         onClick={handleGoogle}
         disabled={googleLoading || loading}
-        className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-lg text-sm font-medium text-foreground bg-card hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {googleLoading ? (
-          <span className="w-5 h-5 rounded-full border-2 border-gray-300 border-t-gray-700 animate-spin" />
+          <span className="w-5 h-5 rounded-full border-2 border-border border-t-foreground animate-spin" />
         ) : (
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -105,85 +108,83 @@ export function LoginForm() {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-100" />
+          <div className="w-full border-t border-border" />
         </div>
-        <div className="relative flex justify-center text-xs text-gray-400 uppercase tracking-wider">
-          <span className="bg-white px-3">or</span>
+        <div className="relative flex justify-center text-xs text-muted-foreground uppercase tracking-wider">
+          <span className="bg-cream px-3">or</span>
         </div>
       </div>
 
       {/* Credentials form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {globalError && (
-          <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-xl border border-red-100">
+          <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-lg border border-destructive/20">
             {globalError}
           </div>
         )}
 
-        <div>
+        <div className="space-y-2">
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1.5"
+            className="block text-sm font-medium text-foreground"
           >
             Email
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-colors focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 ${
-              errors.email ? "border-red-300 bg-red-50" : "border-gray-200"
+            className={`h-12 text-sm rounded-lg ${
+              errors.email ? "border-destructive" : ""
             }`}
           />
           {errors.email && (
-            <p className="text-xs text-red-600 mt-1">{errors.email}</p>
+            <p className="text-xs text-destructive mt-1">{errors.email}</p>
           )}
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-foreground"
             >
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+              className="text-xs text-muted-foreground hover:text-foreground font-medium"
             >
               Forgot password?
             </Link>
           </div>
-          <input
+          <Input
             id="password"
             type="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className={`w-full px-4 py-3 rounded-xl border text-sm outline-none transition-colors focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 ${
-              errors.password ? "border-red-300 bg-red-50" : "border-gray-200"
+            placeholder="Your password"
+            className={`h-12 text-sm rounded-lg ${
+              errors.password ? "border-destructive" : ""
             }`}
           />
           {errors.password && (
-            <p className="text-xs text-red-600 mt-1">{errors.password}</p>
+            <p className="text-xs text-destructive mt-1">{errors.password}</p>
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={loading || googleLoading}
-          className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          className="w-full h-12 rounded-lg text-sm font-semibold"
         >
-          {loading ? (
-            <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-          ) : null}
           {loading ? "Signing in…" : "Sign in"}
-        </button>
+          {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
+        </Button>
       </form>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -16,22 +16,18 @@ function getDashboardUrl(roles: string[]): string {
 
 export default function VerifyEmailClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { data: session, status: sessionStatus, update } = useSession();
   const token = searchParams.get("token");
 
   const [status, setStatus] = useState<Status>("verifying");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Resend state
   const [resendEmail, setResendEmail] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
   const [resendError, setResendError] = useState("");
 
   useEffect(() => {
-    // No token — show the "check your inbox" holding page for logged-in
-    // but unverified users redirected here by middleware.
     if (!token) {
       setStatus("error");
       setErrorMessage(
@@ -58,20 +54,14 @@ export default function VerifyEmailClient() {
 
         setStatus("success");
 
-        // If the user is already authenticated, refresh the JWT so the
-        // emailVerified field is updated in the session. The trigger="update"
-        // callback in auth.ts re-fetches emailVerified from the DB.
         if (sessionStatus === "authenticated") {
           await update();
-          // Small delay for the session update to propagate before navigating
-          await new Promise((r) => setTimeout(r, 300));
           const dashboardUrl = getDashboardUrl(
             (session?.user?.roles ?? []) as string[]
           );
-          router.push(dashboardUrl);
+          window.location.href = dashboardUrl;
         } else {
-          // Not authenticated — redirect to login after a short pause
-          setTimeout(() => router.push("/login?verified=1"), 2500);
+          setTimeout(() => { window.location.href = "/login?verified=1"; }, 2500);
         }
       } catch {
         setErrorMessage("An unexpected error occurred. Please try again.");
@@ -83,7 +73,6 @@ export default function VerifyEmailClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Pre-fill resend email from session
   useEffect(() => {
     if (session?.user?.email) {
       setResendEmail(session.user.email);
@@ -129,74 +118,67 @@ export default function VerifyEmailClient() {
     }
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-
   return (
-    <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+    <div className="max-w-md w-full rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
 
-      {/* Verifying */}
       {status === "verifying" && token && (
         <>
-          <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <h1 className="text-xl font-semibold text-foreground mb-2">
             Verifying your email…
           </h1>
-          <p className="text-gray-500 text-sm">This will only take a moment.</p>
+          <p className="text-muted-foreground text-sm">This will only take a moment.</p>
         </>
       )}
 
-      {/* Success */}
       {status === "success" && (
         <>
-          <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <h1 className="text-xl font-semibold text-foreground mb-2">
             Email verified
           </h1>
-          <p className="text-gray-500 text-sm mb-4">
+          <p className="text-muted-foreground text-sm mb-4">
             {sessionStatus === "authenticated"
               ? "Taking you to your dashboard…"
               : "You can now sign in to your account."}
           </p>
           {sessionStatus !== "authenticated" && (
-            <Link href="/login" className="text-green-700 text-sm font-medium hover:underline">
+            <Link href="/login" className="text-foreground text-sm font-medium hover:underline">
               Go to login
             </Link>
           )}
         </>
       )}
 
-      {/* Error / No-token holding page */}
       {status === "error" && (
         <>
           {token ? (
-            /* Token present but invalid/expired */
             <>
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-12 h-12 rounded-full bg-amber/20 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z" />
                 </svg>
               </div>
-              <h1 className="text-xl font-semibold text-gray-900 mb-2">
+              <h1 className="text-xl font-semibold text-foreground mb-2">
                 Link expired or already used
               </h1>
-              <p className="text-gray-500 text-sm mb-6">{errorMessage}</p>
+              <p className="text-muted-foreground text-sm mb-6">{errorMessage}</p>
             </>
           ) : (
-            /* No token — middleware redirected unverified user here */
             <>
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h1 className="text-xl font-semibold text-gray-900 mb-2">
+              <h1 className="text-xl font-semibold text-foreground mb-2">
                 Check your inbox
               </h1>
-              <p className="text-gray-500 text-sm mb-6">
+              <p className="text-muted-foreground text-sm mb-6">
                 We sent a verification link to{" "}
                 <strong>{session?.user?.email ?? "your email address"}</strong>.
                 Click it to activate your account.
@@ -204,14 +186,12 @@ export default function VerifyEmailClient() {
             </>
           )}
 
-          {/* Resend form */}
-          <div className="border-t border-gray-100 pt-6 mt-2">
-            <p className="text-sm text-gray-500 mb-3">
+          <div className="border-t border-border pt-6 mt-2">
+            <p className="text-sm text-muted-foreground mb-3">
               Didn&apos;t receive it? Request a new link.
             </p>
 
             <form onSubmit={handleResend} className="space-y-3">
-              {/* Only show email field if user is not authenticated */}
               {sessionStatus !== "authenticated" && (
                 <input
                   type="email"
@@ -219,32 +199,32 @@ export default function VerifyEmailClient() {
                   value={resendEmail}
                   onChange={(e) => setResendEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                  className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               )}
 
               {resendError && (
-                <p className="text-red-600 text-sm">{resendError}</p>
+                <p className="text-destructive text-sm">{resendError}</p>
               )}
               {resendMessage && (
-                <p className="text-green-700 text-sm font-medium">{resendMessage}</p>
+                <p className="text-primary text-sm font-medium">{resendMessage}</p>
               )}
 
               <button
                 type="submit"
                 disabled={resendLoading}
-                className="w-full bg-green-700 text-white text-sm font-semibold py-2 rounded-lg hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-primary text-primary-foreground text-sm font-semibold py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {resendLoading ? "Sending…" : "Resend verification email"}
               </button>
             </form>
 
-            <p className="mt-4 text-xs text-gray-400">
+            <p className="mt-4 text-xs text-muted-foreground/60">
               You can request one email per minute.
             </p>
           </div>
 
-          <p className="mt-6 text-xs text-gray-400">
+          <p className="mt-6 text-xs text-muted-foreground/60">
             <Link href="/login" className="hover:underline">
               Back to login
             </Link>

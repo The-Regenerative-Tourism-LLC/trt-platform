@@ -31,13 +31,13 @@ export default async function AccountLayout({
         : "/traveler/dashboard";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Minimal header for account pages */}
-      <header className="bg-white border-b border-gray-100">
+      <header className="bg-card border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link
             href={dashboardUrl}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <svg
               className="w-4 h-4"
@@ -54,7 +54,7 @@ export default async function AccountLayout({
             </svg>
             Back to dashboard
           </Link>
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-foreground">
             {session.email}
           </span>
         </div>
@@ -65,14 +65,14 @@ export default async function AccountLayout({
         <div className="flex gap-8">
           {/* Side nav */}
           <nav className="w-48 shrink-0">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            <p className="text-[11px] uppercase tracking-[0.2em] font-semibold text-muted-foreground/60 mb-3">
               Account
             </p>
             <ul className="space-y-1">
               <li>
                 <Link
                   href="/account/security"
-                  className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="block px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"
                 >
                   Security
                 </Link>

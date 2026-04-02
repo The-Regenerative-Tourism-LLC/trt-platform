@@ -74,9 +74,9 @@ export default function ChangePasswordForm() {
 
   if (success) {
     return (
-      <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-4">
+      <div className="flex items-start gap-3 bg-secondary border border-primary/20 rounded-lg p-4">
         <svg
-          className="w-5 h-5 text-green-600 mt-0.5 shrink-0"
+          className="w-5 h-5 text-primary mt-0.5 shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -89,13 +89,13 @@ export default function ChangePasswordForm() {
           />
         </svg>
         <div>
-          <p className="text-sm font-semibold text-green-800">Password updated</p>
-          <p className="text-sm text-green-700 mt-0.5">
+          <p className="text-sm font-semibold text-foreground">Password updated</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
             A confirmation email has been sent to your address.
           </p>
           <button
             onClick={() => setSuccess(false)}
-            className="mt-3 text-xs text-green-700 underline"
+            className="mt-3 text-xs text-primary underline"
           >
             Change again
           </button>
@@ -109,7 +109,7 @@ export default function ChangePasswordForm() {
       <div>
         <label
           htmlFor="currentPassword"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Current password
         </label>
@@ -120,14 +120,14 @@ export default function ChangePasswordForm() {
           autoComplete="current-password"
           value={form.currentPassword}
           onChange={set("currentPassword")}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+          className="w-full h-12 px-3 py-2 border border-input rounded-lg bg-background text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus:border-transparent"
         />
       </div>
 
       <div>
         <label
           htmlFor="newPassword"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           New password
         </label>
@@ -139,14 +139,14 @@ export default function ChangePasswordForm() {
           value={form.newPassword}
           onChange={set("newPassword")}
           placeholder="Min. 8 characters"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+          className="w-full h-12 px-3 py-2 border border-input rounded-lg bg-background text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus:border-transparent"
         />
       </div>
 
       <div>
         <label
           htmlFor="confirmPassword"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Confirm new password
         </label>
@@ -158,18 +158,18 @@ export default function ChangePasswordForm() {
           value={form.confirmPassword}
           onChange={set("confirmPassword")}
           placeholder="Repeat new password"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+          className="w-full h-12 px-3 py-2 border border-input rounded-lg bg-background text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus:border-transparent"
         />
       </div>
 
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={isLoading}
-        className="bg-gray-900 text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="bg-primary text-primary-foreground text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isLoading ? "Updating…" : "Update password"}
       </button>

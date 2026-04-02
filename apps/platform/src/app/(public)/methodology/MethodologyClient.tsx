@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowRight,
@@ -107,16 +107,24 @@ export function MethodologyClient() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-navy text-white">
-        <div className="container mx-auto max-w-7xl px-5 md:px-6 py-16 md:py-28">
+      <section className="relative overflow-hidden text-white">
+        <Image
+          src="/assets/methodology-hero.jpg"
+          alt="Methodology"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/85" />
+        <div className="relative z-10 container mx-auto max-w-7xl px-5 md:px-6 py-16 md:py-28">
           <div className="max-w-2xl space-y-5">
-            <p className="editorial-label text-white/30">How it works</p>
+            <p className="editorial-label text-white/50">How it works</p>
             <h1 className="text-3xl md:text-[3.5rem] font-bold tracking-tight leading-[1.05]">
               How we measure
               <br />
               regenerative tourism
             </h1>
-            <p className="text-base md:text-lg text-white/50 leading-relaxed max-w-lg">
+            <p className="text-base md:text-lg text-white/60 leading-relaxed max-w-lg">
               We built a system that answers three questions no booking platform
               can: How lightly does this operator touch the land? Does the money
               stay local? And is the place actually getting better because

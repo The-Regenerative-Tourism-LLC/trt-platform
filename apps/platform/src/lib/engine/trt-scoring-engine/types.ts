@@ -1,10 +1,32 @@
 /**
  * TRT Scoring Engine — Type Definitions
  *
+ * ARCHITECTURE: All snapshot and engine types are IMMUTABLE.
+ * Every property is readonly. Arrays are readonly arrays. Records use
+ * Readonly<Record<>> to prevent mutation of entries.
+ *
  * These types define the exact public contract of the scoring engine.
  * All inputs must be fully provided before invoking computeScore().
  * The engine never reads from the database, environment, or system time.
+ *
+ * IMMUTABILITY CONTRACT:
+ *   - AssessmentSnapshot, DpiSnapshot, ScoreSnapshot are append-only records.
+ *   - Once constructed, no field may be mutated.
+ *   - DeltaBlock, EvidenceRef, ComputationTrace are frozen sub-structures.
+ *   - MethodologyBundle is versioned and never modified in-place.
  */
+
+// ── Immutability Utility ──────────────────────────────────────────────────
+
+/**
+ * Recursively makes all properties, arrays, and nested objects readonly.
+ * Use on any snapshot or engine type to guarantee deep immutability at the type level.
+ */
+export type DeepReadonly<T> = T extends (infer U)[]
+  ? readonly DeepReadonly<U>[]
+  : T extends Record<string, unknown>
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : T;
 
 // ── Methodology Bundle ─────────────────────────────────────────────────────
 
@@ -64,8 +86,8 @@ export interface MethodologyBundle {
     readonly advancing: number; // 55
     readonly developing: number; // 40
   };
-  readonly normalizationBounds: Record<IndicatorId, NormBounds>;
-  readonly normalizationBoundsTours?: Record<IndicatorId, NormBounds>;
+  readonly normalizationBounds: Readonly<Record<IndicatorId, NormBounds>>;
+  readonly normalizationBoundsTours?: Readonly<Record<IndicatorId, NormBounds>>;
   readonly signature?: string;
 }
 
@@ -100,9 +122,9 @@ export interface P3Responses {
 
 export interface DeltaBlock {
   readonly priorCycle: number;
-  readonly baselineScores: Record<IndicatorId, number>;
-  readonly priorScores: Record<IndicatorId, number>;
-  readonly currentScores: Record<IndicatorId, number>;
+  readonly baselineScores: Readonly<Record<IndicatorId, number>>;
+  readonly priorScores: Readonly<Record<IndicatorId, number>>;
+  readonly currentScores: Readonly<Record<IndicatorId, number>>;
 }
 
 export interface EvidenceRef {
@@ -141,7 +163,7 @@ export interface AssessmentSnapshot {
 
   readonly delta: DeltaBlock | null; // null on Cycle 1
 
-  readonly evidence: EvidenceRef[];
+  readonly evidence: readonly EvidenceRef[];
 
   readonly snapshotHash: string; // SHA-256 of canonical JSON
   readonly createdAt: string; // ISO8601 timestamp
@@ -178,9 +200,9 @@ export type DpsBand =
 export type DpiPressureLevel = "low" | "moderate" | "high";
 
 export interface ComputationTrace {
-  readonly p1SubScores: Record<string, number>;
-  readonly p2SubScores: Record<string, number>;
-  readonly p3SubScores: Record<string, number>;
+  readonly p1SubScores: Readonly<Record<string, number>>;
+  readonly p2SubScores: Readonly<Record<string, number>>;
+  readonly p3SubScores: Readonly<Record<string, number>>;
   readonly p1Weighted: number;
   readonly p2Weighted: number;
   readonly p3Weighted: number;

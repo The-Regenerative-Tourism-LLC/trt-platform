@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * ARCHITECTURE: Presentation-only component.
+ *
+ * This file displays traveler-facing data fetched from API routes.
+ * It must NOT compute or approximate any scores.
+ * All score data originates from immutable, persisted ScoreSnapshots.
+ */
+
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -9,7 +17,7 @@ export function TravelerDashboardClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -35,10 +43,10 @@ export function TravelerDashboardClient() {
       </div>
 
       {/* Impact Passport Card */}
-      <div className="rounded-2xl border bg-card p-8 flex flex-col items-center text-center gap-4">
-        <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center">
+      <div className="rounded-lg border border-border bg-card p-8 flex flex-col items-center text-center gap-4 shadow-sm">
+        <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center">
           <svg
-            className="w-10 h-10 text-emerald-600"
+            className="w-10 h-10 text-primary"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -61,7 +69,7 @@ export function TravelerDashboardClient() {
         <div className="flex gap-3 flex-wrap justify-center">
           <Link
             href="/traveler/discover"
-            className="inline-flex items-center gap-2 bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-full hover:bg-emerald-700 transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-6 py-2.5 rounded-full hover:bg-primary/90 transition-colors text-sm"
           >
             Discover Operators →
           </Link>
@@ -83,7 +91,7 @@ export function TravelerDashboardClient() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl border bg-card p-5 text-center"
+            className="rounded-lg border border-border bg-card p-5 text-center shadow-sm"
           >
             <p className="text-3xl font-bold">{stat.value}</p>
             <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>

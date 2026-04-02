@@ -6,13 +6,19 @@
 # Flow:
 #   1. Wait for PostgreSQL to accept connections (retry loop — no extra tools)
 #   2. Apply pending Prisma migrations (idempotent, advisory-locked)
-#   3. Regenerate Prisma client (precautionary; already done at build time)
-#   4. exec into the Next.js production server (PID 1 from this point, clean signals)
+#   3. exec into the Next.js standalone server (PID 1 from this point, clean signals)
 #
 # Environment variables expected at runtime (injected by Railway):
 #   DATABASE_URL   — PostgreSQL connection string
 #   AUTH_SECRET    — Auth.js signing secret
 #   PORT           — TCP port (Railway injects this; Next.js reads it automatically)
+#   HOSTNAME       — bind address (set to 0.0.0.0 in Dockerfile ENV)
+#
+# MONOREPO NOTE:
+#   Next.js standalone output preserves the workspace directory structure.
+#   The app lives at apps/platform/ in the monorepo, so server.js is emitted
+#   at .next/standalone/apps/platform/server.js — NOT at the standalone root.
+#   All paths below reflect this structure.
 
 set -e
 
@@ -38,17 +44,12 @@ done
 
 echo "==> Migrations applied."
 
-# ── 2. Regenerate Prisma client ────────────────────────────────────────────────
-# The client was already generated during `docker build` (for the Linux/musl
-# target). This step is a precautionary re-run to ensure the runtime binary
-# matches the schema. It is a no-op when nothing has changed.
-echo "==> Generating Prisma client..."
-npx prisma generate
-
-# ── 3. Start Next.js ───────────────────────────────────────────────────────────
-# `exec` replaces this shell process so Next.js becomes the direct signal
-# recipient (SIGTERM on Railway deploys triggers a clean graceful shutdown).
-# -H 0.0.0.0 binds to all interfaces (required in container environments).
-# PORT is read automatically by Next.js from the environment.
-echo "==> Starting Next.js on 0.0.0.0:${PORT:-3000}..."
-exec node_modules/.bin/next start -H 0.0.0.0
+# ── 2. Start Next.js standalone server ────────────────────────────────────────
+# `exec` replaces this shell process so the server becomes PID 1, ensuring
+# Railway's SIGTERM on deploy triggers a clean graceful shutdown.
+# PORT and HOSTNAME are read from the environment (set in Dockerfile + Railway).
+#
+# server.js is at apps/platform/server.js inside the container because the
+# standalone output mirrors the monorepo workspace path.
+echo "==> Starting server on ${HOSTNAME:-0.0.0.0}:${PORT:-3000}..."
+exec node apps/platform/server.js

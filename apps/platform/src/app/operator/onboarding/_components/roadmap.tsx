@@ -12,32 +12,32 @@ export function RoadmapScreen({
     {
       icon: "🏢",
       label: "Your operation",
-      desc: "Basic info about your business, location, and ownership.",
+      desc: "Operator type, business details, ownership, and annual activity.",
       done: !!(data.legalName?.trim()),
     },
     {
       icon: "🌱",
-      label: "Pillar 1 — Operational Footprint (40%)",
-      desc: "Energy, water, waste, carbon & land use.",
+      label: "Pillar 1 — Operational Footprint",
+      desc: "Energy, water, waste, carbon & site use. Weighted 40%.",
       done: data.totalElectricityKwh != null || data.totalGasKwh != null,
     },
     {
       icon: "🤝",
-      label: "Pillar 2 — Local Integration (30%)",
-      desc: "Employment, procurement, revenue retention & community.",
+      label: "Pillar 2 — Local Integration",
+      desc: "Your team, where you buy from, how guests book, community. Weighted 30%.",
       done: data.totalFte != null || data.soloOperator === true,
     },
     {
       icon: "✨",
-      label: "Pillar 3 — Regenerative Contribution (30%)",
-      desc: "How you actively improve the place you depend on.",
+      label: "Pillar 3 — Giving Back to Your Destination",
+      desc: "Regenerative programmes and forward commitments. Weighted 30%.",
       done: !!data.p3Status,
     },
     {
       icon: "📎",
-      label: "Evidence & Review",
-      desc: "Upload supporting documents and review your assessment before submission.",
-      done: (data.evidenceRefs?.length ?? 0) > 0,
+      label: "Review & submit",
+      desc: "See your estimated score and submit your assessment.",
+      done: !!(data.legalName?.trim()) && !!data.p3Status,
     },
   ];
 
@@ -47,15 +47,16 @@ export function RoadmapScreen({
         <div className="max-w-2xl mx-auto w-full space-y-8">
 
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-200">
+            <div className="inline-flex items-center gap-2 bg-secondary text-primary text-xs font-semibold px-3 py-1 rounded-full border border-primary/30">
               Green Passport Assessment
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Let&apos;s get your Green Passport set up
+              Let&apos;s build your Green Passport
             </h1>
             <p className="text-muted-foreground text-base leading-relaxed max-w-lg">
-              We&apos;ll walk you through a few sections about your operation. It takes
-              about 20 minutes — you can save and come back anytime.
+              We&apos;ll walk you through five sections covering your operation,
+              environmental footprint, local impact, and regenerative contribution.
+              It takes about 20–30 minutes — your progress is saved automatically.
             </p>
           </div>
 
@@ -68,7 +69,7 @@ export function RoadmapScreen({
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                     s.done
-                      ? "bg-emerald-100 text-emerald-600"
+                      ? "bg-secondary text-primary"
                       : "bg-muted text-muted-foreground"
                   }`}
                 >
@@ -85,7 +86,7 @@ export function RoadmapScreen({
                   </p>
                 </div>
                 {s.done && (
-                  <span className="text-[10px] font-semibold text-emerald-600 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0">
+                  <span className="text-[10px] font-semibold text-primary border border-primary/30 bg-secondary px-2 py-0.5 rounded-full shrink-0">
                     Started
                   </span>
                 )}
@@ -102,7 +103,7 @@ export function RoadmapScreen({
 
           <button
             onClick={onStart}
-            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-10 py-3 rounded-xl transition-colors text-base"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-10 py-3 rounded-xl transition-colors text-base"
           >
             Start assessment →
           </button>

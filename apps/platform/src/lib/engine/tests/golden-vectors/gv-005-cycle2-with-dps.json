@@ -1,0 +1,94 @@
+{
+  "vectorId": "GV-005",
+  "description": "Cycle 2 — DPS computed from delta block with baseline and prior scores",
+  "input": {
+    "assessmentSnapshot": {
+      "operatorId": "op-001",
+      "operatorType": "A",
+      "activityUnit": { "guestNights": 5000 },
+      "assessmentCycle": 2,
+      "assessmentPeriodEnd": "2025-12-31",
+      "pillar1": {
+        "energyIntensity": 20,
+        "renewablePct": 75,
+        "waterIntensity": 150,
+        "recirculationScore": 2,
+        "wasteDiversionPct": 60,
+        "carbonIntensity": 12,
+        "siteScore": 3
+      },
+      "pillar2": {
+        "localEmploymentRate": 60,
+        "employmentQuality": 70,
+        "localFbRate": 50,
+        "localNonfbRate": 45,
+        "directBookingRate": 55,
+        "localOwnershipPct": 60,
+        "communityScore": 3
+      },
+      "pillar3": {
+        "categoryScope": 75,
+        "traceability": 75,
+        "additionality": 50,
+        "continuity": 75
+      },
+      "p3Status": "B",
+      "delta": {
+        "priorCycle": 1,
+        "baselineScores": {
+          "p1a": 70,
+          "p1b": 60,
+          "p1c": 50,
+          "p1d": 40,
+          "p1e": 50,
+          "p2a": 55,
+          "p2b": 45,
+          "p2c": 40,
+          "p2d": 50,
+          "p3": 50
+        },
+        "priorScores": {
+          "p1a": 70,
+          "p1b": 60,
+          "p1c": 50,
+          "p1d": 40,
+          "p1e": 50,
+          "p2a": 55,
+          "p2b": 45,
+          "p2c": 40,
+          "p2d": 50,
+          "p3": 50
+        },
+        "currentScores": {}
+      },
+      "evidence": [],
+      "snapshotHash": "snap-hash-005",
+      "createdAt": "2026-01-15T00:00:00Z"
+    },
+    "dpiSnapshot": {
+      "territoryId": "territory-madeira",
+      "touristIntensity": 65,
+      "ecologicalSensitivity": 55,
+      "economicLeakageRate": 40,
+      "regenerativePerf": 45,
+      "compositeDpi": 56,
+      "pressureLevel": "moderate",
+      "snapshotHash": "dpi-hash-001",
+      "createdAt": "2026-03-01T00:00:00Z"
+    },
+    "methodologyBundle": "v1.0.0"
+  },
+  "expectedOutput": {
+    "dpiScore": 56,
+    "dpiPressureLevel": "moderate"
+  },
+  "assertions": [
+    "dpsTotal must not be null on Cycle 2",
+    "dps1 must not be null on Cycle 2",
+    "dps2 must not be null on Cycle 2",
+    "dps3 must not be null on Cycle 2",
+    "dpsBand must not be null on Cycle 2",
+    "gpsTotal must be in range [0, 100]"
+  ],
+  "notes": "Cycle 2 with delta block — DPS is computed from improvement/regression relative to baseline and prior scores. Engine must produce non-null DPS values."
+}

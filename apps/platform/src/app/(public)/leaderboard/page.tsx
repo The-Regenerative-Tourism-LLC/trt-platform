@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -13,13 +14,21 @@ export default function LeaderboardPage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-navy text-white">
-        <div className="container mx-auto max-w-7xl py-14 md:py-24 px-5 md:px-6 space-y-4">
-          <p className="editorial-label text-white/30">Community</p>
+      <section className="relative overflow-hidden text-white">
+        <Image
+          src="/assets/leaderboard-hero.jpg"
+          alt="Impact Record"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/70 to-black/85" />
+        <div className="relative z-10 container mx-auto max-w-7xl py-14 md:py-24 px-5 md:px-6 space-y-4">
+          <p className="editorial-label text-white/50">Community</p>
           <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05]">
-            Regenerative leaderboard
+            Impact Record
           </h1>
-          <p className="text-sm text-white/50 max-w-lg leading-relaxed">
+          <p className="text-sm text-white/60 max-w-lg leading-relaxed">
             Travelers ranked by cumulative Choice Score — earned through
             verified regenerative bookings, activities, and check-ins.
           </p>

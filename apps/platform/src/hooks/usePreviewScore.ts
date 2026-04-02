@@ -1,5 +1,16 @@
 "use client";
 
+/**
+ * ARCHITECTURE: API delegation hook — no scoring logic.
+ *
+ * This hook calls POST /api/v1/score/preview to obtain preview scores.
+ * It sends raw onboarding data to the API, which derives indicators server-side
+ * and invokes the scoring engine. The hook only receives and exposes the result.
+ *
+ * This file must NOT import the scoring engine, snapshot builders, or MethodologyBundle.
+ * It must NOT compute, approximate, or infer GPS/DPS/DPI scores locally.
+ */
+
 import { useState, useCallback, useRef } from "react";
 import type { OnboardingData } from "@/lib/onboarding/onboarding-steps";
 import { waterPracticesToRecirculationScore } from "@/lib/onboarding/onboarding-steps";

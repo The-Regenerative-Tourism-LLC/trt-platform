@@ -10,9 +10,8 @@
  *   - Back navigation never validates and always moves back
  *   - Conditional steps are skipped correctly
  *   - Step validators only check the current step's fields
- *   - Evidence upload step is always passable (optional)
  *   - Delta step is only visible for cycle 2+ operators
- *   - Accommodation/experience steps are gated by operator type
+ *   - operation-activity merges accommodation + experience + ownership + activity
  */
 
 import { describe, it, expect } from "vitest";
@@ -41,7 +40,7 @@ function typeAData(): Partial<OnboardingData> {
     territoryId: "ter-1",
     accommodationCategory: "guesthouse",
     rooms: 6,
-    ownershipType: "independent",
+    ownershipType: "sole-proprietor",
     localEquityPct: 100,
     assessmentPeriodEnd: "2024-12-31",
     guestNights: 1200,
@@ -153,8 +152,8 @@ function typeBData(): Partial<OnboardingData> {
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 describe("ONBOARDING_STEPS", () => {
-  it("has 25 steps defined", () => {
-    expect(ONBOARDING_STEPS).toHaveLength(25);
+  it("has 21 steps defined (merged operation-activity, removed evidence-upload)", () => {
+    expect(ONBOARDING_STEPS).toHaveLength(21);
   });
 
   it("first step is operator-type", () => {
@@ -170,6 +169,21 @@ describe("ONBOARDING_STEPS", () => {
     const unique = new Set(ids);
     expect(unique.size).toBe(ids.length);
   });
+
+  it("includes operation-activity but not the old individual steps", () => {
+    const ids = ONBOARDING_STEPS.map((s) => s.id);
+    expect(ids).toContain("operation-activity");
+    expect(ids).not.toContain("accommodation");
+    expect(ids).not.toContain("experience-types");
+    expect(ids).not.toContain("ownership");
+    expect(ids).not.toContain("activity-unit");
+    expect(ids).not.toContain("evidence-upload");
+  });
+
+  it("gps-preview comes before evidence-checklist", () => {
+    const ids = ONBOARDING_STEPS.map((s) => s.id);
+    expect(ids.indexOf("gps-preview")).toBeLessThan(ids.indexOf("evidence-checklist"));
+  });
 });
 
 // ── Step navigation helpers ────────────────────────────────────────────────────
@@ -180,34 +194,26 @@ describe("getNextStep", () => {
     expect(next?.id).toBe("identity");
   });
 
-  it("skips accommodation step for type B operator", () => {
-    const next = getNextStep("identity", { operatorType: "B" });
-    // accommodation is conditional on A or C — should skip to experience-types
-    expect(next?.id).toBe("experience-types");
+  it("identity → operation-activity for all operator types", () => {
+    expect(getNextStep("identity", { operatorType: "A" })?.id).toBe("operation-activity");
+    expect(getNextStep("identity", { operatorType: "B" })?.id).toBe("operation-activity");
+    expect(getNextStep("identity", { operatorType: "C" })?.id).toBe("operation-activity");
   });
 
-  it("includes accommodation step for type A operator", () => {
-    const next = getNextStep("identity", { operatorType: "A" });
-    expect(next?.id).toBe("accommodation");
-  });
-
-  it("skips experience-types step for type A operator", () => {
-    const next = getNextStep("accommodation", { operatorType: "A" });
-    expect(next?.id).toBe("ownership");
-  });
-
-  it("includes experience-types step for type B operator", () => {
-    // B has no accommodation, so identity → experience-types → ownership
-    const next = getNextStep("identity", { operatorType: "B" });
-    expect(next?.id).toBe("experience-types");
-    const next2 = getNextStep("experience-types", { operatorType: "B" });
-    expect(next2?.id).toBe("ownership");
+  it("operation-activity → photos", () => {
+    const next = getNextStep("operation-activity", {});
+    expect(next?.id).toBe("photos");
   });
 
   it("skips p3-programme and p3-evidence-quality for status E", () => {
     const next = getNextStep("p3-status", { p3Status: "E" });
-    // E → skip programme, evidence-quality, forward-commitment → evidence-upload
-    expect(next?.id).toBe("evidence-upload");
+    // E → skip programme, evidence-quality, forward-commitment → delta (if cycle 2+) or gps-preview
+    expect(next?.id).toBe("gps-preview");
+  });
+
+  it("skips p3-programme and p3-evidence-quality for status E (cycle 1)", () => {
+    const next = getNextStep("p3-status", { p3Status: "E", assessmentCycle: 1 });
+    expect(next?.id).toBe("gps-preview");
   });
 
   it("includes p3-programme for status A", () => {
@@ -215,14 +221,21 @@ describe("getNextStep", () => {
     expect(next?.id).toBe("p3-programme");
   });
 
-  it("goes to evidence-checklist after evidence-upload for cycle 1", () => {
-    const next = getNextStep("evidence-upload", {});
+  it("gps-preview → evidence-checklist", () => {
+    const next = getNextStep("gps-preview", {});
     expect(next?.id).toBe("evidence-checklist");
   });
 
-  it("includes delta after evidence-checklist for cycle 2+ operator", () => {
-    const next = getNextStep("evidence-checklist", { assessmentCycle: 2 });
+  it("evidence-checklist → review-submit (cycle 1)", () => {
+    const next = getNextStep("evidence-checklist", {});
+    expect(next?.id).toBe("review-submit");
+  });
+
+  it("includes delta before gps-preview for cycle 2+ operator", () => {
+    const next = getNextStep("p3-status", { p3Status: "E", assessmentCycle: 2 });
     expect(next?.id).toBe("delta");
+    const afterDelta = getNextStep("delta", { assessmentCycle: 2 });
+    expect(afterDelta?.id).toBe("gps-preview");
   });
 
   it("returns undefined after review-submit (last step)", () => {
@@ -242,37 +255,45 @@ describe("getPreviousStep", () => {
     expect(prev?.id).toBe("operator-type");
   });
 
-  it("skips accommodation going back from ownership for type B", () => {
-    // B: ownership → back → experience-types (accommodation skipped)
-    const prev = getPreviousStep("ownership", { operatorType: "B" });
-    expect(prev?.id).toBe("experience-types");
+  it("returns identity from operation-activity", () => {
+    const prev = getPreviousStep("operation-activity", { operatorType: "A" });
+    expect(prev?.id).toBe("identity");
   });
 
-  it("goes back to accommodation from ownership for type A", () => {
-    const prev = getPreviousStep("ownership", { operatorType: "A" });
-    expect(prev?.id).toBe("accommodation");
+  it("returns operation-activity from photos", () => {
+    const prev = getPreviousStep("photos", {});
+    expect(prev?.id).toBe("operation-activity");
+  });
+
+  it("returns evidence-checklist from review-submit", () => {
+    const prev = getPreviousStep("review-submit", {});
+    expect(prev?.id).toBe("evidence-checklist");
   });
 });
 
 // ── Visible steps ─────────────────────────────────────────────────────────────
 
 describe("getVisibleSteps", () => {
-  it("for type A, status E, cycle 1 — visible steps exclude conditional B/C/D steps", () => {
+  it("for type A, status E, cycle 1 — visible steps exclude conditional P3/delta steps", () => {
     const data: OnboardingData = { operatorType: "A", p3Status: "E" };
     const visible = getVisibleSteps(data).map((s) => s.id);
-    expect(visible).toContain("accommodation");
+    expect(visible).toContain("operation-activity");
+    expect(visible).not.toContain("accommodation");
     expect(visible).not.toContain("experience-types");
+    expect(visible).not.toContain("ownership");
+    expect(visible).not.toContain("activity-unit");
     expect(visible).not.toContain("p3-programme");
     expect(visible).not.toContain("p3-evidence-quality");
     expect(visible).not.toContain("p3-forward-commitment");
     expect(visible).not.toContain("delta");
   });
 
-  it("for type B, status A, cycle 2 — includes experience-types, p3-programme, delta", () => {
+  it("for type B, status A, cycle 2 — includes p3-programme, delta, no old individual steps", () => {
     const data: OnboardingData = { operatorType: "B", p3Status: "A", assessmentCycle: 2 };
     const visible = getVisibleSteps(data).map((s) => s.id);
-    expect(visible).toContain("experience-types");
+    expect(visible).toContain("operation-activity");
     expect(visible).not.toContain("accommodation");
+    expect(visible).not.toContain("experience-types");
     expect(visible).toContain("p3-programme");
     expect(visible).toContain("p3-evidence-quality");
     expect(visible).toContain("delta");
@@ -285,12 +306,18 @@ describe("getVisibleSteps", () => {
     expect(visible).not.toContain("p3-programme");
     expect(visible).not.toContain("p3-evidence-quality");
   });
+
+  it("gps-preview always appears before evidence-checklist", () => {
+    const data: OnboardingData = { operatorType: "A", p3Status: "E" };
+    const ids = getVisibleSteps(data).map((s) => s.id);
+    expect(ids.indexOf("gps-preview")).toBeLessThan(ids.indexOf("evidence-checklist"));
+  });
 });
 
 describe("isLastStep", () => {
   it("returns false for any step before review-submit", () => {
     expect(isLastStep("gps-preview", {})).toBe(false);
-    expect(isLastStep("evidence-upload", {})).toBe(false);
+    expect(isLastStep("evidence-checklist", {})).toBe(false);
   });
 
   it("returns true for review-submit", () => {
@@ -329,22 +356,43 @@ describe("validateStep — identity", () => {
   });
 });
 
-describe("validateStep — accommodation", () => {
-  it("passes for type B (step not visible)", () => {
-    expect(validateStep("accommodation", { operatorType: "B" })).toBe(true);
+describe("validateStep — operation-activity", () => {
+  it("fails when required fields missing", () => {
+    expect(validateStep("operation-activity", { operatorType: "A" })).toBe(false);
   });
 
-  it("fails for type A when accommodationCategory or rooms missing", () => {
-    expect(validateStep("accommodation", { operatorType: "A" })).toBe(false);
-    expect(validateStep("accommodation", { operatorType: "A", accommodationCategory: "guesthouse" })).toBe(false);
-  });
-
-  it("passes for type A when accommodationCategory and rooms provided", () => {
-    expect(validateStep("accommodation", {
+  it("passes for type A with all required fields", () => {
+    expect(validateStep("operation-activity", {
       operatorType: "A",
       accommodationCategory: "guesthouse",
       rooms: 6,
+      ownershipType: "sole-proprietor",
+      localEquityPct: 100,
+      assessmentPeriodEnd: "2024-12-31",
+      guestNights: 1200,
     })).toBe(true);
+  });
+
+  it("passes for type B with all required fields (no accommodation needed)", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "B",
+      experienceTypes: ["hiking_trekking"],
+      ownershipType: "sole-proprietor",
+      localEquityPct: 100,
+      assessmentPeriodEnd: "2024-12-31",
+      visitorDays: 800,
+    })).toBe(true);
+  });
+
+  it("fails for type B when experience types missing", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "B",
+      experienceTypes: [],
+      ownershipType: "sole-proprietor",
+      localEquityPct: 100,
+      assessmentPeriodEnd: "2024-12-31",
+      visitorDays: 800,
+    })).toBe(false);
   });
 });
 
@@ -369,13 +417,9 @@ describe("validateStep — p2-employment", () => {
   });
 });
 
-describe("validateStep — evidence-upload", () => {
-  it("always passes regardless of evidenceRefs (optional)", () => {
-    expect(validateStep("evidence-upload", {})).toBe(true);
-    expect(validateStep("evidence-upload", { evidenceRefs: [] })).toBe(true);
-    expect(validateStep("evidence-upload", {
-      evidenceRefs: [{ indicatorId: "p1_energy_intensity", tier: "T1", checksum: "abc", verificationState: "pending" }],
-    })).toBe(true);
+describe("validateStep — gps-preview", () => {
+  it("always passes (read-only step)", () => {
+    expect(validateStep("gps-preview", {})).toBe(true);
   });
 });
 
@@ -420,13 +464,16 @@ describe("full navigation — Type A, P3 status E, cycle 1", () => {
     const data = typeAData() as OnboardingData;
     const visible = getVisibleSteps(data).map((s) => s.id);
 
-    // Confirm no conditional steps that shouldn't be present
+    // Confirm merged step present, old individual steps absent
+    expect(visible).toContain("operation-activity");
+    expect(visible).not.toContain("accommodation");
     expect(visible).not.toContain("experience-types");
+    expect(visible).not.toContain("ownership");
+    expect(visible).not.toContain("activity-unit");
     expect(visible).not.toContain("p3-programme");
     expect(visible).not.toContain("p3-evidence-quality");
     expect(visible).not.toContain("p3-forward-commitment");
     expect(visible).not.toContain("delta");
-    expect(visible).toContain("accommodation");
     expect(visible).toContain("review-submit");
   });
 
@@ -460,7 +507,8 @@ describe("full navigation — Type B, P3 status A, cycle 2", () => {
     (data as any).deltaExplanation = "Added solar panels.";
     const visible = getVisibleSteps(data).map((s) => s.id);
 
-    expect(visible).toContain("experience-types");
+    expect(visible).toContain("operation-activity");
+    expect(visible).not.toContain("experience-types");
     expect(visible).not.toContain("accommodation");
     expect(visible).toContain("p3-programme");
     expect(visible).toContain("p3-evidence-quality");
@@ -485,8 +533,8 @@ describe("getVisibleStepNumber", () => {
   });
 
   it("returns -1 for hidden step", () => {
-    // accommodation is hidden for type B
-    expect(getVisibleStepNumber("accommodation", { operatorType: "B" })).toBe(-1);
+    // delta is hidden for cycle 1 operators
+    expect(getVisibleStepNumber("delta", { operatorType: "B" })).toBe(-1);
   });
 
   it("returns sequential numbers for visible steps", () => {
@@ -504,7 +552,7 @@ describe("getStepById", () => {
   it("returns the step for a valid id", () => {
     const step = getStepById("identity");
     expect(step?.id).toBe("identity");
-    expect(step?.label).toBe("Identity");
+    expect(step?.label).toBe("About Your Business");
   });
 
   it("returns undefined for unknown id", () => {

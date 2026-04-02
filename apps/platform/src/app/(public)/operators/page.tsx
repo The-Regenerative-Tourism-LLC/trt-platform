@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db/prisma";
 import { GPS_BAND_CONFIG, DPS_BAND_CONFIG } from "@/lib/constants";
 import { Search, MapPin, Filter, Leaf } from "lucide-react";
@@ -23,10 +24,10 @@ interface Props {
 }
 
 const BAND_OPTIONS: { value: string; label: string; color: string }[] = [
-  { value: "regenerative_leader", label: "Regenerative Leader", color: "bg-emerald-600" },
-  { value: "regenerative_practice", label: "Regenerative Practice", color: "bg-green-600" },
-  { value: "advancing", label: "Advancing", color: "bg-teal-600" },
-  { value: "developing", label: "Developing", color: "bg-amber-600" },
+  { value: "regenerative_leader", label: "Regenerative Leader", color: "bg-primary" },
+  { value: "regenerative_practice", label: "Regenerative Practice", color: "bg-primary/80" },
+  { value: "advancing", label: "Advancing", color: "bg-primary/60" },
+  { value: "developing", label: "Developing", color: "bg-muted-foreground" },
 ];
 
 const SORT_OPTIONS: { value: string; label: string }[] = [
@@ -37,19 +38,19 @@ const SORT_OPTIONS: { value: string; label: string }[] = [
 
 function bandBgClass(band: GreenPassportBand): string {
   const map: Record<GreenPassportBand, string> = {
-    regenerative_leader: "bg-emerald-600",
-    regenerative_practice: "bg-green-600",
-    advancing: "bg-teal-600",
-    developing: "bg-amber-600",
-    not_yet_published: "bg-zinc-400",
+    regenerative_leader: "bg-primary",
+    regenerative_practice: "bg-primary/80",
+    advancing: "bg-primary/60",
+    developing: "bg-muted-foreground",
+    not_yet_published: "bg-muted-foreground/60",
   };
-  return map[band] ?? "bg-zinc-400";
+  return map[band] ?? "bg-muted-foreground/60";
 }
 
 function pressureTextClass(level: string | null): string {
-  if (level === "high") return "text-red-600";
-  if (level === "moderate") return "text-amber-600";
-  return "text-emerald-600";
+  if (level === "high") return "text-destructive";
+  if (level === "moderate") return "text-[hsl(var(--trt-amber))]";
+  return "text-accent";
 }
 
 export default async function PublicOperatorsPage({ searchParams }: Props) {
@@ -111,21 +112,28 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
   return (
     <main className="min-h-screen bg-background">
       {/* Hero */}
-      <section className="relative bg-gradient-to-b from-emerald-950 via-emerald-900 to-emerald-800 text-white py-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-700/20 to-transparent" />
-        <div className="max-w-5xl mx-auto relative space-y-4">
-          <div className="inline-flex items-center gap-2 bg-emerald-800/60 text-emerald-200 text-sm px-4 py-1.5 rounded-full">
+      <section className="relative overflow-hidden text-white">
+        <Image
+          src="/assets/hero-landscape.jpg"
+          alt="Verified Regenerative Operators"
+          fill
+          className="object-cover object-center"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/70 to-black/85" />
+        <div className="relative z-10 container mx-auto max-w-7xl py-14 md:py-24 px-5 md:px-6 space-y-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 text-white/60 text-sm px-4 py-1.5 rounded-full">
             <Leaf className="h-3.5 w-3.5" />
             Verified by Green Passport
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05]">
             Verified Regenerative Operators
           </h1>
-          <p className="text-emerald-200 text-lg max-w-2xl">
+          <p className="text-sm text-white/60 max-w-2xl leading-relaxed">
             Every operator listed here has been independently assessed across three
             pillars of regenerative impact. Scores are computed, not claimed.
           </p>
-          <p className="text-emerald-300/80 text-sm">
+          <p className="text-white/50 text-sm">
             {sorted.length === 0
               ? "No operators match your filters"
               : `${sorted.length} operator${sorted.length !== 1 ? "s" : ""} with published GPS scores`}
@@ -133,7 +141,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+      <div className="container mx-auto max-w-7xl px-5 md:px-6 py-8 md:py-12 space-y-8">
         {/* Filter bar */}
         <form
           method="GET"
@@ -151,7 +159,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                 type="search"
                 defaultValue={q ?? ""}
                 placeholder="Search operators, regions..."
-                className="w-full rounded-lg border bg-background pl-9 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full rounded-lg border bg-background pl-9 pr-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
           </div>
@@ -164,7 +172,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
               id="band"
               name="band"
               defaultValue={band ?? ""}
-              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">All bands</option>
               {BAND_OPTIONS.map((o) => (
@@ -183,7 +191,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
               id="territory"
               name="territory"
               defaultValue={territory ?? ""}
-              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">All territories</option>
               {territories.map((t) => (
@@ -202,7 +210,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
               id="sort"
               name="sort"
               defaultValue={sort ?? "recent"}
-              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -214,7 +222,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
 
           <button
             type="submit"
-            className="rounded-lg bg-emerald-600 text-white px-5 py-2 text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
+            className="rounded-lg bg-primary text-primary-foreground px-5 py-2 text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2"
           >
             <Filter className="h-3.5 w-3.5" />
             Apply
@@ -226,23 +234,23 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Filters active:</span>
             {q && (
-              <span className="bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full text-xs font-medium">
+              <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-medium">
                 &ldquo;{q}&rdquo;
               </span>
             )}
             {band && (
-              <span className="bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full text-xs font-medium capitalize">
+              <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-medium capitalize">
                 {band.replace(/_/g, " ")}
               </span>
             )}
             {territory && (
-              <span className="bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full text-xs font-medium">
+              <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-medium">
                 {territories.find((t) => t.id === territory)?.name ?? territory}
               </span>
             )}
             <Link
               href="/operators"
-              className="text-xs text-emerald-600 hover:underline ml-1"
+              className="text-xs text-accent hover:underline ml-1"
             >
               Clear all
             </Link>
@@ -259,7 +267,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
             </p>
             <Link
               href="/operators"
-              className="inline-flex mt-2 text-sm text-emerald-600 hover:underline"
+              className="inline-flex mt-2 text-sm text-accent hover:underline"
             >
               Clear all filters
             </Link>
@@ -280,7 +288,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                 <Link
                   key={op.id}
                   href={`/operators/${op.id}`}
-                  className="group rounded-2xl border bg-card hover:shadow-lg transition-all overflow-hidden flex flex-col"
+                  className="group rounded-lg border border-border bg-card hover:shadow-sm transition-all overflow-hidden flex flex-col card-interactive"
                 >
                   {/* Cover image */}
                   {op.coverPhotoUrl ? (
@@ -289,8 +297,8 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                       style={{ backgroundImage: `url(${op.coverPhotoUrl})` }}
                     />
                   ) : (
-                    <div className="h-40 w-full bg-gradient-to-br from-emerald-100 via-teal-50 to-emerald-50 flex items-center justify-center">
-                      <Leaf className="h-8 w-8 text-emerald-300" />
+                    <div className="h-40 w-full bg-secondary flex items-center justify-center">
+                      <Leaf className="h-8 w-8 text-muted-foreground/40" />
                     </div>
                   )}
 
@@ -298,7 +306,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                     {/* Name + GPS */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="font-semibold leading-tight truncate group-hover:text-emerald-700 transition-colors">
+                        <p className="font-semibold leading-tight truncate group-hover:text-primary transition-colors">
                           {op.tradingName ?? op.legalName}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1">
@@ -327,9 +335,9 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                     {/* Pillar mini bars */}
                     <div className="space-y-1.5 mt-auto">
                       {[
-                        { label: "P1", score: Number(score.p1Score), color: "bg-emerald-500" },
-                        { label: "P2", score: Number(score.p2Score), color: "bg-amber-500" },
-                        { label: "P3", score: Number(score.p3Score), color: "bg-teal-500" },
+                        { label: "P1", score: Number(score.p1Score), color: "bg-[hsl(var(--gps-footprint))]" },
+                        { label: "P2", score: Number(score.p2Score), color: "bg-[hsl(var(--gps-local))]" },
+                        { label: "P3", score: Number(score.p3Score), color: "bg-[hsl(var(--gps-regen))]" },
                       ].map((p) => (
                         <div key={p.label} className="flex items-center gap-2">
                           <span className="text-[10px] w-5 text-muted-foreground font-medium">

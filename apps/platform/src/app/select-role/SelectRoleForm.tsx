@@ -109,28 +109,28 @@ export function SelectRoleForm() {
             onClick={() => setSelected(option.value)}
             className={`w-full flex gap-5 items-start p-5 rounded-2xl border-2 text-left transition-all ${
               selected === option.value
-                ? "border-emerald-500 bg-emerald-50"
-                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                ? "border-foreground bg-secondary"
+                : "border-border hover:border-foreground/30 hover:bg-secondary/50"
             }`}
           >
             <span
               className={`mt-0.5 flex-shrink-0 ${
                 selected === option.value
-                  ? "text-emerald-600"
-                  : "text-gray-400"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
               }`}
             >
               {option.icon}
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-foreground">
                   {option.label}
                 </span>
                 {selected === option.value && (
-                  <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                  <span className="w-5 h-5 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
                     <svg
-                      className="w-3 h-3 text-white"
+                      className="w-3 h-3 text-background"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -143,7 +143,7 @@ export function SelectRoleForm() {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-muted-foreground mb-3">
                 {option.description}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -152,8 +152,8 @@ export function SelectRoleForm() {
                     key={f}
                     className={`text-xs px-2.5 py-1 rounded-full font-medium ${
                       selected === option.value
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-foreground/10 text-foreground"
+                        : "bg-secondary text-muted-foreground"
                     }`}
                   >
                     {f}
@@ -166,7 +166,7 @@ export function SelectRoleForm() {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-xl border border-red-100">
+        <div className="bg-destructive/10 text-destructive text-sm px-4 py-3 rounded-lg border border-destructive/20">
           {error}
         </div>
       )}
@@ -175,10 +175,10 @@ export function SelectRoleForm() {
         type="button"
         onClick={handleConfirm}
         disabled={!selected || isPending}
-        className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
       >
         {isPending ? (
-          <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+          <span className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
         ) : null}
         {isPending ? "Setting up your account…" : "Continue"}
       </button>

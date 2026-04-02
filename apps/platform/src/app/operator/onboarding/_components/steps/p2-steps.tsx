@@ -58,9 +58,9 @@ export function P2EmploymentStep({
       </FieldGroup>
 
       {data.soloOperator ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-          <p className="text-sm font-medium text-emerald-800">Solo operator</p>
-          <p className="text-xs text-emerald-700 mt-1">
+        <div className="rounded-xl border border-primary/30 bg-secondary p-5">
+          <p className="text-sm font-medium text-foreground">Solo operator</p>
+          <p className="text-xs text-muted-foreground mt-1">
             Employment metrics default to 100% for solo operators. You can continue.
           </p>
         </div>
@@ -265,7 +265,7 @@ export function P2RevenueStep({
   return (
     <StepShell
       {...shell}
-      title="Revenue & bookings"
+      title="How guests find and book you"
       subtitle="Indicator 2C · 20% of Pillar 2. Booking volume and direct channel share."
     >
       {floatingGps}
@@ -291,7 +291,7 @@ export function P2RevenueStep({
               directBookingPct: e.target.checked ? 100 : data.directBookingPct === 100 ? undefined : data.directBookingPct,
             })
           }
-          className="mt-0.5 accent-emerald-600"
+          className="mt-0.5 accent-primary"
         />
         <span className="text-sm font-medium">All bookings are direct</span>
       </label>
@@ -330,7 +330,7 @@ export function P2CommunityStep({
   return (
     <StepShell
       {...shell}
-      title="Community"
+      title="Community engagement"
       subtitle="Indicator 2D · 15% of Pillar 2. Local community integration."
     >
       {floatingGps}
@@ -361,7 +361,7 @@ export function P2CommunityStep({
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Pillar 2 — Local Integration Summary
           </p>
-          <div className="text-2xl font-bold tabular-nums text-teal-600">
+          <div className="text-2xl font-bold tabular-nums text-primary">
             {Math.round(preview.pillar2Score)}
             <span className="text-sm font-normal text-muted-foreground ml-1">/ 100</span>
           </div>

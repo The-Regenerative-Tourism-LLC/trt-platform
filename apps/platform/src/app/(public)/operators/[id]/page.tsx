@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db/prisma";
 import { GPS_BAND_CONFIG, DPS_BAND_CONFIG, PRESSURE_CONFIG, OPERATOR_TYPES } from "@/lib/constants";
 import { GPSCircle, GPSBandBadge, DPSBandBadge, PressureBadge, PillarBar } from "@/components/scoring/ScoreDisplays";
@@ -86,15 +87,26 @@ export default async function PublicGreenPassportPage({ params }: Props) {
       {/* Hero / Cover */}
       <section className="relative">
         {operator.coverPhotoUrl ? (
-          <div
-            className="h-64 md:h-80 w-full bg-cover bg-center"
-            style={{ backgroundImage: `url(${operator.coverPhotoUrl})` }}
-          >
+          <div className="h-64 md:h-80 w-full relative overflow-hidden">
+            <Image
+              src={operator.coverPhotoUrl}
+              alt="Operator cover"
+              fill
+              className="object-cover object-center"
+              priority
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
         ) : (
-          <div className="h-64 md:h-80 w-full bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-700/20 to-transparent" />
+          <div className="h-64 md:h-80 w-full relative overflow-hidden">
+            <Image
+              src="/assets/hero-landscape.jpg"
+              alt="Operator"
+              fill
+              className="object-cover object-center"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
           </div>
         )}
 
@@ -102,7 +114,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         <div className="absolute top-4 left-4">
           <Link
             href="/operators"
-            className="inline-flex items-center gap-1.5 bg-white/90 backdrop-blur-sm text-sm font-medium px-3 py-1.5 rounded-full hover:bg-white transition-colors"
+            className="inline-flex items-center gap-1.5 bg-card/90 backdrop-blur-sm text-sm font-medium px-3 py-1.5 rounded-full hover:bg-card transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             All Operators
@@ -111,7 +123,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
 
         {/* GPS score overlay */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
-          <div className="bg-white rounded-2xl shadow-xl p-4 flex items-center gap-4">
+          <div className="bg-card rounded-lg shadow-sm p-4 flex items-center gap-4">
             <GPSCircle score={gpsTotal} band={gpsBand} size={100} />
             <div className="hidden sm:block">
               <GPSBandBadge band={gpsBand} />
@@ -129,7 +141,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
       <div className="max-w-4xl mx-auto px-4 pt-20 pb-12 space-y-8">
         {/* Operator identity */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full">
             <Leaf className="h-3 w-3" />
             Verified Green Passport
           </div>
@@ -158,7 +170,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         </div>
 
         {/* Score breakdown */}
-        <div className="rounded-2xl border bg-card p-6 md:p-8 space-y-6">
+        <div className="rounded-lg border border-border bg-card p-6 md:p-8 space-y-6 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
               Green Passport Score
@@ -173,19 +185,19 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               label="P1 Operational Footprint"
               score={p1}
               weight={0.4}
-              colorClass="bg-emerald-500"
+              colorClass="bg-[hsl(var(--gps-footprint))]"
             />
             <PillarBar
               label="P2 Local Integration"
               score={p2}
               weight={0.3}
-              colorClass="bg-amber-500"
+              colorClass="bg-[hsl(var(--gps-local))]"
             />
             <PillarBar
               label="P3 Regenerative Contribution"
               score={p3}
               weight={0.3}
-              colorClass="bg-teal-500"
+              colorClass="bg-[hsl(var(--gps-regen))]"
             />
           </div>
 
@@ -196,19 +208,19 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                 label: "Operational Footprint",
                 score: p1,
                 description: "Energy, water, waste, carbon, and land use intensity per activity unit.",
-                color: "border-emerald-200 bg-emerald-50/50",
+                color: "border-border bg-secondary/50",
               },
               {
                 label: "Local Integration",
                 score: p2,
                 description: "Employment, procurement, revenue retention, and community engagement.",
-                color: "border-amber-200 bg-amber-50/50",
+                color: "border-border bg-secondary/50",
               },
               {
                 label: "Regenerative Contribution",
                 score: p3,
                 description: "Active ecological, cultural, or scientific contribution with institutional traceability.",
-                color: "border-teal-200 bg-teal-50/50",
+                color: "border-border bg-secondary/50",
               },
             ].map((pillar) => (
               <div
@@ -229,7 +241,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
 
         {/* DPS — Direction of Travel */}
         {dpsTotal != null && dpsBand && dpsConfig && (
-          <div className="rounded-2xl border bg-card p-6 space-y-4">
+          <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
@@ -267,14 +279,14 @@ export default async function PublicGreenPassportPage({ params }: Props) {
 
         {/* Forward Commitment */}
         {fcr && (
-          <div className="rounded-2xl border border-teal-200 bg-teal-50/50 p-6 space-y-3">
+          <div className="rounded-lg border border-accent/20 bg-accent/5 p-6 space-y-3 shadow-sm">
             <div className="flex items-center gap-2">
-              <Leaf className="h-4 w-4 text-teal-600" />
-              <h2 className="text-sm font-semibold text-teal-800">
+              <Leaf className="h-4 w-4 text-accent" />
+              <h2 className="text-sm font-semibold text-foreground">
                 Forward Commitment — Pillar 3 In Development
               </h2>
             </div>
-            <p className="text-sm text-teal-700">
+            <p className="text-sm text-muted-foreground">
               This operator has formally committed to establishing a regenerative contribution programme.
               Category: <strong>{fcr.preferredCategory}</strong>.
               Status: <strong className="capitalize">{fcr.status}</strong>.
@@ -284,7 +296,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
 
         {/* DPI — Destination Context */}
         {operator.territory?.compositeDpi != null && (
-          <div className="rounded-2xl border bg-card p-6 space-y-4">
+          <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
                 <Globe className="h-4 w-4" />
@@ -329,7 +341,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
 
         {/* Score History (if multiple cycles) */}
         {operator.scoreSnapshots.length > 1 && (
-          <div className="rounded-2xl border bg-card p-6 space-y-4">
+          <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
             <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
               Assessment History
             </h2>
@@ -338,7 +350,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                 <div
                   key={s.id}
                   className={`flex items-center justify-between p-3 rounded-xl ${
-                    i === 0 ? "bg-emerald-50 border border-emerald-200" : "bg-muted"
+                    i === 0 ? "bg-primary/10 border border-primary/20" : "bg-muted"
                   }`}
                 >
                   <div>
@@ -367,9 +379,9 @@ export default async function PublicGreenPassportPage({ params }: Props) {
 
         {/* Evidence Summary */}
         {verifiedEvidence.length > 0 && (
-          <div className="rounded-2xl border bg-card p-6 space-y-4">
+          <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <CheckCircle2 className="h-4 w-4 text-accent" />
               <h2 className="text-sm font-semibold">Verified Evidence</h2>
               <span className="ml-auto text-xs text-muted-foreground">
                 {verifiedEvidence.length} item{verifiedEvidence.length !== 1 ? "s" : ""} verified
@@ -378,18 +390,18 @@ export default async function PublicGreenPassportPage({ params }: Props) {
             <div className="grid sm:grid-cols-2 gap-2">
               {verifiedEvidence.map((e) => {
                 const pillar = e.indicatorId.startsWith("p1_")
-                  ? { label: "P1", color: "bg-emerald-100 text-emerald-800 border-emerald-200" }
+                  ? { label: "P1", color: "bg-secondary text-foreground border-border" }
                   : e.indicatorId.startsWith("p2_")
-                  ? { label: "P2", color: "bg-amber-100 text-amber-800 border-amber-200" }
+                  ? { label: "P2", color: "bg-secondary text-foreground border-border" }
                   : e.indicatorId.startsWith("p3_")
-                  ? { label: "P3", color: "bg-teal-100 text-teal-800 border-teal-200" }
+                  ? { label: "P3", color: "bg-secondary text-foreground border-border" }
                   : { label: "—", color: "bg-muted text-muted-foreground border-border" };
 
                 const tierColors: Record<string, string> = {
-                  T1: "bg-emerald-600 text-white",
-                  T2: "bg-blue-600 text-white",
-                  T3: "bg-purple-600 text-white",
-                  Proxy: "bg-zinc-500 text-white",
+                  T1: "bg-primary text-primary-foreground",
+                  T2: "bg-primary/70 text-primary-foreground",
+                  T3: "bg-primary/50 text-primary-foreground",
+                  Proxy: "bg-muted-foreground text-background",
                 };
 
                 return (
@@ -403,7 +415,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                     </span>
                     {e.tier && (
                       <span
-                        className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wide ${tierColors[e.tier] ?? "bg-zinc-400 text-white"}`}
+                        className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold tracking-wide ${tierColors[e.tier] ?? "bg-muted-foreground/60 text-background"}`}
                       >
                         {e.tier}
                       </span>
@@ -420,7 +432,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         )}
 
         {/* Verification & Audit */}
-        <div className="rounded-2xl border bg-muted/30 p-6 space-y-3">
+        <div className="rounded-lg border border-border bg-muted/30 p-6 space-y-3 shadow-sm">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-muted-foreground" />
             <h2 className="text-sm font-semibold">Verification & Audit</h2>
