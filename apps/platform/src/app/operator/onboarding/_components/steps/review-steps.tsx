@@ -243,7 +243,7 @@ export function ReviewSubmitStep({
         </ReviewSection>
 
         {/* Activity */}
-        <ReviewSection title="Activity Data" editStepId="activity-unit">
+        <ReviewSection title="Activity Data" editStepId="operation-activity">
           {data.operatorType !== "B" && data.guestNights != null && (
             <Row label="Guest-nights" value={data.guestNights.toLocaleString()} />
           )}
@@ -356,7 +356,7 @@ export function ReviewSubmitStep({
         </ReviewSection>
 
         {/* Evidence */}
-        <ReviewSection title="Evidence" editStepId="evidence-upload">
+        <ReviewSection title="Evidence" editStepId="evidence-checklist">
           <Row label="Files linked" value={evidenceCount > 0 ? `${evidenceCount} file${evidenceCount !== 1 ? "s" : ""}` : "None"} />
           {evidenceCount === 0 && (
             <span className="text-xs text-amber-600 col-span-2">
@@ -442,10 +442,10 @@ export function ReviewSubmitStep({
           <p className="text-sm font-semibold">What happens next?</p>
           <div className="space-y-2.5">
             {[
-              { step: "1", text: "Your raw data is submitted to the TRT Scoring Engine." },
-              { step: "2", text: "P1 intensities and P2 rates are derived server-side." },
-              { step: "3", text: "An immutable ScoreSnapshot is created (isPublished = false)." },
-              { step: "4", text: "You'll be prompted to upload evidence — T1 verification enables publication." },
+              { step: "1", text: "Your data is saved and a preliminary score is calculated." },
+              { step: "2", text: "Upload supporting evidence from your operator dashboard." },
+              { step: "3", text: "Our team reviews and verifies your data." },
+              { step: "4", text: "Once verified, your score is published on your public Green Passport profile." },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-3">
                 <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
@@ -458,9 +458,8 @@ export function ReviewSubmitStep({
         </div>
 
         <Tip icon="🔒">
-          Your Cycle 1 GPS becomes the locked baseline for future Delta Performance
-          Score (DPS) calculations. Evidence upload is encouraged before your passport
-          is published to travellers.
+          Your Green Passport score is your baseline for future assessments. Adding
+          evidence strengthens your score and unlocks your public profile.
         </Tip>
 
         <PrivacyBadge />
@@ -472,5 +471,108 @@ export function ReviewSubmitStep({
         )}
       </div>
     </StepShell>
+  );
+}
+
+// ── Submission Success Screen ─────────────────────────────────────────────────
+
+export function SubmissionSuccessScreen({
+  onGoToDashboard,
+}: {
+  onGoToDashboard: () => void;
+}) {
+  const nextSteps = [
+    {
+      icon: "📁",
+      title: "Upload your evidence",
+      desc: "Head to your operator dashboard and upload supporting documents — utility bills, payroll records, supplier invoices. Evidence strengthens your score.",
+    },
+    {
+      icon: "🔍",
+      title: "Our team reviews your submission",
+      desc: "A TRT reviewer will verify your data and evidence. You'll receive an email when review is complete.",
+    },
+    {
+      icon: "🌿",
+      title: "Your Green Passport goes live",
+      desc: "Once verified, your score is published on your public Green Passport profile — visible to travellers who care.",
+    },
+  ];
+
+  const recommendations = [
+    "Consider switching to a renewable energy tariff — this can significantly boost your P1 score.",
+    "Local procurement is one of the highest-impact P2 improvements you can make.",
+    "Formalising your community engagement programme can unlock P3 Status A.",
+  ];
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="flex-1 flex flex-col justify-center px-4 py-16">
+        <div className="max-w-2xl mx-auto w-full space-y-8">
+
+          {/* Success hero */}
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto">
+              ✓
+            </div>
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-200">
+                Assessment submitted
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+                Your Green Passport is on its way
+              </h1>
+              <p className="text-muted-foreground text-base leading-relaxed max-w-lg mx-auto">
+                Your assessment has been received. Here&apos;s what happens next and how to make the most of your score.
+              </p>
+            </div>
+          </div>
+
+          {/* What happens next */}
+          <div className="space-y-3">
+            <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+              What happens next
+            </p>
+            <div className="space-y-3">
+              {nextSteps.map((s, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-4 p-4 rounded-xl border bg-card"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-xl shrink-0">
+                    {s.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">{s.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recommendations */}
+          <div className="rounded-xl border bg-card p-5 space-y-3">
+            <p className="text-sm font-semibold">Recommendations to improve your score</p>
+            <div className="space-y-2">
+              {recommendations.map((r, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <span className="text-emerald-500 mt-0.5 shrink-0 text-sm">→</span>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{r}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={onGoToDashboard}
+            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-10 py-3 rounded-xl transition-colors text-base"
+          >
+            Go to my dashboard →
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

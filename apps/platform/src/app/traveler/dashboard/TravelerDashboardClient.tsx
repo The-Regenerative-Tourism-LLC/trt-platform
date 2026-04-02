@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * ARCHITECTURE: Presentation-only component.
+ *
+ * This file displays traveler-facing data fetched from API routes.
+ * It must NOT compute or approximate any scores.
+ * All score data originates from immutable, persisted ScoreSnapshots.
+ */
+
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 

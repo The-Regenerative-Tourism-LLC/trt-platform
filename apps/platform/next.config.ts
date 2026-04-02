@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Enable server actions
-  },
+  output: "standalone",
   images: {
     remotePatterns: [
       {

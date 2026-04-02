@@ -115,8 +115,8 @@ export function StepShell({
       <div className="fixed top-0.5 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-b">
         <div className="flex items-center justify-between px-4 py-2.5 max-w-4xl mx-auto gap-3">
           {/* Step counter (mobile) */}
-          <span className="text-xs text-muted-foreground shrink-0 sm:hidden font-medium">
-            {stepNumber}/{totalSteps}
+          <span className="text-xs text-muted-foreground shrink-0 sm:hidden font-mono font-medium">
+            {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
           </span>
 
           {/* Section progress (desktop) */}
@@ -145,8 +145,8 @@ export function StepShell({
         <div className="max-w-2xl mx-auto py-8 space-y-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                Step {stepNumber} of {totalSteps}
+              <span className="text-xs font-mono font-medium text-muted-foreground tabular-nums">
+                {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
               </span>
               {sectionLabel && (
                 <>

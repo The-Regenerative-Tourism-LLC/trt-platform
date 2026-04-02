@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -16,7 +16,6 @@ function getDashboardUrl(roles: string[]): string {
 
 export default function VerifyEmailClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { data: session, status: sessionStatus, update } = useSession();
   const token = searchParams.get("token");
 
@@ -63,15 +62,17 @@ export default function VerifyEmailClient() {
         // callback in auth.ts re-fetches emailVerified from the DB.
         if (sessionStatus === "authenticated") {
           await update();
-          // Small delay for the session update to propagate before navigating
-          await new Promise((r) => setTimeout(r, 300));
           const dashboardUrl = getDashboardUrl(
             (session?.user?.roles ?? []) as string[]
           );
-          router.push(dashboardUrl);
+          // Use a full page navigation (not router.push) so that the browser
+          // sends the newly-updated JWT cookie to the middleware. router.push
+          // is a client-side navigation and can bypass the cookie update,
+          // causing the middleware to still see isEmailVerified=false → loop.
+          window.location.href = dashboardUrl;
         } else {
           // Not authenticated — redirect to login after a short pause
-          setTimeout(() => router.push("/login?verified=1"), 2500);
+          setTimeout(() => { window.location.href = "/login?verified=1"; }, 2500);
         }
       } catch {
         setErrorMessage("An unexpected error occurred. Please try again.");

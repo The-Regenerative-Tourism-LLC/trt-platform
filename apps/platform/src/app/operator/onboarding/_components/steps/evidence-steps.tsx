@@ -48,8 +48,8 @@ export function EvidenceChecklistStep({ data, updateField, shell }: StepProps) {
   return (
     <StepShell
       {...shell}
-      title="Evidence readiness"
-      subtitle="Confirm you understand which documents support your assessment. This is not a file upload — link files on the previous step if needed."
+      title="Evidence checklist"
+      subtitle="Tick the documents you have ready to support your assessment. You can upload them to your dashboard after submission."
     >
       <div className="space-y-3">
         {CHECKLIST_ROWS.filter((row) => row.field !== "evidenceChecklistP3" || showP3).map(
