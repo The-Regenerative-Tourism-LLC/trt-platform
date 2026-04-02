@@ -13,10 +13,12 @@ FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Copy only manifests — this layer is cached until these files change
-COPY apps/platform/package.json apps/platform/package-lock.json apps/platform/.npmrc ./
+# Install from the monorepo root lockfile, scoped to the platform workspace.
+# In npm workspaces the root package-lock.json is authoritative.
+COPY package.json package-lock.json .npmrc ./
+COPY apps/platform/package.json ./apps/platform/package.json
 
-RUN npm ci
+RUN npm ci --workspace apps/platform --include-workspace-root=false
 
 # ── Stage 2: builder ───────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -25,13 +27,17 @@ WORKDIR /app
 
 # Bring in installed dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/package-lock.json ./package-lock.json
+COPY --from=deps /app/apps/platform/package.json ./apps/platform/package.json
 
-# Copy all app source files
-COPY apps/platform/ .
+# Copy application source
+COPY apps/platform ./apps/platform
+COPY start.sh ./start.sh
 
 # Generate Prisma client for the Linux/musl target inside this container.
 # The local macOS binary will not work here — must be generated fresh.
-RUN npx prisma generate
+RUN npm --workspace apps/platform run prisma:generate
 
 # Build-time stubs.
 #
@@ -47,7 +53,7 @@ ENV NODE_ENV=production \
     AUTH_SECRET="build-placeholder-change-in-railway" \
     NEXTAUTH_URL="http://localhost:3000"
 
-RUN npm run build
+RUN npm --workspace apps/platform run build
 
 # ── Stage 3: runner ────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner
@@ -61,21 +67,21 @@ RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nextjs
 
 # Next.js build output
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/apps/platform/.next ./.next
+COPY --from=builder /app/apps/platform/public ./public
 
 # Runtime dependencies (node_modules includes Prisma CLI for migrate deploy)
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/apps/platform/package.json ./package.json
 
 # Prisma schema + migrations (required by prisma migrate deploy at startup)
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/apps/platform/prisma ./prisma
 
 # Next.js config
-COPY --from=builder /app/next.config.ts ./next.config.ts
+COPY --from=builder /app/apps/platform/next.config.ts ./next.config.ts
 
 # Production entrypoint — handles DB wait, migrations, and server start
-COPY --chmod=755 start.sh ./start.sh
+COPY --from=builder --chmod=755 /app/start.sh ./start.sh
 
 # prisma generate writes to node_modules/.prisma/client at runtime.
 # Grant the nextjs user write access to that specific directory only.
