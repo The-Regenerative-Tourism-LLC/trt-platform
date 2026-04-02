@@ -67,23 +67,37 @@ ENV NODE_ENV=production \
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nextjs
 
-# Standalone output: server.js + trimmed runtime node_modules + .next server files.
-# With output:"standalone", Next.js bundles everything needed to run the server.
-# The hashed external module IDs (e.g. @prisma/client-2c3a…) are only resolvable
-# via the module map embedded in this server.js — not via `next start`.
+# ── Standalone output ─────────────────────────────────────────────────────────
+#
+# MONOREPO PATH: Next.js standalone preserves the workspace directory structure.
+# The build runs from WORKDIR /app with the app at apps/platform/, so the
+# standalone output is structured as:
+#
+#   .next/standalone/
+#   ├── node_modules/              (trimmed runtime deps at workspace root)
+#   ├── package.json               (root workspace package.json)
+#   └── apps/platform/
+#       ├── server.js              ← entry point (NOT at standalone root)
+#       ├── .next/server/          (server chunks)
+#       └── node_modules/          (hoisted/linked platform deps)
+#
+# We copy the entire standalone tree to /app/, so the final container has
+# server.js at /app/apps/platform/server.js.
 COPY --from=builder --chown=nextjs:nodejs /app/apps/platform/.next/standalone ./
 
-# Static assets — must be placed at the monorepo-relative path server.js expects
+# Static assets — server.js expects these at the monorepo-relative path
 COPY --from=builder --chown=nextjs:nodejs /app/apps/platform/.next/static ./apps/platform/.next/static
 
-# Public directory
+# Public directory — also at the monorepo-relative path
 COPY --from=builder --chown=nextjs:nodejs /app/apps/platform/public ./apps/platform/public
 
-# Prisma schema + migrations (required by prisma migrate deploy at startup)
+# Prisma schema + migrations (required by prisma migrate deploy at startup).
+# Placed at /app/prisma so `npx prisma migrate deploy` finds it from WORKDIR.
 COPY --from=builder --chown=nextjs:nodejs /app/apps/platform/prisma ./prisma
 
-# Full node_modules from builder — provides Prisma CLI for migrate deploy and
-# the linux-musl Prisma Client binary generated during build.
+# Full node_modules from builder — provides:
+#   1. Prisma CLI for `npx prisma migrate deploy` in start.sh
+#   2. Linux-musl Prisma Client query engine generated during build
 # The standalone server.js resolves @prisma/client through its own embedded
 # module map, so this layer does not conflict with the standalone runtime.
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
