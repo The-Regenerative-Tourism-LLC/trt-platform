@@ -238,38 +238,32 @@ export interface OnboardingStep {
 }
 
 export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
-  { id: "operator-type",       label: "Operator Type" },
-  { id: "identity",            label: "Identity" },
-  { id: "accommodation",       label: "Accommodation",
-    condition: (d) => d.operatorType === "A" || d.operatorType === "C" },
-  { id: "experience-types",    label: "Experiences",
-    condition: (d) => d.operatorType === "B" || d.operatorType === "C" },
-  { id: "ownership",           label: "Ownership" },
-  { id: "activity-unit",       label: "Activity Data" },
-  { id: "photos",              label: "Photos" },
-  { id: "p1-energy",           label: "Energy" },
-  { id: "p1-water",            label: "Water",
+  { id: "operator-type",         label: "Operator Type" },
+  { id: "identity",              label: "About Your Business" },
+  { id: "operation-activity",    label: "Your Operation" },
+  { id: "photos",                label: "Photos" },
+  { id: "p1-energy",             label: "Energy" },
+  { id: "p1-water",              label: "Water",
     condition: (d) => !(d.operatorType === "B" && d.tourNoFixedBase === true) },
-  { id: "p1-waste",            label: "Waste" },
-  { id: "p1-carbon",           label: "Carbon" },
-  { id: "p1-site",             label: "Site & Land Use" },
-  { id: "p2-employment",       label: "Employment" },
-  { id: "p2-procurement",      label: "Procurement" },
-  { id: "p2-revenue",          label: "Revenue" },
-  { id: "p2-community",        label: "Community" },
-  { id: "p3-status",           label: "P3 Status" },
-  { id: "p3-programme",        label: "Programme Details",
+  { id: "p1-waste",              label: "Waste" },
+  { id: "p1-carbon",             label: "Carbon" },
+  { id: "p1-site",               label: "Site & Land Use" },
+  { id: "p2-employment",         label: "Your Team" },
+  { id: "p2-procurement",        label: "Where You Buy From" },
+  { id: "p2-revenue",            label: "How Guests Book" },
+  { id: "p2-community",          label: "Community Engagement" },
+  { id: "p3-status",             label: "Giving Back" },
+  { id: "p3-programme",          label: "Programme Details",
     condition: (d) => d.p3Status === "A" || d.p3Status === "B" || d.p3Status === "C" },
-  { id: "p3-evidence-quality", label: "Evidence Quality",
+  { id: "p3-evidence-quality",   label: "Evidence Quality",
     condition: (d) => d.p3Status === "A" || d.p3Status === "B" || d.p3Status === "C" },
   { id: "p3-forward-commitment", label: "Forward Commitment",
     condition: (d) => d.p3Status === "D" },
-  { id: "evidence-upload",     label: "Evidence Upload" },
-  { id: "evidence-checklist",  label: "Evidence Checklist" },
-  { id: "delta",               label: "Prior Cycle",
+  { id: "delta",                 label: "Prior Cycle",
     condition: (d) => typeof d.assessmentCycle === "number" && d.assessmentCycle > 1 },
-  { id: "gps-preview",         label: "GPS Preview" },
-  { id: "review-submit",       label: "Review & Submit" },
+  { id: "gps-preview",           label: "Your Score" },
+  { id: "evidence-checklist",    label: "Evidence Checklist" },
+  { id: "review-submit",         label: "Review & Submit" },
 ] as const;
 
 // ── Navigation helpers ────────────────────────────────────────────────────────
@@ -390,36 +384,53 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     isNonEmpty(d.primaryContactEmail) &&
     isNonEmpty(d.territoryId),
 
+  // Legacy individual validators (kept for backward compat, not in active step list)
   "accommodation": (d) => {
-    // Conditional step — if not shown, treat as valid
     if (d.operatorType !== "A" && d.operatorType !== "C") return true;
     return isNonEmpty(d.accommodationCategory) && isPositiveNumber(d.rooms);
   },
-
   "experience-types": (d) => {
     if (d.operatorType !== "B" && d.operatorType !== "C") return true;
     return Array.isArray(d.experienceTypes) && d.experienceTypes.length > 0;
   },
-
   "ownership": (d) =>
-    isNonEmpty(d.ownershipType) &&
-    isNonNegativeNumber(d.localEquityPct),
-
+    isNonEmpty(d.ownershipType) && isNonNegativeNumber(d.localEquityPct),
   "activity-unit": (d) => {
     if (!isNonEmpty(d.assessmentPeriodEnd)) return false;
     if (d.operatorType === "A") return isPositiveNumber(d.guestNights);
     if (d.operatorType === "B") return isPositiveNumber(d.visitorDays);
-    // Type C: both required + revenue split must sum to 100
     if (!isPositiveNumber(d.guestNights) || !isPositiveNumber(d.visitorDays)) return false;
     const acc = d.revenueSplitAccommodationPct ?? 0;
     const exp = d.revenueSplitExperiencePct ?? 0;
     return Math.abs(acc + exp - 100) < 0.01;
   },
 
+  /** Merged step: accommodation + experience types + ownership + activity unit */
+  "operation-activity": (d) => {
+    const accomOk =
+      (d.operatorType !== "A" && d.operatorType !== "C") ||
+      (isNonEmpty(d.accommodationCategory) && isPositiveNumber(d.rooms));
+    const expOk =
+      (d.operatorType !== "B" && d.operatorType !== "C") ||
+      (Array.isArray(d.experienceTypes) && d.experienceTypes.length > 0);
+    const ownershipOk =
+      isNonEmpty(d.ownershipType) && isNonNegativeNumber(d.localEquityPct);
+    if (!accomOk || !expOk || !ownershipOk) return false;
+    if (!isNonEmpty(d.assessmentPeriodEnd)) return false;
+    if (d.operatorType === "A") return isPositiveNumber(d.guestNights);
+    if (d.operatorType === "B") return isPositiveNumber(d.visitorDays);
+    if (d.operatorType === "C") {
+      if (!isPositiveNumber(d.guestNights) || !isPositiveNumber(d.visitorDays)) return false;
+      const acc = d.revenueSplitAccommodationPct ?? 0;
+      const exp = d.revenueSplitExperiencePct ?? 0;
+      return Math.abs(acc + exp - 100) < 0.01;
+    }
+    return true;
+  },
+
   "photos": (d) =>
     Array.isArray(d.photoRefs) &&
-    d.photoRefs.length >= 1 &&
-    d.photoRefs.every((p) => isNonEmpty(p.storageRef)),
+    d.photoRefs.length >= 1,
 
   "p1-energy": (d) => {
     const gridOffice =
@@ -523,8 +534,8 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     );
   },
 
-  // Evidence upload — optional, operators may submit without evidence
-  "evidence-upload": (_d) => true,
+  // GPS preview — read-only summary, always passable
+  "gps-preview": (_d) => true,
 
   "evidence-checklist": (d) => {
     const base =
@@ -544,9 +555,6 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
 
   // Delta step — informational only for Cycle 2+, always passable
   "delta": (_d) => true,
-
-  // GPS preview — read-only summary, always passable
-  "gps-preview": (_d) => true,
 
   // Review — no additional validation beyond reaching this step
   "review-submit": (_d) => true,
@@ -580,15 +588,9 @@ export interface SectionGroup {
 export const SECTION_GROUPS: readonly SectionGroup[] = [
   {
     id: "profile",
-    label: "Your Profile",
-    shortLabel: "Profile",
-    stepIds: ["operator-type", "identity", "accommodation", "experience-types", "ownership"],
-  },
-  {
-    id: "activity",
-    label: "Activity Data",
-    shortLabel: "Activity",
-    stepIds: ["activity-unit", "photos"],
+    label: "Your Operation",
+    shortLabel: "Operation",
+    stepIds: ["operator-type", "identity", "operation-activity", "photos"],
   },
   {
     id: "pillar1",
@@ -609,16 +611,10 @@ export const SECTION_GROUPS: readonly SectionGroup[] = [
     stepIds: ["p3-status", "p3-programme", "p3-evidence-quality", "p3-forward-commitment"],
   },
   {
-    id: "evidence",
-    label: "Evidence",
-    shortLabel: "Evidence",
-    stepIds: ["evidence-upload", "evidence-checklist", "delta"],
-  },
-  {
     id: "submit",
     label: "Review & Submit",
     shortLabel: "Submit",
-    stepIds: ["gps-preview", "review-submit"],
+    stepIds: ["delta", "gps-preview", "evidence-checklist", "review-submit"],
   },
 ] as const;
 
@@ -632,13 +628,10 @@ export function getSectionForStep(stepId: string): SectionGroup | undefined {
  * Used to show contextual "section name · step title" in the onboarding header.
  */
 export const STEP_SECTIONS: Readonly<Record<string, string>> = {
-  "operator-type":           "Your Profile",
-  "identity":                "Your Profile",
-  "accommodation":           "Your Profile",
-  "experience-types":        "Your Profile",
-  "ownership":               "Your Profile",
-  "activity-unit":           "Activity Data",
-  "photos":                  "Activity Data",
+  "operator-type":           "Your Operation",
+  "identity":                "Your Operation",
+  "operation-activity":      "Your Operation",
+  "photos":                  "Your Operation",
   "p1-energy":               "Pillar 1 — Operational Footprint",
   "p1-water":                "Pillar 1 — Operational Footprint",
   "p1-waste":                "Pillar 1 — Operational Footprint",
@@ -652,9 +645,8 @@ export const STEP_SECTIONS: Readonly<Record<string, string>> = {
   "p3-programme":            "Pillar 3 — Regenerative Contribution",
   "p3-evidence-quality":     "Pillar 3 — Regenerative Contribution",
   "p3-forward-commitment":   "Pillar 3 — Regenerative Contribution",
-  "evidence-upload":         "Evidence",
-  "evidence-checklist":      "Evidence",
-  "delta":                   "Prior Cycle",
-  "gps-preview":             "Score Preview",
+  "delta":                   "Review",
+  "gps-preview":             "Review",
+  "evidence-checklist":      "Review",
   "review-submit":           "Review & Submit",
 };

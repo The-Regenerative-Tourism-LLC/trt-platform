@@ -36,10 +36,7 @@ import { RoadmapScreen } from "./_components/roadmap";
 import {
   OperatorTypeStep,
   IdentityStep,
-  AccommodationStep,
-  ExperienceTypesStep,
-  OwnershipStep,
-  ActivityUnitStep,
+  OperationActivityStep,
   PhotosStep,
 } from "./_components/steps/profile-steps";
 import {
@@ -62,13 +59,13 @@ import {
   P3ForwardCommitmentStep,
 } from "./_components/steps/p3-steps";
 import {
-  EvidenceUploadStep,
   EvidenceChecklistStep,
   DeltaStep,
 } from "./_components/steps/evidence-steps";
 import {
   GpsPreviewStep,
   ReviewSubmitStep,
+  SubmissionSuccessScreen,
 } from "./_components/steps/review-steps";
 import { StepShell } from "./_components/shell";
 
@@ -191,6 +188,7 @@ export function OperatorOnboardingClient() {
   const [draftInitialized, setDraftInitialized] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(true);
   const [declarationChecked, setDeclarationChecked] = useState(false);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const { preview, loading: previewLoading, refreshPreview } = usePreviewScore(data);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(false);
@@ -219,13 +217,6 @@ export function OperatorOnboardingClient() {
     queryKey: ["onboarding-draft"],
     queryFn: () =>
       fetch("/api/v1/onboarding/draft").then((r) => r.json()),
-  });
-
-  const { data: evidenceData } = useQuery({
-    queryKey: ["operator-evidence"],
-    queryFn: () =>
-      fetch("/api/v1/operator/evidence").then((r) => r.json()),
-    enabled: stepId === "evidence-upload",
   });
 
   const { data: priorScoreData, isLoading: priorLoading } = useQuery({
@@ -342,9 +333,8 @@ export function OperatorOnboardingClient() {
         return;
       }
 
-      toast.success("Assessment submitted successfully!");
       resetOnboarding();
-      router.push("/operator/dashboard");
+      setSubmissionSuccess(true);
     } catch (err) {
       toast.error("Failed to submit assessment");
       console.error(err);
@@ -367,8 +357,6 @@ export function OperatorOnboardingClient() {
     "p3-programme",
     "p3-evidence-quality",
     "p3-forward-commitment",
-    "evidence-upload",
-    "evidence-checklist",
     "delta",
   ]);
   const showGpsFloat = GPS_FLOAT_STEPS.has(stepId) && preview != null;
@@ -425,6 +413,10 @@ export function OperatorOnboardingClient() {
     );
   }
 
+  if (submissionSuccess) {
+    return <SubmissionSuccessScreen onGoToDashboard={() => router.push("/operator/dashboard")} />;
+  }
+
   if (showRoadmap) {
     return <RoadmapScreen onStart={() => setShowRoadmap(false)} data={data} />;
   }
@@ -439,14 +431,8 @@ export function OperatorOnboardingClient() {
       return <OperatorTypeStep {...stepProps} />;
     case "identity":
       return <IdentityStep {...stepProps} territories={territories} />;
-    case "accommodation":
-      return <AccommodationStep {...stepProps} />;
-    case "experience-types":
-      return <ExperienceTypesStep {...stepProps} />;
-    case "ownership":
-      return <OwnershipStep {...stepProps} />;
-    case "activity-unit":
-      return <ActivityUnitStep {...stepProps} />;
+    case "operation-activity":
+      return <OperationActivityStep {...stepProps} />;
     case "photos":
       return <PhotosStep {...stepProps} />;
     case "p1-energy":
@@ -475,8 +461,6 @@ export function OperatorOnboardingClient() {
       return <P3EvidenceQualityStep {...stepProps} />;
     case "p3-forward-commitment":
       return <P3ForwardCommitmentStep {...stepProps} />;
-    case "evidence-upload":
-      return <EvidenceUploadStep {...stepProps} evidenceData={evidenceData} />;
     case "evidence-checklist":
       return <EvidenceChecklistStep {...stepProps} />;
     case "delta":

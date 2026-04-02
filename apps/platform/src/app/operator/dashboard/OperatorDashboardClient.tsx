@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * ARCHITECTURE: Presentation-only component.
+ *
+ * This file displays ScoreSnapshot data fetched from GET /api/v1/operator/dashboard.
+ * It must NOT compute, approximate, or infer GPS/DPS/DPI scores.
+ * All score values originate from a persisted ScoreSnapshot — never from local calculation.
+ * ScoreSnapshots are immutable and append-only; this component only reads and renders them.
+ */
+
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";

@@ -265,7 +265,7 @@ export function P2RevenueStep({
   return (
     <StepShell
       {...shell}
-      title="Revenue & bookings"
+      title="How guests find and book you"
       subtitle="Indicator 2C · 20% of Pillar 2. Booking volume and direct channel share."
     >
       {floatingGps}
@@ -330,7 +330,7 @@ export function P2CommunityStep({
   return (
     <StepShell
       {...shell}
-      title="Community"
+      title="Community engagement"
       subtitle="Indicator 2D · 15% of Pillar 2. Local community integration."
     >
       {floatingGps}

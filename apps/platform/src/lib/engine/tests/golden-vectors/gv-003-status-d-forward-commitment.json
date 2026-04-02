@@ -1,0 +1,62 @@
+{
+  "vectorId": "GV-003",
+  "description": "Status D operator — P3 = 0 due to forward commitment, GPS renormalized from P1+P2",
+  "input": {
+    "assessmentSnapshot": {
+      "operatorId": "op-001",
+      "operatorType": "A",
+      "activityUnit": { "guestNights": 5000 },
+      "assessmentCycle": 1,
+      "assessmentPeriodEnd": "2025-12-31",
+      "pillar1": {
+        "energyIntensity": 20,
+        "renewablePct": 75,
+        "waterIntensity": 150,
+        "recirculationScore": 2,
+        "wasteDiversionPct": 60,
+        "carbonIntensity": 12,
+        "siteScore": 3
+      },
+      "pillar2": {
+        "localEmploymentRate": 60,
+        "employmentQuality": 70,
+        "localFbRate": 50,
+        "localNonfbRate": 45,
+        "directBookingRate": 55,
+        "localOwnershipPct": 60,
+        "communityScore": 3
+      },
+      "pillar3": {
+        "categoryScope": 75,
+        "traceability": 75,
+        "additionality": 50,
+        "continuity": 75
+      },
+      "p3Status": "D",
+      "delta": null,
+      "evidence": [],
+      "snapshotHash": "snap-hash-003",
+      "createdAt": "2026-01-15T00:00:00Z"
+    },
+    "dpiSnapshot": {
+      "territoryId": "territory-madeira",
+      "touristIntensity": 65,
+      "ecologicalSensitivity": 55,
+      "economicLeakageRate": 40,
+      "regenerativePerf": 45,
+      "compositeDpi": 56,
+      "pressureLevel": "moderate",
+      "snapshotHash": "dpi-hash-001",
+      "createdAt": "2026-03-01T00:00:00Z"
+    },
+    "methodologyBundle": "v1.0.0"
+  },
+  "expectedOutput": {
+    "p3Score": 0,
+    "dpsTotal": null,
+    "dpsBand": null,
+    "dpiScore": 56,
+    "dpiPressureLevel": "moderate"
+  },
+  "notes": "P3 = 0 for Status D (forward commitment). GPS is renormalized using P1+P2 only, divided by combined weight (0.70) to maintain 0-100 scale."
+}
