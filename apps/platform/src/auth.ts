@@ -73,23 +73,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
   callbacks: {
     async jwt({ token, user, trigger }) {
-      // On first sign-in, embed roles into the token
+      // On first sign-in, embed roles and emailVerified into the token.
+      // Single query covers both to minimise DB round-trips.
       if (user?.id) {
-        const roles = await prisma.userRole.findMany({
-          where: { userId: user.id },
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: {
+            emailVerified: true,
+            roles: { select: { role: true } },
+          },
         });
-        token.roles = roles.map((r) => r.role) as AppRole[];
-        token.needsRoleSelection = roles.length === 0;
+        token.roles = (dbUser?.roles.map((r) => r.role) ?? []) as AppRole[];
+        token.needsRoleSelection = token.roles.length === 0;
+        token.isEmailVerified = !!dbUser?.emailVerified;
       }
 
-      // On explicit session update (e.g. after role selection), re-fetch roles
+      // On explicit session update (e.g. after role selection or email
+      // verification), re-fetch both roles and emailVerified.
       if (trigger === "update") {
         const userId = token.sub!;
-        const roles = await prisma.userRole.findMany({
-          where: { userId },
+        const dbUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            emailVerified: true,
+            roles: { select: { role: true } },
+          },
         });
-        token.roles = roles.map((r) => r.role) as AppRole[];
-        token.needsRoleSelection = roles.length === 0;
+        token.roles = (dbUser?.roles.map((r) => r.role) ?? []) as AppRole[];
+        token.needsRoleSelection = token.roles.length === 0;
+        token.isEmailVerified = !!dbUser?.emailVerified;
       }
 
       // Self-heal: JWT may carry stale needsRoleSelection=true from a partial
@@ -129,6 +141,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.roles = (token.roles as AppRole[]) ?? [];
       // Derive needsRoleSelection from roles array — resilient to stale JWT field
       session.user.needsRoleSelection = session.user.roles.length === 0;
+      // Default true: existing JWTs that pre-date this field are unaffected on deploy.
+      session.user.isEmailVerified = token.isEmailVerified ?? true;
       return session;
     },
   },

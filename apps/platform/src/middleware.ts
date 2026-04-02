@@ -23,10 +23,14 @@ export default auth((req) => {
   const hasRole = userRoles.length > 0;
   const needsRoleSelection = !hasRole;
 
+  // isEmailVerified defaults true: existing sessions (pre-field) must not be locked out.
+  const emailVerified: boolean = session?.user?.isEmailVerified ?? true;
+
   console.log("[middleware]", pathname, {
     isLoggedIn,
     hasRole,
     roles: userRoles,
+    isEmailVerified: emailVerified,
     needsRoleSelection_session: session?.user?.needsRoleSelection,
     needsRoleSelection_derived: needsRoleSelection,
   });
@@ -34,6 +38,7 @@ export default auth((req) => {
   const isAdminRoute = pathname.startsWith("/admin");
   const isOperatorRoute = pathname.startsWith("/operator");
   const isTravelerRoute = pathname.startsWith("/traveler");
+  const isAccountRoute = pathname.startsWith("/account");
   const isSelectRoleRoute = pathname === "/select-role";
   const isAuthRoute = pathname === "/login" || pathname === "/signup";
   const isRootRoute = pathname === "/";
@@ -42,7 +47,13 @@ export default auth((req) => {
   // Protected routes require a session. Redirect to login and preserve the
   // intended destination so the user lands there after signing in.
   if (!isLoggedIn) {
-    if (isAdminRoute || isOperatorRoute || isTravelerRoute || isSelectRoleRoute) {
+    if (
+      isAdminRoute ||
+      isOperatorRoute ||
+      isTravelerRoute ||
+      isSelectRoleRoute ||
+      isAccountRoute
+    ) {
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
@@ -52,35 +63,38 @@ export default auth((req) => {
 
   // ── Authenticated — role not yet assigned ────────────────────────────────────
   // New users that completed sign-up but haven't selected a role yet must finish
-  // role selection before accessing any other matched route. This includes the
-  // root and auth pages — the needsRoleSelection check must not fall through to
-  // the isRootRoute/isAuthRoute block below (which would route to /select-role
-  // via getDashboardUrl anyway, but only for role-scoped routes — not for / or
-  // /login/signup which return NextResponse.next() in the old logic).
+  // role selection before accessing any other matched route.
   if (needsRoleSelection && !isSelectRoleRoute) {
     return NextResponse.redirect(new URL("/select-role", req.url));
   }
 
   // ── Authenticated — role already assigned, visiting /select-role ─────────────
-  // A user who completed role selection should not be able to reach /select-role
-  // again. Without this guard they would land on /select-role with
-  // needsRoleSelection: false, see "Role already assigned" on retry, and have
-  // no way to navigate out. Send them directly to their dashboard.
   if (isSelectRoleRoute && !needsRoleSelection) {
     return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
+  // ── Email verification gate ──────────────────────────────────────────────────
+  // Credentials users who have not verified their email may not access any
+  // dashboard or account route. They are redirected to /verify-email.
+  // Google OAuth users arrive with emailVerified already set by NextAuth — they
+  // always pass this check.
+  // /account/security is blocked too — prevents a workaround via settings.
+  if (
+    !emailVerified &&
+    (isAdminRoute || isOperatorRoute || isTravelerRoute || isAccountRoute)
+  ) {
+    return NextResponse.redirect(new URL("/verify-email", req.url));
+  }
+
   // ── Authenticated — redirect away from auth/marketing pages ─────────────────
   // Once logged in, /login, /signup, and / are no longer meaningful destinations.
-  // Send the user directly to their role dashboard.
   if (isAuthRoute || isRootRoute) {
     return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
   // ── Role enforcement ─────────────────────────────────────────────────────────
-  // Admins are granted read access to all role-scoped routes (oversight / support).
-  // Any other user trying to access a route outside their role is redirected to
-  // their own dashboard.
+  // Admins can access all role-scoped routes (oversight / support).
+  // Account routes (/account/*) are accessible to any authenticated user.
   const isAdmin = userRoles.includes("admin");
 
   if (isAdminRoute && !isAdmin) {
@@ -107,5 +121,6 @@ export const config = {
     "/operator/:path*",
     "/traveler/:path*",
     "/admin/:path*",
+    "/account/:path*",
   ],
 };
