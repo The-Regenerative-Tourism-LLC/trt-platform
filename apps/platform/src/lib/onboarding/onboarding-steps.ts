@@ -49,6 +49,7 @@ export interface OnboardingData {
   isChainMember?: boolean;
   chainName?: string;
   soloOperator?: boolean;
+  ownerLivesLocally?: boolean;
 
   // Step 5 — Activity unit
   guestNights?: number;
@@ -57,8 +58,13 @@ export interface OnboardingData {
   revenueSplitExperiencePct?: number;
   assessmentPeriodEnd?: string;
 
-  /** Property / experience photos — references only (no file bytes). First item = cover. */
-  photoRefs?: Array<{ id: string; storageRef: string; fileName?: string }>;
+  /**
+   * Uploaded operator photos. Each entry is a persisted OperatorPhoto record.
+   * id = OperatorPhoto.id (server-assigned), url = public storage URL.
+   * isCover = true for the cover photo (enforced server-side via set-cover API).
+   * No file bytes are stored here — only metadata from the upload API response.
+   */
+  photoRefs?: Array<{ id: string; url: string; isCover: boolean; fileName?: string }>;
 
   // Step 1 — Location (part of identity)
   address?: string;
@@ -405,7 +411,7 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     return Math.abs(acc + exp - 100) < 0.01;
   },
 
-  /** Merged step: accommodation + experience types + ownership + activity unit */
+  /** Merged step: accommodation + experience types + activity unit (ownership moved to identity step) */
   "operation-activity": (d) => {
     const accomOk =
       (d.operatorType !== "A" && d.operatorType !== "C") ||
@@ -413,9 +419,7 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     const expOk =
       (d.operatorType !== "B" && d.operatorType !== "C") ||
       (Array.isArray(d.experienceTypes) && d.experienceTypes.length > 0);
-    const ownershipOk =
-      isNonEmpty(d.ownershipType) && isNonNegativeNumber(d.localEquityPct);
-    if (!accomOk || !expOk || !ownershipOk) return false;
+    if (!accomOk || !expOk) return false;
     if (!isNonEmpty(d.assessmentPeriodEnd)) return false;
     if (d.operatorType === "A") return isPositiveNumber(d.guestNights);
     if (d.operatorType === "B") return isPositiveNumber(d.visitorDays);
@@ -471,8 +475,7 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
   "p1-site": (d) =>
     typeof d.p1SiteScore === "number" &&
     d.p1SiteScore >= 0 &&
-    d.p1SiteScore <= 4 &&
-    !!d.evidenceTierSite,
+    d.p1SiteScore <= 4,
 
   "p2-employment": (d) => {
     // Solo operators bypass employment fields

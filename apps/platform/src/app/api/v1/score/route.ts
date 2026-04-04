@@ -110,7 +110,8 @@ const ScoreRequestSchema = z.object({
     .array(
       z.object({
         id: z.string().min(1),
-        storageRef: z.string().min(1),
+        url: z.string().min(1),
+        isCover: z.boolean(),
         fileName: z.string().optional(),
       })
     )
