@@ -310,6 +310,14 @@ export function OperatorOnboardingClient() {
     }
   };
 
+  const handleSaveClose = async () => {
+    try {
+      await saveDraft();
+    } finally {
+      router.push("/operator/dashboard");
+    }
+  };
+
   const handleSubmit = async () => {
     setSaving(true);
     try {
@@ -364,13 +372,15 @@ export function OperatorOnboardingClient() {
   const shell = {
     stepId,
     progress,
-    stepNumber,
-    totalSteps,
+    // +1 offset: roadmap is screen 01, question steps start at 02
+    stepNumber: stepNumber + 1,
+    totalSteps: totalSteps + 1,
     onBack: handleBack,
     onNext: handleNext,
     saving,
     saved,
     canNext,
+    onSaveClose: handleSaveClose,
   };
 
   const floatingGps = (
@@ -391,21 +401,18 @@ export function OperatorOnboardingClient() {
   if (draftLoading && !draftInitialized) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-muted">
-          <div className="h-full w-1/3 bg-primary/40 animate-pulse" />
-        </div>
-        <div className="fixed top-0.5 left-0 right-0 z-40 bg-background/90 border-b h-11" />
-        <div className="flex-1 pt-14 pb-28 px-4">
-          <div className="max-w-2xl mx-auto py-8 space-y-6">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50 h-14" />
+        <div className="flex-1 pt-14 pb-24 px-6">
+          <div className="max-w-[768px] mx-auto py-10 space-y-8">
             <div className="space-y-3">
-              <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-              <div className="h-8 w-56 rounded bg-muted animate-pulse" />
-              <div className="h-4 w-80 rounded bg-muted animate-pulse" />
+              <div className="h-10 w-80 rounded-xl bg-muted animate-pulse" />
+              <div className="h-4 w-96 rounded bg-muted animate-pulse" />
             </div>
-            <div className="space-y-4">
-              <div className="h-20 rounded-xl bg-muted animate-pulse" />
-              <div className="h-20 rounded-xl bg-muted animate-pulse" />
-              <div className="h-20 rounded-xl bg-muted animate-pulse" />
+            <div className="space-y-3">
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
             </div>
           </div>
         </div>
@@ -418,7 +425,14 @@ export function OperatorOnboardingClient() {
   }
 
   if (showRoadmap) {
-    return <RoadmapScreen onStart={() => setShowRoadmap(false)} data={data} />;
+    return (
+      <RoadmapScreen
+        onStart={() => setShowRoadmap(false)}
+        data={data}
+        totalSteps={totalSteps}
+        onSaveClose={handleSaveClose}
+      />
+    );
   }
 
   // ── Step dispatch ─────────────────────────────────────────────────────────
