@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -21,37 +21,40 @@ export default function VerifyEmailClient() {
 
   const [status, setStatus] = useState<Status>("verifying");
   const [errorMessage, setErrorMessage] = useState("");
-  // Signals that the API call succeeded — redirect deferred until sessionStatus settles
+  // Signals that the verify API call succeeded — redirect is handled separately
   const [verificationDone, setVerificationDone] = useState(false);
+
+  // Refs prevent effects from running more than once even if deps flicker
+  // (update() causes sessionStatus: authenticated → loading → authenticated)
+  const recoveryDone = useRef(false);
+  const redirectDone = useRef(false);
 
   const [resendEmail, setResendEmail] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
   const [resendError, setResendError] = useState("");
 
-  // Recovery: user is authenticated but stuck on /verify-email with no token
-  // (stale JWT — email was verified but session was never refreshed).
-  // Refresh the session from DB; if email is now verified, redirect to dashboard.
+  // Recovery: user is stuck on /verify-email without a token.
+  // This happens when the JWT is stale (isEmailVerified: false) but the DB
+  // already has the email verified. Refresh the JWT once; if now verified, redirect.
   useEffect(() => {
-    if (token || sessionStatus !== "authenticated") return;
+    if (token || sessionStatus !== "authenticated" || recoveryDone.current) return;
+    recoveryDone.current = true;
 
-    async function tryRecovery() {
+    void (async () => {
       const updated = await update();
       if (updated?.user?.isEmailVerified) {
-        const dashboardUrl = getDashboardUrl(
+        window.location.href = getDashboardUrl(
           (updated.user.roles ?? []) as string[]
         );
-        window.location.href = dashboardUrl;
       }
-    }
-
-    void tryRecovery();
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, sessionStatus]);
 
-  // Step 1: call the verification API. Do NOT redirect here — sessionStatus may
-  // still be "loading" in production, which would send an authenticated user to
-  // /login and trigger a middleware loop.
+  // Step 1: Call the verification API. Do NOT redirect inline — sessionStatus
+  // may still be "loading" in production, causing a redirect to /login which
+  // the middleware bounces back to /verify-email (loop).
   useEffect(() => {
     if (!token) {
       setStatus("error");
@@ -61,14 +64,13 @@ export default function VerifyEmailClient() {
       return;
     }
 
-    async function verify() {
+    void (async () => {
       try {
         const res = await fetch("/api/auth/verify-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
-
         const data = await res.json();
 
         if (!res.ok) {
@@ -83,35 +85,27 @@ export default function VerifyEmailClient() {
         setErrorMessage("An unexpected error occurred. Please try again.");
         setStatus("error");
       }
-    }
-
-    void verify();
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Step 2: redirect once both the verification is done AND the session status
-  // has settled (not "loading"). This prevents sending an authenticated user to
-  // /login with a stale JWT, which would loop back to /verify-email.
+  // Step 2: Redirect once verification succeeded AND sessionStatus has settled.
+  // The ref prevents re-running when update() causes sessionStatus to flicker.
   useEffect(() => {
-    if (!verificationDone || sessionStatus === "loading") return;
+    if (!verificationDone || sessionStatus === "loading" || redirectDone.current) return;
+    redirectDone.current = true;
 
-    async function doRedirect() {
+    void (async () => {
       if (sessionStatus === "authenticated") {
         // Refresh JWT so the middleware sees isEmailVerified: true
         const updated = await update();
-        const roles = (
-          updated?.user?.roles ??
-          session?.user?.roles ??
-          []
-        ) as string[];
+        const roles = (updated?.user?.roles ?? session?.user?.roles ?? []) as string[];
         window.location.href = getDashboardUrl(roles);
       } else {
-        // Not logged in — send to login; a fresh JWT will reflect verified email
+        // Unauthenticated: send to login; fresh JWT will reflect verified email
         window.location.href = "/login?verified=1";
       }
-    }
-
-    void doRedirect();
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verificationDone, sessionStatus]);
 
@@ -121,7 +115,7 @@ export default function VerifyEmailClient() {
     }
   }, [session?.user?.email]);
 
-  async function handleResend(e: React.FormEvent) {
+  async function handleResend(e: React.SyntheticEvent) {
     e.preventDefault();
     setResendLoading(true);
     setResendMessage("");
