@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowLeft, Save, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
 import {
   STEP_SECTIONS,
   SECTION_GROUPS,
@@ -68,6 +68,7 @@ export function StepShell({
   children,
   title,
   subtitle,
+  topIcon,
   stepId: _stepId,
   progress: _progress,
   stepNumber,
@@ -86,6 +87,7 @@ export function StepShell({
   children: ReactNode;
   title: string;
   subtitle?: string;
+  topIcon?: ReactNode;
   stepId: string;
   progress: number;
   stepNumber: number;
@@ -106,74 +108,113 @@ export function StepShell({
   void _progress;
   void _isFirst;
 
+  const progressPct = totalSteps > 0 ? (stepNumber / totalSteps) * 100 : 0;
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Top bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
-        <div className="flex items-center h-14 px-6 max-w-[768px] mx-auto">
+      {/* Progress bar */}
+      <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-border/40">
+        <div
+          className="h-full bg-foreground transition-all duration-300"
+          style={{ width: `${progressPct}%` }}
+        />
+      </div>
+
+      {/* Header bar */}
+      <div
+        className="fixed left-0 right-0 z-40 flex items-center bg-background/90 backdrop-blur-sm border-b border-border/40"
+        style={{ top: "2px", height: "56px" }}
+      >
+        <div className={`flex items-center w-full ${topIcon ? "max-w-[600px]" : "max-w-onboarding"} mx-auto px-3 sm:px-6`}>
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors w-16 sm:w-20"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Back</span>
           </button>
 
-          <span className="flex-1 text-center text-sm font-mono font-medium tabular-nums">
+          <span className="flex-1 text-center text-xs sm:text-sm font-mono font-medium tabular-nums text-muted-foreground">
             {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
           </span>
 
-          <button
-            onClick={onSaveClose}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Save className="w-4 h-4" />
-            <span className="hidden sm:inline">Save</span>
-            <X className="w-4 h-4 ml-0.5" />
-          </button>
+          <div className="flex items-center justify-end w-16 sm:w-20">
+            <button
+              onClick={onSaveClose}
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Save</span>
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 pt-14 pb-32 px-6">
-        <div className="max-w-[768px] mx-auto py-10 space-y-8">
-          {saved && (
-            <span className="text-xs text-primary font-medium">Saved ✓</span>
-          )}
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{title}</h1>
-            {subtitle && (
-              <p className="text-muted-foreground leading-relaxed">{subtitle}</p>
+      <div className="flex-1 pt-14 sm:pt-20 pb-24 sm:pb-28 px-3 sm:px-6">
+        {topIcon ? (
+          <div className="max-w-[600px] mx-auto space-y-4 sm:space-y-5">
+            {topIcon}
+            {saved && (
+              <span className="text-xs text-muted-foreground font-medium">Saved ✓</span>
             )}
+            <div className="space-y-2">
+              <h1 className="text-5xl font-bold tracking-tight text-foreground leading-tight">{title}</h1>
+              {subtitle && (
+                <p className="text-sm text-muted-foreground leading-relaxed">{subtitle}</p>
+              )}
+            </div>
+            <div className="space-y-3">{children}</div>
           </div>
-          <div className="space-y-5">{children}</div>
-        </div>
+        ) : (
+          <div className="max-w-onboarding mx-auto space-y-5 sm:space-y-8">
+            {saved && (
+              <span className="text-xs text-muted-foreground font-medium">Saved ✓</span>
+            )}
+            <div className="space-y-2 sm:space-y-3">
+              <h1 className="text-5xl font-bold tracking-tight text-foreground leading-tight">{title}</h1>
+              {subtitle && (
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{subtitle}</p>
+              )}
+            </div>
+            <div className="space-y-4 sm:space-y-5">{children}</div>
+          </div>
+        )}
       </div>
 
       {/* Bottom navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border/50">
-        <div className="flex items-center justify-end px-6 max-w-[768px] mx-auto">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-center bg-background/95 backdrop-blur-md border-t border-border/40"
+        style={{ height: "72px" }}
+      >
+        <div className={`flex items-center justify-end w-full ${topIcon ? "max-w-[600px]" : "max-w-onboarding"} mx-auto px-3 sm:px-6`}>
           {isLast ? (
             <button
               onClick={onSubmit}
               disabled={saving || !canSubmit}
-              className="bg-foreground text-background font-semibold px-8 py-2.5 rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 bg-foreground text-background font-semibold rounded-xl h-10 sm:h-11 px-5 sm:px-8 text-sm sm:text-base disabled:opacity-40 hover:opacity-90 transition-opacity"
             >
               {saving ? "Submitting…" : "Submit Assessment"}
             </button>
           ) : (
-            <div className="flex flex-col items-end gap-1 py-[8px]">
+            <div className="flex flex-col items-end gap-1">
               {canNext === false && (
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
                   Complete required fields to continue
                 </p>
               )}
               <button
                 onClick={onNext}
                 disabled={canNext === false || saving}
-                className="bg-foreground text-background font-semibold px-8 py-2.5 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 bg-foreground text-background font-semibold rounded-xl h-10 sm:h-11 px-5 sm:px-8 text-sm sm:text-base disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
               >
-                {saving ? "Saving…" : "Continue →"}
+                {saving ? "Saving…" : (
+                  <>
+                    Next
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </div>
           )}

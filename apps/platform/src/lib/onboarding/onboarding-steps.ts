@@ -386,8 +386,6 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
   "identity": (d) =>
     isNonEmpty(d.legalName) &&
     isNonEmpty(d.country) &&
-    isNonEmpty(d.primaryContactName) &&
-    isNonEmpty(d.primaryContactEmail) &&
     isNonEmpty(d.territoryId),
 
   // Legacy individual validators (kept for backward compat, not in active step list)
@@ -399,10 +397,13 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     if (d.operatorType !== "B" && d.operatorType !== "C") return true;
     return Array.isArray(d.experienceTypes) && d.experienceTypes.length > 0;
   },
-  "ownership": (d) =>
-    isNonEmpty(d.ownershipType) && isNonNegativeNumber(d.localEquityPct),
+  "ownership": (d) => {
+    if (!isNonEmpty(d.ownershipType)) return false;
+    const variantB = new Set(["partnership", "private-company", "public-company"]);
+    if (variantB.has(d.ownershipType!)) return isNonNegativeNumber(d.localEquityPct);
+    return true;
+  },
   "activity-unit": (d) => {
-    if (!isNonEmpty(d.assessmentPeriodEnd)) return false;
     if (d.operatorType === "A") return isPositiveNumber(d.guestNights);
     if (d.operatorType === "B") return isPositiveNumber(d.visitorDays);
     if (!isPositiveNumber(d.guestNights) || !isPositiveNumber(d.visitorDays)) return false;
@@ -420,7 +421,6 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
       (d.operatorType !== "B" && d.operatorType !== "C") ||
       (Array.isArray(d.experienceTypes) && d.experienceTypes.length > 0);
     if (!accomOk || !expOk) return false;
-    if (!isNonEmpty(d.assessmentPeriodEnd)) return false;
     if (d.operatorType === "A") return isPositiveNumber(d.guestNights);
     if (d.operatorType === "B") return isPositiveNumber(d.visitorDays);
     if (d.operatorType === "C") {
@@ -484,12 +484,12 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
       isPositiveNumber(d.totalFte) &&
       isNonNegativeNumber(d.localFte) &&
       isNonNegativeNumber(d.permanentContractPct) &&
-      isPositiveNumber(d.averageMonthlyWage) &&
-      isPositiveNumber(d.minimumWage)
+      isPositiveNumber(d.averageMonthlyWage)
     );
   },
 
   "p2-procurement": (d) => {
+    // Accept legacy tourNoFbSpend/tourNoNonFbSpend flags (old drafts) or direct spend values
     const fbOk = d.tourNoFbSpend === true || isNonNegativeNumber(d.totalFbSpend);
     const nonFbOk = d.tourNoNonFbSpend === true || isNonNegativeNumber(d.totalNonFbSpend);
     return fbOk && nonFbOk;

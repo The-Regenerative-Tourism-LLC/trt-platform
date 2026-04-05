@@ -1,6 +1,12 @@
 import { useState } from "react";
 import type { ReactNode, ChangeEvent } from "react";
 import dynamic from "next/dynamic";
+import { Building2, Mountain, Sparkles, Info, HelpCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import type { OnboardingData } from "@/store/onboarding-store";
 import type { StepShellBaseProps } from "../shell";
 import { StepShell } from "../shell";
@@ -33,6 +39,12 @@ interface StepProps {
 }
 
 // ── Operator Type ─────────────────────────────────────────────────────────────
+
+const operatorIconMap = {
+  A: Building2,
+  B: Mountain,
+  C: Sparkles,
+} as const;
 
 export function OperatorTypeStep({
   data,
@@ -69,40 +81,80 @@ export function OperatorTypeStep({
     data.operatorType === "B" &&
     data._confirmsNoAccommodation === true;
 
+  const topIcon = (
+    <div className="w-11 h-11 rounded-xl bg-muted/60 flex items-center justify-center">
+      <Building2 className="w-5 h-5 text-foreground/50" strokeWidth={1.5} />
+    </div>
+  );
+
   return (
     <StepShell
       {...shell}
       title="What type of operation do you run?"
       subtitle="This determines which questions we'll ask you. Accommodation operators are benchmarked per guest-night, experience operators per visitor-day."
+      topIcon={topIcon}
       isFirst
     >
-      <div className="grid gap-3">
-        {typeOptions.map((opt) => (
-          <button
-            key={opt.key}
-            onClick={() => {
-              updateField({
-                operatorType: opt.key,
-                _accomGateShown: false,
-                _confirmsNoAccommodation: false,
-                _accomGateWarn: false,
-              });
-            }}
-            className={`w-full rounded-xl border-2 p-5 text-left transition-all ${
-              data.operatorType === opt.key
-                ? "border-foreground bg-secondary shadow-sm ring-1 ring-primary/30"
-                : "border-border hover:border-primary/40 hover:bg-muted/20"
-            }`}
-          >
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-base">{opt.label}</span>
-              <span className="text-[10px] font-medium text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                {opt.badge}
-              </span>
-            </div>
-            <div className="text-sm text-muted-foreground mt-1">{opt.desc}</div>
-          </button>
-        ))}
+      {/* Option cards */}
+      <div className="space-y-2">
+        {typeOptions.map((opt) => {
+          const isSelected = data.operatorType === opt.key;
+          const Icon = operatorIconMap[opt.key];
+          return (
+            <button
+              key={opt.key}
+              onClick={() => {
+                updateField({
+                  operatorType: opt.key,
+                  _accomGateShown: false,
+                  _confirmsNoAccommodation: false,
+                  _accomGateWarn: false,
+                });
+              }}
+              className={[
+                "w-full flex items-center gap-4 rounded-2xl border px-4 py-5 text-left transition-all",
+                isSelected
+                  ? "border-foreground bg-card"
+                  : "border-border/40 bg-card hover:border-border/60",
+              ].join(" ")}
+            >
+              {/* Left icon tile */}
+              <div className={[
+                "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
+                isSelected ? "bg-foreground" : "bg-muted/60",
+              ].join(" ")}>
+                <Icon
+                  className={isSelected ? "w-5 h-5 text-background" : "w-5 h-5 text-foreground/50"}
+                  strokeWidth={1.5}
+                />
+              </div>
+
+              {/* Text column */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-base font-bold text-foreground leading-snug">
+                    {opt.label}
+                  </span>
+                  <span className="text-[10px] font-medium text-muted-foreground border border-border/60 rounded-full px-2 py-0.5 leading-none whitespace-nowrap">
+                    {opt.badge}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                  {opt.desc}
+                </p>
+              </div>
+
+              {/* Radio indicator */}
+              {isSelected ? (
+                <div className="w-5 h-5 rounded-full bg-foreground flex items-center justify-center shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-background" />
+                </div>
+              ) : (
+                <div className="w-5 h-5 rounded-full border border-border/60 shrink-0" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Type B accommodation gate */}
@@ -163,10 +215,13 @@ export function OperatorTypeStep({
         </div>
       )}
 
-      <Tip icon="📊">
-        This choice affects all scoring benchmarks. Accommodation operators are measured
-        per guest-night; experience operators per visitor-day with lower thresholds.
-      </Tip>
+      {/* Info box */}
+      <div className="flex items-start gap-3 rounded-xl border border-border/40 bg-surface/20 px-4 py-4">
+        <Info className="w-[15px] h-[15px] shrink-0 text-muted-foreground/70 mt-px" strokeWidth={1.5} />
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          This choice affects all scoring benchmarks. Accommodation operators are measured per guest-night; experience operators per visitor-day with lower thresholds.
+        </p>
+      </div>
     </StepShell>
   );
 }
@@ -182,11 +237,18 @@ export function IdentityStep({
 }: StepProps & {
   territories: Array<{ id: string; name: string; country: string | null }>;
 }) {
+  const topIcon = (
+    <div className="w-11 h-11 rounded-xl bg-muted/60 flex items-center justify-center">
+      <Building2 className="w-5 h-5 text-foreground/50" strokeWidth={1.5} />
+    </div>
+  );
+
   return (
     <StepShell
       {...shell}
       title="About your business"
       subtitle="These details are required for publication but are not scored."
+      topIcon={topIcon}
     >
       {floatingGps}
 
@@ -293,31 +355,6 @@ export function IdentityStep({
         </FieldGroup>
       </div>
 
-      {/* Contact */}
-      <div className="border-t border-border/50 pt-6 space-y-4">
-        <p className="text-sm font-semibold">Primary contact</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FieldGroup label="Name">
-            <input
-              type="text"
-              value={data.primaryContactName ?? ""}
-              onChange={(e) => updateField({ primaryContactName: e.target.value })}
-              className={inputCls}
-              placeholder="Full name"
-            />
-          </FieldGroup>
-          <FieldGroup label="Email">
-            <input
-              type="email"
-              value={data.primaryContactEmail ?? ""}
-              onChange={(e) => updateField({ primaryContactEmail: e.target.value })}
-              className={inputCls}
-              placeholder="contact@example.com"
-            />
-          </FieldGroup>
-        </div>
-      </div>
-
       {/* Ownership */}
       <OwnershipSection data={data} updateField={updateField} />
     </StepShell>
@@ -327,17 +364,17 @@ export function IdentityStep({
 // ── Ownership section (shared UI block) ───────────────────────────────────────
 
 const OWNERSHIP_TYPES = [
-  { value: "sole-proprietor",    label: "Sole proprietor" },
-  { value: "family-business",    label: "Family business" },
-  { value: "local-company",      label: "Local company" },
-  { value: "franchise",          label: "Franchise" },
-  { value: "international-chain",label: "International chain" },
+  { value: "sole-proprietor", label: "Sole proprietor" },
+  { value: "local-company",   label: "Local company" },
+  { value: "partnership",     label: "Partnership" },
+  { value: "private-company", label: "Private company" },
+  { value: "public-company",  label: "Public company / group" },
 ] as const;
 
-// Ownership types that require the local equity field
-const REQUIRES_EQUITY = new Set(["local-company", "franchise", "international-chain"]);
-// Ownership types that show the solo operator question
-const SHOWS_SOLO     = new Set(["sole-proprietor", "family-business"]);
+// Variant A: locally-rooted types — show livesLocally + solo owner question
+const VARIANT_A = new Set(["sole-proprietor", "local-company"]);
+// Variant B: corporate types — show equity % slider
+const VARIANT_B = new Set(["partnership", "private-company", "public-company"]);
 
 function OwnershipSection({
   data,
@@ -347,8 +384,8 @@ function OwnershipSection({
   updateField: (patch: Partial<OnboardingData>) => void;
 }) {
   const ownershipType = data.ownershipType ?? "";
-  const showEquity    = REQUIRES_EQUITY.has(ownershipType);
-  const showSolo      = SHOWS_SOLO.has(ownershipType);
+  const isVariantA    = VARIANT_A.has(ownershipType);
+  const isVariantB    = VARIANT_B.has(ownershipType);
   const isChain       = data.isChainMember === true;
 
   return (
@@ -372,9 +409,10 @@ function OwnershipSection({
             const next = e.target.value;
             updateField({
               ownershipType: next || undefined,
-              // clear solo/equity when switching to incompatible types
-              soloOperator: SHOWS_SOLO.has(next) ? data.soloOperator : undefined,
-              localEquityPct: REQUIRES_EQUITY.has(next) ? data.localEquityPct : undefined,
+              // clear variant-specific fields when switching
+              ownerLivesLocally: VARIANT_A.has(next) ? data.ownerLivesLocally : undefined,
+              soloOperator: VARIANT_A.has(next) ? data.soloOperator : undefined,
+              localEquityPct: VARIANT_B.has(next) ? data.localEquityPct : undefined,
             });
           }}
           className={inputCls}
@@ -386,92 +424,114 @@ function OwnershipSection({
         </select>
       </FieldGroup>
 
-      {/* 2. Do you live within the destination region? */}
-      <FieldGroup label="Do you live within the destination region?">
-        <TogglePair
-          value={data.ownerLivesLocally}
-          trueLabel="Yes — I/we live locally"
-          falseLabel="No — based elsewhere"
-          onChange={(v) => updateField({ ownerLivesLocally: v })}
-        />
-      </FieldGroup>
+      {/* Variant A — sole proprietor / local company */}
+      {isVariantA && (
+        <>
+          {/* 2A. Do you live within the destination region? */}
+          <FieldGroup label="Do you live within the destination region?">
+            <TogglePair
+              value={data.ownerLivesLocally}
+              trueLabel="Yes — I/we live locally"
+              falseLabel="No — based elsewhere"
+              onChange={(v) => updateField({ ownerLivesLocally: v })}
+            />
+          </FieldGroup>
 
-      {/* 3. Chain toggle */}
+          {/* 3A. Chain toggle */}
+          <ChainToggle isChain={isChain} onToggle={() =>
+            updateField({ isChainMember: !isChain, chainName: isChain ? undefined : data.chainName })
+          } />
+          {isChain && (
+            <FieldGroup label="Chain / group name">
+              <input
+                type="text"
+                value={data.chainName ?? ""}
+                onChange={(e) => updateField({ chainName: e.target.value })}
+                className={inputCls}
+                placeholder="Name of the chain or group"
+              />
+            </FieldGroup>
+          )}
+
+          {/* 4A. Solo operator */}
+          <FieldGroup label="Are you a solo / owner-operator?">
+            <TogglePair
+              value={data.soloOperator}
+              trueLabel="Yes — solo operator"
+              falseLabel="No — I have staff"
+              onChange={(v) => updateField({ soloOperator: v })}
+            />
+          </FieldGroup>
+        </>
+      )}
+
+      {/* Variant B — partnership / private / public company */}
+      {isVariantB && (
+        <>
+          {/* 2B. Local equity % slider */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">
+                % of equity owned by local residents
+              </label>
+              <span className="text-sm font-mono font-semibold tabular-nums">
+                {data.localEquityPct ?? 0}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={data.localEquityPct ?? 0}
+              onChange={(e) => updateField({ localEquityPct: Number(e.target.value) })}
+              className="w-full accent-foreground cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          {/* 3B. Chain toggle */}
+          <ChainToggle isChain={isChain} onToggle={() =>
+            updateField({ isChainMember: !isChain, chainName: isChain ? undefined : data.chainName })
+          } />
+          {isChain && (
+            <FieldGroup label="Chain / group name">
+              <input
+                type="text"
+                value={data.chainName ?? ""}
+                onChange={(e) => updateField({ chainName: e.target.value })}
+                className={inputCls}
+                placeholder="Name of the chain or group"
+              />
+            </FieldGroup>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function ChainToggle({ isChain, onToggle }: { isChain: boolean; onToggle: () => void }) {
+  return (
+    <div
+      className="flex items-center gap-4 p-4 rounded-xl border border-border/60 bg-card cursor-pointer select-none"
+      onClick={onToggle}
+    >
       <div
-        className="flex items-center gap-4 p-4 rounded-xl border border-border/60 bg-card cursor-pointer select-none"
-        onClick={() =>
-          updateField({
-            isChainMember: !isChain,
-            chainName: isChain ? undefined : data.chainName,
-          })
-        }
+        className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
+          isChain ? "bg-foreground" : "bg-muted"
+        }`}
       >
-        {/* Toggle switch */}
-        <div
-          className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
-            isChain ? "bg-foreground" : "bg-muted"
+        <span
+          className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            isChain ? "translate-x-6" : "translate-x-1"
           }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              isChain ? "translate-x-6" : "translate-x-1"
-            }`}
-          />
-        </div>
-        <span className="text-sm font-medium">Part of a hotel chain or group</span>
+        />
       </div>
-
-      {/* 4. Chain / group name (conditional) */}
-      {isChain && (
-        <FieldGroup label="Chain / group name">
-          <input
-            type="text"
-            value={data.chainName ?? ""}
-            onChange={(e) => updateField({ chainName: e.target.value })}
-            className={inputCls}
-            placeholder="Name of the chain or group"
-          />
-        </FieldGroup>
-      )}
-
-      {/* 5. Local equity % (conditional — local company / franchise / international chain) */}
-      {showEquity && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">
-              % of equity owned by local residents
-            </label>
-            <span className="text-sm font-mono font-semibold tabular-nums">
-              {data.localEquityPct ?? 0}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={data.localEquityPct ?? 0}
-            onChange={(e) => updateField({ localEquityPct: Number(e.target.value) })}
-            className="w-full accent-foreground cursor-pointer"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>0%</span>
-            <span>100%</span>
-          </div>
-        </div>
-      )}
-
-      {/* 6. Solo operator (conditional — sole proprietor / family business) */}
-      {showSolo && (
-        <FieldGroup label="Are you a solo / owner-operator?">
-          <TogglePair
-            value={data.soloOperator}
-            trueLabel="Yes — solo operator"
-            falseLabel="No — I have staff"
-            onChange={(v) => updateField({ soloOperator: v })}
-          />
-        </FieldGroup>
-      )}
+      <span className="text-sm font-medium">Part of a hotel chain or group</span>
     </div>
   );
 }
@@ -723,18 +783,6 @@ export function ActivityUnitStep({
       title="Activity data"
       subtitle="The scale of your operation. These figures normalise your intensity metrics per guest."
     >
-      <FieldGroup
-        label="Assessment period end date"
-        hint="The last day of the 12-month period your operational data covers."
-      >
-        <input
-          type="date"
-          value={data.assessmentPeriodEnd ?? ""}
-          onChange={(e) => updateField({ assessmentPeriodEnd: e.target.value || undefined })}
-          max={new Date().toISOString().slice(0, 10)}
-          className={inputCls}
-        />
-      </FieldGroup>
       {data.operatorType !== "B" && (
         <FieldGroup
           label="Total guest-nights"
@@ -902,15 +950,6 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
           {/* 5. Annual activity */}
           <div className="space-y-4 border-t border-border/50 pt-5">
             <p className="text-sm font-semibold">Annual activity</p>
-            <FieldGroup label="Assessment period end date">
-              <input
-                type="date"
-                value={data.assessmentPeriodEnd ?? ""}
-                onChange={(e) => updateField({ assessmentPeriodEnd: e.target.value || undefined })}
-                max={new Date().toISOString().slice(0, 10)}
-                className={inputCls}
-              />
-            </FieldGroup>
             <FieldGroup label="Total guest-nights (last 12 months)">
               <NumberInput
                 value={data.guestNights}
@@ -919,6 +958,13 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                 min={0}
               />
             </FieldGroup>
+            <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
+              <div className="text-sm text-muted-foreground leading-relaxed">
+                <p className="font-medium text-foreground/80 mb-1">How to calculate guest-nights</p>
+                <p>Guest-nights = number of guests × number of nights stayed over the last 12 months. For example, 2 guests staying 3 nights = 6 guest-nights. If you don&apos;t know the exact number, provide your best estimate.</p>
+              </div>
+            </div>
             <FieldGroup label="Average price per night (€)">
               <NumberInput
                 value={data.pricePerNight}
@@ -931,7 +977,22 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
 
           {/* 4. Food service */}
           <div className="space-y-3 border-t border-border/50 pt-5">
-            <p className="text-sm font-semibold">Do you serve food on-site?</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-semibold">Do you serve food on-site?</p>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+                    <HelpCircle className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
+                >
+                  This helps us tailor the procurement section — if you don&apos;t serve food, we won&apos;t ask about food &amp; beverage sourcing.
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {FOOD_SERVICE_OPTIONS.map((fs) => (
                 <button
@@ -943,8 +1004,8 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                       : "border-border hover:border-foreground/30 bg-background"
                   }`}
                 >
-                  <p className="text-sm font-semibold">{fs.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{fs.desc}</p>
+                  <p className="text-base font-semibold">{fs.label}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{fs.desc}</p>
                 </button>
               ))}
             </div>
@@ -989,15 +1050,6 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
           {/* Annual activity for B/C */}
           <div className="space-y-4 border-t border-border/50 pt-5">
             <p className="text-sm font-semibold">Annual activity</p>
-            <FieldGroup label="Assessment period end date">
-              <input
-                type="date"
-                value={data.assessmentPeriodEnd ?? ""}
-                onChange={(e) => updateField({ assessmentPeriodEnd: e.target.value || undefined })}
-                max={new Date().toISOString().slice(0, 10)}
-                className={inputCls}
-              />
-            </FieldGroup>
             <FieldGroup label="Total visitor-days">
               <NumberInput value={data.visitorDays} onChange={(v) => updateField({ visitorDays: v })} placeholder="e.g. 2 000" min={0} />
             </FieldGroup>

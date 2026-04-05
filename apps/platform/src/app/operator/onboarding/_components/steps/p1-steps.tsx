@@ -3,11 +3,35 @@ import type { OnboardingData } from "@/store/onboarding-store";
 import type { EvidenceTier } from "@/lib/onboarding/onboarding-steps";
 import type { StepShellBaseProps } from "../shell";
 import type { PreviewScores } from "@/hooks/usePreviewScore";
+import { HelpCircle } from "lucide-react";
 import { StepShell } from "../shell";
 import {
   FieldGroup,
   NumberInput,
 } from "../primitives";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+
+function FieldTooltip({ text }: { text: string }) {
+  return (
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger asChild>
+        <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+          <HelpCircle className="w-4 h-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
+      >
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 interface StepProps {
   data: OnboardingData;
@@ -60,7 +84,7 @@ export function P1EnergyStep({
       </div>
 
       {/* Electricity */}
-      <FieldGroup label="Total electricity consumed (annual)">
+      <FieldGroup label={<>Total electricity consumed (annual) <FieldTooltip text="From annual utility invoice" /></>}>
         <div className="relative">
           <input
             type="number"
@@ -155,7 +179,7 @@ export function P1EnergyStep({
 
       {/* Energy exported */}
       <FieldGroup
-        label="Energy exported to the grid (annual)"
+        label={<>Energy exported to the grid (annual) <FieldTooltip text="Surplus renewable energy (solar, wind, etc.) fed back into the public grid. This reduces your net energy consumption and carbon footprint." /></>}
         hint="From your inverter or net metering bill. If none: 0"
       >
         <div className="relative">
@@ -461,8 +485,14 @@ export function P1WasteStep({
           onChange={(v) => updateField({ totalWasteKg: v })}
           placeholder="e.g. 12,000"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
+      {totalWaste > 0 && (
+        <p className="text-sm text-muted-foreground bg-muted/50 border border-border/50 rounded-xl px-4 py-3 leading-relaxed">
+          Break down your {totalWaste.toLocaleString()} kg into the categories below. What&apos;s left ({Math.max(0, totalWaste - totalDiverted).toLocaleString()} kg) is assumed to go to landfill.
+        </p>
+      )}
 
       {/* Recycled */}
       <FieldGroup
@@ -474,6 +504,7 @@ export function P1WasteStep({
           onChange={(v) => updateField({ wasteRecycledKg: v })}
           placeholder="e.g. 3,000"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
 
@@ -487,6 +518,7 @@ export function P1WasteStep({
           onChange={(v) => updateField({ wasteCompostedKg: v })}
           placeholder="e.g. 1,500"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
 
@@ -500,8 +532,21 @@ export function P1WasteStep({
           onChange={(v) => updateField({ wasteOtherDivertedKg: v })}
           placeholder="e.g. 500"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
+      {totalWaste > 0 && (
+        <div className="bg-muted/50 border border-border/50 rounded-xl px-4 py-3 space-y-1.5">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Sent to landfill</span>
+            <span className="font-medium">{Math.max(0, totalWaste - totalDiverted).toLocaleString()} kg</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Diversion rate</span>
+            <span className="font-bold">{diversionRate.toFixed(1)}%</span>
+          </div>
+        </div>
+      )}
 
       {/* Bonus practices */}
       <div className="space-y-3">
