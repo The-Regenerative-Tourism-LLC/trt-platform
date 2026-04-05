@@ -484,12 +484,12 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
       isPositiveNumber(d.totalFte) &&
       isNonNegativeNumber(d.localFte) &&
       isNonNegativeNumber(d.permanentContractPct) &&
-      isPositiveNumber(d.averageMonthlyWage) &&
-      isPositiveNumber(d.minimumWage)
+      isPositiveNumber(d.averageMonthlyWage)
     );
   },
 
   "p2-procurement": (d) => {
+    // Accept legacy tourNoFbSpend/tourNoNonFbSpend flags (old drafts) or direct spend values
     const fbOk = d.tourNoFbSpend === true || isNonNegativeNumber(d.totalFbSpend);
     const nonFbOk = d.tourNoNonFbSpend === true || isNonNegativeNumber(d.totalNonFbSpend);
     return fbOk && nonFbOk;

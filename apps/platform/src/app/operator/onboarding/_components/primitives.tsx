@@ -29,6 +29,7 @@ export function NumberInput({
   min,
   max,
   step,
+  unit,
 }: {
   value: number | undefined;
   onChange: (v: number | undefined) => void;
@@ -36,7 +37,29 @@ export function NumberInput({
   min?: number;
   max?: number;
   step?: number;
+  unit?: string;
 }) {
+  if (unit) {
+    return (
+      <div className="relative">
+        <input
+          type="number"
+          value={value ?? ""}
+          onChange={(e) =>
+            onChange(e.target.value === "" ? undefined : parseFloat(e.target.value))
+          }
+          placeholder={placeholder}
+          min={min}
+          max={max}
+          step={step}
+          className={`${inputCls} pr-20`}
+        />
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground bg-muted px-2 py-1 rounded pointer-events-none">
+          {unit}
+        </span>
+      </div>
+    );
+  }
   return (
     <input
       type="number"
@@ -217,24 +240,26 @@ export function EvidenceTierSelector({
   label?: string;
 }) {
   return (
-    <div className="space-y-1.5">
-      <p className="text-xs font-medium text-muted-foreground">
-        {label ?? "Evidence quality for this indicator"}
+    <div className="rounded-2xl bg-muted/50 border border-border/40 px-4 py-4 space-y-2">
+      <p className="text-sm text-muted-foreground">
+        {label ?? "What is the source of this data?"}
       </p>
-      <div className="flex gap-2 flex-wrap">
-        {EVIDENCE_TIERS.map((tier) => (
-          <button
-            key={tier.value}
-            onClick={() => onChange(tier.value)}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
-              value === tier.value
-                ? "border-foreground bg-secondary text-foreground"
-                : "border-border hover:border-primary/40 text-muted-foreground"
-            }`}
-          >
-            {tier.label}
-          </button>
-        ))}
+      <div className="relative">
+        <select
+          value={value ?? ""}
+          onChange={(e) => { if (e.target.value) onChange(e.target.value as EvidenceTier); }}
+          className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring pr-9"
+        >
+          <option value="" disabled>Select evidence quality...</option>
+          {EVIDENCE_TIERS.map((tier) => (
+            <option key={tier.value} value={tier.value}>
+              {tier.label} — {tier.desc}
+            </option>
+          ))}
+        </select>
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          &#x2304;
+        </span>
       </div>
     </div>
   );

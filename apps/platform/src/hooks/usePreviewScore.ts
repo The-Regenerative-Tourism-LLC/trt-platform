@@ -22,6 +22,7 @@ export interface PreviewScores {
   gpsScore: number;
   gpsBand: string;
   methodologyVersion: string;
+  p2SubScores?: { p2a: number; p2b: number; p2c: number; p2d: number };
 }
 
 export function buildPreviewPayload(data: OnboardingData) {
@@ -115,6 +116,7 @@ export function usePreviewScore(data: OnboardingData) {
       });
       if (res.ok) {
         const json = (await res.json()) as PreviewScores & { preview?: boolean };
+        const p2Sub = (json as unknown as Record<string, unknown>).indicatorScores as { p2?: { p2a?: number; p2b?: number; p2c?: number; p2d?: number } } | undefined;
         setPreview({
           pillar1Score: json.pillar1Score,
           pillar2Score: json.pillar2Score,
@@ -122,6 +124,12 @@ export function usePreviewScore(data: OnboardingData) {
           gpsScore: json.gpsScore,
           gpsBand: json.gpsBand,
           methodologyVersion: json.methodologyVersion,
+          p2SubScores: p2Sub?.p2 && p2Sub.p2.p2a != null ? {
+            p2a: p2Sub.p2.p2a ?? 0,
+            p2b: p2Sub.p2.p2b ?? 0,
+            p2c: p2Sub.p2.p2c ?? 0,
+            p2d: p2Sub.p2.p2d ?? 0,
+          } : undefined,
         });
       }
     } catch (err) {

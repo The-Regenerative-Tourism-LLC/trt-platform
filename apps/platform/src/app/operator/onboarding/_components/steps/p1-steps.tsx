@@ -485,8 +485,14 @@ export function P1WasteStep({
           onChange={(v) => updateField({ totalWasteKg: v })}
           placeholder="e.g. 12,000"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
+      {totalWaste > 0 && (
+        <p className="text-sm text-muted-foreground bg-muted/50 border border-border/50 rounded-xl px-4 py-3 leading-relaxed">
+          Break down your {totalWaste.toLocaleString()} kg into the categories below. What&apos;s left ({Math.max(0, totalWaste - totalDiverted).toLocaleString()} kg) is assumed to go to landfill.
+        </p>
+      )}
 
       {/* Recycled */}
       <FieldGroup
@@ -498,6 +504,7 @@ export function P1WasteStep({
           onChange={(v) => updateField({ wasteRecycledKg: v })}
           placeholder="e.g. 3,000"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
 
@@ -511,6 +518,7 @@ export function P1WasteStep({
           onChange={(v) => updateField({ wasteCompostedKg: v })}
           placeholder="e.g. 1,500"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
 
@@ -524,8 +532,21 @@ export function P1WasteStep({
           onChange={(v) => updateField({ wasteOtherDivertedKg: v })}
           placeholder="e.g. 500"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
+      {totalWaste > 0 && (
+        <div className="bg-muted/50 border border-border/50 rounded-xl px-4 py-3 space-y-1.5">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Sent to landfill</span>
+            <span className="font-medium">{Math.max(0, totalWaste - totalDiverted).toLocaleString()} kg</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Diversion rate</span>
+            <span className="font-bold">{diversionRate.toFixed(1)}%</span>
+          </div>
+        </div>
+      )}
 
       {/* Bonus practices */}
       <div className="space-y-3">

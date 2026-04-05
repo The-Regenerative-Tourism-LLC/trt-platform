@@ -43,7 +43,6 @@ function completeData(): OnboardingData {
     localFte: 5,
     permanentContractPct: 80,
     averageMonthlyWage: 1000,
-    minimumWage: 870,
     seasonalOperator: false,
     totalFbSpend: 20000,
     localFbSpend: 14000,

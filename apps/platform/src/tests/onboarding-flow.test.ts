@@ -66,7 +66,6 @@ function typeAData(): Partial<OnboardingData> {
     localFte: 4,
     permanentContractPct: 80,
     averageMonthlyWage: 900,
-    minimumWage: 820,
     totalFbSpend: 12000,
     localFbSpend: 9000,
     totalNonFbSpend: 5000,
@@ -462,7 +461,6 @@ describe("validateStep — p2-employment", () => {
       localFte: 3,
       permanentContractPct: 75,
       averageMonthlyWage: 900,
-      minimumWage: 820,
     })).toBe(true);
     expect(validateStep("p2-employment", {
       soloOperator: false,
