@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowLeft, Save, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
 import {
   STEP_SECTIONS,
   SECTION_GROUPS,
@@ -106,74 +106,166 @@ export function StepShell({
   void _progress;
   void _isFirst;
 
+  const progressPct = totalSteps > 0 ? (stepNumber / totalSteps) * 100 : 0;
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Top bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50">
-        <div className="flex items-center h-14 px-6 max-w-[768px] mx-auto">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: "#E7E3D8" }}
+    >
+      {/* Progress bar */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50"
+        style={{ height: "2px", backgroundColor: "rgba(0,0,0,0.08)" }}
+      >
+        <div
+          className="h-full transition-all duration-300"
+          style={{ width: `${progressPct}%`, backgroundColor: "#000000" }}
+        />
+      </div>
+
+      {/* Header bar */}
+      <div
+        className="fixed left-0 right-0 z-40 flex items-center backdrop-blur-sm"
+        style={{
+          top: "2px",
+          height: "56px",
+          backgroundColor: "rgba(231,227,216,0.9)",
+          borderBottom: "1px solid rgba(0,0,0,0.06)",
+        }}
+      >
+        <div
+          className="flex items-center w-full"
+          style={{ maxWidth: "640px", margin: "0 auto", padding: "0 24px" }}
+        >
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center transition-opacity hover:opacity-60"
+            style={{ gap: "6px", fontSize: "13px", color: "rgba(41,38,35,0.6)", width: "80px" }}
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft style={{ width: "15px", height: "15px" }} />
             Back
           </button>
 
-          <span className="flex-1 text-center text-sm font-mono font-medium tabular-nums">
+          <span
+            className="flex-1 text-center tabular-nums"
+            style={{
+              fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
+              fontSize: "13px",
+              fontWeight: 500,
+              color: "rgba(41,38,35,0.6)",
+            }}
+          >
             {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
           </span>
 
-          <button
-            onClick={onSaveClose}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Save className="w-4 h-4" />
-            <span className="hidden sm:inline">Save</span>
-            <X className="w-4 h-4 ml-0.5" />
-          </button>
+          <div className="flex items-center justify-end" style={{ width: "80px" }}>
+            <button
+              onClick={onSaveClose}
+              className="flex items-center transition-opacity hover:opacity-60"
+              style={{ gap: "6px", fontSize: "13px", color: "rgba(41,38,35,0.6)" }}
+            >
+              <Save style={{ width: "15px", height: "15px" }} />
+              <span>Save</span>
+              <X style={{ width: "15px", height: "15px" }} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 pt-14 pb-32 px-6">
-        <div className="max-w-[768px] mx-auto py-10 space-y-8">
+      <div
+        className="flex-1"
+        style={{ paddingTop: "80px", paddingBottom: "120px", paddingLeft: "24px", paddingRight: "24px" }}
+      >
+        <div style={{ maxWidth: "640px", margin: "0 auto" }}>
           {saved && (
-            <span className="text-xs text-primary font-medium">Saved ✓</span>
+            <p style={{ fontSize: "12px", color: "rgba(41,38,35,0.5)", marginBottom: "8px" }}>Saved ✓</p>
           )}
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{title}</h1>
+          <div style={{ marginBottom: "24px" }}>
+            <h1
+              style={{
+                fontSize: "32px",
+                lineHeight: "38px",
+                fontWeight: 600,
+                color: "#1F1C19",
+                marginBottom: "8px",
+                letterSpacing: "-0.3px",
+              }}
+            >
+              {title}
+            </h1>
             {subtitle && (
-              <p className="text-muted-foreground leading-relaxed">{subtitle}</p>
+              <p style={{ fontSize: "15px", lineHeight: "22px", color: "rgba(41,38,35,0.6)" }}>
+                {subtitle}
+              </p>
             )}
           </div>
-          <div className="space-y-5">{children}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>{children}</div>
         </div>
       </div>
 
       {/* Bottom navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border/50">
-        <div className="flex items-center justify-end px-6 max-w-[768px] mx-auto">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-center backdrop-blur-sm"
+        style={{
+          height: "72px",
+          backgroundColor: "rgba(231,227,216,0.95)",
+          borderTop: "1px solid rgba(0,0,0,0.06)",
+        }}
+      >
+        <div
+          className="flex items-center justify-end w-full"
+          style={{ maxWidth: "640px", margin: "0 auto", padding: "0 24px" }}
+        >
           {isLast ? (
             <button
               onClick={onSubmit}
               disabled={saving || !canSubmit}
-              className="bg-foreground text-background font-semibold px-8 py-2.5 rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity"
+              className="flex items-center transition-opacity hover:opacity-80 disabled:opacity-40"
+              style={{
+                backgroundColor: "#1F1C19",
+                color: "#ffffff",
+                borderRadius: "12px",
+                padding: "10px 20px",
+                fontSize: "14px",
+                fontWeight: 600,
+                gap: "6px",
+                border: "none",
+                cursor: saving || !canSubmit ? "not-allowed" : "pointer",
+              }}
             >
               {saving ? "Submitting…" : "Submit Assessment"}
             </button>
           ) : (
-            <div className="flex flex-col items-end gap-1 py-[8px]">
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
               {canNext === false && (
-                <p className="text-[10px] text-muted-foreground">
+                <p style={{ fontSize: "11px", color: "rgba(41,38,35,0.5)" }}>
                   Complete required fields to continue
                 </p>
               )}
               <button
                 onClick={onNext}
                 disabled={canNext === false || saving}
-                className="bg-foreground text-background font-semibold px-8 py-2.5 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                className="flex items-center transition-opacity hover:opacity-80 disabled:opacity-30"
+                style={{
+                  backgroundColor: "#1F1C19",
+                  color: "#ffffff",
+                  borderRadius: "12px",
+                  padding: "10px 20px",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  gap: "6px",
+                  border: "none",
+                  cursor: canNext === false || saving ? "not-allowed" : "pointer",
+                }}
               >
-                {saving ? "Saving…" : "Continue →"}
+                {saving ? "Saving…" : (
+                  <>
+                    Continue
+                    <ArrowRight style={{ width: "15px", height: "15px" }} />
+                  </>
+                )}
               </button>
             </div>
           )}
