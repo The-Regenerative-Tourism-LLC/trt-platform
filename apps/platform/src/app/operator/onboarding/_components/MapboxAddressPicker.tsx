@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MapPin } from "lucide-react";
 import { inputCls } from "./primitives";
+import { getMapboxToken } from "./getMapboxToken";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -34,7 +35,13 @@ export function MapboxAddressPicker({
   initialLng,
   onSelect,
 }: Props) {
-  const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  // process.env.NEXT_PUBLIC_MAPBOX_TOKEN is inlined at build time — it may be
+  // undefined if the variable was not present when Railway ran `next build`.
+  // The server action fallback reads from the live runtime environment instead,
+  // ensuring the token is always available regardless of build-time state.
+  const [token, setToken] = useState<string | null>(
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null
+  );
 
   const [input, setInput] = useState(initialAddress ?? "");
   const [suggestions, setSuggestions] = useState<GeoFeature[]>([]);
@@ -52,11 +59,19 @@ export function MapboxAddressPicker({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Fetch the token from the server at runtime if it wasn't inlined at build time.
+  useEffect(() => {
+    if (token) return;
+    getMapboxToken().then((t) => {
+      if (t) setToken(t);
+    });
+  }, [token]);
+
   // ── Initialize / update map whenever coords change ──────────────────────────
   // The map container is only rendered when coords !== null, so by the time
   // this effect runs, mapContainerRef.current is guaranteed to be in the DOM.
   useEffect(() => {
-    if (!coords || !TOKEN) return;
+    if (!coords || !token) return;
 
     let cancelled = false;
 
@@ -64,7 +79,7 @@ export function MapboxAddressPicker({
       const mbgl = (await import("mapbox-gl")).default;
       if (cancelled || !mapContainerRef.current) return;
 
-      mbgl.accessToken = TOKEN;
+      mbgl.accessToken = token;
 
       if (!mapRef.current) {
         // First time: create the map
@@ -98,7 +113,7 @@ export function MapboxAddressPicker({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [coords]);
+  }, [coords, token]);
 
   // Destroy map on unmount
   useEffect(() => {
@@ -113,7 +128,7 @@ export function MapboxAddressPicker({
     setInput(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (!TOKEN || val.length < 3) {
+    if (!token || val.length < 3) {
       setSuggestions([]);
       setOpen(false);
       return;
@@ -124,7 +139,7 @@ export function MapboxAddressPicker({
         const url =
           `https://api.mapbox.com/geocoding/v5/mapbox.places/` +
           `${encodeURIComponent(val)}.json` +
-          `?access_token=${TOKEN}&types=address,place&limit=5`;
+          `?access_token=${token}&types=address,place&limit=5`;
         const res = await fetch(url);
         if (!res.ok) return;
         const json = await res.json();
@@ -189,18 +204,11 @@ export function MapboxAddressPicker({
       </div>
 
       {/* Map preview — only rendered (and ref-attached) once coords exist */}
-      {coords && (
+      {coords && token && (
         <div
           ref={mapContainerRef}
           className="w-full h-48 rounded-xl overflow-hidden border border-border"
         />
-      )}
-
-      {!TOKEN && process.env.NODE_ENV === "development" && (
-        <p className="text-xs text-amber-600">
-          Set <code className="font-mono">NEXT_PUBLIC_MAPBOX_TOKEN</code> in{" "}
-          <code className="font-mono">.env.local</code> and restart the dev server to enable autocomplete.
-        </p>
       )}
     </div>
   );
