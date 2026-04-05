@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Caveat, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -48,6 +49,11 @@ export default function RootLayout({
       <body
         className={`${instrumentSans.variable} ${caveat.variable} ${jetbrainsMono.variable} antialiased`}
       >
+        {/* Klaviyo onsite script — replace YOUR_KLAVIYO_PUBLIC_KEY with your account's public API key */}
+        <Script
+          src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=YOUR_KLAVIYO_PUBLIC_KEY"
+          strategy="afterInteractive"
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

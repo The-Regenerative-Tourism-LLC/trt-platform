@@ -37,7 +37,8 @@ export default auth((req) => {
 
   const isAdminRoute = pathname.startsWith("/admin");
   const isOperatorRoute = pathname.startsWith("/operator");
-  const isTravelerRoute = pathname.startsWith("/traveler");
+  const isTravelerRoute =
+    pathname.startsWith("/traveler") && pathname !== "/traveler/waitlist";
   const isAccountRoute = pathname.startsWith("/account");
   const isSelectRoleRoute = pathname === "/select-role";
   const isAuthRoute = pathname === "/login" || pathname === "/signup";
