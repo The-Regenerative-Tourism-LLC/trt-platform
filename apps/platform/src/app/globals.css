@@ -82,13 +82,50 @@
   --font-hand: "Caveat", cursive;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
+  /* Typography scale */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 42px;
+
+  /* Spacing scale */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+
+  /* Radius scale */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  /* Border radius Tailwind overrides */
+  --border-radius-sm: 4px;
+  --border-radius: 6px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 10px;
+  --border-radius-xl: 12px;
+  --border-radius-2xl: 16px;
+
   /* Container */
   --container-2xl: 1400px;
-
-  /* Radius */
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --container-sm: 384px;
+  --container-md: 448px;
+  --container-lg: 512px;
+  --container-xl: 576px;
 
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
@@ -276,7 +313,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sans);
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: -0.02em;
   }
 
@@ -509,6 +546,45 @@
   .onboarding-final-divider {
     border-color: hsl(var(--border) / 0.7);
   }
+
+  /* ── Global base component scales ────────────────────────────────────────── */
+
+  .btn-base {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    border: none;
+  }
+
+  .card-base {
+    border-radius: 16px;
+    padding: 16px 20px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: hsl(var(--surface) / 0.3);
+  }
+
+  .input-base {
+    height: 40px;
+    border-radius: 10px;
+    padding: 0 12px;
+    font-size: 14px;
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    outline: none;
+    width: 100%;
+  }
+  .input-base:focus {
+    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 2px hsl(var(--ring) / 0.15);
+  }
 }
 
 /* Mobile menu slide-in */
@@ -540,6 +616,11 @@
 }
 
 @layer utilities {
+  /* Onboarding-specific container — isolated from global max-w-* utilities */
+  .max-w-onboarding {
+    max-width: 672px;
+  }
+
   .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;

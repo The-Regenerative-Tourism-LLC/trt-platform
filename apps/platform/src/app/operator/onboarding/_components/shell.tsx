@@ -109,161 +109,92 @@ export function StepShell({
   const progressPct = totalSteps > 0 ? (stepNumber / totalSteps) * 100 : 0;
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: "#E7E3D8" }}
-    >
+    <div className="min-h-screen flex flex-col bg-background">
       {/* Progress bar */}
-      <div
-        className="fixed top-0 left-0 right-0 z-50"
-        style={{ height: "2px", backgroundColor: "rgba(0,0,0,0.08)" }}
-      >
+      <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-border/40">
         <div
-          className="h-full transition-all duration-300"
-          style={{ width: `${progressPct}%`, backgroundColor: "#000000" }}
+          className="h-full bg-foreground transition-all duration-300"
+          style={{ width: `${progressPct}%` }}
         />
       </div>
 
       {/* Header bar */}
       <div
-        className="fixed left-0 right-0 z-40 flex items-center backdrop-blur-sm"
-        style={{
-          top: "2px",
-          height: "56px",
-          backgroundColor: "rgba(231,227,216,0.9)",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
-        }}
+        className="fixed left-0 right-0 z-40 flex items-center bg-background/90 backdrop-blur-sm border-b border-border/40"
+        style={{ top: "2px", height: "56px" }}
       >
-        <div
-          className="flex items-center w-full"
-          style={{ maxWidth: "640px", margin: "0 auto", padding: "0 24px" }}
-        >
+        <div className="flex items-center w-full max-w-onboarding mx-auto px-3 sm:px-6">
           <button
             onClick={onBack}
-            className="flex items-center transition-opacity hover:opacity-60"
-            style={{ gap: "6px", fontSize: "13px", color: "rgba(41,38,35,0.6)", width: "80px" }}
+            className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors w-16 sm:w-20"
           >
-            <ArrowLeft style={{ width: "15px", height: "15px" }} />
-            Back
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Back</span>
           </button>
 
-          <span
-            className="flex-1 text-center tabular-nums"
-            style={{
-              fontFamily: "var(--font-mono, 'JetBrains Mono', monospace)",
-              fontSize: "13px",
-              fontWeight: 500,
-              color: "rgba(41,38,35,0.6)",
-            }}
-          >
+          <span className="flex-1 text-center text-xs sm:text-sm font-mono font-medium tabular-nums text-muted-foreground">
             {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
           </span>
 
-          <div className="flex items-center justify-end" style={{ width: "80px" }}>
+          <div className="flex items-center justify-end w-16 sm:w-20">
             <button
               onClick={onSaveClose}
-              className="flex items-center transition-opacity hover:opacity-60"
-              style={{ gap: "6px", fontSize: "13px", color: "rgba(41,38,35,0.6)" }}
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Save style={{ width: "15px", height: "15px" }} />
-              <span>Save</span>
-              <X style={{ width: "15px", height: "15px" }} />
+              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Save</span>
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div
-        className="flex-1"
-        style={{ paddingTop: "80px", paddingBottom: "120px", paddingLeft: "24px", paddingRight: "24px" }}
-      >
-        <div style={{ maxWidth: "640px", margin: "0 auto" }}>
+      <div className="flex-1 pt-14 sm:pt-20 pb-24 sm:pb-28 px-3 sm:px-6">
+        <div className="max-w-onboarding mx-auto space-y-5 sm:space-y-8">
           {saved && (
-            <p style={{ fontSize: "12px", color: "rgba(41,38,35,0.5)", marginBottom: "8px" }}>Saved ✓</p>
+            <span className="text-xs text-muted-foreground font-medium">Saved ✓</span>
           )}
-          <div style={{ marginBottom: "24px" }}>
-            <h1
-              style={{
-                fontSize: "32px",
-                lineHeight: "38px",
-                fontWeight: 600,
-                color: "#1F1C19",
-                marginBottom: "8px",
-                letterSpacing: "-0.3px",
-              }}
-            >
-              {title}
-            </h1>
+          <div className="space-y-2 sm:space-y-3">
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground leading-tight">{title}</h1>
             {subtitle && (
-              <p style={{ fontSize: "15px", lineHeight: "22px", color: "rgba(41,38,35,0.6)" }}>
-                {subtitle}
-              </p>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{subtitle}</p>
             )}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>{children}</div>
+          <div className="space-y-4 sm:space-y-5">{children}</div>
         </div>
       </div>
 
       {/* Bottom navigation */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 flex items-center backdrop-blur-sm"
-        style={{
-          height: "72px",
-          backgroundColor: "rgba(231,227,216,0.95)",
-          borderTop: "1px solid rgba(0,0,0,0.06)",
-        }}
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-center bg-background/95 backdrop-blur-md border-t border-border/40"
+        style={{ height: "72px" }}
       >
-        <div
-          className="flex items-center justify-end w-full"
-          style={{ maxWidth: "640px", margin: "0 auto", padding: "0 24px" }}
-        >
+        <div className="flex items-center justify-end w-full max-w-onboarding mx-auto px-3 sm:px-6">
           {isLast ? (
             <button
               onClick={onSubmit}
               disabled={saving || !canSubmit}
-              className="flex items-center transition-opacity hover:opacity-80 disabled:opacity-40"
-              style={{
-                backgroundColor: "#1F1C19",
-                color: "#ffffff",
-                borderRadius: "12px",
-                padding: "10px 20px",
-                fontSize: "14px",
-                fontWeight: 600,
-                gap: "6px",
-                border: "none",
-                cursor: saving || !canSubmit ? "not-allowed" : "pointer",
-              }}
+              className="inline-flex items-center gap-2 bg-foreground text-background font-semibold rounded-xl h-10 sm:h-11 px-5 sm:px-8 text-sm sm:text-base disabled:opacity-40 hover:opacity-90 transition-opacity"
             >
               {saving ? "Submitting…" : "Submit Assessment"}
             </button>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+            <div className="flex flex-col items-end gap-1">
               {canNext === false && (
-                <p style={{ fontSize: "11px", color: "rgba(41,38,35,0.5)" }}>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
                   Complete required fields to continue
                 </p>
               )}
               <button
                 onClick={onNext}
                 disabled={canNext === false || saving}
-                className="flex items-center transition-opacity hover:opacity-80 disabled:opacity-30"
-                style={{
-                  backgroundColor: "#1F1C19",
-                  color: "#ffffff",
-                  borderRadius: "12px",
-                  padding: "10px 20px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  gap: "6px",
-                  border: "none",
-                  cursor: canNext === false || saving ? "not-allowed" : "pointer",
-                }}
+                className="inline-flex items-center gap-2 bg-foreground text-background font-semibold rounded-xl h-10 sm:h-11 px-5 sm:px-8 text-sm sm:text-base disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
               >
                 {saving ? "Saving…" : (
                   <>
                     Continue
-                    <ArrowRight style={{ width: "15px", height: "15px" }} />
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
