@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
-type Status = "verifying" | "success" | "error" | "already_verified";
+type Status = "verifying" | "success" | "error";
 
 function getDashboardUrl(roles: string[]): string {
   if (roles.includes("admin")) return "/admin/dashboard";
@@ -21,12 +21,8 @@ export default function VerifyEmailClient() {
 
   const [status, setStatus] = useState<Status>("verifying");
   const [errorMessage, setErrorMessage] = useState("");
-  // Signals that the verify API call succeeded — redirect is handled separately
   const [verificationDone, setVerificationDone] = useState(false);
-
-  // Refs prevent effects from running more than once even if deps flicker
-  // (update() causes sessionStatus: authenticated → loading → authenticated)
-  const recoveryDone = useRef(false);
+  // Prevents a double-redirect in the token flow when sessionStatus flickers
   const redirectDone = useRef(false);
 
   const [resendEmail, setResendEmail] = useState("");
@@ -34,27 +30,49 @@ export default function VerifyEmailClient() {
   const [resendMessage, setResendMessage] = useState("");
   const [resendError, setResendError] = useState("");
 
-  // Recovery: user is stuck on /verify-email without a token.
-  // This happens when the JWT is stale (isEmailVerified: false) but the DB
-  // already has the email verified. Refresh the JWT once; if now verified, redirect.
+  // ── Recovery (no token) ──────────────────────────────────────────────────
+  // The user is here because the middleware saw isEmailVerified: false in the
+  // JWT, even though the DB may already have it set (stale JWT).
+  //
+  // We refresh the session immediately on mount and again every time the
+  // window regains focus — covering the common case where the user verifies
+  // in another tab, then returns here.
+  //
+  // Intentionally does NOT depend on sessionStatus so that update() calls
+  // (which briefly cycle sessionStatus loading→authenticated) don't re-trigger
+  // this effect and create an infinite loop.
   useEffect(() => {
-    if (token || sessionStatus !== "authenticated" || recoveryDone.current) return;
-    recoveryDone.current = true;
+    if (token) return; // Token flow is handled separately below
 
-    void (async () => {
-      const updated = await update();
-      if (updated?.user?.isEmailVerified) {
+    let cancelled = false;
+
+    async function tryRedirectIfVerified() {
+      const updated = await update({});
+      if (!cancelled && updated?.user?.isEmailVerified) {
         window.location.href = getDashboardUrl(
           (updated.user.roles ?? []) as string[]
         );
       }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, sessionStatus]);
+    }
 
-  // Step 1: Call the verification API. Do NOT redirect inline — sessionStatus
-  // may still be "loading" in production, causing a redirect to /login which
-  // the middleware bounces back to /verify-email (loop).
+    // Check immediately (same-tab recovery: stale JWT)
+    void tryRedirectIfVerified();
+
+    // Check whenever the user returns to this tab (cross-tab: verified elsewhere)
+    const onFocus = () => void tryRedirectIfVerified();
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", onFocus);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]); // Re-run only if token appears/disappears, not on sessionStatus flicker
+
+  // ── Step 1: Verify token via API ─────────────────────────────────────────
+  // Deliberately does not redirect here — sessionStatus may still be "loading"
+  // in production (higher latency), which would send an authenticated user to
+  // /login and trigger a middleware redirect loop back to /verify-email.
   useEffect(() => {
     if (!token) {
       setStatus("error");
@@ -89,20 +107,24 @@ export default function VerifyEmailClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Step 2: Redirect once verification succeeded AND sessionStatus has settled.
-  // The ref prevents re-running when update() causes sessionStatus to flicker.
+  // ── Step 2: Redirect after token verification ────────────────────────────
+  // Wait for sessionStatus to settle before deciding where to send the user.
+  // The ref prevents a double-redirect when update() causes sessionStatus to
+  // flicker (authenticated → loading → authenticated).
   useEffect(() => {
-    if (!verificationDone || sessionStatus === "loading" || redirectDone.current) return;
+    if (!verificationDone || sessionStatus === "loading" || redirectDone.current) {
+      return;
+    }
     redirectDone.current = true;
 
     void (async () => {
       if (sessionStatus === "authenticated") {
         // Refresh JWT so the middleware sees isEmailVerified: true
-        const updated = await update();
+        const updated = await update({});
         const roles = (updated?.user?.roles ?? session?.user?.roles ?? []) as string[];
         window.location.href = getDashboardUrl(roles);
       } else {
-        // Unauthenticated: send to login; fresh JWT will reflect verified email
+        // Not logged in — fresh login will issue a JWT with isEmailVerified: true
         window.location.href = "/login?verified=1";
       }
     })();
@@ -128,24 +150,14 @@ export default function VerifyEmailClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       const data = await res.json();
 
-      if (res.status === 429) {
-        setResendError(data.error);
-        return;
-      }
-
-      if (!res.ok) {
-        setResendError(data.error ?? "Failed to send. Please try again.");
-        return;
-      }
-
+      if (res.status === 429) { setResendError(data.error); return; }
+      if (!res.ok) { setResendError(data.error ?? "Failed to send. Please try again."); return; }
       if (data.alreadyVerified) {
         setResendMessage("Your email is already verified. You can sign in.");
         return;
       }
-
       setResendMessage("Verification email sent. Check your inbox.");
     } catch {
       setResendError("An error occurred. Please try again.");
@@ -160,9 +172,7 @@ export default function VerifyEmailClient() {
       {status === "verifying" && token && (
         <>
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-foreground mb-2">
-            Verifying your email…
-          </h1>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Verifying your email…</h1>
           <p className="text-muted-foreground text-sm">This will only take a moment.</p>
         </>
       )}
@@ -174,9 +184,7 @@ export default function VerifyEmailClient() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-foreground mb-2">
-            Email verified
-          </h1>
+          <h1 className="text-xl font-semibold text-foreground mb-2">Email verified</h1>
           <p className="text-muted-foreground text-sm mb-4">
             {sessionStatus === "authenticated"
               ? "Taking you to your dashboard…"
@@ -199,9 +207,7 @@ export default function VerifyEmailClient() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z" />
                 </svg>
               </div>
-              <h1 className="text-xl font-semibold text-foreground mb-2">
-                Link expired or already used
-              </h1>
+              <h1 className="text-xl font-semibold text-foreground mb-2">Link expired or already used</h1>
               <p className="text-muted-foreground text-sm mb-6">{errorMessage}</p>
             </>
           ) : (
@@ -211,9 +217,7 @@ export default function VerifyEmailClient() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h1 className="text-xl font-semibold text-foreground mb-2">
-                Check your inbox
-              </h1>
+              <h1 className="text-xl font-semibold text-foreground mb-2">Check your inbox</h1>
               <p className="text-muted-foreground text-sm mb-6">
                 We sent a verification link to{" "}
                 <strong>{session?.user?.email ?? "your email address"}</strong>.
@@ -239,12 +243,8 @@ export default function VerifyEmailClient() {
                 />
               )}
 
-              {resendError && (
-                <p className="text-destructive text-sm">{resendError}</p>
-              )}
-              {resendMessage && (
-                <p className="text-primary text-sm font-medium">{resendMessage}</p>
-              )}
+              {resendError && <p className="text-destructive text-sm">{resendError}</p>}
+              {resendMessage && <p className="text-primary text-sm font-medium">{resendMessage}</p>}
 
               <button
                 type="submit"
@@ -261,9 +261,12 @@ export default function VerifyEmailClient() {
           </div>
 
           <p className="mt-6 text-xs text-muted-foreground/60">
-            <Link href="/login" className="hover:underline">
+            <button
+              onClick={() => signOut({ redirectTo: "/login" })}
+              className="hover:underline"
+            >
               Back to login
-            </Link>
+            </button>
           </p>
         </>
       )}
