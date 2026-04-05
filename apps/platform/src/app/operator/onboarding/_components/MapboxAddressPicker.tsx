@@ -42,6 +42,7 @@ export function MapboxAddressPicker({
   const [token, setToken] = useState<string | null>(
     process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? null
   );
+    console.log("Mapbox token (initial):", token);
 
   const [input, setInput] = useState(initialAddress ?? "");
   const [suggestions, setSuggestions] = useState<GeoFeature[]>([]);
