@@ -104,6 +104,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.isEmailVerified = !!dbUser?.emailVerified;
       }
 
+      // Self-heal: JWT may carry stale isEmailVerified=false if the user
+      // verified in another tab/session after the JWT was issued. Re-check
+      // the DB so the middleware doesn't redirect a verified user to /verify-email.
+      // Wrapped in try/catch — Prisma is not available in Edge runtime contexts.
+      if (
+        token.isEmailVerified === false &&
+        token.sub &&
+        !user &&
+        trigger !== "update"
+      ) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { emailVerified: true },
+          });
+          if (dbUser?.emailVerified) {
+            token.isEmailVerified = true;
+          }
+        } catch {
+          // Prisma not available in Edge — will re-sync on next Node.js request
+        }
+      }
+
       // Self-heal: JWT may carry stale needsRoleSelection=true from a partial
       // previous attempt. If roles are already in the token, trust them.
       // Falls back to a DB re-check only when the token claims no roles exist.
