@@ -1,7 +1,12 @@
 import { useState } from "react";
 import type { ReactNode, ChangeEvent } from "react";
 import dynamic from "next/dynamic";
-import { Building2, Mountain, Sparkles, Info } from "lucide-react";
+import { Building2, Mountain, Sparkles, Info, HelpCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import type { OnboardingData } from "@/store/onboarding-store";
 import type { StepShellBaseProps } from "../shell";
 import { StepShell } from "../shell";
@@ -778,18 +783,6 @@ export function ActivityUnitStep({
       title="Activity data"
       subtitle="The scale of your operation. These figures normalise your intensity metrics per guest."
     >
-      <FieldGroup
-        label="Assessment period end date"
-        hint="The last day of the 12-month period your operational data covers."
-      >
-        <input
-          type="date"
-          value={data.assessmentPeriodEnd ?? ""}
-          onChange={(e) => updateField({ assessmentPeriodEnd: e.target.value || undefined })}
-          max={new Date().toISOString().slice(0, 10)}
-          className={inputCls}
-        />
-      </FieldGroup>
       {data.operatorType !== "B" && (
         <FieldGroup
           label="Total guest-nights"
@@ -957,15 +950,6 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
           {/* 5. Annual activity */}
           <div className="space-y-4 border-t border-border/50 pt-5">
             <p className="text-sm font-semibold">Annual activity</p>
-            <FieldGroup label="Assessment period end date">
-              <input
-                type="date"
-                value={data.assessmentPeriodEnd ?? ""}
-                onChange={(e) => updateField({ assessmentPeriodEnd: e.target.value || undefined })}
-                max={new Date().toISOString().slice(0, 10)}
-                className={inputCls}
-              />
-            </FieldGroup>
             <FieldGroup label="Total guest-nights (last 12 months)">
               <NumberInput
                 value={data.guestNights}
@@ -974,6 +958,13 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                 min={0}
               />
             </FieldGroup>
+            <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
+              <div className="text-sm text-muted-foreground leading-relaxed">
+                <p className="font-medium text-foreground/80 mb-1">How to calculate guest-nights</p>
+                <p>Guest-nights = number of guests × number of nights stayed over the last 12 months. For example, 2 guests staying 3 nights = 6 guest-nights. If you don&apos;t know the exact number, provide your best estimate.</p>
+              </div>
+            </div>
             <FieldGroup label="Average price per night (€)">
               <NumberInput
                 value={data.pricePerNight}
@@ -986,7 +977,22 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
 
           {/* 4. Food service */}
           <div className="space-y-3 border-t border-border/50 pt-5">
-            <p className="text-sm font-semibold">Do you serve food on-site?</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-semibold">Do you serve food on-site?</p>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+                    <HelpCircle className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
+                >
+                  This helps us tailor the procurement section — if you don&apos;t serve food, we won&apos;t ask about food &amp; beverage sourcing.
+                </TooltipContent>
+              </Tooltip>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {FOOD_SERVICE_OPTIONS.map((fs) => (
                 <button
@@ -1044,15 +1050,6 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
           {/* Annual activity for B/C */}
           <div className="space-y-4 border-t border-border/50 pt-5">
             <p className="text-sm font-semibold">Annual activity</p>
-            <FieldGroup label="Assessment period end date">
-              <input
-                type="date"
-                value={data.assessmentPeriodEnd ?? ""}
-                onChange={(e) => updateField({ assessmentPeriodEnd: e.target.value || undefined })}
-                max={new Date().toISOString().slice(0, 10)}
-                className={inputCls}
-              />
-            </FieldGroup>
             <FieldGroup label="Total visitor-days">
               <NumberInput value={data.visitorDays} onChange={(v) => updateField({ visitorDays: v })} placeholder="e.g. 2 000" min={0} />
             </FieldGroup>

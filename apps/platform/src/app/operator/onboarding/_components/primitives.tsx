@@ -9,13 +9,13 @@ export function FieldGroup({
   hint,
   children,
 }: {
-  label: string;
+  label: ReactNode;
   hint?: string;
   children: ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium">{label}</label>
+      <label className="flex items-center gap-1.5 text-sm font-medium">{label}</label>
       {hint && <p className="text-sm text-muted-foreground leading-relaxed">{hint}</p>}
       {children}
     </div>

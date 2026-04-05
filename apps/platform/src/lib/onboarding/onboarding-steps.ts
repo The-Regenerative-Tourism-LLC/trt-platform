@@ -404,7 +404,6 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     return true;
   },
   "activity-unit": (d) => {
-    if (!isNonEmpty(d.assessmentPeriodEnd)) return false;
     if (d.operatorType === "A") return isPositiveNumber(d.guestNights);
     if (d.operatorType === "B") return isPositiveNumber(d.visitorDays);
     if (!isPositiveNumber(d.guestNights) || !isPositiveNumber(d.visitorDays)) return false;
@@ -422,7 +421,6 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
       (d.operatorType !== "B" && d.operatorType !== "C") ||
       (Array.isArray(d.experienceTypes) && d.experienceTypes.length > 0);
     if (!accomOk || !expOk) return false;
-    if (!isNonEmpty(d.assessmentPeriodEnd)) return false;
     if (d.operatorType === "A") return isPositiveNumber(d.guestNights);
     if (d.operatorType === "B") return isPositiveNumber(d.visitorDays);
     if (d.operatorType === "C") {

@@ -3,11 +3,35 @@ import type { OnboardingData } from "@/store/onboarding-store";
 import type { EvidenceTier } from "@/lib/onboarding/onboarding-steps";
 import type { StepShellBaseProps } from "../shell";
 import type { PreviewScores } from "@/hooks/usePreviewScore";
+import { HelpCircle } from "lucide-react";
 import { StepShell } from "../shell";
 import {
   FieldGroup,
   NumberInput,
 } from "../primitives";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+
+function FieldTooltip({ text }: { text: string }) {
+  return (
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger asChild>
+        <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+          <HelpCircle className="w-4 h-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
+      >
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 interface StepProps {
   data: OnboardingData;
@@ -60,7 +84,7 @@ export function P1EnergyStep({
       </div>
 
       {/* Electricity */}
-      <FieldGroup label="Total electricity consumed (annual)">
+      <FieldGroup label={<>Total electricity consumed (annual) <FieldTooltip text="From annual utility invoice" /></>}>
         <div className="relative">
           <input
             type="number"
@@ -155,7 +179,7 @@ export function P1EnergyStep({
 
       {/* Energy exported */}
       <FieldGroup
-        label="Energy exported to the grid (annual)"
+        label={<>Energy exported to the grid (annual) <FieldTooltip text="Surplus renewable energy (solar, wind, etc.) fed back into the public grid. This reduces your net energy consumption and carbon footprint." /></>}
         hint="From your inverter or net metering bill. If none: 0"
       >
         <div className="relative">

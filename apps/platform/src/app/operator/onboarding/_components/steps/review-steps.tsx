@@ -256,7 +256,6 @@ export function ReviewSubmitStep({
               <Row label="Experience %" value={data.revenueSplitExperiencePct != null ? `${data.revenueSplitExperiencePct}%` : null} />
             </>
           )}
-          <Row label="Assessment period end" value={data.assessmentPeriodEnd} />
         </ReviewSection>
 
         {/* Photos */}

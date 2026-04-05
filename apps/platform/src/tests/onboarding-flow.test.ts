@@ -42,7 +42,6 @@ function typeAData(): Partial<OnboardingData> {
     rooms: 6,
     ownershipType: "sole-proprietor",
     localEquityPct: 100,
-    assessmentPeriodEnd: "2024-12-31",
     guestNights: 1200,
     photoRefs: [{ id: "ph-1", storageRef: "https://storage.example.com/cover.jpg" }],
     totalElectricityKwh: 8000,
@@ -100,7 +99,6 @@ function typeBData(): Partial<OnboardingData> {
     experienceTypes: ["hiking_trekking", "nature_wildlife"],
     ownershipType: "independent",
     localEquityPct: 100,
-    assessmentPeriodEnd: "2024-12-31",
     visitorDays: 800,
     photoRefs: [{ id: "ph-b1", storageRef: "https://storage.example.com/tour.jpg" }],
     tourNoTransport: true,
@@ -361,7 +359,16 @@ describe("validateStep — operation-activity", () => {
     expect(validateStep("operation-activity", { operatorType: "A" })).toBe(false);
   });
 
-  it("passes for type A with all required fields", () => {
+  it("passes for type A without assessmentPeriodEnd (field no longer required)", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "A",
+      accommodationCategory: "guesthouse",
+      rooms: 6,
+      guestNights: 1200,
+    })).toBe(true);
+  });
+
+  it("passes for type A with all fields including legacy assessmentPeriodEnd", () => {
     expect(validateStep("operation-activity", {
       operatorType: "A",
       accommodationCategory: "guesthouse",
@@ -373,14 +380,34 @@ describe("validateStep — operation-activity", () => {
     })).toBe(true);
   });
 
+  it("passes for type B without assessmentPeriodEnd (field no longer required)", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "B",
+      experienceTypes: ["hiking_trekking"],
+      visitorDays: 800,
+    })).toBe(true);
+  });
+
   it("passes for type B with all required fields (no accommodation needed)", () => {
     expect(validateStep("operation-activity", {
       operatorType: "B",
       experienceTypes: ["hiking_trekking"],
       ownershipType: "sole-proprietor",
       localEquityPct: 100,
-      assessmentPeriodEnd: "2024-12-31",
       visitorDays: 800,
+    })).toBe(true);
+  });
+
+  it("passes for type C without assessmentPeriodEnd when revenue split sums to 100", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "C",
+      accommodationCategory: "eco-lodge",
+      rooms: 4,
+      experienceTypes: ["kayaking_watersports"],
+      guestNights: 600,
+      visitorDays: 300,
+      revenueSplitAccommodationPct: 60,
+      revenueSplitExperiencePct: 40,
     })).toBe(true);
   });
 
@@ -388,10 +415,37 @@ describe("validateStep — operation-activity", () => {
     expect(validateStep("operation-activity", {
       operatorType: "B",
       experienceTypes: [],
-      ownershipType: "sole-proprietor",
-      localEquityPct: 100,
-      assessmentPeriodEnd: "2024-12-31",
       visitorDays: 800,
+    })).toBe(false);
+  });
+
+  it("fails for type A when guestNights is zero", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "A",
+      accommodationCategory: "guesthouse",
+      rooms: 6,
+      guestNights: 0,
+    })).toBe(false);
+  });
+
+  it("fails for type A when accommodationCategory is missing", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "A",
+      rooms: 6,
+      guestNights: 1200,
+    })).toBe(false);
+  });
+
+  it("fails for type C when revenue split does not sum to 100", () => {
+    expect(validateStep("operation-activity", {
+      operatorType: "C",
+      accommodationCategory: "eco-lodge",
+      rooms: 4,
+      experienceTypes: ["kayaking_watersports"],
+      guestNights: 600,
+      visitorDays: 300,
+      revenueSplitAccommodationPct: 60,
+      revenueSplitExperiencePct: 30,
     })).toBe(false);
   });
 });
