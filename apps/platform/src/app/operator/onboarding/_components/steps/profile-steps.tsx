@@ -232,11 +232,18 @@ export function IdentityStep({
 }: StepProps & {
   territories: Array<{ id: string; name: string; country: string | null }>;
 }) {
+  const topIcon = (
+    <div className="w-11 h-11 rounded-xl bg-muted/60 flex items-center justify-center">
+      <Building2 className="w-5 h-5 text-foreground/50" strokeWidth={1.5} />
+    </div>
+  );
+
   return (
     <StepShell
       {...shell}
       title="About your business"
       subtitle="These details are required for publication but are not scored."
+      topIcon={topIcon}
     >
       {floatingGps}
 
@@ -343,31 +350,6 @@ export function IdentityStep({
         </FieldGroup>
       </div>
 
-      {/* Contact */}
-      <div className="border-t border-border/50 pt-6 space-y-4">
-        <p className="text-sm font-semibold">Primary contact</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <FieldGroup label="Name">
-            <input
-              type="text"
-              value={data.primaryContactName ?? ""}
-              onChange={(e) => updateField({ primaryContactName: e.target.value })}
-              className={inputCls}
-              placeholder="Full name"
-            />
-          </FieldGroup>
-          <FieldGroup label="Email">
-            <input
-              type="email"
-              value={data.primaryContactEmail ?? ""}
-              onChange={(e) => updateField({ primaryContactEmail: e.target.value })}
-              className={inputCls}
-              placeholder="contact@example.com"
-            />
-          </FieldGroup>
-        </div>
-      </div>
-
       {/* Ownership */}
       <OwnershipSection data={data} updateField={updateField} />
     </StepShell>
@@ -377,17 +359,17 @@ export function IdentityStep({
 // ── Ownership section (shared UI block) ───────────────────────────────────────
 
 const OWNERSHIP_TYPES = [
-  { value: "sole-proprietor",    label: "Sole proprietor" },
-  { value: "family-business",    label: "Family business" },
-  { value: "local-company",      label: "Local company" },
-  { value: "franchise",          label: "Franchise" },
-  { value: "international-chain",label: "International chain" },
+  { value: "sole-proprietor", label: "Sole proprietor" },
+  { value: "local-company",   label: "Local company" },
+  { value: "partnership",     label: "Partnership" },
+  { value: "private-company", label: "Private company" },
+  { value: "public-company",  label: "Public company / group" },
 ] as const;
 
-// Ownership types that require the local equity field
-const REQUIRES_EQUITY = new Set(["local-company", "franchise", "international-chain"]);
-// Ownership types that show the solo operator question
-const SHOWS_SOLO     = new Set(["sole-proprietor", "family-business"]);
+// Variant A: locally-rooted types — show livesLocally + solo owner question
+const VARIANT_A = new Set(["sole-proprietor", "local-company"]);
+// Variant B: corporate types — show equity % slider
+const VARIANT_B = new Set(["partnership", "private-company", "public-company"]);
 
 function OwnershipSection({
   data,
@@ -397,8 +379,8 @@ function OwnershipSection({
   updateField: (patch: Partial<OnboardingData>) => void;
 }) {
   const ownershipType = data.ownershipType ?? "";
-  const showEquity    = REQUIRES_EQUITY.has(ownershipType);
-  const showSolo      = SHOWS_SOLO.has(ownershipType);
+  const isVariantA    = VARIANT_A.has(ownershipType);
+  const isVariantB    = VARIANT_B.has(ownershipType);
   const isChain       = data.isChainMember === true;
 
   return (
@@ -422,9 +404,10 @@ function OwnershipSection({
             const next = e.target.value;
             updateField({
               ownershipType: next || undefined,
-              // clear solo/equity when switching to incompatible types
-              soloOperator: SHOWS_SOLO.has(next) ? data.soloOperator : undefined,
-              localEquityPct: REQUIRES_EQUITY.has(next) ? data.localEquityPct : undefined,
+              // clear variant-specific fields when switching
+              ownerLivesLocally: VARIANT_A.has(next) ? data.ownerLivesLocally : undefined,
+              soloOperator: VARIANT_A.has(next) ? data.soloOperator : undefined,
+              localEquityPct: VARIANT_B.has(next) ? data.localEquityPct : undefined,
             });
           }}
           className={inputCls}
@@ -436,92 +419,114 @@ function OwnershipSection({
         </select>
       </FieldGroup>
 
-      {/* 2. Do you live within the destination region? */}
-      <FieldGroup label="Do you live within the destination region?">
-        <TogglePair
-          value={data.ownerLivesLocally}
-          trueLabel="Yes — I/we live locally"
-          falseLabel="No — based elsewhere"
-          onChange={(v) => updateField({ ownerLivesLocally: v })}
-        />
-      </FieldGroup>
+      {/* Variant A — sole proprietor / local company */}
+      {isVariantA && (
+        <>
+          {/* 2A. Do you live within the destination region? */}
+          <FieldGroup label="Do you live within the destination region?">
+            <TogglePair
+              value={data.ownerLivesLocally}
+              trueLabel="Yes — I/we live locally"
+              falseLabel="No — based elsewhere"
+              onChange={(v) => updateField({ ownerLivesLocally: v })}
+            />
+          </FieldGroup>
 
-      {/* 3. Chain toggle */}
+          {/* 3A. Chain toggle */}
+          <ChainToggle isChain={isChain} onToggle={() =>
+            updateField({ isChainMember: !isChain, chainName: isChain ? undefined : data.chainName })
+          } />
+          {isChain && (
+            <FieldGroup label="Chain / group name">
+              <input
+                type="text"
+                value={data.chainName ?? ""}
+                onChange={(e) => updateField({ chainName: e.target.value })}
+                className={inputCls}
+                placeholder="Name of the chain or group"
+              />
+            </FieldGroup>
+          )}
+
+          {/* 4A. Solo operator */}
+          <FieldGroup label="Are you a solo / owner-operator?">
+            <TogglePair
+              value={data.soloOperator}
+              trueLabel="Yes — solo operator"
+              falseLabel="No — I have staff"
+              onChange={(v) => updateField({ soloOperator: v })}
+            />
+          </FieldGroup>
+        </>
+      )}
+
+      {/* Variant B — partnership / private / public company */}
+      {isVariantB && (
+        <>
+          {/* 2B. Local equity % slider */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">
+                % of equity owned by local residents
+              </label>
+              <span className="text-sm font-mono font-semibold tabular-nums">
+                {data.localEquityPct ?? 0}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={data.localEquityPct ?? 0}
+              onChange={(e) => updateField({ localEquityPct: Number(e.target.value) })}
+              className="w-full accent-foreground cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          {/* 3B. Chain toggle */}
+          <ChainToggle isChain={isChain} onToggle={() =>
+            updateField({ isChainMember: !isChain, chainName: isChain ? undefined : data.chainName })
+          } />
+          {isChain && (
+            <FieldGroup label="Chain / group name">
+              <input
+                type="text"
+                value={data.chainName ?? ""}
+                onChange={(e) => updateField({ chainName: e.target.value })}
+                className={inputCls}
+                placeholder="Name of the chain or group"
+              />
+            </FieldGroup>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function ChainToggle({ isChain, onToggle }: { isChain: boolean; onToggle: () => void }) {
+  return (
+    <div
+      className="flex items-center gap-4 p-4 rounded-xl border border-border/60 bg-card cursor-pointer select-none"
+      onClick={onToggle}
+    >
       <div
-        className="flex items-center gap-4 p-4 rounded-xl border border-border/60 bg-card cursor-pointer select-none"
-        onClick={() =>
-          updateField({
-            isChainMember: !isChain,
-            chainName: isChain ? undefined : data.chainName,
-          })
-        }
+        className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
+          isChain ? "bg-foreground" : "bg-muted"
+        }`}
       >
-        {/* Toggle switch */}
-        <div
-          className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
-            isChain ? "bg-foreground" : "bg-muted"
+        <span
+          className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            isChain ? "translate-x-6" : "translate-x-1"
           }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              isChain ? "translate-x-6" : "translate-x-1"
-            }`}
-          />
-        </div>
-        <span className="text-sm font-medium">Part of a hotel chain or group</span>
+        />
       </div>
-
-      {/* 4. Chain / group name (conditional) */}
-      {isChain && (
-        <FieldGroup label="Chain / group name">
-          <input
-            type="text"
-            value={data.chainName ?? ""}
-            onChange={(e) => updateField({ chainName: e.target.value })}
-            className={inputCls}
-            placeholder="Name of the chain or group"
-          />
-        </FieldGroup>
-      )}
-
-      {/* 5. Local equity % (conditional — local company / franchise / international chain) */}
-      {showEquity && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">
-              % of equity owned by local residents
-            </label>
-            <span className="text-sm font-mono font-semibold tabular-nums">
-              {data.localEquityPct ?? 0}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            step={1}
-            value={data.localEquityPct ?? 0}
-            onChange={(e) => updateField({ localEquityPct: Number(e.target.value) })}
-            className="w-full accent-foreground cursor-pointer"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>0%</span>
-            <span>100%</span>
-          </div>
-        </div>
-      )}
-
-      {/* 6. Solo operator (conditional — sole proprietor / family business) */}
-      {showSolo && (
-        <FieldGroup label="Are you a solo / owner-operator?">
-          <TogglePair
-            value={data.soloOperator}
-            trueLabel="Yes — solo operator"
-            falseLabel="No — I have staff"
-            onChange={(v) => updateField({ soloOperator: v })}
-          />
-        </FieldGroup>
-      )}
+      <span className="text-sm font-medium">Part of a hotel chain or group</span>
     </div>
   );
 }
