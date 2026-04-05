@@ -5,70 +5,268 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import type { OnboardingData } from "@/store/onboarding-store";
 import type { StepShellBaseProps } from "../shell";
+import type { PreviewScores } from "@/hooks/usePreviewScore";
 import { StepShell } from "../shell";
-import { FieldGroup, NumberInput, inputCls } from "../primitives";
+import { FieldGroup, NumberInput, inputCls, PrivacyBadge } from "../primitives";
 import { INDICATOR_LABELS } from "@/lib/constants";
 import { toast } from "sonner";
+import { FileText, AlertTriangle } from "lucide-react";
 
 interface StepProps {
   data: OnboardingData;
   updateField: (patch: Partial<OnboardingData>) => void;
   shell: StepShellBaseProps;
+  preview?: PreviewScores | null;
+  previewLoading?: boolean;
+  floatingGps?: ReactNode;
 }
 
-// ── Evidence checklist (confirmation only) ───────────────────────────────────
+// ── Evidence checklist (redesigned) ──────────────────────────────────────────
 
-const CHECKLIST_ROWS: Array<{
-  label: string;
-  field:
-    | "evidenceChecklistElectricity"
-    | "evidenceChecklistGasFuel"
-    | "evidenceChecklistWater"
-    | "evidenceChecklistWaste"
-    | "evidenceChecklistEmployment"
-    | "evidenceChecklistSupplier"
-    | "evidenceChecklistBooking"
-    | "evidenceChecklistOwnership"
-    | "evidenceChecklistP3";
-}> = [
-  { label: "Electricity bills (or equivalent)", field: "evidenceChecklistElectricity" },
-  { label: "Gas / fuel records", field: "evidenceChecklistGasFuel" },
-  { label: "Water bills / meter data", field: "evidenceChecklistWater" },
-  { label: "Waste records", field: "evidenceChecklistWaste" },
-  { label: "Employment documents (where applicable)", field: "evidenceChecklistEmployment" },
-  { label: "Supplier invoices (procurement)", field: "evidenceChecklistSupplier" },
-  { label: "Booking / revenue breakdown", field: "evidenceChecklistBooking" },
-  { label: "Ownership documents", field: "evidenceChecklistOwnership" },
-  { label: "P3 programme documentation (if applicable)", field: "evidenceChecklistP3" },
+type ChecklistField =
+  | "evidenceChecklistElectricity"
+  | "evidenceChecklistGasFuel"
+  | "evidenceChecklistWater"
+  | "evidenceChecklistWaste"
+  | "evidenceChecklistEmployment"
+  | "evidenceChecklistSupplier"
+  | "evidenceChecklistBooking"
+  | "evidenceChecklistOwnership"
+  | "evidenceChecklistP3";
+
+const P1_ROWS: Array<{ label: string; field: ChecklistField; indicator: string }> = [
+  { label: "Electricity bills (12 months)",   field: "evidenceChecklistElectricity", indicator: "1A" },
+  { label: "Gas or fuel records (12 months)", field: "evidenceChecklistGasFuel",     indicator: "1B" },
+  { label: "Water bills (12 months)",         field: "evidenceChecklistWater",        indicator: "1B" },
+  { label: "Waste collection records",        field: "evidenceChecklistWaste",        indicator: "1C" },
 ];
 
-export function EvidenceChecklistStep({ data, updateField, shell }: StepProps) {
+const P2_ROWS: Array<{ label: string; field: ChecklistField; indicator: string }> = [
+  { label: "Staff headcount & contract types",     field: "evidenceChecklistEmployment", indicator: "2A" },
+  { label: "Main suppliers list (with locations)", field: "evidenceChecklistSupplier",   indicator: "2B" },
+  { label: "Booking channel breakdown",            field: "evidenceChecklistBooking",    indicator: "2C" },
+  { label: "Ownership structure",                  field: "evidenceChecklistOwnership",  indicator: "2D" },
+];
+
+const DETAILED_ROWS = [
+  "Monthly energy & water log",
+  "Waste weight records",
+  "Payroll summary (anonymised)",
+  "Procurement invoices",
+];
+
+const P3_ROWS: Array<{ label: string; indicator?: string }> = [
+  { label: "Partnership agreement",          indicator: "3A" },
+  { label: "Partner vegetation report",      indicator: "3B" },
+  { label: "Programme budget" },
+  { label: "Results evidence (photos, data)" },
+];
+
+function CheckRow({
+  label,
+  checked,
+  onChange,
+  indicator,
+  impact,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  indicator?: string;
+  impact?: string;
+}) {
+  return (
+    <label className="flex items-center gap-3 px-4 py-3 border-b border-border/40 last:border-b-0 cursor-pointer hover:bg-muted/20 transition-colors">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="shrink-0 accent-primary w-4 h-4"
+      />
+      <span className="flex-1 text-sm">{label}</span>
+      {impact && (
+        <span className="text-xs text-orange-500 tabular-nums shrink-0">{impact}</span>
+      )}
+      {indicator && (
+        <span className="text-xs text-muted-foreground tabular-nums shrink-0 w-5 text-right">{indicator}</span>
+      )}
+    </label>
+  );
+}
+
+function SectionCard({
+  title,
+  badge,
+  children,
+}: {
+  title: string;
+  badge: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-muted/30 border-b border-border/40">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{title}</span>
+        <span className="text-[10px] text-muted-foreground">{badge}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export function EvidenceChecklistStep({ data, updateField, shell, preview, previewLoading, floatingGps }: StepProps) {
   const showP3 = data.p3Status === "A" || data.p3Status === "B" || data.p3Status === "C";
+  const [detailedChecked, setDetailedChecked] = useState<boolean[]>(DETAILED_ROWS.map(() => false));
+  const [p3Checked, setP3Checked] = useState<boolean[]>(P3_ROWS.map(() => false));
+
+  const coreCount =
+    (data.evidenceChecklistElectricity ? 1 : 0) +
+    (data.evidenceChecklistGasFuel ? 1 : 0) +
+    (data.evidenceChecklistWater ? 1 : 0) +
+    (data.evidenceChecklistWaste ? 1 : 0) +
+    (data.evidenceChecklistEmployment ? 1 : 0) +
+    (data.evidenceChecklistSupplier ? 1 : 0) +
+    (data.evidenceChecklistBooking ? 1 : 0) +
+    (data.evidenceChecklistOwnership ? 1 : 0);
+  const detailedCount = detailedChecked.filter(Boolean).length;
+  const p3Count = showP3 ? p3Checked.filter(Boolean).length : 0;
+  const totalChecked = coreCount + detailedCount + p3Count;
+  const totalDocs = 8 + 4 + (showP3 ? 4 : 0);
+
+  const topIcon = (
+    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+      <FileText className="w-6 h-6 text-muted-foreground" />
+    </div>
+  );
 
   return (
     <StepShell
       {...shell}
       title="Evidence checklist"
-      subtitle="Tick the documents you have ready to support your assessment. You can upload them to your dashboard after submission."
+      subtitle="Tick what you can provide — each document directly impacts your GPS."
+      topIcon={topIcon}
     >
-      <div className="space-y-3">
-        {CHECKLIST_ROWS.filter((row) => row.field !== "evidenceChecklistP3" || showP3).map(
-          (row) => (
-            <label
-              key={row.field}
-              className="flex items-start gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={data[row.field] === true}
-                onChange={(e) => updateField({ [row.field]: e.target.checked })}
-                className="mt-0.5 accent-primary shrink-0"
-              />
-              <span className="text-sm leading-snug">{row.label}</span>
-            </label>
-          )
-        )}
+      {floatingGps}
+
+      {/* Live GPS preview card */}
+      {previewLoading ? (
+        <div className="rounded-xl border bg-card px-5 py-4 space-y-3 animate-pulse">
+          <div className="h-3 w-32 rounded bg-muted mx-auto" />
+          <div className="h-10 w-16 rounded bg-muted mx-auto" />
+          <div className="h-3 w-24 rounded bg-muted mx-auto" />
+          <div className="flex justify-around">
+            <div className="h-3 w-12 rounded bg-muted" />
+            <div className="h-3 w-12 rounded bg-muted" />
+            <div className="h-3 w-12 rounded bg-muted" />
+          </div>
+        </div>
+      ) : preview ? (
+        <div className="rounded-xl border bg-card px-5 py-4 space-y-3">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground text-center">
+            Live GPS Preview
+          </p>
+          <div className="text-center">
+            <p className="text-4xl font-bold tabular-nums">{Math.round(preview.gpsScore)}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Not Yet Published</p>
+          </div>
+          <div className="flex items-center justify-around text-sm tabular-nums">
+            <span>P1 <strong>{preview.pillar1Score.toFixed(1)}</strong></span>
+            <span>P2 <strong>{preview.pillar2Score.toFixed(1)}</strong></span>
+            <span>P3 <strong>{preview.pillar3Score.toFixed(0)}</strong></span>
+          </div>
+          <div className="flex items-center gap-1.5 justify-center text-xs text-orange-500">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span>Missing evidence reduces your score by 19.5 points</span>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Document count */}
+      <div className="rounded-xl border bg-card px-4 py-4 flex items-center gap-4">
+        <div className="w-11 h-11 rounded-2xl bg-muted flex items-center justify-center shrink-0">
+          <span className="text-base font-bold tabular-nums">{totalChecked}</span>
+        </div>
+        <div>
+          <p className="text-sm font-medium">{totalChecked} of {totalDocs} documents ready</p>
+          <p className="text-xs text-muted-foreground">Don&apos;t worry if you don&apos;t have everything now — you can upload from your dashboard at any time.</p>
+        </div>
       </div>
+
+      {/* Section 1: Operational Footprint */}
+      <SectionCard title="Operational Footprint" badge="Required tier">
+        {P1_ROWS.map((row) => (
+          <CheckRow
+            key={row.field}
+            label={row.label}
+            checked={data[row.field] === true}
+            onChange={(v) => updateField({ [row.field]: v })}
+            impact="+0.25"
+            indicator={row.indicator}
+          />
+        ))}
+      </SectionCard>
+
+      {/* Section 2: Local Integration */}
+      <SectionCard title="Local Integration" badge="Required tier">
+        {P2_ROWS.map((row) => (
+          <CheckRow
+            key={row.field}
+            label={row.label}
+            checked={data[row.field] === true}
+            onChange={(v) => updateField({ [row.field]: v })}
+            impact="+0.25"
+            indicator={row.indicator}
+          />
+        ))}
+      </SectionCard>
+
+      {/* Section 3: Detailed Verification */}
+      <SectionCard title="Detailed Verification" badge="Helps raise tier">
+        {DETAILED_ROWS.map((label, i) => (
+          <CheckRow
+            key={label}
+            label={label}
+            checked={detailedChecked[i] ?? false}
+            onChange={(v) => setDetailedChecked((prev) => prev.map((c, j) => j === i ? v : c))}
+          />
+        ))}
+      </SectionCard>
+
+      {/* Section 4: Contribution Programme (if applicable) */}
+      {showP3 && (
+        <SectionCard title="Contribution Programme" badge="If applicable">
+          {P3_ROWS.map((row, i) => (
+            <CheckRow
+              key={row.label}
+              label={row.label}
+              checked={p3Checked[i] ?? false}
+              onChange={(v) => {
+                const next = p3Checked.map((c, j) => j === i ? v : c);
+                setP3Checked(next);
+                updateField({ evidenceChecklistP3: next.some(Boolean) });
+              }}
+              indicator={row.indicator}
+            />
+          ))}
+        </SectionCard>
+      )}
+
+      {/* Info note */}
+      <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 space-y-1.5">
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          <span className="text-foreground font-medium">Evidence quality directly impacts your score.</span>{" "}
+          Each document is evaluated by tier:{" "}
+          <strong>Primary (×1.00)</strong> — utility bills, invoices, receipts.{" "}
+          <strong>Secondary (×0.75)</strong> — supplier certificates.{" "}
+          <strong>Tertiary (×0.50)</strong> — self-reported.{" "}
+          <strong>Proxy (×0.25)</strong> — no evidence provided.
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Unchecked items default to proxy (×0.25). Check &quot;Required tier&quot; items to use your selected evidence quality, and &quot;Detailed verification&quot; items to boost further.
+        </p>
+      </div>
+
+      <PrivacyBadge />
     </StepShell>
   );
 }
