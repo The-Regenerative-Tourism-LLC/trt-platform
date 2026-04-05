@@ -196,7 +196,7 @@ export function MapboxAddressPicker({
         />
       )}
 
-      {!TOKEN && (
+      {!TOKEN && process.env.NODE_ENV === "development" && (
         <p className="text-xs text-amber-600">
           Set <code className="font-mono">NEXT_PUBLIC_MAPBOX_TOKEN</code> in{" "}
           <code className="font-mono">.env.local</code> and restart the dev server to enable autocomplete.
