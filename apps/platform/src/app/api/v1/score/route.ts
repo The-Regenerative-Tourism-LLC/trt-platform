@@ -19,7 +19,9 @@ import { requireSession } from "@/lib/auth/session";
 import {
   findOperatorByUserId,
   markOnboardingCompleted,
+  updateOperator,
 } from "@/lib/db/repositories/operator.repo";
+import { findDraftByOperatorId } from "@/lib/db/repositories/onboarding-draft.repo";
 import {
   computeP1Intensities,
   computeTypeCDualP1Intensities,
@@ -110,7 +112,8 @@ const ScoreRequestSchema = z.object({
     .array(
       z.object({
         id: z.string().min(1),
-        storageRef: z.string().min(1),
+        url: z.string().min(1),
+        isCover: z.boolean(),
         fileName: z.string().optional(),
       })
     )
@@ -280,6 +283,40 @@ export async function POST(req: NextRequest) {
         evidence: data.evidence,
       },
     });
+
+    // Sync profile fields from draft to structured Operator columns.
+    // The draft JSON blob is the source of truth for identity data during onboarding;
+    // structured columns are what the public profile, admin dashboard, and APIs read from.
+    const draft = await findDraftByOperatorId(data.operatorId);
+    if (draft?.dataJson) {
+      const d = draft.dataJson as Record<string, unknown>;
+      const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
+      const num = (v: unknown) => (typeof v === "number" && isFinite(v) ? v : undefined);
+      const bool = (v: unknown) => (typeof v === "boolean" ? v : undefined);
+      const arr = (v: unknown): string[] | undefined =>
+        Array.isArray(v) ? (v as string[]) : undefined;
+
+      await updateOperator(data.operatorId, {
+        ...(str(d.legalName) && { legalName: str(d.legalName)! }),
+        tradingName: str(d.tradingName) ?? null,
+        country: str(d.country) ?? null,
+        destinationRegion: str(d.destinationRegion) ?? null,
+        ...(str(d.territoryId) && { territory: { connect: { id: str(d.territoryId)! } } }),
+        yearOperationStart: num(d.yearOperationStart) ?? null,
+        website: str(d.website) ?? null,
+        address: str(d.address) ?? null,
+        ...(num(d.latitude) !== undefined && { lat: num(d.latitude) }),
+        ...(num(d.longitude) !== undefined && { lng: num(d.longitude) }),
+        ownershipType: str(d.ownershipType) ?? null,
+        localEquityPct: num(d.localEquityPct) ?? null,
+        isChainMember: bool(d.isChainMember) ?? false,
+        chainName: str(d.chainName) ?? null,
+        accommodationCategory: str(d.accommodationCategory) ?? null,
+        rooms: num(d.rooms) ? Math.round(num(d.rooms)!) : null,
+        bedCapacity: num(d.bedCapacity) ? Math.round(num(d.bedCapacity)!) : null,
+        experienceTypes: arr(d.experienceTypes) ?? [],
+      });
+    }
 
     // Mark onboarding as completed so the operator cannot re-enter the onboarding flow
     await markOnboardingCompleted(data.operatorId);

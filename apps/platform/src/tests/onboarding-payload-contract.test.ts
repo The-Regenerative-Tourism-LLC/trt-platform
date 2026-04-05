@@ -21,7 +21,6 @@ function completeData(): OnboardingData {
   return {
     operatorType: "A",
     territoryId: "ter-1",
-    assessmentPeriodEnd: "2025-12-31",
     guestNights: 3000,
     photoRefs: [{ id: "p1", storageRef: "https://x.example/img.jpg" }],
     totalElectricityKwh: 20000,
@@ -44,7 +43,6 @@ function completeData(): OnboardingData {
     localFte: 5,
     permanentContractPct: 80,
     averageMonthlyWage: 1000,
-    minimumWage: 870,
     seasonalOperator: false,
     totalFbSpend: 20000,
     localFbSpend: 14000,
@@ -343,5 +341,66 @@ describe("buildScorePayload — extended raw fields", () => {
     expect(payload.p1Raw.gridExportKwh).toBe(100);
     expect(payload.p1Raw.waterGreywater).toBe(true);
     expect(payload.p2Raw.totalBookingsCount).toBe(500);
+  });
+});
+
+// ── operation-activity step — field saving and payload contract ───────────────
+
+describe("buildScorePayload — operation-activity fields flow through correctly", () => {
+  it("passes guestNights into activityUnit for type A", () => {
+    const data = completeData();
+    data.operatorType = "A";
+    data.guestNights = 2400;
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+    expect(payload.activityUnit.guestNights).toBe(2400);
+    expect(payload.activityUnit.visitorDays).toBeUndefined();
+  });
+
+  it("passes visitorDays into activityUnit for type B", () => {
+    const data = completeData();
+    data.operatorType = "B";
+    data.visitorDays = 900;
+    data.guestNights = undefined;
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+    expect(payload.activityUnit.visitorDays).toBe(900);
+  });
+
+  it("passes both activityUnit values and revenueSplit for type C", () => {
+    const data = completeData();
+    data.operatorType = "C";
+    data.guestNights = 1500;
+    data.visitorDays = 600;
+    data.revenueSplitAccommodationPct = 65;
+    data.revenueSplitExperiencePct = 35;
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+    expect(payload.activityUnit.guestNights).toBe(1500);
+    expect(payload.activityUnit.visitorDays).toBe(600);
+    expect(payload.revenueSplit?.accommodationPct).toBe(65);
+    expect(payload.revenueSplit?.experiencePct).toBe(35);
+  });
+
+  it("does not include revenueSplit for type A", () => {
+    const payload = buildScorePayload(completeData(), "op-1", "ter-1");
+    expect(payload.revenueSplit).toBeUndefined();
+  });
+
+  it("defaults assessmentPeriodEnd to today when not provided", () => {
+    const data = completeData();
+    const today = new Date().toISOString().slice(0, 10);
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+    expect(payload.assessmentPeriodEnd).toBe(today);
+  });
+
+  it("uses provided assessmentPeriodEnd (legacy data) when present", () => {
+    const data: OnboardingData = { ...completeData(), assessmentPeriodEnd: "2024-06-30" };
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+    expect(payload.assessmentPeriodEnd).toBe("2024-06-30");
+  });
+
+  it("passes foodServiceType through p2Raw", () => {
+    const data = completeData();
+    data.foodServiceType = "full_restaurant";
+    const payload = buildScorePayload(data, "op-1", "ter-1");
+    expect(payload.p2Raw.foodServiceType).toBe("full_restaurant");
   });
 });

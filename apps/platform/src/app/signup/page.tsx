@@ -4,7 +4,7 @@ import Link from "next/link";
 import { SignupForm } from "./SignupForm";
 
 export const metadata: Metadata = {
-  title: "Create Account",
+  title: "Operator Signup",
 };
 
 export default function SignupPage() {

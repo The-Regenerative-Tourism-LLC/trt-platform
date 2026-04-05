@@ -337,6 +337,7 @@ model Operator {
   profileViews             ProfileView[]
   checkIns                 CheckIn[]
   onboardingDraft          OnboardingDraft?
+  operatorPhotos           OperatorPhoto[]
 
   @@map("operators")
 }
@@ -419,6 +420,9 @@ model EvidenceRef {
   tier                  EvidenceTier?
   fileName              String?
   storagePath           String?
+  storageKey            String?
+  mimeType              String?
+  sizeBytes             Int?
   checksum              String?
   verificationState     VerificationState @default(pending)
   proxyMethod           String?
@@ -813,6 +817,26 @@ model ProfileView {
   operator    Operator  @relation(fields: [operatorId], references: [id])
 
   @@map("profile_views")
+}
+
+// ── Operator Photo ─────────────────────────────────────────────────────────
+
+model OperatorPhoto {
+  id          String   @id @default(cuid())
+  operatorId  String
+  storageKey  String
+  url         String
+  fileName    String
+  mimeType    String
+  sizeBytes   Int
+  checksum    String
+  isCover     Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  operator    Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+
+  @@map("operator_photos")
 }
 
 // ── Onboarding Draft (mutable, one per operator) ──────────────────────────

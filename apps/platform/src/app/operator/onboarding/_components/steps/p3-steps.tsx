@@ -146,8 +146,8 @@ export function P3ProgrammeStep({
                 className="mt-0.5 accent-primary"
               />
               <div>
-                <div className="text-sm font-medium">{cat.label}</div>
-                <div className="text-xs text-muted-foreground">{cat.description}</div>
+                <div className="text-base font-medium">{cat.label}</div>
+                <div className="text-sm text-muted-foreground">{cat.description}</div>
               </div>
             </label>
           ))}

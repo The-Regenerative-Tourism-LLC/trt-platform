@@ -4,25 +4,18 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
 
-const SignupSchema = z
-  .object({
-    name: z.string().min(1, "Name is required"),
-    email: z.string().email("Enter a valid email"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters"),
-    role: z.enum(["operator", "traveler"], {
-      required_error: "Please select a role",
-    }),
-  });
-
-type Role = "operator" | "traveler";
+const SignupSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(["operator"]),
+});
 
 export function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<Role | "">("");
+  const role = "operator";
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -126,60 +119,6 @@ export function SignupForm() {
             {globalError}
           </div>
         )}
-
-        {/* Role selector */}
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
-            I am a…
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            {(
-              [
-                {
-                  value: "operator",
-                  label: "Tourism Operator",
-                  description: "Lodge, tour, experience",
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
-                    </svg>
-                  ),
-                },
-                {
-                  value: "traveler",
-                  label: "Traveler",
-                  description: "Discover & book",
-                  icon: (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064" />
-                    </svg>
-                  ),
-                },
-              ] as const
-            ).map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setRole(option.value)}
-                className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 text-left transition-all ${
-                  role === option.value
-                    ? "border-foreground bg-secondary"
-                    : "border-border hover:border-foreground/30"
-                }`}
-              >
-                <span className={`${role === option.value ? "text-foreground" : "text-muted-foreground"}`}>
-                  {option.icon}
-                </span>
-                <span className="text-sm font-medium text-foreground">{option.label}</span>
-                <span className="text-xs text-muted-foreground">{option.description}</span>
-              </button>
-            ))}
-          </div>
-          {errors.role && (
-            <p className="text-xs text-destructive mt-1">{errors.role}</p>
-          )}
-        </div>
 
         <div className="space-y-4 rounded-2xl border border-border bg-surface/30 p-5">
           <div className="space-y-2">

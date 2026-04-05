@@ -100,15 +100,12 @@ export function OperatorDashboardClient() {
     enabled: !!user,
   });
 
-  // Redirect to onboarding only if onboarding has never been completed.
-  // Once onboardingCompleted = true, the operator stays on the dashboard
-  // even if their ScoreSnapshot is still being processed.
   const operator = data?.operator;
+
+  // Redirect to onboarding only if there is no operator profile at all (new account, no draft).
   useEffect(() => {
-    if (!isLoading && !authLoading && operator !== undefined) {
-      if (operator === null || !operator.onboardingCompleted) {
-        router.replace("/operator/onboarding");
-      }
+    if (!isLoading && !authLoading && operator === null) {
+      router.replace("/operator/onboarding");
     }
   }, [operator, isLoading, authLoading, router]);
 
@@ -120,11 +117,33 @@ export function OperatorDashboardClient() {
     );
   }
 
-  if (!operator || !operator.onboardingCompleted) {
-    // Show spinner while redirect is in progress
+  if (!operator) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  // Onboarding saved but not yet submitted — show a focused "continue" screen
+  if (!operator.onboardingCompleted) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4">
+        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+          <Leaf className="w-7 h-7 text-foreground/60" />
+        </div>
+        <div className="space-y-2 max-w-sm">
+          <h1 className="text-2xl font-bold tracking-tight">Your assessment is in progress</h1>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Your progress has been saved. Pick up where you left off to complete your Green Passport.
+          </p>
+        </div>
+        <Button asChild size="lg" className="gap-2">
+          <Link href="/operator/onboarding">
+            Continue assessment
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </Button>
       </div>
     );
   }

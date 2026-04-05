@@ -3,15 +3,35 @@ import type { OnboardingData } from "@/store/onboarding-store";
 import type { EvidenceTier } from "@/lib/onboarding/onboarding-steps";
 import type { StepShellBaseProps } from "../shell";
 import type { PreviewScores } from "@/hooks/usePreviewScore";
+import { HelpCircle } from "lucide-react";
 import { StepShell } from "../shell";
 import {
   FieldGroup,
   NumberInput,
-  BandSelector,
-  TogglePair,
-  Tip,
-  EvidenceTierSelector,
 } from "../primitives";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+
+function FieldTooltip({ text }: { text: string }) {
+  return (
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger asChild>
+        <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+          <HelpCircle className="w-4 h-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
+      >
+        {text}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 interface StepProps {
   data: OnboardingData;
@@ -29,240 +49,228 @@ export function P1EnergyStep({
   shell,
   floatingGps,
 }: StepProps) {
+  const elec = data.totalElectricityKwh ?? 0;
+  const gas = data.totalGasKwh ?? 0;
+  const exported = data.gridExportKwh ?? 0;
+  const onsitePct = data.renewableOnsitePct ?? 0;
+  const tariffPct = data.renewableTariffPct ?? 0;
+
+  const netEnergy = Math.max(0, elec + gas - exported);
+  const activityUnit =
+    data.operatorType === "B"
+      ? (data.visitorDays ?? 0)
+      : (data.guestNights ?? 0);
+  const energyIntensity = activityUnit > 0 ? netEnergy / activityUnit : 0;
+  const renewableCombined = Math.min(onsitePct + tariffPct, 100);
+  const unitLabel = data.operatorType === "B" ? "vd" : "gn";
+  const hasAnyEnergy =
+    data.totalElectricityKwh != null || data.totalGasKwh != null;
+
   return (
     <StepShell
       {...shell}
       title="Energy consumption"
-      subtitle="Indicator 1A · 30% of Pillar 1 · GPS impact 12%. Total energy use and renewable share for the 12-month assessment period."
+      subtitle="Indicator 1A · Weight: 30% of P1 · GPS Impact: 12%"
     >
       {floatingGps}
-      {data.operatorType === "B" ? (
-        <>
-          <FieldGroup label="No guest transport with your own vehicles?">
-            <TogglePair
-              value={data.tourNoTransport}
-              trueLabel="Yes — no tour transport"
-              falseLabel="No — we use vehicles"
-              onChange={(v) =>
-                updateField({
-                  tourNoTransport: v,
-                  ...(v
-                    ? {
-                        tourFuelType: undefined,
-                        tourFuelLitresPerMonth: undefined,
-                        evKwhPerMonth: undefined,
-                      }
-                    : {}),
-                })
-              }
-            />
-          </FieldGroup>
-          <FieldGroup label="No fixed base (office / property) for water-intensive operations?">
-            <TogglePair
-              value={data.tourNoFixedBase}
-              trueLabel="Yes — no fixed base"
-              falseLabel="No — we have a fixed base"
-              onChange={(v) => updateField({ tourNoFixedBase: v })}
-            />
-          </FieldGroup>
-          {!data.tourNoTransport && (
-          <FieldGroup
-            label="Tour transport fuel type"
-            hint="How do you transport guests? Select the primary fuel type."
-          >
-            <div className="flex gap-2 flex-wrap">
-              {(["no_vehicle", "diesel", "petrol", "marine_diesel", "hybrid", "electric"] as const).map((ft) => (
-                <button
-                  key={ft}
-                  onClick={() =>
-                    updateField({ tourFuelType: data.tourFuelType === ft ? undefined : ft })
-                  }
-                  className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all ${
-                    data.tourFuelType === ft
-                      ? "border-foreground bg-secondary text-foreground"
-                      : "border-border hover:border-primary/40"
-                  }`}
-                >
-                  {ft === "no_vehicle" ? "No vehicle" : ft === "marine_diesel" ? "Marine diesel" : ft.charAt(0).toUpperCase() + ft.slice(1)}
-                </button>
-              ))}
-            </div>
-          </FieldGroup>
-          )}
-          {!data.tourNoTransport && data.tourFuelType && data.tourFuelType !== "electric" && data.tourFuelType !== "no_vehicle" && (
-            <FieldGroup label="Tour fuel (litres per month)" hint="Average monthly fuel used for guest transport.">
-              <NumberInput
-                value={data.tourFuelLitresPerMonth}
-                onChange={(v) => updateField({ tourFuelLitresPerMonth: v })}
-                placeholder="e.g. 200"
-                min={0}
-              />
-            </FieldGroup>
-          )}
-          {!data.tourNoTransport && data.tourFuelType === "electric" && (
-            <FieldGroup label="EV charging (kWh per month)" hint="Electricity used for electric vehicle fleet.">
-              <NumberInput
-                value={data.evKwhPerMonth}
-                onChange={(v) => updateField({ evKwhPerMonth: v })}
-                placeholder="e.g. 500"
-                min={0}
-              />
-            </FieldGroup>
-          )}
-          <FieldGroup
-            label="Office / base electricity (kWh)"
-            hint="Annual electricity for your office or base location, if applicable."
-          >
-            <NumberInput
-              value={data.officeElectricityKwh}
-              onChange={(v) => updateField({ officeElectricityKwh: v })}
-              placeholder="e.g. 3 000"
-              min={0}
-            />
-          </FieldGroup>
-          <FieldGroup
-            label="Electricity exported to grid (kWh / year)"
-            hint="If you feed surplus generation into the grid."
-          >
-            <NumberInput
-              value={data.gridExportKwh}
-              onChange={(v) => updateField({ gridExportKwh: v })}
-              placeholder="e.g. 0"
-              min={0}
-            />
-          </FieldGroup>
-        </>
-      ) : (
-        <>
-          <FieldGroup
-            label="Total electricity (kWh)"
-            hint="Sum from all electricity bills — include common areas, kitchens, EV charging."
-          >
-            <NumberInput
-              value={data.totalElectricityKwh}
-              onChange={(v) => updateField({ totalElectricityKwh: v })}
-              placeholder="e.g. 45 000"
-              min={0}
-            />
-          </FieldGroup>
-          <FieldGroup
-            label="Office / ancillary electricity (kWh)"
-            hint="Optional separate meter or outbuilding, if not included above."
-          >
-            <NumberInput
-              value={data.officeElectricityKwh}
-              onChange={(v) => updateField({ officeElectricityKwh: v })}
-              placeholder="e.g. 0"
-              min={0}
-            />
-          </FieldGroup>
-          <FieldGroup
-            label="Electricity exported to grid (kWh / year)"
-            hint="Surplus generation fed into the grid."
-          >
-            <NumberInput
-              value={data.gridExportKwh}
-              onChange={(v) => updateField({ gridExportKwh: v })}
-              placeholder="e.g. 0"
-              min={0}
-            />
-          </FieldGroup>
-          <FieldGroup
-            label="Total gas / LPG / fuel oil (kWh)"
-            hint="Convert: 1 kg LPG ≈ 13.9 kWh · 1 m³ natural gas ≈ 10.5 kWh · 1 L heating oil ≈ 10.7 kWh"
-          >
-            <NumberInput
-              value={data.totalGasKwh}
-              onChange={(v) => updateField({ totalGasKwh: v })}
-              placeholder="e.g. 12 000"
-              min={0}
-            />
-          </FieldGroup>
-        </>
-      )}
-      <FieldGroup
-        label="On-site renewable generation (%)"
-        hint="Solar PV, wind, small hydro, or biomass generated on your property."
-      >
-        <NumberInput
-          value={data.renewableOnsitePct}
-          onChange={(v) => updateField({ renewableOnsitePct: v })}
-          placeholder="e.g. 30"
-          min={0}
-          max={100}
-        />
-      </FieldGroup>
-      <FieldGroup
-        label="Certified renewable tariff (%)"
-        hint="Green energy tariff backed by a certificate of origin (GoO or REGO)."
-      >
-        <NumberInput
-          value={data.renewableTariffPct}
-          onChange={(v) => updateField({ renewableTariffPct: v })}
-          placeholder="e.g. 50"
-          min={0}
-          max={100}
-        />
-      </FieldGroup>
-      {data.operatorType !== "B" && (
-        <>
-          <FieldGroup
-            label="Tour transport fuel type"
-            hint="If your operation provides guest transport — leave unselected if not applicable."
-          >
-            <div className="flex gap-2 flex-wrap">
-              {(["diesel", "petrol", "electric"] as const).map((ft) => (
-                <button
-                  key={ft}
-                  onClick={() =>
-                    updateField({
-                      tourFuelType: data.tourFuelType === ft ? undefined : ft,
-                    })
-                  }
-                  className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all capitalize ${
-                    data.tourFuelType === ft
-                      ? "border-foreground bg-secondary text-foreground"
-                      : "border-border hover:border-primary/40"
-                  }`}
-                >
-                  {ft}
-                </button>
-              ))}
-            </div>
-          </FieldGroup>
-          {data.tourFuelType && data.tourFuelType !== "electric" && (
-            <FieldGroup label="Tour fuel (litres per month)" hint="Average monthly fuel used for guest transport.">
-              <NumberInput
-                value={data.tourFuelLitresPerMonth}
-                onChange={(v) => updateField({ tourFuelLitresPerMonth: v })}
-                placeholder="e.g. 200"
-                min={0}
-              />
-            </FieldGroup>
-          )}
-          {data.tourFuelType === "electric" && (
-            <FieldGroup label="EV charging (kWh per month)" hint="Electricity used for electric vehicle fleet.">
-              <NumberInput
-                value={data.evKwhPerMonth}
-                onChange={(v) => updateField({ evKwhPerMonth: v })}
-                placeholder="e.g. 500"
-                min={0}
-              />
-            </FieldGroup>
-          )}
-        </>
-      )}
 
-      <Tip icon="⚡">
-        Energy intensity is measured in kWh per activity unit ({data.operatorType === "B" ? "visitor-day" : "guest-night"}).
-        Lower intensity and higher renewable share improve your 1A sub-score.
-      </Tip>
+      {/* Info box */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
+        <span className="text-base select-none shrink-0 mt-0.5">🏢</span>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          If you operate multiple buildings, enter the combined annual totals
+          across all buildings and meters.
+        </p>
+      </div>
 
-      <EvidenceTierSelector
-        value={data.evidenceTierEnergy}
-        onChange={(v: EvidenceTier) => updateField({ evidenceTierEnergy: v })}
-        label="Evidence quality — energy data"
-      />
+      {/* Electricity */}
+      <FieldGroup label={<>Total electricity consumed (annual) <FieldTooltip text="From annual utility invoice" /></>}>
+        <div className="relative">
+          <input
+            type="number"
+            value={data.totalElectricityKwh ?? ""}
+            onChange={(e) =>
+              updateField({
+                totalElectricityKwh:
+                  e.target.value === "" ? undefined : parseFloat(e.target.value),
+              })
+            }
+            placeholder="e.g. 45000"
+            min={0}
+            className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+            kWh/year
+          </span>
+        </div>
+      </FieldGroup>
+
+      {/* Gas */}
+      <FieldGroup
+        label="Total gas / LPG consumed (annual)"
+        hint="If no gas: 0. 1 kg LPG = 13.9 kWh"
+      >
+        <div className="relative">
+          <input
+            type="number"
+            value={data.totalGasKwh ?? ""}
+            onChange={(e) =>
+              updateField({
+                totalGasKwh:
+                  e.target.value === "" ? undefined : parseFloat(e.target.value),
+              })
+            }
+            placeholder="e.g. 8000"
+            min={0}
+            className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+            kWh/year
+          </span>
+        </div>
+      </FieldGroup>
+
+      {/* Renewable energy section */}
+      <div className="space-y-5 pt-1">
+        <p className="text-sm font-semibold">Renewable energy</p>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            % on-site renewable generation
+          </label>
+          <p className="text-xs text-muted-foreground">
+            Solar PV, wind. If none: 0
+          </p>
+          <p className="text-sm font-semibold tabular-nums">{onsitePct}%</p>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={onsitePct}
+            onChange={(e) =>
+              updateField({ renewableOnsitePct: parseInt(e.target.value) })
+            }
+            className="w-full accent-foreground"
+          />
+        </div>
+
+        <div className="h-px bg-border/40" />
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            % from renewable energy tariff
+          </label>
+          <p className="text-xs text-muted-foreground">
+            Green tariff certificate from energy provider. If none: 0
+          </p>
+          <p className="text-sm font-semibold tabular-nums">{tariffPct}%</p>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={tariffPct}
+            onChange={(e) =>
+              updateField({ renewableTariffPct: parseInt(e.target.value) })
+            }
+            className="w-full accent-foreground"
+          />
+        </div>
+      </div>
+
+      {/* Energy exported */}
+      <FieldGroup
+        label={<>Energy exported to the grid (annual) <FieldTooltip text="Surplus renewable energy (solar, wind, etc.) fed back into the public grid. This reduces your net energy consumption and carbon footprint." /></>}
+        hint="From your inverter or net metering bill. If none: 0"
+      >
+        <div className="relative">
+          <input
+            type="number"
+            value={data.gridExportKwh ?? ""}
+            onChange={(e) =>
+              updateField({
+                gridExportKwh:
+                  e.target.value === "" ? undefined : parseFloat(e.target.value),
+              })
+            }
+            placeholder="e.g. 5000"
+            min={0}
+            className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+            kWh/year
+          </span>
+        </div>
+      </FieldGroup>
+
+      {/* Live computation */}
+      <div className="space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Live Computation
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">
+              Net energy consumption
+            </span>
+            <span className="text-sm font-bold tabular-nums">
+              {hasAnyEnergy ? Math.round(netEnergy).toLocaleString() : "0"}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                kWh/year
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">
+              Energy intensity
+            </span>
+            <span className="text-sm font-bold tabular-nums">
+              {activityUnit > 0 && hasAnyEnergy
+                ? Math.round(energyIntensity)
+                : "0"}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                kWh/{unitLabel}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Renewable %</span>
+            <span className="text-sm font-bold tabular-nums">
+              {onsitePct > 0 || tariffPct > 0
+                ? `${Math.round(renewableCombined)}%`
+                : "—"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">1A sub-score</span>
+            <span className="text-sm font-bold tabular-nums text-muted-foreground">
+              —
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Evidence quality */}
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
+        <p className="text-sm text-muted-foreground">
+          What is the source of this energy data?
+        </p>
+        <select
+          value={data.evidenceTierEnergy ?? ""}
+          onChange={(e) =>
+            updateField({
+              evidenceTierEnergy:
+                (e.target.value as EvidenceTier) || undefined,
+            })
+          }
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">Select evidence quality…</option>
+          <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
+          <option value="T2">T2 — Secondary</option>
+          <option value="T3">T3 — Tertiary</option>
+          <option value="Proxy">Proxy</option>
+        </select>
+      </div>
     </StepShell>
   );
 }
@@ -275,52 +283,133 @@ export function P1WaterStep({
   shell,
   floatingGps,
 }: StepProps) {
+  const waterPractices = [
+    { key: "waterGreywater" as const, label: "Greywater recycling system" },
+    { key: "waterRainwater" as const, label: "Rainwater harvesting" },
+    { key: "waterWastewaterTreatment" as const, label: "On-site wastewater treatment" },
+  ] as const;
+
+  const selectedCount = waterPractices.filter((p) => data[p.key] === true).length;
+  const recirculationBonus = Math.min(selectedCount * 3.3, 9.9);
+
+  const activityUnit =
+    data.operatorType === "B"
+      ? (data.visitorDays ?? 0)
+      : (data.guestNights ?? 0);
+  const waterIntensity =
+    activityUnit > 0 && data.totalWaterLitres != null
+      ? data.totalWaterLitres / activityUnit
+      : 0;
+  const unitLabel = data.operatorType === "B" ? "vd" : "gn";
+
   return (
     <StepShell
       {...shell}
-      title="Water"
-      subtitle="Indicator 1B · 25% of Pillar 1. Consumption and water stewardship practices."
+      title="Water usage"
+      subtitle="Indicator 1B · Weight: 25% of P1 · GPS Impact: 10%"
     >
       {floatingGps}
+
+      {/* Total water */}
       <FieldGroup
-        label="Total water consumed (litres)"
+        label="Total water consumed (annual)"
         hint="From water meter or utility bills. 1 m³ = 1 000 litres."
       >
-        <NumberInput
-          value={data.totalWaterLitres}
-          onChange={(v) => updateField({ totalWaterLitres: v })}
-          placeholder="e.g. 750 000"
-          min={0}
-        />
+        <div className="relative">
+          <input
+            type="number"
+            value={data.totalWaterLitres ?? ""}
+            onChange={(e) =>
+              updateField({
+                totalWaterLitres:
+                  e.target.value === "" ? undefined : parseFloat(e.target.value),
+              })
+            }
+            placeholder="e.g. 750000"
+            min={0}
+            className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+            litres/year
+          </span>
+        </div>
       </FieldGroup>
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">Water stewardship practices</p>
-        {(
-          [
-            { key: "waterGreywater" as const, label: "Greywater capture / reuse" },
-            { key: "waterRainwater" as const, label: "Rainwater harvesting" },
-            { key: "waterWastewaterTreatment" as const, label: "On-site wastewater treatment" },
-          ] as const
-        ).map((item) => (
+
+      {/* Recirculation practices */}
+      <div className="space-y-3">
+        <div className="space-y-0.5">
+          <p className="text-sm font-semibold">Water recirculation practices</p>
+          <p className="text-xs text-muted-foreground">
+            Each practice adds +3.3 points (max +9.9). Select all that apply.
+          </p>
+        </div>
+        {waterPractices.map((item) => (
           <label
             key={item.key}
-            className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
+            className="flex items-center gap-3 p-4 border border-border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
           >
             <input
               type="checkbox"
               checked={data[item.key] === true}
               onChange={(e) => updateField({ [item.key]: e.target.checked })}
-              className="mt-0.5 accent-primary"
+              className="w-4 h-4 accent-foreground shrink-0"
             />
-            <span className="text-sm">{item.label}</span>
+            <span className="text-sm font-medium">{item.label}</span>
           </label>
         ))}
       </div>
-      <EvidenceTierSelector
-        value={data.evidenceTierWater}
-        onChange={(v: EvidenceTier) => updateField({ evidenceTierWater: v })}
-        label="Evidence quality — water data"
-      />
+
+      {/* Live computation */}
+      <div className="space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Live Computation
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Water intensity</span>
+            <span className="text-sm font-bold tabular-nums">
+              {data.totalWaterLitres != null && activityUnit > 0
+                ? Math.round(waterIntensity).toLocaleString()
+                : "0"}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                L/{unitLabel}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Recirculation bonus</span>
+            <span className="text-sm font-bold tabular-nums">
+              {selectedCount > 0 ? `+${recirculationBonus.toFixed(1)}` : "—"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">1B sub-score</span>
+            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Evidence quality */}
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
+        <p className="text-sm text-muted-foreground">
+          What is the source of this water data?
+        </p>
+        <select
+          value={data.evidenceTierWater ?? ""}
+          onChange={(e) =>
+            updateField({
+              evidenceTierWater: (e.target.value as EvidenceTier) || undefined,
+            })
+          }
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">Select evidence quality…</option>
+          <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
+          <option value="T2">T2 — Secondary</option>
+          <option value="T3">T3 — Tertiary</option>
+          <option value="Proxy">Proxy</option>
+        </select>
+      </div>
     </StepShell>
   );
 }
@@ -333,101 +422,209 @@ export function P1WasteStep({
   shell,
   floatingGps,
 }: StepProps) {
-  const totalDiverted =
-    (data.wasteRecycledKg ?? 0) +
-    (data.wasteCompostedKg ?? 0) +
-    (data.wasteOtherDivertedKg ?? 0);
-  const wasteWarning =
-    data.totalWasteKg != null &&
-    data.totalWasteKg > 0 &&
-    totalDiverted > data.totalWasteKg;
+  const recycled = data.wasteRecycledKg ?? 0;
+  const composted = data.wasteCompostedKg ?? 0;
+  const otherDiverted = data.wasteOtherDivertedKg ?? 0;
+  const totalDiverted = recycled + composted + otherDiverted;
+  const totalWaste = data.totalWasteKg ?? 0;
+  const diversionRate =
+    totalWaste > 0 ? Math.min((totalDiverted / totalWaste) * 100, 100) : 0;
+
+  const wastePractices = [
+    { key: "noSingleUsePlastics" as const, label: "Single-use plastics eliminated (+5 pts)" },
+    { key: "foodWasteProgramme" as const, label: "Active food waste reduction programme (+5 pts)" },
+    { key: "wasteEducation" as const, label: "Guest/staff waste education (+3 pts)" },
+  ] as const;
+
+  const bonusCount = wastePractices.filter((p) => data[p.key] === true).length;
 
   return (
     <StepShell
       {...shell}
-      title="Waste"
-      subtitle="Indicator 1C · 20% of Pillar 1. Waste generation and diversion."
+      title="Waste management"
+      subtitle="Indicator 1C · Weight: 20% of P1 · GPS Impact: 8%"
     >
       {floatingGps}
-      <Tip icon="🗑️">
-        Estimate annual waste from bag count × weight, container volume × collections, or waste
-        contractor invoices.
-      </Tip>
+
+      {/* Info box */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
+        <span className="text-base select-none shrink-0 mt-0.5">💡</span>
+        <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
+          <p>
+            <strong>How to estimate your annual waste:</strong> Most operators don't weigh waste
+            daily — that's OK. Use one of these standard methods:
+          </p>
+          <ul className="space-y-1 list-none">
+            <li>
+              <strong>Bag count method:</strong> Count bags per week × average bag weight (a
+              standard 120L bin bag ≈ 8–12 kg) × 52 weeks.
+            </li>
+            <li>
+              <strong>Container method:</strong> Number of bin pickups × container capacity (e.g.
+              240L wheelie bin ≈ 20 kg, 1100L skip ≈ 90 kg).
+            </li>
+            <li>
+              <strong>Invoice method:</strong> Check your waste collection invoices for tonnage or
+              volume data.
+            </li>
+          </ul>
+          <p>
+            If you don't know yet, leave it empty — you can track for a week and come back to fill
+            it in.
+          </p>
+        </div>
+      </div>
+
+      {/* Total waste produced */}
       <FieldGroup
-        label="Total waste generated (kg)"
-        hint="From waste collection invoices or on-site weighing records."
+        label="Total waste produced in the last 12 months (kg)"
+        hint="All waste streams combined: general, recyclable, organic, hazardous"
       >
         <NumberInput
           value={data.totalWasteKg}
           onChange={(v) => updateField({ totalWasteKg: v })}
-          placeholder="e.g. 5 000"
+          placeholder="e.g. 12,000"
           min={0}
+          unit="kg/year"
         />
       </FieldGroup>
-      <div className="grid grid-cols-3 gap-3">
-        <FieldGroup label="Recycled (kg)">
-          <NumberInput
-            value={data.wasteRecycledKg}
-            onChange={(v) => updateField({ wasteRecycledKg: v })}
-            placeholder="e.g. 2 000"
-            min={0}
-          />
-        </FieldGroup>
-        <FieldGroup label="Composted (kg)">
-          <NumberInput
-            value={data.wasteCompostedKg}
-            onChange={(v) => updateField({ wasteCompostedKg: v })}
-            placeholder="e.g. 1 000"
-            min={0}
-          />
-        </FieldGroup>
-        <FieldGroup label="Other diverted (kg)" hint="Anaerobic digestion, reuse.">
-          <NumberInput
-            value={data.wasteOtherDivertedKg}
-            onChange={(v) => updateField({ wasteOtherDivertedKg: v })}
-            placeholder="e.g. 500"
-            min={0}
-          />
-        </FieldGroup>
-      </div>
-      {wasteWarning && (
-        <p className="text-sm text-amber-600">
-          Diverted waste ({totalDiverted.toLocaleString()} kg) exceeds total waste.
+      {totalWaste > 0 && (
+        <p className="text-sm text-muted-foreground bg-muted/50 border border-border/50 rounded-xl px-4 py-3 leading-relaxed">
+          Break down your {totalWaste.toLocaleString()} kg into the categories below. What&apos;s left ({Math.max(0, totalWaste - totalDiverted).toLocaleString()} kg) is assumed to go to landfill.
         </p>
       )}
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">Bonus practices</p>
-        {(
-          [
-            { key: "noSingleUsePlastics" as const, label: "No single-use plastics policy" },
-            { key: "foodWasteProgramme" as const, label: "Active food waste reduction programme" },
-            { key: "wasteEducation" as const, label: "Guest waste education / signage" },
-          ] as const
-        ).map((item) => (
+
+      {/* Recycled */}
+      <FieldGroup
+        label="Recycled (kg)"
+        hint="Paper, plastic, glass, metal sent to recycling. Check with your waste collector for recycling tonnage."
+      >
+        <NumberInput
+          value={data.wasteRecycledKg}
+          onChange={(v) => updateField({ wasteRecycledKg: v })}
+          placeholder="e.g. 3,000"
+          min={0}
+          unit="kg/year"
+        />
+      </FieldGroup>
+
+      {/* Composted */}
+      <FieldGroup
+        label="Composted (kg)"
+        hint="Food scraps, garden waste composted on or off site."
+      >
+        <NumberInput
+          value={data.wasteCompostedKg}
+          onChange={(v) => updateField({ wasteCompostedKg: v })}
+          placeholder="e.g. 1,500"
+          min={0}
+          unit="kg/year"
+        />
+      </FieldGroup>
+
+      {/* Other diversion */}
+      <FieldGroup
+        label="Other diversion (kg)"
+        hint="Donated, repurposed, or any other waste kept from landfill (textiles, electronics, construction debris)."
+      >
+        <NumberInput
+          value={data.wasteOtherDivertedKg}
+          onChange={(v) => updateField({ wasteOtherDivertedKg: v })}
+          placeholder="e.g. 500"
+          min={0}
+          unit="kg/year"
+        />
+      </FieldGroup>
+      {totalWaste > 0 && (
+        <div className="bg-muted/50 border border-border/50 rounded-xl px-4 py-3 space-y-1.5">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Sent to landfill</span>
+            <span className="font-medium">{Math.max(0, totalWaste - totalDiverted).toLocaleString()} kg</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Diversion rate</span>
+            <span className="font-bold">{diversionRate.toFixed(1)}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Bonus practices */}
+      <div className="space-y-3">
+        <div className="space-y-0.5">
+          <p className="text-sm font-semibold">Bonus practices (max +13 pts)</p>
+        </div>
+        {wastePractices.map((item) => (
           <label
             key={item.key}
-            className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
+            className="flex items-center gap-3 p-4 border border-border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors"
           >
             <input
               type="checkbox"
               checked={data[item.key] === true}
               onChange={(e) => updateField({ [item.key]: e.target.checked })}
-              className="mt-0.5 accent-primary"
+              className="w-4 h-4 accent-foreground shrink-0"
             />
-            <span className="text-sm">{item.label}</span>
+            <span className="text-sm font-medium">{item.label}</span>
           </label>
         ))}
       </div>
-      <EvidenceTierSelector
-        value={data.evidenceTierWaste}
-        onChange={(v: EvidenceTier) => updateField({ evidenceTierWaste: v })}
-        label="Evidence quality — waste data"
-      />
+
+      {/* Live computation */}
+      <div className="space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Live computation
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Waste diversion rate</span>
+            <span className="text-sm font-bold tabular-nums">
+              {totalWaste > 0 && totalDiverted > 0
+                ? `${Math.round(diversionRate)}%`
+                : "—"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Bonus points</span>
+            <span className="text-sm font-bold tabular-nums">
+              {bonusCount > 0 ? `+${bonusCount}` : "—"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">1C sub-score</span>
+            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Evidence quality */}
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
+        <p className="text-sm text-muted-foreground">
+          What is the source of this data?
+        </p>
+        <select
+          value={data.evidenceTierWaste ?? ""}
+          onChange={(e) =>
+            updateField({
+              evidenceTierWaste: (e.target.value as EvidenceTier) || undefined,
+            })
+          }
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">Select evidence quality…</option>
+          <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
+          <option value="T2">T2 — Secondary (×0.75)</option>
+          <option value="T3">T3 — Tertiary</option>
+          <option value="Proxy">Proxy</option>
+        </select>
+      </div>
     </StepShell>
   );
 }
 
-// ── P1: Carbon (scope 3 context) ─────────────────────────────────────────────
+// ── P1: Carbon ────────────────────────────────────────────────────────────────
+
+const GRID_FACTOR_KG_CO2E = 0.149; // kg CO₂e/kWh (Portugal, IEA 2023)
+const GAS_FACTOR_KG_CO2E = 0.202;  // kg CO₂e/kWh (natural gas)
 
 export function P1CarbonStep({
   data,
@@ -435,38 +632,175 @@ export function P1CarbonStep({
   shell,
   floatingGps,
 }: StepProps) {
+  const netElectricityKwh = Math.max(
+    0,
+    (data.totalElectricityKwh ?? 0) - (data.gridExportKwh ?? 0)
+  );
+  const tariffFactor = 1 - Math.min((data.renewableTariffPct ?? 0) / 100, 1);
+
+  const scope1KgCo2 = (data.totalGasKwh ?? 0) * GAS_FACTOR_KG_CO2E;
+  const scope2KgCo2 = netElectricityKwh * GRID_FACTOR_KG_CO2E * tariffFactor;
+  const scope3KgCo2 = data.scope3TransportKgCo2e ?? 0;
+  const totalKgCo2 = scope1KgCo2 + scope2KgCo2 + scope3KgCo2;
+
+  const activityUnit =
+    data.operatorType === "B"
+      ? (data.visitorDays ?? 0)
+      : (data.guestNights ?? 0);
+  const unitLabel = data.operatorType === "B" ? "vd" : "gn";
+  const carbonIntensity = activityUnit > 0 ? totalKgCo2 / activityUnit : 0;
+
   return (
     <StepShell
       {...shell}
-      title="Carbon context"
-      subtitle="Indicator 1D · optional Scope 3 transport for reporting context."
+      title="Carbon emissions"
+      subtitle="Indicator 1D · Weight: 15% of P1 · GPS Impact: 6%"
     >
       {floatingGps}
-      <Tip icon="🌍">
-        Scope 1 &amp; 2 emissions are calculated server-side from your energy data. Add Scope 3
-        (transport you arrange) here if applicable.
-      </Tip>
+
+      {/* Info box */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
+        <span className="text-base select-none shrink-0 mt-0.5">☁️</span>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          We auto-calculate your carbon emissions from the energy data you already provided. No
+          extra input needed for Scope 1 &amp; 2.
+        </p>
+      </div>
+
+      {/* Auto-calculated emission figures */}
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
+        <p className="text-sm font-semibold">Auto-calculated emission figures</p>
+        <p className="text-xs text-muted-foreground font-mono">
+          Grid emission factor: 0.149 kgCO₂/kWh (Portugal, IEA 2023)
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">
+              Scope 1 — Direct (gas, fuel combustion)
+            </span>
+            <span className="text-sm font-bold tabular-nums whitespace-nowrap ml-4">
+              {Math.round(scope1KgCo2).toLocaleString()}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">kgCO₂/year</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">
+              Scope 2 — Electricity (kWh × grid factor × (1 − green tariff %))
+            </span>
+            <span className="text-sm font-bold tabular-nums whitespace-nowrap ml-4">
+              {Math.round(scope2KgCo2).toLocaleString()}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">kgCO₂/year</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Scope 3 input */}
       <FieldGroup
-        label="Scope 3 transport emissions (kg CO₂e)"
-        hint="Guest transport arranged by you (not guests' flights). Optional."
+        label="Scope 3 — Other indirect emissions (kgCO₂)"
+        hint="Optional. Includes refrigerant leakage, business travel, waste transport, and guest commuting. Leave blank if you haven't measured this yet — it won't affect your score negatively."
       >
-        <NumberInput
-          value={data.scope3TransportKgCo2e}
-          onChange={(v) => updateField({ scope3TransportKgCo2e: v })}
-          placeholder="e.g. 1 200"
-          min={0}
-        />
+        <div className="relative">
+          <input
+            type="number"
+            value={data.scope3TransportKgCo2e ?? ""}
+            onChange={(e) =>
+              updateField({
+                scope3TransportKgCo2e:
+                  e.target.value === "" ? undefined : parseFloat(e.target.value),
+              })
+            }
+            placeholder="e.g. 1,200"
+            min={0}
+            className="w-full rounded-lg border border-input bg-background pl-3 pr-28 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+            kgCO₂/year
+          </span>
+        </div>
       </FieldGroup>
-      <EvidenceTierSelector
-        value={data.evidenceTierCarbon}
-        onChange={(v: EvidenceTier) => updateField({ evidenceTierCarbon: v })}
-        label="Evidence quality — carbon data"
-      />
+
+      {/* Scope 3 explanation box */}
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
+        <span className="text-base select-none shrink-0 mt-0.5">💡</span>
+        <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
+          <p className="font-semibold text-foreground">How is Scope 3 used?</p>
+          <p>
+            Scope 3 is <strong>not included</strong> in your Carbon Intensity (1D) score — only
+            Scope 1 &amp; 2 count. This field is collected for transparency and future reporting.
+            If you don&apos;t have this data, simply leave it blank.
+          </p>
+          <p>If you do track it, common sources include:</p>
+          <ul className="space-y-1 list-disc list-inside">
+            <li>Guest transport to/from your property</li>
+            <li>Refrigerant gas leakage (HVAC systems)</li>
+            <li>Staff commuting &amp; business travel</li>
+            <li>Waste collection &amp; disposal transport</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Live computation */}
+      <div className="space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Live computation
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Total emissions</span>
+            <span className="text-sm font-bold tabular-nums">
+              {Math.round(totalKgCo2).toLocaleString()}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">kgCO₂/year</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Carbon intensity</span>
+            <span className="text-sm font-bold tabular-nums">
+              {activityUnit > 0 ? carbonIntensity.toFixed(2) : "0"}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                kgCO₂/{unitLabel}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">1D sub-score</span>
+            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Evidence quality */}
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
+        <p className="text-sm text-muted-foreground">What is the source of this data?</p>
+        <select
+          value={data.evidenceTierCarbon ?? ""}
+          onChange={(e) =>
+            updateField({
+              evidenceTierCarbon: (e.target.value as EvidenceTier) || undefined,
+            })
+          }
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">Select evidence quality…</option>
+          <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
+          <option value="T2">T2 — Secondary (×0.75)</option>
+          <option value="T3">T3 — Tertiary</option>
+          <option value="Proxy">Proxy</option>
+        </select>
+      </div>
     </StepShell>
   );
 }
 
 // ── P1: Site & land use ───────────────────────────────────────────────────────
+
+const SITE_OPTIONS: { label: string; score: number }[] = [
+  { label: "Pristine natural — remote, minimal human impact", score: 100 },
+  { label: "Low-impact natural — mostly natural with limited infrastructure", score: 75 },
+  { label: "Mixed — blend of natural and developed areas", score: 50 },
+  { label: "Mostly developed — predominantly urban or built-up", score: 25 },
+  { label: "Fully urban — entirely developed, no natural surroundings", score: 0 },
+];
 
 export function P1SiteStep({
   data,
@@ -475,49 +809,117 @@ export function P1SiteStep({
   floatingGps,
   preview,
 }: StepProps) {
+  // 1E: selected option index stored in p1SiteScore (0–4 where 0=pristine, 4=urban)
+  // Convert to display score: option 0→100, 1→75, 2→50, 3→25, 4→0
+  const selectedIdx = data.p1SiteScore ?? null;
+  const site1E = selectedIdx !== null ? SITE_OPTIONS[selectedIdx]?.score ?? 0 : 0;
+  const p1Total = preview?.pillar1Score ?? 0;
+  const gpsContribution = p1Total * 0.40;
+
+  const indicators: { key: string; label: string; score: number; weight: number }[] = [
+    { key: "1A", label: "1A Energy", score: 0, weight: 30 },
+    { key: "1B", label: "1B Water",  score: 0, weight: 25 },
+    { key: "1C", label: "1C Waste",  score: 0, weight: 20 },
+    { key: "1D", label: "1D Carbon", score: 0, weight: 15 },
+    { key: "1E", label: "1E Site",   score: site1E, weight: 10 },
+  ];
+
+  // Back-fill 1A–1D from p1Total when preview arrives.
+  // We only know the weighted sum; individual scores are not exposed by PreviewScores.
+  // 1E we compute locally; derive the remaining contribution for display.
+  const site1EContribution = site1E * 0.10;
+  const remainingP1 = Math.max(0, p1Total - site1EContribution);
+
+  // Distribute remaining score proportionally to weights 30/25/20/15 = 90
+  const weights = [30, 25, 20, 15];
+  const totalOtherWeight = 90;
+  const derivedScores =
+    preview != null
+      ? weights.map((w) => Math.min(100, Math.round((remainingP1 * w) / totalOtherWeight)))
+      : [0, 0, 0, 0];
+
+  const displayIndicators = indicators.map((ind, i) =>
+    i < 4 ? { ...ind, score: derivedScores[i] ?? 0 } : ind
+  );
+
   return (
     <StepShell
       {...shell}
       title="Site & land use"
-      subtitle="Indicator 1E · 10% of Pillar 1. Ecological quality of your site."
+      subtitle="Indicator 1E · Weight: 10% of P1 · GPS Impact: 4%"
     >
       {floatingGps}
-      <FieldGroup
-        label="Site & land use score"
-        hint="How well does your site support ecological health and low-impact land use?"
-      >
-        <BandSelector
-          values={[4, 3, 2, 1, 0]}
-          labels={[
-            "4 Pristine / regenerative",
-            "3 Low-impact",
-            "2 Standard",
-            "1 Below average",
-            "0 Fully urban / degraded",
-          ]}
-          selected={data.p1SiteScore}
-          onSelect={(v) => updateField({ p1SiteScore: v })}
-        />
-      </FieldGroup>
-      <EvidenceTierSelector
-        value={data.evidenceTierSite}
-        onChange={(v: EvidenceTier) => updateField({ evidenceTierSite: v })}
-        label="Evidence quality — site / land use"
-      />
-      {preview && (
-        <div className="rounded-xl border bg-card p-5 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Pillar 1 — Operational Footprint Summary
-          </p>
-          <div className="text-2xl font-bold tabular-nums text-primary">
-            {Math.round(preview.pillar1Score)}
-            <span className="text-sm font-normal text-muted-foreground ml-1">/ 100</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Weighted: 1A Energy 30% · 1B Water 25% · 1C Waste 20% · 1D Carbon 15% · 1E Site 10%
+
+      {/* Environment dropdown */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          How would you describe the natural environment surrounding your operation?
+        </label>
+        <select
+          value={selectedIdx ?? ""}
+          onChange={(e) => {
+            const val = e.target.value;
+            updateField({ p1SiteScore: val === "" ? undefined : parseInt(val) });
+          }}
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">Select</option>
+          {SITE_OPTIONS.map((opt, i) => (
+            <option key={i} value={i}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Pillar 1 summary card */}
+      <div className="rounded-xl border bg-card p-5 space-y-4">
+        <div className="space-y-1">
+          <p className="text-sm font-semibold">Pillar 1: Operational Footprint (40% of GPS)</p>
+          <p className="text-xs text-muted-foreground font-mono">
+            P1 = p1a×0.30 + p1b×0.25 + p1c×0.20 + p1d×0.15 + p1e×0.10
           </p>
         </div>
-      )}
+
+        <div className="space-y-3">
+          {displayIndicators.map((ind) => {
+            const contribution = (ind.score * ind.weight) / 100;
+            return (
+              <div key={ind.key} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground font-medium">{ind.label}</span>
+                  <span className="tabular-nums text-muted-foreground">
+                    {preview != null || ind.key === "1E"
+                      ? `${ind.score}/100 · ${ind.weight}% = ${contribution % 1 === 0 ? contribution : contribution.toFixed(1)}`
+                      : `—/100 · ${ind.weight}% = —`}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-foreground transition-all duration-300"
+                    style={{ width: `${ind.score}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="pt-2 border-t border-border/40 space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold">Footprint score</span>
+            <span className="text-sm font-bold tabular-nums">
+              {p1Total % 1 === 0 ? p1Total : p1Total.toFixed(1)}/100
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">GPS contribution (P1 × 0.40)</span>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {gpsContribution % 1 === 0 ? gpsContribution : gpsContribution.toFixed(1)}
+            </span>
+          </div>
+        </div>
+      </div>
     </StepShell>
   );
 }

@@ -54,3 +54,6 @@ docker-compose.override.yml
 *.bak
 *.old
 *.orig
+
+# Local file storage
+apps/platform/storage/

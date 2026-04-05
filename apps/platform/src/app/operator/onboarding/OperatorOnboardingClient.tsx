@@ -192,6 +192,10 @@ export function OperatorOnboardingClient() {
   const { preview, loading: previewLoading, refreshPreview } = usePreviewScore(data);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(false);
+  // Tracks whether the draft has been loaded from the server so we never
+  // autosave before the initial draft load completes (which could overwrite
+  // real server data with an empty/stale local state).
+  const draftInitializedRef = useRef(false);
 
   const flashSaved = () => {
     setSaved(true);
@@ -238,11 +242,23 @@ export function OperatorOnboardingClient() {
     if (draftData === undefined) return;
     const d = draftData?.draft;
     if (d?.updatedAt && Object.keys(d.dataJson ?? {}).length > 0) {
+      // Server draft is the source of truth — always prefer it.
       loadDraft(d);
       setShowRoadmap(false);
     } else {
-      resetOnboarding();
+      // No server draft. Check if Zustand (localStorage) already has data from
+      // a previous session that hadn't synced to the server yet. If so, keep it
+      // and don't wipe it — the next autosave will push it to the server.
+      // Only call resetOnboarding() when there is truly nothing anywhere.
+      const hasLocalData =
+        Object.keys(useOnboardingStore.getState().data ?? {}).length > 0;
+      if (hasLocalData) {
+        setShowRoadmap(false);
+      } else {
+        resetOnboarding();
+      }
     }
+    draftInitializedRef.current = true;
     setDraftInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftData]);
@@ -258,6 +274,10 @@ export function OperatorOnboardingClient() {
     }
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(() => {
+      // Guard: never autosave before the server draft has been loaded.
+      // Without this, the initial loadDraft/resetOnboarding call would
+      // schedule a save of whatever happened to be in state at that moment.
+      if (!draftInitializedRef.current) return;
       saveDraft().catch(() => {/* best effort */});
     }, 1500);
     return () => {
@@ -265,6 +285,20 @@ export function OperatorOnboardingClient() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  // Save immediately when the page becomes hidden (tab switch, window minimize,
+  // browser close). This catches the case where the user leaves before the
+  // 1500 ms autosave debounce has fired.
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && draftInitializedRef.current) {
+        saveDraft().catch(() => {/* best effort */});
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [saveDraft]);
 
   // ── Navigation handlers ─────────────────────────────────────────────────
 
@@ -307,6 +341,14 @@ export function OperatorOnboardingClient() {
       /* best effort */
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveClose = async () => {
+    try {
+      await saveDraft();
+    } finally {
+      router.push("/operator/dashboard");
     }
   };
 
@@ -364,13 +406,15 @@ export function OperatorOnboardingClient() {
   const shell = {
     stepId,
     progress,
-    stepNumber,
-    totalSteps,
+    // +1 offset: roadmap is screen 01, question steps start at 02
+    stepNumber: stepNumber + 1,
+    totalSteps: totalSteps + 1,
     onBack: handleBack,
     onNext: handleNext,
     saving,
     saved,
     canNext,
+    onSaveClose: handleSaveClose,
   };
 
   const floatingGps = (
@@ -391,21 +435,18 @@ export function OperatorOnboardingClient() {
   if (draftLoading && !draftInitialized) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <div className="fixed top-0 left-0 right-0 z-50 h-0.5 bg-muted">
-          <div className="h-full w-1/3 bg-primary/40 animate-pulse" />
-        </div>
-        <div className="fixed top-0.5 left-0 right-0 z-40 bg-background/90 border-b h-11" />
-        <div className="flex-1 pt-14 pb-28 px-4">
-          <div className="max-w-2xl mx-auto py-8 space-y-6">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border/50 h-14" />
+        <div className="flex-1 pt-14 pb-24 px-6">
+          <div className="max-w-[768px] mx-auto py-10 space-y-8">
             <div className="space-y-3">
-              <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-              <div className="h-8 w-56 rounded bg-muted animate-pulse" />
-              <div className="h-4 w-80 rounded bg-muted animate-pulse" />
+              <div className="h-10 w-80 rounded-xl bg-muted animate-pulse" />
+              <div className="h-4 w-96 rounded bg-muted animate-pulse" />
             </div>
-            <div className="space-y-4">
-              <div className="h-20 rounded-xl bg-muted animate-pulse" />
-              <div className="h-20 rounded-xl bg-muted animate-pulse" />
-              <div className="h-20 rounded-xl bg-muted animate-pulse" />
+            <div className="space-y-3">
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
+              <div className="h-20 rounded-2xl bg-muted animate-pulse" />
             </div>
           </div>
         </div>
@@ -418,7 +459,14 @@ export function OperatorOnboardingClient() {
   }
 
   if (showRoadmap) {
-    return <RoadmapScreen onStart={() => setShowRoadmap(false)} data={data} />;
+    return (
+      <RoadmapScreen
+        onStart={() => setShowRoadmap(false)}
+        data={data}
+        totalSteps={totalSteps}
+        onSaveClose={handleSaveClose}
+      />
+    );
   }
 
   // ── Step dispatch ─────────────────────────────────────────────────────────

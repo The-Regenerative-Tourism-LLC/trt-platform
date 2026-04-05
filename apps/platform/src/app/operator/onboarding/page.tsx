@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OperatorOnboardingClient } from "./OperatorOnboardingClient";
+import { OperatorOnboardingClientLoader } from "./OperatorOnboardingClientLoader";
 
 export const metadata: Metadata = {
   title: "Operator Assessment",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function OperatorOnboardingPage() {
-  return <OperatorOnboardingClient />;
+  return <OperatorOnboardingClientLoader />;
 }
