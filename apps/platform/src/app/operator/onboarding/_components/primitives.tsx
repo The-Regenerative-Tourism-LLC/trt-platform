@@ -16,7 +16,7 @@ export function FieldGroup({
   return (
     <div className="space-y-1.5">
       <label className="text-sm font-medium">{label}</label>
-      {hint && <p className="text-xs text-muted-foreground leading-relaxed">{hint}</p>}
+      {hint && <p className="text-sm text-muted-foreground leading-relaxed">{hint}</p>}
       {children}
     </div>
   );
@@ -126,7 +126,7 @@ export function Tip({
   return (
     <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
       <span className="text-base select-none shrink-0 mt-0.5">{icon}</span>
-      <div className="text-xs text-muted-foreground leading-relaxed">{children}</div>
+      <div className="text-sm text-muted-foreground leading-relaxed">{children}</div>
     </div>
   );
 }
@@ -135,7 +135,7 @@ export function PrivacyBadge() {
   return (
     <div className="flex items-start gap-3 rounded-xl bg-muted/30 border border-border/40 px-4 py-3">
       <span className="text-base select-none shrink-0 mt-0.5">🔒</span>
-      <p className="text-xs text-muted-foreground leading-relaxed">
+      <p className="text-sm text-muted-foreground leading-relaxed">
         Your data is protected under our NDA. Only aggregated, anonymised scores are
         ever shared publicly. Individual operational data remains confidential.
       </p>

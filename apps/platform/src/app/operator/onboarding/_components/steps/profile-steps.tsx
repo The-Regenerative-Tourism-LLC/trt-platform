@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode, ChangeEvent } from "react";
 import dynamic from "next/dynamic";
+import { Building2, Mountain, Sparkles, Info } from "lucide-react";
 import type { OnboardingData } from "@/store/onboarding-store";
 import type { StepShellBaseProps } from "../shell";
 import { StepShell } from "../shell";
@@ -33,6 +34,12 @@ interface StepProps {
 }
 
 // ── Operator Type ─────────────────────────────────────────────────────────────
+
+const operatorIconMap = {
+  A: Building2,
+  B: Mountain,
+  C: Sparkles,
+} as const;
 
 export function OperatorTypeStep({
   data,
@@ -69,40 +76,80 @@ export function OperatorTypeStep({
     data.operatorType === "B" &&
     data._confirmsNoAccommodation === true;
 
+  const topIcon = (
+    <div className="w-11 h-11 rounded-xl bg-muted/60 flex items-center justify-center">
+      <Building2 className="w-5 h-5 text-foreground/50" strokeWidth={1.5} />
+    </div>
+  );
+
   return (
     <StepShell
       {...shell}
       title="What type of operation do you run?"
       subtitle="This determines which questions we'll ask you. Accommodation operators are benchmarked per guest-night, experience operators per visitor-day."
+      topIcon={topIcon}
       isFirst
     >
-      <div className="grid gap-3">
-        {typeOptions.map((opt) => (
-          <button
-            key={opt.key}
-            onClick={() => {
-              updateField({
-                operatorType: opt.key,
-                _accomGateShown: false,
-                _confirmsNoAccommodation: false,
-                _accomGateWarn: false,
-              });
-            }}
-            className={`w-full rounded-xl border-2 p-5 text-left transition-all ${
-              data.operatorType === opt.key
-                ? "border-foreground bg-secondary shadow-sm ring-1 ring-primary/30"
-                : "border-border hover:border-primary/40 hover:bg-muted/20"
-            }`}
-          >
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-base">{opt.label}</span>
-              <span className="text-[10px] font-medium text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                {opt.badge}
-              </span>
-            </div>
-            <div className="text-sm text-muted-foreground mt-1">{opt.desc}</div>
-          </button>
-        ))}
+      {/* Option cards */}
+      <div className="space-y-2">
+        {typeOptions.map((opt) => {
+          const isSelected = data.operatorType === opt.key;
+          const Icon = operatorIconMap[opt.key];
+          return (
+            <button
+              key={opt.key}
+              onClick={() => {
+                updateField({
+                  operatorType: opt.key,
+                  _accomGateShown: false,
+                  _confirmsNoAccommodation: false,
+                  _accomGateWarn: false,
+                });
+              }}
+              className={[
+                "w-full flex items-center gap-4 rounded-2xl border px-4 py-5 text-left transition-all",
+                isSelected
+                  ? "border-foreground bg-card"
+                  : "border-border/40 bg-card hover:border-border/60",
+              ].join(" ")}
+            >
+              {/* Left icon tile */}
+              <div className={[
+                "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
+                isSelected ? "bg-foreground" : "bg-muted/60",
+              ].join(" ")}>
+                <Icon
+                  className={isSelected ? "w-5 h-5 text-background" : "w-5 h-5 text-foreground/50"}
+                  strokeWidth={1.5}
+                />
+              </div>
+
+              {/* Text column */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-base font-bold text-foreground leading-snug">
+                    {opt.label}
+                  </span>
+                  <span className="text-[10px] font-medium text-muted-foreground border border-border/60 rounded-full px-2 py-0.5 leading-none whitespace-nowrap">
+                    {opt.badge}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                  {opt.desc}
+                </p>
+              </div>
+
+              {/* Radio indicator */}
+              {isSelected ? (
+                <div className="w-5 h-5 rounded-full bg-foreground flex items-center justify-center shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-background" />
+                </div>
+              ) : (
+                <div className="w-5 h-5 rounded-full border border-border/60 shrink-0" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Type B accommodation gate */}
@@ -163,10 +210,13 @@ export function OperatorTypeStep({
         </div>
       )}
 
-      <Tip icon="📊">
-        This choice affects all scoring benchmarks. Accommodation operators are measured
-        per guest-night; experience operators per visitor-day with lower thresholds.
-      </Tip>
+      {/* Info box */}
+      <div className="flex items-start gap-3 rounded-xl border border-border/40 bg-surface/20 px-4 py-4">
+        <Info className="w-[15px] h-[15px] shrink-0 text-muted-foreground/70 mt-px" strokeWidth={1.5} />
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          This choice affects all scoring benchmarks. Accommodation operators are measured per guest-night; experience operators per visitor-day with lower thresholds.
+        </p>
+      </div>
     </StepShell>
   );
 }
@@ -943,8 +993,8 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                       : "border-border hover:border-foreground/30 bg-background"
                   }`}
                 >
-                  <p className="text-sm font-semibold">{fs.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{fs.desc}</p>
+                  <p className="text-base font-semibold">{fs.label}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{fs.desc}</p>
                 </button>
               ))}
             </div>

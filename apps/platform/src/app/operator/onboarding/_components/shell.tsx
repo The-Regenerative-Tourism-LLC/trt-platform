@@ -68,6 +68,7 @@ export function StepShell({
   children,
   title,
   subtitle,
+  topIcon,
   stepId: _stepId,
   progress: _progress,
   stepNumber,
@@ -86,6 +87,7 @@ export function StepShell({
   children: ReactNode;
   title: string;
   subtitle?: string;
+  topIcon?: ReactNode;
   stepId: string;
   progress: number;
   stepNumber: number;
@@ -123,7 +125,7 @@ export function StepShell({
         className="fixed left-0 right-0 z-40 flex items-center bg-background/90 backdrop-blur-sm border-b border-border/40"
         style={{ top: "2px", height: "56px" }}
       >
-        <div className="flex items-center w-full max-w-onboarding mx-auto px-3 sm:px-6">
+        <div className={`flex items-center w-full ${topIcon ? "max-w-[600px]" : "max-w-onboarding"} mx-auto px-3 sm:px-6`}>
           <button
             onClick={onBack}
             className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors w-16 sm:w-20"
@@ -151,18 +153,34 @@ export function StepShell({
 
       {/* Content */}
       <div className="flex-1 pt-14 sm:pt-20 pb-24 sm:pb-28 px-3 sm:px-6">
-        <div className="max-w-onboarding mx-auto space-y-5 sm:space-y-8">
-          {saved && (
-            <span className="text-xs text-muted-foreground font-medium">Saved ✓</span>
-          )}
-          <div className="space-y-2 sm:space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground leading-tight">{title}</h1>
-            {subtitle && (
-              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{subtitle}</p>
+        {topIcon ? (
+          <div className="max-w-[600px] mx-auto space-y-4 sm:space-y-5">
+            {topIcon}
+            {saved && (
+              <span className="text-xs text-muted-foreground font-medium">Saved ✓</span>
             )}
+            <div className="space-y-2">
+              <h1 className="text-5xl font-bold tracking-tight text-foreground leading-tight">{title}</h1>
+              {subtitle && (
+                <p className="text-sm text-muted-foreground leading-relaxed">{subtitle}</p>
+              )}
+            </div>
+            <div className="space-y-3">{children}</div>
           </div>
-          <div className="space-y-4 sm:space-y-5">{children}</div>
-        </div>
+        ) : (
+          <div className="max-w-onboarding mx-auto space-y-5 sm:space-y-8">
+            {saved && (
+              <span className="text-xs text-muted-foreground font-medium">Saved ✓</span>
+            )}
+            <div className="space-y-2 sm:space-y-3">
+              <h1 className="text-5xl font-bold tracking-tight text-foreground leading-tight">{title}</h1>
+              {subtitle && (
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{subtitle}</p>
+              )}
+            </div>
+            <div className="space-y-4 sm:space-y-5">{children}</div>
+          </div>
+        )}
       </div>
 
       {/* Bottom navigation */}
@@ -170,7 +188,7 @@ export function StepShell({
         className="fixed bottom-0 left-0 right-0 z-40 flex items-center bg-background/95 backdrop-blur-md border-t border-border/40"
         style={{ height: "72px" }}
       >
-        <div className="flex items-center justify-end w-full max-w-onboarding mx-auto px-3 sm:px-6">
+        <div className={`flex items-center justify-end w-full ${topIcon ? "max-w-[600px]" : "max-w-onboarding"} mx-auto px-3 sm:px-6`}>
           {isLast ? (
             <button
               onClick={onSubmit}
@@ -193,7 +211,7 @@ export function StepShell({
               >
                 {saving ? "Saving…" : (
                   <>
-                    Continue
+                    Next
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

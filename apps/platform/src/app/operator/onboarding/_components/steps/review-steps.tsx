@@ -451,7 +451,7 @@ export function ReviewSubmitStep({
                 <span className="w-5 h-5 rounded-full bg-secondary text-primary text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                   {item.step}
                 </span>
-                <p className="text-xs text-muted-foreground leading-relaxed">{item.text}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.text}</p>
               </div>
             ))}
           </div>
@@ -543,8 +543,8 @@ export function SubmissionSuccessScreen({
                     {s.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold">{s.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
+                    <p className="text-base font-semibold">{s.title}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
               ))}

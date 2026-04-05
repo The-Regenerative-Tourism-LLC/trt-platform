@@ -191,8 +191,8 @@ export function EvidenceUploadStep({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{ev.fileName}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
+                    <p className="text-base font-medium truncate">{ev.fileName}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span

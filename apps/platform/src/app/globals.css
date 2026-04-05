@@ -168,13 +168,13 @@
 
 @layer base {
   :root {
-    --background: 45 20% 95%;
+   --background: 45 22% 93%;
     --foreground: 30 8% 15%;
 
     --selected: 30 12% 24%;
     --selected-foreground: 40 20% 93%;
 
-    --card: 45 15% 98%;
+    --card: 40 18% 90%;
     --card-foreground: 30 8% 15%;
 
     --popover: 45 15% 98%;
@@ -393,7 +393,7 @@
   }
 
   .glass-card {
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(24px);
   }
@@ -620,6 +620,11 @@
   .max-w-onboarding {
     max-width: 672px;
   }
+
+  .border {
+    border-width: 2px;
+  }
+
 
   .scrollbar-none {
     -ms-overflow-style: none;

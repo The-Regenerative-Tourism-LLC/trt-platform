@@ -59,8 +59,8 @@ export function P2EmploymentStep({
 
       {data.soloOperator ? (
         <div className="rounded-xl border border-primary/30 bg-secondary p-5">
-          <p className="text-sm font-medium text-foreground">Solo operator</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-base font-medium text-foreground">Solo operator</p>
+          <p className="text-sm text-muted-foreground mt-1">
             Employment metrics default to 100% for solo operators. You can continue.
           </p>
         </div>
