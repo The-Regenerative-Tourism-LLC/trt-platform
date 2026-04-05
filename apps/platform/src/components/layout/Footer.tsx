@@ -42,16 +42,10 @@ export function Footer() {
                 Destinations
               </Link>
               <Link
-                href="/signup?role=operator"
+                href="/signup"
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
                 Operator Signup
-              </Link>
-              <Link
-                href="/signup?role=traveler"
-                className="block text-sm text-white/60 hover:text-white transition-colors"
-              >
-                Traveler Signup
               </Link>
               <Link
                 href="/leaderboard"

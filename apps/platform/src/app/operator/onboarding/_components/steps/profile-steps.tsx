@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ReactNode, ChangeEvent } from "react";
 import dynamic from "next/dynamic";
 import { Building2, Mountain, Sparkles, Info, HelpCircle } from "lucide-react";
@@ -243,6 +243,24 @@ export function IdentityStep({
     </div>
   );
 
+  // Auto-deduce territory from destination region or country.
+  // Priority: match territory name against destinationRegion first, then country.
+  useEffect(() => {
+    if (!territories.length) return;
+    const region = (data.destinationRegion ?? "").toLowerCase().trim();
+    const country = (data.country ?? "").toLowerCase().trim();
+    if (!region && !country) return;
+
+    const match =
+      territories.find((t) => region && t.name.toLowerCase() === region) ??
+      territories.find((t) => country && t.country?.toLowerCase() === country);
+
+    if (match && match.id !== data.territoryId) {
+      updateField({ territoryId: match.id });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.destinationRegion, data.country, territories]);
+
   return (
     <StepShell
       {...shell}
@@ -339,20 +357,6 @@ export function IdentityStep({
           </FieldGroup>
         </div>
 
-        <FieldGroup label="Territory">
-          <select
-            value={data.territoryId ?? ""}
-            onChange={(e) => updateField({ territoryId: e.target.value || undefined })}
-            className={inputCls}
-          >
-            <option value="">— Select territory —</option>
-            {territories.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}{t.country ? ` (${t.country})` : ""}
-              </option>
-            ))}
-          </select>
-        </FieldGroup>
       </div>
 
       {/* Ownership */}
@@ -453,15 +457,6 @@ function OwnershipSection({
             </FieldGroup>
           )}
 
-          {/* 4A. Solo operator */}
-          <FieldGroup label="Are you a solo / owner-operator?">
-            <TogglePair
-              value={data.soloOperator}
-              trueLabel="Yes — solo operator"
-              falseLabel="No — I have staff"
-              onChange={(v) => updateField({ soloOperator: v })}
-            />
-          </FieldGroup>
         </>
       )}
 

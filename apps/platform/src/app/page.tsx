@@ -196,16 +196,16 @@ export default function LandingPage() {
               </p>
               <div className="flex items-center gap-4 flex-wrap">
                 <Link
-                  href="/signup?role=operator"
+                  href="/signup"
                   className="inline-flex items-center bg-[hsl(var(--cream))] text-foreground hover:bg-[hsl(var(--cream))]/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
                 >
                   Join as operator
                 </Link>
                 <Link
-                  href="/signup?role=traveler"
+                  href="/traveler/waitlist"
                   className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white font-medium transition-colors"
                 >
-                  Join as a traveler <ArrowRight className="w-4 h-4" />
+                  For travelers <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -314,7 +314,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-8">
                 <Link
-                  href="/signup?role=operator"
+                  href="/signup"
                   className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
                 >
                   Join us
@@ -366,7 +366,7 @@ export default function LandingPage() {
             </h2>
             <div className="mt-8">
               <Link
-                href="/signup?role=operator"
+                href="/signup"
                 className="inline-flex items-center bg-[hsl(var(--cream))] text-foreground hover:bg-[hsl(var(--cream))]/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
               >
                 Join us
@@ -565,7 +565,7 @@ export default function LandingPage() {
               </h3>
               <div className="mt-6">
                 <Link
-                  href="/signup?role=operator"
+                  href="/signup"
                   className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
                 >
                   Join us
@@ -648,7 +648,7 @@ export default function LandingPage() {
 
             <div className="mt-10 text-center reveal">
               <Link
-                href="/signup?role=operator"
+                href="/signup"
                 className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
               >
                 Join us as operator
@@ -762,7 +762,7 @@ export default function LandingPage() {
               </div>
               <div className="mt-8 flex justify-center">
                 <Link
-                  href="/signup?role=operator"
+                  href="/signup"
                   className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-sm font-semibold rounded-lg transition-colors"
                 >
                   Join us
@@ -841,7 +841,7 @@ export default function LandingPage() {
             Now you can prove it.
           </h2>
           <Link
-            href="/signup?role=traveler"
+            href="/traveler/waitlist"
             className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-sm font-semibold rounded-lg transition-colors"
           >
             Join as a traveler

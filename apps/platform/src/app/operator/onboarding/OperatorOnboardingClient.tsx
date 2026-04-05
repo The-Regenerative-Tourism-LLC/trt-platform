@@ -192,6 +192,10 @@ export function OperatorOnboardingClient() {
   const { preview, loading: previewLoading, refreshPreview } = usePreviewScore(data);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(false);
+  // Tracks whether the draft has been loaded from the server so we never
+  // autosave before the initial draft load completes (which could overwrite
+  // real server data with an empty/stale local state).
+  const draftInitializedRef = useRef(false);
 
   const flashSaved = () => {
     setSaved(true);
@@ -238,11 +242,23 @@ export function OperatorOnboardingClient() {
     if (draftData === undefined) return;
     const d = draftData?.draft;
     if (d?.updatedAt && Object.keys(d.dataJson ?? {}).length > 0) {
+      // Server draft is the source of truth — always prefer it.
       loadDraft(d);
       setShowRoadmap(false);
     } else {
-      resetOnboarding();
+      // No server draft. Check if Zustand (localStorage) already has data from
+      // a previous session that hadn't synced to the server yet. If so, keep it
+      // and don't wipe it — the next autosave will push it to the server.
+      // Only call resetOnboarding() when there is truly nothing anywhere.
+      const hasLocalData =
+        Object.keys(useOnboardingStore.getState().data ?? {}).length > 0;
+      if (hasLocalData) {
+        setShowRoadmap(false);
+      } else {
+        resetOnboarding();
+      }
     }
+    draftInitializedRef.current = true;
     setDraftInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftData]);
@@ -258,6 +274,10 @@ export function OperatorOnboardingClient() {
     }
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(() => {
+      // Guard: never autosave before the server draft has been loaded.
+      // Without this, the initial loadDraft/resetOnboarding call would
+      // schedule a save of whatever happened to be in state at that moment.
+      if (!draftInitializedRef.current) return;
       saveDraft().catch(() => {/* best effort */});
     }, 1500);
     return () => {
@@ -265,6 +285,20 @@ export function OperatorOnboardingClient() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  // Save immediately when the page becomes hidden (tab switch, window minimize,
+  // browser close). This catches the case where the user leaves before the
+  // 1500 ms autosave debounce has fired.
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && draftInitializedRef.current) {
+        saveDraft().catch(() => {/* best effort */});
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [saveDraft]);
 
   // ── Navigation handlers ─────────────────────────────────────────────────
 

@@ -45,7 +45,7 @@ export default function LeaderboardPage() {
             code, and joining regenerative activities.
           </p>
           <Button variant="outline" asChild>
-            <Link href="/signup?role=traveler">
+            <Link href="/traveler/waitlist">
               Join as traveler
               <ArrowRight className="w-4 h-4 ml-1.5" />
             </Link>
