@@ -261,8 +261,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
   { id: "p3-status",             label: "Giving Back" },
   { id: "p3-programme",          label: "Programme Details",
     condition: (d) => d.p3Status === "A" || d.p3Status === "B" || d.p3Status === "C" },
-  { id: "p3-evidence-quality",   label: "Evidence Quality",
-    condition: (d) => d.p3Status === "A" || d.p3Status === "B" || d.p3Status === "C" },
   { id: "p3-forward-commitment", label: "Forward Commitment",
     condition: (d) => d.p3Status === "D" },
   { id: "delta",                 label: "Prior Cycle",
@@ -385,8 +383,7 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
 
   "identity": (d) =>
     isNonEmpty(d.legalName) &&
-    isNonEmpty(d.country) &&
-    isNonEmpty(d.territoryId),
+    isNonEmpty(d.country),
 
   // Legacy individual validators (kept for backward compat, not in active step list)
   "accommodation": (d) => {
@@ -515,14 +512,6 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
     return (
       Array.isArray(d.p3ContributionCategories) &&
       d.p3ContributionCategories.length > 0 &&
-      isNonEmpty(d.p3ProgrammeDescription) &&
-      isPositiveNumber(d.p3AnnualBudget)
-    );
-  },
-
-  "p3-evidence-quality": (d) => {
-    if (d.p3Status !== "A" && d.p3Status !== "B" && d.p3Status !== "C") return true;
-    return (
       typeof d.p3Traceability === "number" &&
       typeof d.p3Additionality === "number" &&
       typeof d.p3Continuity === "number"
@@ -540,21 +529,7 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
   // GPS preview — read-only summary, always passable
   "gps-preview": (_d) => true,
 
-  "evidence-checklist": (d) => {
-    const base =
-      d.evidenceChecklistElectricity === true &&
-      d.evidenceChecklistGasFuel === true &&
-      d.evidenceChecklistWater === true &&
-      d.evidenceChecklistWaste === true &&
-      d.evidenceChecklistEmployment === true &&
-      d.evidenceChecklistSupplier === true &&
-      d.evidenceChecklistBooking === true &&
-      d.evidenceChecklistOwnership === true;
-    const p3Need =
-      d.p3Status === "A" || d.p3Status === "B" || d.p3Status === "C";
-    const p3Ok = !p3Need || d.evidenceChecklistP3 === true;
-    return base && p3Ok;
-  },
+  "evidence-checklist": (_d) => true,
 
   // Delta step — informational only for Cycle 2+, always passable
   "delta": (_d) => true,
@@ -611,7 +586,7 @@ export const SECTION_GROUPS: readonly SectionGroup[] = [
     id: "pillar3",
     label: "Regenerative Contribution",
     shortLabel: "P3",
-    stepIds: ["p3-status", "p3-programme", "p3-evidence-quality", "p3-forward-commitment"],
+    stepIds: ["p3-status", "p3-programme", "p3-forward-commitment"],
   },
   {
     id: "submit",
@@ -646,7 +621,6 @@ export const STEP_SECTIONS: Readonly<Record<string, string>> = {
   "p2-community":            "Pillar 2 — Local Integration",
   "p3-status":               "Pillar 3 — Regenerative Contribution",
   "p3-programme":            "Pillar 3 — Regenerative Contribution",
-  "p3-evidence-quality":     "Pillar 3 — Regenerative Contribution",
   "p3-forward-commitment":   "Pillar 3 — Regenerative Contribution",
   "delta":                   "Review",
   "gps-preview":             "Review",

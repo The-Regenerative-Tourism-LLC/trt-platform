@@ -190,13 +190,20 @@ export function StepShell({
       >
         <div className={`flex items-center justify-end w-full ${topIcon ? "max-w-[600px]" : "max-w-onboarding"} mx-auto px-3 sm:px-6`}>
           {isLast ? (
-            <button
-              onClick={onSubmit}
-              disabled={saving || !canSubmit}
-              className="inline-flex items-center gap-2 bg-foreground text-background font-semibold rounded-xl h-10 sm:h-11 px-5 sm:px-8 text-sm sm:text-base disabled:opacity-40 hover:opacity-90 transition-opacity"
-            >
-              {saving ? "Submitting…" : "Submit Assessment"}
-            </button>
+            <div className="flex flex-col items-end gap-1">
+              {!canSubmit && (
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  Tick the confirmation above to submit.
+                </p>
+              )}
+              <button
+                onClick={onSubmit}
+                disabled={saving || !canSubmit}
+                className="inline-flex items-center gap-2 bg-foreground text-background font-semibold rounded-xl h-10 sm:h-11 px-5 sm:px-8 text-sm sm:text-base disabled:opacity-40 hover:opacity-90 transition-opacity"
+              >
+                {saving ? "Submitting…" : "Submit Assessment"}
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col items-end gap-1">
               {canNext === false && (
@@ -231,69 +238,43 @@ export function GpsFloatingCard({
   p2,
   p3,
   gps,
-  gpsBand,
   visible,
 }: {
   p1: number;
   p2: number;
   p3: number;
   gps: number;
-  gpsBand?: string;
   visible: boolean;
 }) {
   if (!visible) return null;
 
-  const bandLabels: Record<string, string> = {
-    regenerative_leader: "Regenerative Leader",
-    regenerative_practice: "Regenerative Practice",
-    advancing: "Advancing",
-    developing: "Developing",
-    not_yet_published: "Not Yet Published",
-  };
-  const bandColors: Record<string, string> = {
-    regenerative_leader: "text-primary",
-    regenerative_practice: "text-teal-600",
-    advancing: "text-sky-600",
-    developing: "text-amber-600",
-    not_yet_published: "text-muted-foreground",
-  };
-
   return (
-    <div className="hidden lg:block fixed top-20 right-6 z-30 w-56">
+    <div className="hidden lg:block fixed top-20 right-6 z-30 w-52">
       <div className="rounded-xl border bg-card shadow-lg p-4 space-y-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           GPS Preview
         </p>
-        <div className="text-center">
-          <span className={`text-3xl font-bold tabular-nums ${bandColors[gpsBand ?? ""] ?? "text-foreground"}`}>
-            {Math.round(gps)}
-          </span>
-          {gpsBand && (
-            <p className={`text-xs font-medium mt-0.5 ${bandColors[gpsBand] ?? "text-muted-foreground"}`}>
-              {bandLabels[gpsBand] ?? gpsBand}
-            </p>
-          )}
-        </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {([
-            { label: "P1 Footprint", score: p1, color: "bg-primary" },
-            { label: "P2 Integration", score: p2, color: "bg-teal-500" },
-            { label: "P3 Regenerative", score: p3, color: "bg-sky-500" },
+            { label: "P1 Footprint", score: p1 },
+            { label: "P2 Integration", score: p2 },
+            { label: "P3 Contribution", score: p3 },
           ] as const).map((p) => (
-            <div key={p.label} className="space-y-0.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground">{p.label}</span>
-                <span className="text-[10px] font-bold tabular-nums">{Math.round(p.score)}</span>
-              </div>
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${p.color} rounded-full transition-all duration-500`}
-                  style={{ width: `${Math.min(Math.max(p.score, 0), 100)}%` }}
-                />
-              </div>
+            <div key={p.label} className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">{p.label}</span>
+              <span className="text-xs tabular-nums text-foreground">
+                {p.score.toFixed(1)}/100
+              </span>
             </div>
           ))}
         </div>
+        <div className="border-t border-border/50 pt-2 flex items-center justify-between">
+          <span className="text-sm font-bold">GPS</span>
+          <span className="text-xl font-bold tabular-nums">{gps.toFixed(1)}</span>
+        </div>
+        <p className="text-xs text-center text-muted-foreground">
+          Not Yet Published
+        </p>
       </div>
     </div>
   );

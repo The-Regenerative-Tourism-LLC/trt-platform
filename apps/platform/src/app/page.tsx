@@ -171,7 +171,7 @@ export default function LandingPage() {
         <div className="relative z-10 w-full px-6 md:px-16 lg:px-24 pb-16 md:pb-24">
           <div className="max-w-[1400px] mx-auto grid md:grid-cols-[1.2fr_1fr] gap-10 md:gap-20 items-end">
             <div>
-              <p className="font-[var(--font-hand)] text-base md:text-lg text-white/60 mb-4 italic">
+              <p className="font-hand text-base md:text-lg text-white/60 mb-4 italic">
                 The first regenerative map of tourism
               </p>
               <h1 className="fm-hero-heading text-white">
@@ -332,7 +332,7 @@ export default function LandingPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="font-[var(--font-hand)] text-lg md:text-xl text-muted-foreground italic text-right">
+              <p className="font-hand text-lg md:text-xl text-muted-foreground italic text-right">
                 2026 — We start here in Madeira
               </p>
             </div>
@@ -352,7 +352,7 @@ export default function LandingPage() {
         />
         <div className="relative max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-28 md:py-44 text-center">
           <div className="reveal">
-            <p className="font-[var(--font-hand)] text-lg md:text-xl text-white/70 italic">
+            <p className="font-hand text-lg md:text-xl text-white/70 italic">
               Founding cohort · Madeira 2026
             </p>
             <h2 className="fm-section-heading text-white mt-4 max-w-3xl mx-auto">
@@ -380,7 +380,7 @@ export default function LandingPage() {
       <section className="fm-cream border-t border-border">
         <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 pt-24 pb-12 md:pt-40 md:pb-20">
           <div className="text-center reveal">
-            <p className="font-[var(--font-hand)] text-lg md:text-xl text-muted-foreground italic">
+            <p className="font-hand text-lg md:text-xl text-muted-foreground italic">
               Coming soon — Off the beaten track.
             </p>
             <h2 className="fm-section-heading text-foreground mt-4">
@@ -509,7 +509,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <p className="font-[var(--font-hand)] text-base text-muted-foreground italic text-center mt-8">
+          <p className="font-hand text-base text-muted-foreground italic text-center mt-8">
             100% electric · 100% local
           </p>
         </div>
@@ -519,7 +519,7 @@ export default function LandingPage() {
       <section className="fm-cream">
         <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-24 md:py-40">
           <div className="text-center reveal">
-            <p className="font-[var(--font-hand)] text-lg md:text-xl text-muted-foreground italic mb-4">
+            <p className="font-hand text-lg md:text-xl text-muted-foreground italic mb-4">
               Meet the Green Passport
             </p>
             <h2 className="fm-section-heading text-foreground">
@@ -601,7 +601,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col justify-center px-8 md:px-16 lg:px-24 py-16 md:py-24">
             <div className="reveal">
-              <p className="font-[var(--font-hand)] text-lg md:text-xl text-muted-foreground italic mb-3">
+              <p className="font-hand text-lg md:text-xl text-muted-foreground italic mb-3">
                 Simple, transparent, verified
               </p>
               <h2 className="fm-section-heading text-foreground mb-12">
@@ -635,7 +635,7 @@ export default function LandingPage() {
                     {step.num}
                   </span>
                   <div className="flex-1">
-                    <span className="font-[var(--font-hand)] text-lg md:text-xl text-foreground block mb-1">
+                    <span className="font-hand text-lg md:text-xl text-foreground block mb-1">
                       {step.title}
                     </span>
                     <p className="text-base text-muted-foreground leading-relaxed">
@@ -663,7 +663,7 @@ export default function LandingPage() {
         <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-24 md:py-40">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
             <div className="reveal">
-              <p className="font-[var(--font-hand)] text-lg md:text-xl text-foreground/60 italic mb-4">
+              <p className="font-hand text-lg md:text-xl text-foreground/60 italic mb-4">
                 Every destination is different
               </p>
               <h2 className="fm-section-heading text-foreground">
@@ -832,7 +832,7 @@ export default function LandingPage() {
 
         {/* Centered heading + CTA */}
         <div className="relative z-20 flex flex-col items-center justify-center min-h-[60vh] md:min-h-[70vh] px-6 text-center">
-          <p className="font-[var(--font-hand)] text-base md:text-xl text-muted-foreground italic mb-4">
+          <p className="font-hand text-base md:text-xl text-muted-foreground italic mb-4">
             For travelers
           </p>
           <h2 className="fm-hero-heading text-foreground mb-10">
@@ -855,7 +855,7 @@ export default function LandingPage() {
         <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-24 space-y-10">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <p className="font-[var(--font-hand)] text-lg md:text-xl italic mb-3">
+              <p className="font-hand text-lg md:text-xl italic mb-3">
                 FAQs
               </p>
               <h2 className="fm-section-heading">Common Questions</h2>
