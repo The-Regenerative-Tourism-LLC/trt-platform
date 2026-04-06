@@ -62,7 +62,7 @@ export default function TravelerWaitlistPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
         <div className="relative z-10 max-w-[1400px] mx-auto w-full px-6 md:px-16 lg:px-24 pb-16 md:pb-24 grid md:grid-cols-2 gap-10 items-end">
           <div>
-            <p className="font-[var(--font-hand)] text-base md:text-xl italic mb-4 text-white/70">
+            <p className="font-hand text-base md:text-xl italic mb-4 text-white/70">
               For travelers
             </p>
             <h1 className="fm-hero-heading leading-none">
@@ -88,7 +88,7 @@ export default function TravelerWaitlistPage() {
       {/* ═══ 2. WHAT YOU CAN DO TODAY ═══ */}
       <section style={{ backgroundColor: "#F5F1EB" }}>
         <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-24">
-          <p className="font-[var(--font-hand)] text-base md:text-xl italic mb-3 text-muted-foreground">
+          <p className="font-hand text-base md:text-xl italic mb-3 text-muted-foreground">
             Available now
           </p>
           <h2 className="fm-section-heading mb-3">What you can do today</h2>
@@ -130,7 +130,7 @@ export default function TravelerWaitlistPage() {
       {/* ═══ 3. HOW IT WILL WORK ═══ */}
       <section style={{ backgroundColor: "#EDEAE4" }}>
         <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-24">
-          <p className="font-[var(--font-hand)] text-base md:text-xl italic mb-3 text-muted-foreground">
+          <p className="font-hand text-base md:text-xl italic mb-3 text-muted-foreground">
             Coming soon
           </p>
           <h2 className="fm-section-heading mb-3">How it will work</h2>
@@ -239,7 +239,7 @@ export default function TravelerWaitlistPage() {
 
         {/* Centered content */}
         <div className="relative z-20 flex flex-col items-center justify-center min-h-[60vh] md:min-h-[70vh] px-6 text-center">
-          <p className="font-[var(--font-hand)] text-base md:text-xl text-muted-foreground italic mb-4">
+          <p className="font-hand text-base md:text-xl text-muted-foreground italic mb-4">
             For travelers
           </p>
           <h2 className="fm-hero-heading text-foreground mb-10">

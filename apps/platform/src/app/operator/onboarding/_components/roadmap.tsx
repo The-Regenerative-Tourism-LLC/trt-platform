@@ -116,10 +116,7 @@ export function RoadmapScreen({
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   ) : (
-                    <span
-                      className="text-base sm:text-lg leading-none"
-                      style={{ fontFamily: "var(--font-hand, 'Caveat', cursive)", fontWeight: 400 }}
-                    >
+                    <span className="font-hand font-normal text-base sm:text-lg leading-none">
                       {s.num}
                     </span>
                   )}

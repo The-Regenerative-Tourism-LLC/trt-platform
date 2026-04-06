@@ -25,7 +25,7 @@ export function Footer() {
 
           {/* Platform */}
           <div className="md:col-span-3 space-y-4">
-            <p className="font-[var(--font-hand)] text-xl text-white/50">
+            <p className="font-hand text-xl text-white/50">
               Platform
             </p>
             <div className="space-y-2.5">
@@ -64,7 +64,7 @@ export function Footer() {
 
           {/* Methodology */}
           <div className="md:col-span-4 space-y-4">
-            <p className="font-[var(--font-hand)] text-xl text-white/50">
+            <p className="font-hand text-xl text-white/50">
               Methodology
             </p>
             <div className="space-y-2.5">

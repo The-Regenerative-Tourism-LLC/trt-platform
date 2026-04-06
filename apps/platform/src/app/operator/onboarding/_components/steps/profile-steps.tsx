@@ -857,18 +857,18 @@ const ACCOM_CATEGORIES_MERGED = [
 ];
 
 const EXPERIENCE_SUBCATEGORIES_MERGED = [
-  { id: "nature_wildlife",      label: "Nature & Wildlife",       icon: "🌿" },
-  { id: "whale_watching",       label: "Whale & Dolphin Watching", icon: "🐋" },
-  { id: "diving_snorkelling",   label: "Diving & Snorkelling",    icon: "🤿" },
-  { id: "hiking_trekking",      label: "Hiking & Trekking",       icon: "🥾" },
-  { id: "kayaking_watersports", label: "Kayaking & Water Sports", icon: "🚣" },
-  { id: "cycling",              label: "Cycling & E-bike",        icon: "🚴" },
-  { id: "cultural_heritage",    label: "Cultural & Heritage",     icon: "🏛️" },
-  { id: "photography",          label: "Photography Tours",       icon: "📸" },
-  { id: "birdwatching",         label: "Birdwatching",            icon: "🦅" },
-  { id: "wellness_yoga",        label: "Wellness & Yoga",         icon: "🧘" },
-  { id: "volunteering",         label: "Volunteering",            icon: "🤝" },
-  { id: "food_agritourism",     label: "Food & Agritourism",      icon: "🍷" },
+
+  { id: "nature_wildlife",      label: "Nature & Wildlife",                    desc: "Nature walks, wildlife photography, guided nature experiences",          icon: "🌿" },
+  { id: "whale_watching",       label: "Whale & Dolphin Watching",             desc: "Cetacean observation tours, marine wildlife excursions",                 icon: "🐋" },
+  { id: "diving_snorkelling",   label: "Snorkelling & Diving",                 desc: "Reef diving, snorkelling tours, underwater exploration",                 icon: "🤿" },
+  { id: "birdwatching",         label: "Birdwatching & Wildlife Observation",  desc: "Guided birdwatching, wildlife hides, species identification walks",      icon: "🦅" },
+  { id: "kayaking_watersports", label: "Water-based Activities",               desc: "Kayaking, surfing, sailing, canyoning, stand-up paddleboarding",        icon: "🚣" },
+  { id: "cultural_heritage",    label: "Cultural & Heritage",                  desc: "Historical tours, museum visits, heritage experiences",                  icon: "🏛️" },
+  { id: "cooking_food",         label: "Cooking Classes & Food Experiences",   desc: "Traditional cooking workshops, food tours, gastronomy experiences",      icon: "🍳" },
+  { id: "art_craft",            label: "Art & Craft Workshops",                desc: "Embroidery, pottery, painting, woodworking, traditional crafts",         icon: "🎨" },
+  { id: "adventure_sport",      label: "Adventure & Sport",                    desc: "Hiking, climbing, MTB, trail running, paragliding",                     icon: "⛰️" },
+  { id: "wellness_creative",    label: "Wellness & Creative",                  desc: "Yoga retreats, art workshops, photography tours, meditation",            icon: "🧘" },
+  { id: "food_agritourism",     label: "Food & Agritourism",                   desc: "Farm visits, wine tours, food trails, foraging, harvest experiences",    icon: "🌾" },
 ];
 
 const FOOD_SERVICE_OPTIONS = [
@@ -894,22 +894,85 @@ const FOOD_SERVICE_OPTIONS = [
   },
 ];
 
+function FoodServiceSection({
+  data,
+  updateField,
+}: {
+  data: OnboardingData;
+  updateField: (patch: Partial<OnboardingData>) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-1.5">
+        <p className="text-sm font-semibold">Do you serve food on-site?</p>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>
+            <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
+          >
+            This helps us tailor the procurement section — if you don&apos;t serve food, we won&apos;t ask about food &amp; beverage sourcing.
+          </TooltipContent>
+        </Tooltip>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {FOOD_SERVICE_OPTIONS.map((fs) => (
+          <button
+            key={fs.id}
+            onClick={() => updateField({ foodServiceType: fs.id })}
+            className={`rounded-xl border-2 p-4 text-left transition-all ${
+              data.foodServiceType === fs.id
+                ? "border-foreground bg-secondary"
+                : "border-border hover:border-foreground/30 bg-background"
+            }`}
+          >
+            <p className="text-base font-semibold">{fs.label}</p>
+            <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{fs.desc}</p>
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
+        <span className="text-base shrink-0 mt-0.5">🌿</span>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          <span className="font-semibold text-foreground">Food &amp; agritourism tip:</span>{" "}
+          Operators with on-site kitchens can significantly boost their P2 score by sourcing from local farms and producers within 100 km. We&apos;ll ask about this in the procurement section.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function OperationActivityStep({ data, updateField, shell }: StepProps) {
   const selectedExp = data.experienceTypes ?? [];
   const showAccom = data.operatorType === "A" || data.operatorType === "C";
   const showExp   = data.operatorType === "B" || data.operatorType === "C";
   const showSplit  = data.operatorType === "C";
+  const isPureExp = data.operatorType === "B";
+
+  const topIcon = isPureExp ? (
+    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+      <Mountain className="w-6 h-6 text-muted-foreground" />
+    </div>
+  ) : (
+    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+      <Building2 className="w-6 h-6 text-muted-foreground" />
+    </div>
+  );
 
   return (
     <StepShell
       {...shell}
-      title="Property & activity details"
+      title={isPureExp ? "Experience details" : "Property & activity details"}
       subtitle="Tell us about your operation and its annual activity."
+      topIcon={topIcon}
     >
       {/* ── Accommodation details (A/C) */}
       {showAccom && (
         <>
-          {/* 1. Property type */}
           <div className="space-y-3">
             <div>
               <p className="text-sm font-semibold">Accommodation categories</p>
@@ -932,7 +995,6 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
             </div>
           </div>
 
-          {/* 2 & 3. Rooms + Bed capacity */}
           <div className="grid grid-cols-2 gap-4">
             <FieldGroup label="Number of rooms / units">
               <NumberInput value={data.rooms} onChange={(v) => updateField({ rooms: v })} placeholder="e.g. 12" min={1} />
@@ -942,68 +1004,25 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
             </FieldGroup>
           </div>
 
-          {/* 5. Annual activity */}
           <div className="space-y-4 border-t border-border/50 pt-5">
             <p className="text-sm font-semibold">Annual activity</p>
             <FieldGroup label="Total guest-nights (last 12 months)">
-              <NumberInput
-                value={data.guestNights}
-                onChange={(v) => updateField({ guestNights: v })}
-                placeholder="e.g. 3200"
-                min={0}
-              />
+              <NumberInput value={data.guestNights} onChange={(v) => updateField({ guestNights: v })} placeholder="e.g. 3200" min={0} />
             </FieldGroup>
             <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
               <Info className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
               <div className="text-sm text-muted-foreground leading-relaxed">
                 <p className="font-medium text-foreground/80 mb-1">How to calculate guest-nights</p>
-                <p>Guest-nights = number of guests × number of nights stayed over the last 12 months. For example, 2 guests staying 3 nights = 6 guest-nights. If you don&apos;t know the exact number, provide your best estimate.</p>
+                <p>Guest-nights = number of guests × number of nights stayed. For example, 2 guests staying 3 nights = 6 guest-nights.</p>
               </div>
             </div>
             <FieldGroup label="Average price per night (€)">
-              <NumberInput
-                value={data.pricePerNight}
-                onChange={(v) => updateField({ pricePerNight: v })}
-                placeholder="e.g. 85"
-                min={0}
-              />
+              <NumberInput value={data.pricePerNight} onChange={(v) => updateField({ pricePerNight: v })} placeholder="e.g. 85" min={0} />
             </FieldGroup>
           </div>
 
-          {/* 4. Food service */}
-          <div className="space-y-3 border-t border-border/50 pt-5">
-            <div className="flex items-center gap-1.5">
-              <p className="text-sm font-semibold">Do you serve food on-site?</p>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
-                    <HelpCircle className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
-                >
-                  This helps us tailor the procurement section — if you don&apos;t serve food, we won&apos;t ask about food &amp; beverage sourcing.
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {FOOD_SERVICE_OPTIONS.map((fs) => (
-                <button
-                  key={fs.id}
-                  onClick={() => updateField({ foodServiceType: fs.id })}
-                  className={`rounded-xl border-2 p-4 text-left transition-all ${
-                    data.foodServiceType === fs.id
-                      ? "border-foreground bg-secondary"
-                      : "border-border hover:border-foreground/30 bg-background"
-                  }`}
-                >
-                  <p className="text-base font-semibold">{fs.label}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{fs.desc}</p>
-                </button>
-              ))}
-            </div>
+          <div className="border-t border-border/50 pt-5">
+            <FoodServiceSection data={data} updateField={updateField} />
           </div>
         </>
       )}
@@ -1012,11 +1031,13 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
       {showExp && (
         <div className="space-y-4">
           {showAccom && <div className="border-t border-border/50" />}
+
+          {/* Subcategories */}
           <div>
-            <p className="text-sm font-semibold">Experience types</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Select all that apply.</p>
+            <p className="text-sm font-semibold">Experience subcategories</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Select all that apply</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             {EXPERIENCE_SUBCATEGORIES_MERGED.map((sub) => {
               const isSelected = selectedExp.includes(sub.id);
               return (
@@ -1029,26 +1050,60 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                         : [...selectedExp, sub.id],
                     })
                   }
-                  className={`rounded-xl border-2 p-3 text-left transition-all ${
+                  className={`rounded-xl border-2 p-4 text-left transition-all ${
                     isSelected
                       ? "border-foreground bg-secondary shadow-sm"
-                      : "border-border hover:border-primary/40 hover:bg-muted/20"
+                      : "border-border hover:border-foreground/30 bg-background"
                   }`}
                 >
-                  <span className="text-xl block mb-1">{sub.icon}</span>
-                  <p className="text-xs font-semibold leading-tight">{sub.label}</p>
+                  <span className="text-2xl block mb-2">{sub.icon}</span>
+                  <p className="text-sm font-semibold leading-tight">{sub.label}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-snug">{sub.desc}</p>
                 </button>
               );
             })}
           </div>
 
-          {/* Annual activity for B/C */}
-          <div className="space-y-4 border-t border-border/50 pt-5">
-            <p className="text-sm font-semibold">Annual activity</p>
-            <FieldGroup label="Total visitor-days">
-              <NumberInput value={data.visitorDays} onChange={(v) => updateField({ visitorDays: v })} placeholder="e.g. 2 000" min={0} />
-            </FieldGroup>
+          {/* Visitor-days */}
+          <div className="space-y-3 border-t border-border/50 pt-5">
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-semibold">Total visitor-days (last 12 months)</p>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+                    <HelpCircle className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-background text-foreground border border-border shadow-md max-w-[280px] text-sm leading-relaxed py-3 px-4"
+                >
+                  Count each participant per day. Half-day and short sessions are weighted fractionally.
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <NumberInput
+              value={data.visitorDays}
+              onChange={(v) => updateField({ visitorDays: v })}
+              placeholder="e.g. 1600"
+              unit="visitor-days"
+              min={0}
+            />
+            <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">Visitor-day = 8 hours of activity per participant.</span>{" "}
+                Full day (8h) → 1.00 · Half day (4h) → 0.50 · Short session (2h) → 0.25
+              </p>
+            </div>
           </div>
+
+          {/* Food service for B */}
+          {isPureExp && (
+            <div className="border-t border-border/50 pt-5">
+              <FoodServiceSection data={data} updateField={updateField} />
+            </div>
+          )}
         </div>
       )}
 

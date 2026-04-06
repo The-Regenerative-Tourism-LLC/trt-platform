@@ -322,6 +322,13 @@
   }
 }
 
+@layer base {
+  /* `font-[var(--font-hand)]` is parsed as font-weight in Tailwind v4; use this for Caveat. */
+  .font-hand {
+    font-family: var(--font-hand);
+  }
+}
+
 @layer components {
   .score-number {
     font-size: 3rem;

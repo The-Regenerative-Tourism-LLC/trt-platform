@@ -383,8 +383,7 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
 
   "identity": (d) =>
     isNonEmpty(d.legalName) &&
-    isNonEmpty(d.country) &&
-    isNonEmpty(d.territoryId),
+    isNonEmpty(d.country),
 
   // Legacy individual validators (kept for backward compat, not in active step list)
   "accommodation": (d) => {
