@@ -28,7 +28,7 @@ import {
   type AssessmentSnapshotInput,
 } from "../snapshots/assessment-snapshot.builder";
 import { loadActiveBundle } from "../methodology/methodology-bundle.loader";
-import { findLatestDpiByTerritory } from "../db/repositories/dpi.repo";
+import { findLatestDpiByTerritory, findMadeiraTerritoryId } from "../db/repositories/dpi.repo";
 import { createAssessmentSnapshot } from "../db/repositories/assessment.repo";
 import {
   createScoreSnapshot,
@@ -92,6 +92,10 @@ export interface ScoringResult {
   dpsBand: string | null;
   dpiScore: number;
   dpiPressureLevel: string;
+  /** Territory whose DPI was used (may be Madeira when operator territory has no DPI). */
+  dpiTerritoryId: string;
+  /** True when dpiTerritoryId ≠ input.territoryId (Madeira or FALLBACK used as reference). */
+  referenceDpi: boolean;
   methodologyVersion: string;
   isPublished: boolean;
   publicationBlockedReason: string | null;
@@ -237,20 +241,50 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
   }
 
   // ── Step 4: Load active DPI snapshot for territory ─────────────────────
+  // If the operator's territory has no DPI, fall back to Madeira as reference.
+  // effectiveDpiRecord  — actual DB record used (for linking ScoreSnapshot.dpiSnapshotId)
+  // referenceDpi        — true when operator territory ≠ DPI territory
+  // dpiTerritoryId      — territory whose DPI was used (denormalised for analytics)
   const dpiRecord = await findLatestDpiByTerritory(input.territoryId);
-  const dpiSnapshot: DpiSnapshot = dpiRecord
-    ? {
-        territoryId: dpiRecord.territoryId,
-        touristIntensity: Number(dpiRecord.touristIntensity),
-        ecologicalSensitivity: Number(dpiRecord.ecologicalSensitivity),
-        economicLeakageRate: Number(dpiRecord.economicLeakageRate),
-        regenerativePerf: Number(dpiRecord.regenerativePerf),
-        compositeDpi: Number(dpiRecord.compositeDpi),
-        pressureLevel: dpiRecord.pressureLevel,
-        snapshotHash: dpiRecord.snapshotHash ?? "no-hash",
-        createdAt: dpiRecord.createdAt.toISOString(),
-      }
-    : { ...FALLBACK_DPI, territoryId: input.territoryId };
+  let effectiveDpiRecord = dpiRecord;
+  let referenceDpi = false;
+  let dpiSnapshot: DpiSnapshot;
+
+  if (dpiRecord) {
+    dpiSnapshot = {
+      territoryId: dpiRecord.territoryId,
+      touristIntensity: Number(dpiRecord.touristIntensity),
+      ecologicalSensitivity: Number(dpiRecord.ecologicalSensitivity),
+      economicLeakageRate: Number(dpiRecord.economicLeakageRate),
+      regenerativePerf: Number(dpiRecord.regenerativePerf),
+      compositeDpi: Number(dpiRecord.compositeDpi),
+      pressureLevel: dpiRecord.pressureLevel,
+      snapshotHash: dpiRecord.snapshotHash ?? "no-hash",
+      createdAt: dpiRecord.createdAt.toISOString(),
+    };
+  } else {
+    // No DPI for this territory — always reference DPI regardless of Madeira availability
+    referenceDpi = true;
+    const madeiraId = await findMadeiraTerritoryId();
+    const madeiraDpi = madeiraId ? await findLatestDpiByTerritory(madeiraId) : null;
+    effectiveDpiRecord = madeiraDpi;
+    dpiSnapshot = madeiraDpi
+      ? {
+          territoryId: madeiraDpi.territoryId,
+          touristIntensity: Number(madeiraDpi.touristIntensity),
+          ecologicalSensitivity: Number(madeiraDpi.ecologicalSensitivity),
+          economicLeakageRate: Number(madeiraDpi.economicLeakageRate),
+          regenerativePerf: Number(madeiraDpi.regenerativePerf),
+          compositeDpi: Number(madeiraDpi.compositeDpi),
+          pressureLevel: madeiraDpi.pressureLevel,
+          snapshotHash: madeiraDpi.snapshotHash ?? "no-hash",
+          createdAt: madeiraDpi.createdAt.toISOString(),
+        }
+      : { ...FALLBACK_DPI, territoryId: input.territoryId };
+  }
+
+  // Territory whose DPI is being used — stored for analytics
+  const dpiTerritoryId = dpiSnapshot.territoryId;
 
   // ── Step 5: Load active MethodologyBundle ──────────────────────────────
   const { bundle: methodology, hash: bundleHash } = await loadActiveBundle();
@@ -307,7 +341,9 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
   const persistedScore = await createScoreSnapshot({
     assessmentSnapshot: { connect: { id: persistedAssessment.id } },
     operator: { connect: { id: input.operatorId } },
-    ...(dpiRecord ? { dpiSnapshot: { connect: { id: dpiRecord.id } } } : {}),
+    ...(effectiveDpiRecord ? { dpiSnapshot: { connect: { id: effectiveDpiRecord.id } } } : {}),
+    dpiTerritoryId,
+    referenceDpi,
     methodologyVersion: methodology.version,
     inputHash,
     bundleHash,
@@ -380,6 +416,8 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     dpsBand: persistedScore.dpsBand,
     dpiScore: Number(persistedScore.dpiScore ?? 50),
     dpiPressureLevel: persistedScore.dpiPressureLevel ?? "moderate",
+    dpiTerritoryId: persistedScore.dpiTerritoryId ?? dpiTerritoryId,
+    referenceDpi: persistedScore.referenceDpi,
     methodologyVersion: persistedScore.methodologyVersion,
     isPublished: persistedScore.isPublished,
     publicationBlockedReason: persistedScore.publicationBlockedReason,

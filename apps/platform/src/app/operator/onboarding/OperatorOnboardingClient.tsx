@@ -55,7 +55,6 @@ import {
 import {
   P3StatusStep,
   P3ProgrammeStep,
-  P3EvidenceQualityStep,
   P3ForwardCommitmentStep,
 } from "./_components/steps/p3-steps";
 import {
@@ -264,8 +263,15 @@ export function OperatorOnboardingClient() {
   }, [draftData]);
 
   useEffect(() => {
-    if (stepId === "gps-preview") refreshPreview();
+    if (stepId === "gps-preview" || stepId === "evidence-checklist") refreshPreview();
   }, [stepId, refreshPreview]);
+
+  // Refresh preview when communityScore changes on the community step so the
+  // 2D Community bar updates live without requiring Next navigation.
+  useEffect(() => {
+    if (stepId === "p2-community" && data.communityScore != null) refreshPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.communityScore]);
 
   useEffect(() => {
     if (!isMountedRef.current) {
@@ -356,7 +362,9 @@ export function OperatorOnboardingClient() {
     setSaving(true);
     try {
       const operator = onboardingData?.operator;
-      const territoryId = data.territoryId ?? operator?.territoryId;
+      // Resolve territoryId: onboarding state → operator record → Madeira fallback
+      const madeira = territories.find((t) => t.name.toLowerCase() === "madeira");
+      const territoryId = data.territoryId ?? operator?.territoryId ?? madeira?.id;
       if (!operator?.id || !territoryId) {
         toast.error("Operator profile incomplete — territory not assigned");
         return;
@@ -397,9 +405,11 @@ export function OperatorOnboardingClient() {
     "p2-community",
     "p3-status",
     "p3-programme",
-    "p3-evidence-quality",
     "p3-forward-commitment",
     "delta",
+    "gps-preview",
+    "evidence-checklist",
+    "review-submit",
   ]);
   const showGpsFloat = GPS_FLOAT_STEPS.has(stepId) && preview != null;
 
@@ -423,7 +433,6 @@ export function OperatorOnboardingClient() {
       p2={preview?.pillar2Score ?? 0}
       p3={preview?.pillar3Score ?? 0}
       gps={preview?.gpsScore ?? 0}
-      gpsBand={preview?.gpsBand}
       visible={showGpsFloat}
     />
   );
@@ -471,7 +480,7 @@ export function OperatorOnboardingClient() {
 
   // ── Step dispatch ─────────────────────────────────────────────────────────
 
-  const territories: Array<{ id: string; name: string; country: string | null }> =
+  const territories: Array<{ id: string; name: string; country: string | null; compositeDpi?: number | null }> =
     onboardingData?.territories ?? [];
 
   switch (stepId) {
@@ -505,12 +514,10 @@ export function OperatorOnboardingClient() {
       return <P3StatusStep {...stepProps} />;
     case "p3-programme":
       return <P3ProgrammeStep {...stepProps} />;
-    case "p3-evidence-quality":
-      return <P3EvidenceQualityStep {...stepProps} />;
     case "p3-forward-commitment":
       return <P3ForwardCommitmentStep {...stepProps} />;
     case "evidence-checklist":
-      return <EvidenceChecklistStep {...stepProps} />;
+      return <EvidenceChecklistStep {...stepProps} preview={preview} previewLoading={previewLoading} />;
     case "delta":
       return (
         <DeltaStep
@@ -526,6 +533,8 @@ export function OperatorOnboardingClient() {
           shell={shell}
           preview={preview}
           previewLoading={previewLoading}
+          floatingGps={floatingGps}
+          referenceDpi={preview?.referenceDpi ?? data.referenceDpi}
         />
       );
     case "review-submit":
@@ -539,6 +548,8 @@ export function OperatorOnboardingClient() {
           onDeclarationChange={setDeclarationChecked}
           onSubmit={handleSubmit}
           onEditSection={setStepId}
+          floatingGps={floatingGps}
+          referenceDpi={preview?.referenceDpi ?? data.referenceDpi}
         />
       );
     default:

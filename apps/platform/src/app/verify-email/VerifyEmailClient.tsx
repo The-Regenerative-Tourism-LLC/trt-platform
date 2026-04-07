@@ -251,7 +251,7 @@ export default function VerifyEmailClient() {
                 disabled={resendLoading}
                 className="w-full bg-primary text-primary-foreground text-sm font-semibold py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {resendLoading ? "Sending…" : "Resend verification email"}
+                {resendLoading ? "Sending…" : "Send verification email"}
               </button>
             </form>
 

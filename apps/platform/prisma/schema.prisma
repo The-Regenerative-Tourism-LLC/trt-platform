@@ -485,6 +485,11 @@ model ScoreSnapshot {
   dpiScore              Decimal?     @db.Decimal(6, 2)
   dpiPressureLevel      PressureLevel?
 
+  /** Territory whose DPI was actually used in scoring (may differ from operator territory). */
+  dpiTerritoryId        String?
+  /** True when the DPI used is not the operator's own territory DPI (e.g. Madeira reference). */
+  referenceDpi          Boolean      @default(false)
+
   computationTrace      Json?
   isPublished           Boolean      @default(false)
   publicationBlockedReason String?

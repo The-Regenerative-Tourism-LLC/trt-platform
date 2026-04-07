@@ -9,11 +9,9 @@ import type { StorageProvider, StorageUploadInput, StorageUploadResult } from ".
 export class S3StorageProvider implements StorageProvider {
   private readonly client: S3Client;
   private readonly bucket: string;
-  private readonly publicBaseUrl: string;
 
   constructor() {
     this.bucket = process.env.STORAGE_BUCKET!;
-    this.publicBaseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
 
     this.client = new S3Client({
       endpoint: process.env.STORAGE_ENDPOINT,
@@ -69,6 +67,7 @@ export class S3StorageProvider implements StorageProvider {
   }
 
   getPublicUrl(key: string): string {
-    return `${this.publicBaseUrl}/${key}`;
+    // Railway buckets are private — serve via our backend proxy
+    return `/api/v1/images/${key}`;
   }
 }
