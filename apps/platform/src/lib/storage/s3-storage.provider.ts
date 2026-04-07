@@ -39,6 +39,7 @@ export class S3StorageProvider implements StorageProvider {
           Body: input.body,
           ContentType: input.contentType,
           CacheControl: input.cacheControl,
+          ACL: "public-read",
         })
       );
     } catch (err) {
