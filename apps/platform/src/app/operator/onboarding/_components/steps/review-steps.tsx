@@ -3,7 +3,7 @@ import type { OnboardingData } from "@/store/onboarding-store";
 import type { StepShellBaseProps } from "../shell";
 import type { PreviewScores } from "@/hooks/usePreviewScore";
 import { StepShell } from "../shell";
-import { TrendingUp, Award, Info, Shield, AlertTriangle } from "lucide-react";
+import { TrendingUp, Award, Info, Shield, AlertTriangle, MapPin } from "lucide-react";
 
 // ── GPS Preview ───────────────────────────────────────────────────────────────
 
@@ -13,6 +13,7 @@ interface GpsPreviewProps {
   preview: PreviewScores | null;
   previewLoading: boolean;
   floatingGps?: ReactNode;
+  referenceDpi?: boolean;
 }
 
 export function GpsPreviewStep({
@@ -20,6 +21,7 @@ export function GpsPreviewStep({
   preview,
   previewLoading,
   floatingGps,
+  referenceDpi,
 }: GpsPreviewProps) {
   const topIcon = (
     <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
@@ -76,6 +78,17 @@ export function GpsPreviewStep({
             </div>
           </div>
 
+          {/* Reference DPI warning */}
+          {referenceDpi && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 px-4 py-3 flex items-start gap-3">
+              <MapPin className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+                We do not yet have a DPI calculated for this destination.
+                The current calculation uses Madeira as a reference territory, so the results may not fully reflect your local market.
+              </p>
+            </div>
+          )}
+
           {/* DPS explanation card */}
           <div className="rounded-xl border bg-card p-5 space-y-4">
             <div>
@@ -118,6 +131,7 @@ interface ReviewSubmitProps {
   onSubmit: () => void;
   onEditSection?: (stepId: string) => void;
   floatingGps?: ReactNode;
+  referenceDpi?: boolean;
 }
 
 export function ReviewSubmitStep({
@@ -127,6 +141,7 @@ export function ReviewSubmitStep({
   onDeclarationChange,
   onSubmit,
   floatingGps,
+  referenceDpi,
 }: ReviewSubmitProps) {
   const canSubmit = declarationChecked;
 
@@ -183,6 +198,17 @@ export function ReviewSubmitStep({
           How your GPS is calculated: ({p1.toFixed(1)}×0.40) + ({p2.toFixed(1)}×0.30) + ({p3.toFixed(0)}×0.30) = <strong>{gps}</strong>
         </p>
       </div>
+
+      {/* Reference DPI warning */}
+      {referenceDpi && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 px-4 py-3 flex items-start gap-3">
+          <MapPin className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+            We do not yet have a DPI calculated for this destination.
+            The current calculation uses Madeira as a reference territory, so the results may not fully reflect your local market.
+          </p>
+        </div>
+      )}
 
       {/* What happens next */}
       <div className="rounded-xl border bg-card px-5 py-4 space-y-3">

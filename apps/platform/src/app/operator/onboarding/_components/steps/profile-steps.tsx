@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { ReactNode, ChangeEvent } from "react";
 import dynamic from "next/dynamic";
-import { Building2, Mountain, Sparkles, Info, HelpCircle } from "lucide-react";
+import { Building2, Mountain, Sparkles, Info, HelpCircle, AlertTriangle } from "lucide-react";
 import {
   Tooltip,
   TooltipTrigger,
@@ -235,7 +235,7 @@ export function IdentityStep({
   floatingGps,
   territories,
 }: StepProps & {
-  territories: Array<{ id: string; name: string; country: string | null }>;
+  territories: Array<{ id: string; name: string; country: string | null; compositeDpi?: number | null }>;
 }) {
   const topIcon = (
     <div className="w-11 h-11 rounded-xl bg-muted/60 flex items-center justify-center">
@@ -245,6 +245,9 @@ export function IdentityStep({
 
   // Auto-deduce territory from destination region or country.
   // Priority: match territory name against destinationRegion first, then country.
+  // If no match is found, fall back to Madeira as the reference territory.
+  // If the matched territory has no DPI, mark referenceDpi = true so scoring
+  // uses Madeira's DPI and the UI shows the appropriate warning.
   useEffect(() => {
     if (!territories.length) return;
     const region = (data.destinationRegion ?? "").toLowerCase().trim();
@@ -255,8 +258,19 @@ export function IdentityStep({
       territories.find((t) => region && t.name.toLowerCase() === region) ??
       territories.find((t) => country && t.country?.toLowerCase() === country);
 
-    if (match && match.id !== data.territoryId) {
-      updateField({ territoryId: match.id });
+    const madeira = territories.find((t) => t.name.toLowerCase() === "madeira");
+
+    if (match) {
+      const hasDpi = match.compositeDpi != null;
+      const newReferenceDpi = !hasDpi;
+      if (match.id !== data.territoryId || newReferenceDpi !== data.referenceDpi) {
+        updateField({ territoryId: match.id, referenceDpi: newReferenceDpi });
+      }
+    } else if (madeira) {
+      // No territory match — use Madeira as fallback territory
+      if (madeira.id !== data.territoryId || data.referenceDpi !== true) {
+        updateField({ territoryId: madeira.id, referenceDpi: true });
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.destinationRegion, data.country, territories]);
@@ -356,6 +370,16 @@ export function IdentityStep({
             />
           </FieldGroup>
         </div>
+
+        {data.referenceDpi === true && (data.destinationRegion || data.country) && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 px-4 py-3 flex items-start gap-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+              We do not yet have a DPI calculated for this destination.
+              The current calculation uses Madeira as a reference territory, so the results may not fully reflect your local market.
+            </p>
+          </div>
+        )}
 
       </div>
 

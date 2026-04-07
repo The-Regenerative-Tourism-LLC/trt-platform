@@ -47,6 +47,14 @@ export async function findAvailableTerritories(): Promise<Territory[]> {
   });
 }
 
+export async function findMadeiraTerritoryId(): Promise<string | null> {
+  const territory = await prisma.territory.findFirst({
+    where: { name: { equals: "Madeira", mode: "insensitive" } },
+    select: { id: true },
+  });
+  return territory?.id ?? null;
+}
+
 export async function upsertTerritoryDpiReadModel(
   territoryId: string,
   dpiData: {

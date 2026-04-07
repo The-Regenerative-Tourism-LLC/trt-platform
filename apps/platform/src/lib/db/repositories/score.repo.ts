@@ -139,3 +139,46 @@ export async function findPublishedScoresByTerritory(
     gpsTotal: Number(r.gpsTotal),
   }));
 }
+
+// ── Analytics queries ────────────────────────────────────────────────────────
+
+/**
+ * Find all scores where a reference DPI was used (operator territory had no DPI).
+ * Useful for reporting on territories that still need their own DPI computed.
+ */
+export async function findScoresUsingReferenceDpi(): Promise<
+  { scoreSnapshotId: string; operatorId: string; operatorTerritoryId: string | null; dpiTerritoryId: string | null }[]
+> {
+  const results = await prisma.scoreSnapshot.findMany({
+    where: { referenceDpi: true },
+    select: {
+      id: true,
+      operatorId: true,
+      dpiTerritoryId: true,
+      assessmentSnapshot: { select: { territoryId: true } },
+    },
+    orderBy: { computedAt: "desc" },
+  });
+  return results.map((r) => ({
+    scoreSnapshotId: r.id,
+    operatorId: r.operatorId,
+    operatorTerritoryId: (r as any).assessmentSnapshot?.territoryId ?? null,
+    dpiTerritoryId: r.dpiTerritoryId,
+  }));
+}
+
+/**
+ * Find the distinct set of operator territories that have used reference DPI.
+ * These are territories that have operators but no DPI of their own.
+ */
+export async function findTerritoriesNeedingDpi(): Promise<string[]> {
+  const results = await prisma.scoreSnapshot.findMany({
+    where: { referenceDpi: true },
+    select: { assessmentSnapshot: { select: { territoryId: true } } },
+    distinct: ["assessmentSnapshotId"],
+  });
+  const ids = results
+    .map((r) => (r as any).assessmentSnapshot?.territoryId as string | undefined)
+    .filter((id): id is string => Boolean(id));
+  return [...new Set(ids)];
+}
