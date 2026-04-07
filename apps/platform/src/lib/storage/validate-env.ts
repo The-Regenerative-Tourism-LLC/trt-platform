@@ -15,7 +15,7 @@ export function validateStorageEnv(): void {
     requireEnv("STORAGE_BUCKET");
     requireEnv("STORAGE_ACCESS_KEY_ID");
     requireEnv("STORAGE_SECRET_ACCESS_KEY");
-    requireEnv("STORAGE_PUBLIC_BASE_URL");
+    // STORAGE_PUBLIC_BASE_URL not required for s3 — files are served via /api/v1/images proxy
   } else {
     throw new Error(`[storage] Unknown STORAGE_DRIVER="${driver}". Must be "local" or "s3".`);
   }
