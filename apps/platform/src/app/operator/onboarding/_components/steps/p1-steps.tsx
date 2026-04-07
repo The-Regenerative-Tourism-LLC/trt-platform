@@ -43,28 +43,316 @@ interface StepProps {
 
 // ── P1: Energy ────────────────────────────────────────────────────────────────
 
-export function P1EnergyStep({
+// kWh per litre factors for each liquid fuel type
+const FUEL_KWH_PER_L: Record<string, number> = {
+  diesel: 10.7,
+  petrol: 9.5,
+  marine_diesel: 11,
+  hybrid: 5.3,
+};
+
+// Shared renewable + export + live computation + evidence block used by both layouts
+function EnergySharedTail({
   data,
   updateField,
-  shell,
-  floatingGps,
-}: StepProps) {
-  const elec = data.totalElectricityKwh ?? 0;
-  const gas = data.totalGasKwh ?? 0;
-  const exported = data.gridExportKwh ?? 0;
+  netEnergy,
+  hasAnyEnergy,
+  unitLabel,
+  energyIntensity,
+  activityUnit,
+}: {
+  data: OnboardingData;
+  updateField: (patch: Partial<OnboardingData>) => void;
+  netEnergy: number;
+  hasAnyEnergy: boolean;
+  unitLabel: string;
+  energyIntensity: number;
+  activityUnit: number;
+}) {
   const onsitePct = data.renewableOnsitePct ?? 0;
   const tariffPct = data.renewableTariffPct ?? 0;
-
-  const netEnergy = Math.max(0, elec + gas - exported);
-  const activityUnit =
-    data.operatorType === "B"
-      ? (data.visitorDays ?? 0)
-      : (data.guestNights ?? 0);
-  const energyIntensity = activityUnit > 0 ? netEnergy / activityUnit : 0;
   const renewableCombined = Math.min(onsitePct + tariffPct, 100);
-  const unitLabel = data.operatorType === "B" ? "vd" : "gn";
-  const hasAnyEnergy =
-    data.totalElectricityKwh != null || data.totalGasKwh != null;
+
+  return (
+    <>
+      {/* Renewable energy */}
+      <div className="space-y-5 pt-1">
+        <p className="text-sm font-semibold">Renewable energy</p>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">% on-site renewable generation</label>
+          <p className="text-xs text-muted-foreground">Solar PV, wind. If none: 0</p>
+          <p className="text-sm font-semibold tabular-nums">{onsitePct}%</p>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={onsitePct}
+            onChange={(e) => updateField({ renewableOnsitePct: parseInt(e.target.value) })}
+            className="w-full accent-foreground"
+          />
+        </div>
+
+        <div className="h-px bg-border/40" />
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">% from renewable energy tariff</label>
+          <p className="text-xs text-muted-foreground">
+            Green tariff certificate from energy provider. If none: 0
+          </p>
+          <p className="text-sm font-semibold tabular-nums">{tariffPct}%</p>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={tariffPct}
+            onChange={(e) => updateField({ renewableTariffPct: parseInt(e.target.value) })}
+            className="w-full accent-foreground"
+          />
+        </div>
+      </div>
+
+      {/* Energy exported to grid */}
+      <FieldGroup
+        label={
+          <>
+            Energy exported to the grid (annual){" "}
+            <FieldTooltip text="Surplus renewable energy (solar, wind, etc.) fed back into the public grid. This reduces your net energy consumption and carbon footprint." />
+          </>
+        }
+        hint="From your inverter or net metering bill. If none: 0"
+      >
+        <div className="relative">
+          <input
+            type="number"
+            value={data.gridExportKwh ?? ""}
+            onChange={(e) =>
+              updateField({
+                gridExportKwh: e.target.value === "" ? undefined : parseFloat(e.target.value),
+              })
+            }
+            placeholder="e.g. 5000"
+            min={0}
+            className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+            kWh/year
+          </span>
+        </div>
+      </FieldGroup>
+
+      {/* Live computation */}
+      <div className="space-y-2">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Live Computation
+        </p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Net energy consumption</span>
+            <span className="text-sm font-bold tabular-nums">
+              {hasAnyEnergy ? Math.round(netEnergy).toLocaleString() : "0"}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">kWh/year</span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Energy intensity</span>
+            <span className="text-sm font-bold tabular-nums">
+              {activityUnit > 0 && hasAnyEnergy ? Math.round(energyIntensity) : "0"}
+              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+                kWh/{unitLabel}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">Renewable %</span>
+            <span className="text-sm font-bold tabular-nums">
+              {onsitePct > 0 || tariffPct > 0 ? `${Math.round(renewableCombined)}%` : "—"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
+            <span className="text-sm text-muted-foreground">1A sub-score</span>
+            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Evidence quality */}
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
+        <p className="text-sm text-muted-foreground">What is the source of this energy data?</p>
+        <select
+          value={data.evidenceTierEnergy ?? ""}
+          onChange={(e) =>
+            updateField({ evidenceTierEnergy: (e.target.value as EvidenceTier) || undefined })
+          }
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="">Select evidence quality…</option>
+          <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
+          <option value="T2">T2 — Secondary</option>
+          <option value="T3">T3 — Tertiary</option>
+          <option value="Proxy">Proxy</option>
+        </select>
+      </div>
+    </>
+  );
+}
+
+export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProps) {
+  const exported = data.gridExportKwh ?? 0;
+
+  // ── Type B (tours-only) layout ─────────────────────────────────────────────
+  if (data.operatorType === "B") {
+    const fuelType = data.tourFuelType ?? "";
+    const isElectric = fuelType === "electric";
+    const isNoVehicle = fuelType === "no_vehicle";
+
+    // Annual fuel energy in kWh
+    const fuelAnnualKwh = isElectric
+      ? (data.evKwhPerMonth ?? 0) * 12
+      : isNoVehicle
+      ? 0
+      : (data.tourFuelLitresPerMonth ?? 0) * (FUEL_KWH_PER_L[fuelType] ?? 0) * 12;
+
+    const officeKwh = data.officeElectricityKwh ?? 0;
+    const netEnergy = Math.max(0, fuelAnnualKwh + officeKwh - exported);
+    const visitorDays = data.visitorDays ?? 0;
+    const energyIntensity = visitorDays > 0 ? netEnergy / visitorDays : 0;
+    const hasAnyEnergy = fuelAnnualKwh > 0 || officeKwh > 0;
+
+    return (
+      <StepShell
+        {...shell}
+        title="Energy consumption"
+        subtitle="Indicator 1A · Weight: 30% of P1 · GPS Impact: 12%"
+      >
+        {floatingGps}
+
+        {/* Fuel type */}
+        <FieldGroup label="Primary transport / fuel type">
+          <div className="relative">
+            <select
+              value={fuelType}
+              onChange={(e) => updateField({ tourFuelType: e.target.value || undefined })}
+              className="w-full rounded-lg border border-input bg-background px-3 pr-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+            >
+              <option value="">Select fuel type…</option>
+              <option value="no_vehicle">No vehicle — walking, cycling, or non-motorised tours</option>
+              <option value="diesel">Diesel — 10.7 kWh/L</option>
+              <option value="petrol">Petrol — 9.5 kWh/L</option>
+              <option value="marine_diesel">Marine diesel — 11 kWh/L</option>
+              <option value="hybrid">Hybrid — 5.3 kWh/L</option>
+              <option value="electric">Electric — 0 direct emissions</option>
+            </select>
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              ▾
+            </span>
+          </div>
+        </FieldGroup>
+
+        {/* Fuel consumption — hidden when no_vehicle */}
+        {!isNoVehicle && fuelType && (
+          <FieldGroup
+            label={
+              <>
+                {isElectric ? "Average monthly electricity (vehicle)" : "Average monthly fuel consumption"}{" "}
+                {!isElectric && <FieldTooltip text="Average over the past 12 months." />}
+              </>
+            }
+          >
+            <div className="relative">
+              <input
+                type="number"
+                value={
+                  isElectric ? (data.evKwhPerMonth ?? "") : (data.tourFuelLitresPerMonth ?? "")
+                }
+                onChange={(e) => {
+                  const val = e.target.value === "" ? undefined : parseFloat(e.target.value);
+                  if (isElectric) {
+                    updateField({ evKwhPerMonth: val });
+                  } else {
+                    updateField({ tourFuelLitresPerMonth: val });
+                  }
+                }}
+                placeholder="e.g. 30"
+                min={0}
+                className="w-full rounded-lg border border-input bg-background pl-3 pr-28 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+                {isElectric ? "kWh/month" : "litres/month"}
+              </span>
+            </div>
+          </FieldGroup>
+        )}
+
+        {/* No fixed base toggle */}
+        <label className="flex items-start gap-3 p-4 rounded-xl border border-border/60 bg-card cursor-pointer">
+          <div className="relative shrink-0 mt-0.5">
+            <input
+              type="checkbox"
+              checked={data.tourNoFixedBase === true}
+              onChange={(e) => updateField({ tourNoFixedBase: e.target.checked || undefined })}
+              className="sr-only peer"
+            />
+            <div className="w-10 h-6 rounded-full bg-muted peer-checked:bg-foreground transition-colors" />
+            <div className="absolute top-1 left-1 w-4 h-4 rounded-full bg-background shadow transition-transform peer-checked:translate-x-4" />
+          </div>
+          <div>
+            <p className="text-sm font-medium leading-tight">
+              We have no fixed office, workshop, or base of operations
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Mobile operations — meet clients at trailheads, harbours, etc.
+            </p>
+          </div>
+        </label>
+
+        {/* Office / base electricity — hidden when no fixed base */}
+        {!data.tourNoFixedBase && (
+          <FieldGroup
+            label="Office / base electricity"
+            hint="Building consumption only — do NOT include vehicle charging"
+          >
+            <div className="relative">
+              <input
+                type="number"
+                value={data.officeElectricityKwh ?? ""}
+                onChange={(e) =>
+                  updateField({
+                    officeElectricityKwh:
+                      e.target.value === "" ? undefined : parseFloat(e.target.value),
+                  })
+                }
+                placeholder="e.g. 2000"
+                min={0}
+                className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+                kWh/year
+              </span>
+            </div>
+          </FieldGroup>
+        )}
+
+        <EnergySharedTail
+          data={data}
+          updateField={updateField}
+          netEnergy={netEnergy}
+          hasAnyEnergy={hasAnyEnergy}
+          unitLabel="vd"
+          energyIntensity={energyIntensity}
+          activityUnit={visitorDays}
+        />
+      </StepShell>
+    );
+  }
+
+  // ── Type A / C (accommodation) layout ─────────────────────────────────────
+  const elec = data.totalElectricityKwh ?? 0;
+  const gas = data.totalGasKwh ?? 0;
+  const netEnergy = Math.max(0, elec + gas - exported);
+  const guestNights = data.guestNights ?? 0;
+  const energyIntensity = guestNights > 0 ? netEnergy / guestNights : 0;
+  const hasAnyEnergy = data.totalElectricityKwh != null || data.totalGasKwh != null;
 
   return (
     <StepShell
@@ -78,13 +366,20 @@ export function P1EnergyStep({
       <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
         <span className="text-base select-none shrink-0 mt-0.5">🏢</span>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          If you operate multiple buildings, enter the combined annual totals
-          across all buildings and meters.
+          If you operate multiple buildings, enter the combined annual totals across all
+          buildings and meters.
         </p>
       </div>
 
       {/* Electricity */}
-      <FieldGroup label={<>Total electricity consumed (annual) <FieldTooltip text="From annual utility invoice" /></>}>
+      <FieldGroup
+        label={
+          <>
+            Total electricity consumed (annual){" "}
+            <FieldTooltip text="From annual utility invoice" />
+          </>
+        }
+      >
         <div className="relative">
           <input
             type="number"
@@ -130,147 +425,15 @@ export function P1EnergyStep({
         </div>
       </FieldGroup>
 
-      {/* Renewable energy section */}
-      <div className="space-y-5 pt-1">
-        <p className="text-sm font-semibold">Renewable energy</p>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            % on-site renewable generation
-          </label>
-          <p className="text-xs text-muted-foreground">
-            Solar PV, wind. If none: 0
-          </p>
-          <p className="text-sm font-semibold tabular-nums">{onsitePct}%</p>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={onsitePct}
-            onChange={(e) =>
-              updateField({ renewableOnsitePct: parseInt(e.target.value) })
-            }
-            className="w-full accent-foreground"
-          />
-        </div>
-
-        <div className="h-px bg-border/40" />
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            % from renewable energy tariff
-          </label>
-          <p className="text-xs text-muted-foreground">
-            Green tariff certificate from energy provider. If none: 0
-          </p>
-          <p className="text-sm font-semibold tabular-nums">{tariffPct}%</p>
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={tariffPct}
-            onChange={(e) =>
-              updateField({ renewableTariffPct: parseInt(e.target.value) })
-            }
-            className="w-full accent-foreground"
-          />
-        </div>
-      </div>
-
-      {/* Energy exported */}
-      <FieldGroup
-        label={<>Energy exported to the grid (annual) <FieldTooltip text="Surplus renewable energy (solar, wind, etc.) fed back into the public grid. This reduces your net energy consumption and carbon footprint." /></>}
-        hint="From your inverter or net metering bill. If none: 0"
-      >
-        <div className="relative">
-          <input
-            type="number"
-            value={data.gridExportKwh ?? ""}
-            onChange={(e) =>
-              updateField({
-                gridExportKwh:
-                  e.target.value === "" ? undefined : parseFloat(e.target.value),
-              })
-            }
-            placeholder="e.g. 5000"
-            min={0}
-            className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
-            kWh/year
-          </span>
-        </div>
-      </FieldGroup>
-
-      {/* Live computation */}
-      <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Live Computation
-        </p>
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">
-              Net energy consumption
-            </span>
-            <span className="text-sm font-bold tabular-nums">
-              {hasAnyEnergy ? Math.round(netEnergy).toLocaleString() : "0"}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">
-                kWh/year
-              </span>
-            </span>
-          </div>
-          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">
-              Energy intensity
-            </span>
-            <span className="text-sm font-bold tabular-nums">
-              {activityUnit > 0 && hasAnyEnergy
-                ? Math.round(energyIntensity)
-                : "0"}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">
-                kWh/{unitLabel}
-              </span>
-            </span>
-          </div>
-          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">Renewable %</span>
-            <span className="text-sm font-bold tabular-nums">
-              {onsitePct > 0 || tariffPct > 0
-                ? `${Math.round(renewableCombined)}%`
-                : "—"}
-            </span>
-          </div>
-          <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">1A sub-score</span>
-            <span className="text-sm font-bold tabular-nums text-muted-foreground">
-              —
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Evidence quality */}
-      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
-        <p className="text-sm text-muted-foreground">
-          What is the source of this energy data?
-        </p>
-        <select
-          value={data.evidenceTierEnergy ?? ""}
-          onChange={(e) =>
-            updateField({
-              evidenceTierEnergy:
-                (e.target.value as EvidenceTier) || undefined,
-            })
-          }
-          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          <option value="">Select evidence quality…</option>
-          <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
-          <option value="T2">T2 — Secondary</option>
-          <option value="T3">T3 — Tertiary</option>
-          <option value="Proxy">Proxy</option>
-        </select>
-      </div>
+      <EnergySharedTail
+        data={data}
+        updateField={updateField}
+        netEnergy={netEnergy}
+        hasAnyEnergy={hasAnyEnergy}
+        unitLabel={data.operatorType === "C" ? "gn" : "gn"}
+        energyIntensity={energyIntensity}
+        activityUnit={guestNights}
+      />
     </StepShell>
   );
 }
@@ -451,8 +614,8 @@ export function P1WasteStep({
         <span className="text-base select-none shrink-0 mt-0.5">💡</span>
         <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
           <p>
-            <strong>How to estimate your annual waste:</strong> Most operators don't weigh waste
-            daily — that's OK. Use one of these standard methods:
+            <strong>How to estimate your annual waste:</strong> Most operators don&apos;t weigh waste
+            daily — that&apos;s OK. Use one of these standard methods:
           </p>
           <ul className="space-y-1 list-none">
             <li>
@@ -469,7 +632,7 @@ export function P1WasteStep({
             </li>
           </ul>
           <p>
-            If you don't know yet, leave it empty — you can track for a week and come back to fill
+            If you don&apos;t know yet, leave it empty — you can track for a week and come back to fill
             it in.
           </p>
         </div>
