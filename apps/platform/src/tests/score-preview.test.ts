@@ -91,6 +91,7 @@ describe("POST /api/v1/score/preview", () => {
     vi.resetAllMocks();
     vi.mocked(sessionLib.requireSession).mockResolvedValue(SESSION);
     vi.mocked(dpiRepo.findLatestDpiByTerritory).mockResolvedValue(null); // use fallback DPI
+    vi.mocked(dpiRepo.findMadeiraTerritoryId).mockResolvedValue(null);   // no Madeira in tests by default
   });
 
   it("returns a GPS score in the valid range", async () => {
@@ -167,13 +168,15 @@ describe("POST /api/v1/score/preview", () => {
     expect(vi.mocked(dpiRepo.findLatestDpiByTerritory)).toHaveBeenCalledWith("ter-1");
   });
 
-  it("falls back to default DPI when territory has no snapshot", async () => {
+  it("falls back to Madeira DPI when territory has no snapshot", async () => {
     vi.mocked(dpiRepo.findLatestDpiByTerritory).mockResolvedValue(null);
+    vi.mocked(dpiRepo.findMadeiraTerritoryId).mockResolvedValue(null); // Madeira also absent
 
     const res = await POST(postReq(minimalPayload({ territoryId: "ter-no-dpi" })));
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.gpsScore).toBeTypeOf("number");
+    expect(json.referenceDpi).toBe(true);
   });
 
   it("works with minimal valid data (only required fields)", async () => {

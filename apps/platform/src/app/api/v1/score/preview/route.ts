@@ -21,7 +21,7 @@ import { computeP2Rates, type RawP2Inputs } from "@/lib/computation/p2-derive";
 import { buildAssessmentSnapshot } from "@/lib/snapshots/assessment-snapshot.builder";
 import { computeScore } from "@/lib/engine/trt-scoring-engine";
 import { loadActiveBundle } from "@/lib/methodology/methodology-bundle.loader";
-import { findLatestDpiByTerritory } from "@/lib/db/repositories/dpi.repo";
+import { findLatestDpiByTerritory, findMadeiraTerritoryId } from "@/lib/db/repositories/dpi.repo";
 import type { DpiSnapshot } from "@/lib/engine/trt-scoring-engine/types";
 import { computeCategoryScope } from "@/lib/constants";
 import { z } from "zod";
@@ -203,8 +203,9 @@ export async function POST(req: NextRequest) {
       now
     );
 
-    // ── Load DPI (territory-specific or fallback) ────────────────────────────
+    // ── Load DPI (territory-specific or Madeira reference fallback) ──────────
     let dpi: DpiSnapshot = FALLBACK_DPI;
+    let referenceDpi = false;
     if (d.territoryId) {
       const dbDpi = await findLatestDpiByTerritory(d.territoryId);
       if (dbDpi) {
@@ -219,7 +220,28 @@ export async function POST(req: NextRequest) {
           snapshotHash: dbDpi.snapshotHash ?? "unknown",
           createdAt: dbDpi.createdAt.toISOString(),
         };
+      } else {
+        // No DPI for this territory — always mark as reference and try Madeira DPI
+        referenceDpi = true;
+        const madeiraId = await findMadeiraTerritoryId();
+        const madeiraDpi = madeiraId ? await findLatestDpiByTerritory(madeiraId) : null;
+        if (madeiraDpi) {
+          dpi = {
+            territoryId: madeiraDpi.territoryId,
+            touristIntensity: Number(madeiraDpi.touristIntensity),
+            ecologicalSensitivity: Number(madeiraDpi.ecologicalSensitivity),
+            economicLeakageRate: Number(madeiraDpi.economicLeakageRate),
+            regenerativePerf: Number(madeiraDpi.regenerativePerf),
+            compositeDpi: Number(madeiraDpi.compositeDpi),
+            pressureLevel: madeiraDpi.pressureLevel as DpiSnapshot["pressureLevel"],
+            snapshotHash: madeiraDpi.snapshotHash ?? "unknown",
+            createdAt: madeiraDpi.createdAt.toISOString(),
+          };
+        }
+        // If no Madeira DPI either, dpi stays as FALLBACK_DPI
       }
+    } else {
+      referenceDpi = true;
     }
 
     // ── Load active methodology bundle ───────────────────────────────────────
@@ -236,6 +258,9 @@ export async function POST(req: NextRequest) {
       pillar3Score: scores.p3Score,
       gpsScore: scores.gpsTotal,
       gpsBand: scores.gpsBand,
+      referenceDpi,
+      operatorTerritoryId: d.territoryId ?? null,
+      dpiTerritoryId: dpi.territoryId,
       indicatorScores: {
         p1: scores.computationTrace.p1SubScores,
         p2: scores.computationTrace.p2SubScores,

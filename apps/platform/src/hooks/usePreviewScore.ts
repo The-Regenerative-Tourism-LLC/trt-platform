@@ -22,6 +22,11 @@ export interface PreviewScores {
   gpsScore: number;
   gpsBand: string;
   methodologyVersion: string;
+  referenceDpi?: boolean;
+  /** Operator's geographic territory (from destination/region). */
+  operatorTerritoryId?: string | null;
+  /** Territory whose DPI was used for scoring (may differ from operator territory). */
+  dpiTerritoryId?: string;
   p2SubScores?: { p2a: number; p2b: number; p2c: number; p2d: number };
 }
 
@@ -124,6 +129,9 @@ export function usePreviewScore(data: OnboardingData) {
           gpsScore: json.gpsScore,
           gpsBand: json.gpsBand,
           methodologyVersion: json.methodologyVersion,
+          referenceDpi: json.referenceDpi,
+          operatorTerritoryId: json.operatorTerritoryId,
+          dpiTerritoryId: json.dpiTerritoryId,
           p2SubScores: p2Sub?.p2 && p2Sub.p2.p2a != null ? {
             p2a: p2Sub.p2.p2a ?? 0,
             p2b: p2Sub.p2.p2b ?? 0,

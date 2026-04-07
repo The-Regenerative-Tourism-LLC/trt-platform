@@ -25,6 +25,8 @@ export interface OnboardingData {
   country?: string;
   destinationRegion?: string;
   territoryId?: string;
+  /** true when territory has no DPI — scoring uses Madeira as reference DPI */
+  referenceDpi?: boolean;
   yearOperationStart?: number;
   website?: string;
   primaryContactName?: string;

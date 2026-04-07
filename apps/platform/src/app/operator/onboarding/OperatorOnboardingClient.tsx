@@ -362,7 +362,9 @@ export function OperatorOnboardingClient() {
     setSaving(true);
     try {
       const operator = onboardingData?.operator;
-      const territoryId = data.territoryId ?? operator?.territoryId;
+      // Resolve territoryId: onboarding state → operator record → Madeira fallback
+      const madeira = territories.find((t) => t.name.toLowerCase() === "madeira");
+      const territoryId = data.territoryId ?? operator?.territoryId ?? madeira?.id;
       if (!operator?.id || !territoryId) {
         toast.error("Operator profile incomplete — territory not assigned");
         return;
@@ -478,7 +480,7 @@ export function OperatorOnboardingClient() {
 
   // ── Step dispatch ─────────────────────────────────────────────────────────
 
-  const territories: Array<{ id: string; name: string; country: string | null }> =
+  const territories: Array<{ id: string; name: string; country: string | null; compositeDpi?: number | null }> =
     onboardingData?.territories ?? [];
 
   switch (stepId) {
@@ -532,6 +534,7 @@ export function OperatorOnboardingClient() {
           preview={preview}
           previewLoading={previewLoading}
           floatingGps={floatingGps}
+          referenceDpi={preview?.referenceDpi ?? data.referenceDpi}
         />
       );
     case "review-submit":
@@ -546,6 +549,7 @@ export function OperatorOnboardingClient() {
           onSubmit={handleSubmit}
           onEditSection={setStepId}
           floatingGps={floatingGps}
+          referenceDpi={preview?.referenceDpi ?? data.referenceDpi}
         />
       );
     default:
