@@ -1,21 +1,21 @@
 /**
  * Prisma Seed Script
  *
- * Creates the minimum data needed to run the app locally and in staging.
+ * Creates the minimum data needed to run the app locally and in production.
  * Safe to run multiple times — all operations are idempotent (upsert/findFirst guards).
  *
- * What is seeded:
- *   1. Madeira, Portugal — the first live destination (isAvailable: true)
- *      with curated baseline DPI component values and an initial DpiSnapshot.
- *   2. Azores, Portugal — coming soon destination (isAvailable: false).
- *   3. Alentejo, Portugal — coming soon destination (isAvailable: false).
- *   4. Dev/test user accounts (admin, operator, traveler).
- *   5. Methodology bundle v1.0.0.
+ * What is ALWAYS seeded (core data):
+ *   1. Territories (Madeira, Azores, Alentejo, Lisbon, Porto, Algarve)
+ *   2. Initial DpiSnapshot for Madeira
+ *   3. Methodology bundle v1.0.0
  *
- * Seed accounts:
- *   admin@theregenerativetourism.com    / Admin1234!
- *   operator@trt-local.dev / Operator1234!
- *   traveler@trt-local.dev / Traveler1234!
+ * What is seeded only when SEED_CREATE_USERS=true:
+ *   4. Admin, operator, and traveler user accounts
+ *
+ * User passwords via environment variables (with local-dev fallbacks):
+ *   SEED_ADMIN_PASSWORD    (fallback: Admin1234!)
+ *   SEED_OPERATOR_PASSWORD (fallback: Operator1234!)
+ *   SEED_TRAVELER_PASSWORD (fallback: Traveler1234!)
  *
  * Run with: npm run db:seed
  */
@@ -27,6 +27,22 @@ import { createHash } from "node:crypto";
 import { DEFAULT_METHODOLOGY_BUNDLE } from "../src/lib/methodology/default-bundle";
 
 const prisma = new PrismaClient();
+
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const SEED_CREATE_USERS = process.env.SEED_CREATE_USERS === "true";
+
+// Passwords: require env vars in production, fall back to dev defaults locally.
+const ADMIN_PASSWORD =
+  process.env.SEED_ADMIN_PASSWORD ??
+  (IS_PRODUCTION ? null : "Admin1234!");
+
+const OPERATOR_PASSWORD =
+  process.env.SEED_OPERATOR_PASSWORD ??
+  (IS_PRODUCTION ? null : "Operator1234!");
+
+const TRAVELER_PASSWORD =
+  process.env.SEED_TRAVELER_PASSWORD ??
+  (IS_PRODUCTION ? null : "Traveler1234!");
 
 function hashBundle(bundle: typeof DEFAULT_METHODOLOGY_BUNDLE): string {
   const canonical = JSON.stringify(bundle, Object.keys(bundle).sort());
@@ -148,12 +164,8 @@ const TERRITORIES = [
   },
 ] as const;
 
-async function main() {
-  console.log("\n── Seeding database ─────────────────────────────────────────\n");
-
-  // ── 1. Territories ─────────────────────────────────────────────────────────
-
-  const territoryIds: Record<string, string> = {};
+async function seedCoreData(territoryIds: Record<string, string>) {
+  // ── 1. Territories ──────────────────────────────────────────────────────────
 
   for (const t of TERRITORIES) {
     const dpiFields = t.dpi
@@ -198,9 +210,7 @@ async function main() {
     territoryIds[t.slug] = territory.id;
   }
 
-  // ── 2. Initial DpiSnapshot for Madeira ────────────────────────────────────
-  // Creates the first immutable DPI record for Madeira. This serves as the
-  // baseline until the admin triggers a proper recomputation via the DPI API.
+  // ── 2. Initial DpiSnapshot for Madeira ──────────────────────────────────────
 
   const madeiraDpiDef = TERRITORIES.find((t) => t.slug === "madeira")!.dpi!;
   const { composite: madeiraDpiComposite, pressureLevel: madeiraPressure } =
@@ -235,9 +245,34 @@ async function main() {
     log(`DPI snapshot exists:`, `Madeira`);
   }
 
-  // ── 3. Admin user ──────────────────────────────────────────────────────────
+  // ── 3. Methodology bundle ───────────────────────────────────────────────────
 
-  const adminHash = await bcrypt.hash("Admin1234!", 12);
+  const bundleHash = hashBundle(DEFAULT_METHODOLOGY_BUNDLE);
+  await prisma.methodologyBundleRecord.upsert({
+    where: { version: DEFAULT_METHODOLOGY_BUNDLE.version },
+    update: {},
+    create: {
+      version: DEFAULT_METHODOLOGY_BUNDLE.version,
+      publishedAt: new Date(DEFAULT_METHODOLOGY_BUNDLE.publishedAt),
+      bundle: DEFAULT_METHODOLOGY_BUNDLE as object,
+      bundleHash,
+      isActive: true,
+    },
+  });
+  log("Methodology bundle:", `v${DEFAULT_METHODOLOGY_BUNDLE.version}`);
+}
+
+async function seedUsers(territoryIds: Record<string, string>) {
+  if (!ADMIN_PASSWORD || !OPERATOR_PASSWORD || !TRAVELER_PASSWORD) {
+    throw new Error(
+      "SEED_CREATE_USERS=true requires SEED_ADMIN_PASSWORD, SEED_OPERATOR_PASSWORD, " +
+      "and SEED_TRAVELER_PASSWORD to be set in production."
+    );
+  }
+
+  // ── Admin user ──────────────────────────────────────────────────────────────
+
+  const adminHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@theregenerativetourism.com" },
     update: {},
@@ -250,9 +285,9 @@ async function main() {
   });
   log("Admin user:", admin.email);
 
-  // ── 4. Operator user + profile ─────────────────────────────────────────────
+  // ── Operator user + profile ─────────────────────────────────────────────────
 
-  const operatorHash = await bcrypt.hash("Operator1234!", 12);
+  const operatorHash = await bcrypt.hash(OPERATOR_PASSWORD, 12);
   const operatorUser = await prisma.user.upsert({
     where: { email: "operator@trt-local.dev" },
     update: {},
@@ -286,9 +321,9 @@ async function main() {
   });
   log("Operator user:", operatorUser.email);
 
-  // ── 5. Traveler user + profile ─────────────────────────────────────────────
+  // ── Traveler user + profile ─────────────────────────────────────────────────
 
-  const travelerHash = await bcrypt.hash("Traveler1234!", 12);
+  const travelerHash = await bcrypt.hash(TRAVELER_PASSWORD, 12);
   const travelerUser = await prisma.user.upsert({
     where: { email: "traveler@trt-local.dev" },
     update: {},
@@ -305,22 +340,24 @@ async function main() {
     create: { userId: travelerUser.id, displayName: "Seed Traveler" },
   });
   log("Traveler user:", travelerUser.email);
+}
 
-  // ── 6. Methodology bundle ──────────────────────────────────────────────────
+async function main() {
+  console.log("\n── Seeding database ─────────────────────────────────────────\n");
+  console.log(`  NODE_ENV:          ${process.env.NODE_ENV ?? "not set"}`);
+  console.log(`  SEED_CREATE_USERS: ${SEED_CREATE_USERS}`);
+  console.log("");
 
-  const bundleHash = hashBundle(DEFAULT_METHODOLOGY_BUNDLE);
-  await prisma.methodologyBundleRecord.upsert({
-    where: { version: DEFAULT_METHODOLOGY_BUNDLE.version },
-    update: {},
-    create: {
-      version: DEFAULT_METHODOLOGY_BUNDLE.version,
-      publishedAt: new Date(DEFAULT_METHODOLOGY_BUNDLE.publishedAt),
-      bundle: DEFAULT_METHODOLOGY_BUNDLE as object,
-      bundleHash,
-      isActive: true,
-    },
-  });
-  log("Methodology bundle:", `v${DEFAULT_METHODOLOGY_BUNDLE.version}`);
+  const territoryIds: Record<string, string> = {};
+
+  await seedCoreData(territoryIds);
+
+  if (SEED_CREATE_USERS) {
+    console.log("\n  [Users]\n");
+    await seedUsers(territoryIds);
+  } else {
+    log("Users:", "skipped (SEED_CREATE_USERS not set)");
+  }
 
   console.log("\n── Seed complete ────────────────────────────────────────────\n");
   console.log("  Destinations:");
@@ -330,10 +367,16 @@ async function main() {
   console.log("    Lisbon           — coming soon");
   console.log("    Porto            — coming soon");
   console.log("    Alentejo         — coming soon");
-  console.log("\n  Credentials:");
-  console.log("    admin@theregenerativetourism.com       Admin1234!");
-  console.log("    operator@trt-local.dev    Operator1234!");
-  console.log("    traveler@trt-local.dev    Traveler1234!");
+
+  if (SEED_CREATE_USERS && !IS_PRODUCTION) {
+    console.log("\n  Dev credentials:");
+    console.log("    admin@theregenerativetourism.com    Admin1234!");
+    console.log("    operator@trt-local.dev              Operator1234!");
+    console.log("    traveler@trt-local.dev              Traveler1234!");
+  } else if (SEED_CREATE_USERS) {
+    console.log("\n  Users created with passwords from environment variables.");
+  }
+
   console.log("");
 }
 
