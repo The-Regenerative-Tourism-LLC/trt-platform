@@ -459,12 +459,7 @@ export const STEP_VALIDATORS: Record<string, StepValidator> = {
 
   "p1-water": (d) => {
     if (d.operatorType === "B" && d.tourNoFixedBase === true) return true;
-    return (
-      isNonNegativeNumber(d.totalWaterLitres) &&
-      typeof d.waterGreywater === "boolean" &&
-      typeof d.waterRainwater === "boolean" &&
-      typeof d.waterWastewaterTreatment === "boolean"
-    );
+    return isNonNegativeNumber(d.totalWaterLitres);
   },
 
   "p1-waste": (d) => isNonNegativeNumber(d.totalWasteKg),

@@ -141,12 +141,7 @@ export const STEP_REGISTRY: Record<string, StepDefinition> = {
     validate: (s) => {
       if (isToursOnly(s) && s.tours.tourNoFixedBase === true) return true;
       const p1 = s.pillar1;
-      return (
-        isNonNeg(p1.totalWaterLitres) &&
-        typeof p1.waterGreywater === 'boolean' &&
-        typeof p1.waterRainwater === 'boolean' &&
-        typeof p1.waterWastewaterTreatment === 'boolean'
-      );
+      return isNonNeg(p1.totalWaterLitres);
     },
   },
 

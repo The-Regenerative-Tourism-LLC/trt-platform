@@ -889,7 +889,7 @@ export function P1CarbonStep({
         <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
           <p className="font-semibold text-foreground">How is Scope 3 used?</p>
           <p>
-            Scope 3 is <strong>not included</strong> in your Carbon Intensity (1D) score — only
+            Scope 3 is <strong>not included </strong>in your Carbon Intensity (1D) score — only
             Scope 1 &amp; 2 count. This field is collected for transparency and future reporting.
             If you don&apos;t have this data, simply leave it blank.
           </p>
