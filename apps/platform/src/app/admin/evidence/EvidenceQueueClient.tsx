@@ -66,7 +66,7 @@ const TIER_STYLES: Record<string, string> = {
 };
 
 const STATE_CONFIG: Record<VerificationState, { icon: typeof Clock; color: string; bgColor: string }> = {
-  pending: { icon: Clock, color: "text-amber-600", bgColor: "bg-amber-100 text-amber-800" },
+  pending: { icon: Clock, color: "text-amber-600", bgColor: "bg-card" },
   verified: { icon: CheckCircle2, color: "text-primary", bgColor: "bg-secondary text-primary" },
   rejected: { icon: XCircle, color: "text-destructive", bgColor: "bg-destructive/10 text-destructive" },
   lapsed: { icon: AlertCircle, color: "text-muted-foreground", bgColor: "bg-muted text-muted-foreground" },
@@ -183,7 +183,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
           <TabsTrigger value="pending">
             Pending Review
             {visiblePending.length > 0 && (
-              <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-800 text-[10px] px-1.5">
+              <Badge variant="secondary" className="ml-2 bg-amber-100 text-[10px] px-1.5">
                 {visiblePending.length}
               </Badge>
             )}
