@@ -25,7 +25,7 @@ export function ScoreUpdatedTemplate({
   previewText,
 }: ScoreUpdatedProps) {
   const greeting = recipientName ? `Hi ${recipientName},` : "Hi there,";
-  const band = GPS_BAND_LABELS[gpsBand] ?? { label: gpsBand, color: "#1a6b3c" };
+  const band = GPS_BAND_LABELS[gpsBand] ?? { label: gpsBand, color: "#000000" };
   const preview = previewText ?? `Your GPS score has been published — ${band.label}.`;
 
   return (

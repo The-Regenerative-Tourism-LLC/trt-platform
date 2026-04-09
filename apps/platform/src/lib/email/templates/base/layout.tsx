@@ -19,8 +19,8 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-const BRAND_GREEN = "#1a6b3c";
-const LIGHT_GREEN = "#f0faf4";
+const BLACK = "#000000";
+const LIGHT_BROWN = "#DDD9D4";
 const TEXT_PRIMARY = "#111827";
 const TEXT_MUTED = "#6b7280";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
@@ -124,7 +124,7 @@ const styles = {
     padding: "0",
   },
   header: {
-    backgroundColor: BRAND_GREEN,
+    backgroundColor: BLACK,
     padding: "0",
   },
   headerInner: {
@@ -166,7 +166,7 @@ const styles = {
     margin: "28px 0",
   },
   btn: {
-    backgroundColor: BRAND_GREEN,
+    backgroundColor: BLACK,
     borderRadius: "6px",
     color: "#ffffff",
     display: "inline-block",
@@ -176,8 +176,8 @@ const styles = {
     textDecoration: "none",
   },
   callout: {
-    backgroundColor: LIGHT_GREEN,
-    borderLeft: `4px solid ${BRAND_GREEN}`,
+    backgroundColor: LIGHT_BROWN,
+    borderLeft: `4px solid ${BLACK}`,
     borderRadius: "0 6px 6px 0",
     margin: "20px 0",
     padding: "16px 20px",

@@ -46,7 +46,7 @@ export function InvitationEmailTemplate({
       </EmailBody>
 
       <EmailBody>
-        <a href={inviteUrl} style={{ color: "#1a6b3c", wordBreak: "break-all" }}>
+        <a href={inviteUrl} style={{ color: "#000000", wordBreak: "break-all" }}>
           {inviteUrl}
         </a>
       </EmailBody>
