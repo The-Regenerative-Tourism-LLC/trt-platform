@@ -60,13 +60,7 @@ export interface OnboardingData {
   revenueSplitExperiencePct?: number;
   assessmentPeriodEnd?: string;
 
-  /**
-   * Uploaded operator photos. Each entry is a persisted OperatorPhoto record.
-   * id = OperatorPhoto.id (server-assigned), url = public storage URL.
-   * isCover = true for the cover photo (enforced server-side via set-cover API).
-   * No file bytes are stored here — only metadata from the upload API response.
-   */
-  photoRefs?: Array<{ id: string; url: string; isCover: boolean; fileName?: string }>;
+  photoRefs?: Array<{ id: string; url: string; storageKey: string; isCover: boolean; fileName?: string }>;
 
   // Step 1 — Location (part of identity)
   address?: string;

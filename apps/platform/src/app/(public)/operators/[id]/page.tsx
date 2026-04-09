@@ -10,6 +10,13 @@ import type { GreenPassportBand, DpsBand } from "@/lib/engine/trt-scoring-engine
 
 export const dynamic = "force-dynamic";
 
+function buildPublicStorageUrl(storageKey: string): string {
+  const base = process.env.STORAGE_PUBLIC_BASE_URL;
+  if (base) return `${base}/${storageKey}`;
+  // Local dev: served via /uploads/[...path] route
+  return `/uploads/${storageKey}`;
+}
+
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -44,6 +51,11 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         orderBy: { createdAt: "desc" },
         take: 1,
       },
+      operatorPhotos: {
+        where: { isCover: true },
+        take: 1,
+        select: { storageKey: true },
+      },
     },
   });
 
@@ -69,6 +81,13 @@ export default async function PublicGreenPassportPage({ params }: Props) {
   }
 
   const score = operator.scoreSnapshots[0];
+
+  // Resolve cover photo: prefer new OperatorPhoto source, fall back to legacy field
+  const coverStorageKey = operator.operatorPhotos[0]?.storageKey ?? null;
+  const coverPhotoUrl = coverStorageKey
+    ? buildPublicStorageUrl(coverStorageKey)
+    : (operator.coverPhotoUrl ?? null);
+
   const gpsTotal = Number(score.gpsTotal);
   const gpsBand = score.gpsBand as GreenPassportBand;
   const config = GPS_BAND_CONFIG[gpsBand];
@@ -86,10 +105,10 @@ export default async function PublicGreenPassportPage({ params }: Props) {
     <div className="min-h-screen bg-background">
       {/* Hero / Cover */}
       <section className="relative">
-        {operator.coverPhotoUrl ? (
+        {coverPhotoUrl ? (
           <div className="h-64 md:h-80 w-full relative overflow-hidden">
             <Image
-              src={operator.coverPhotoUrl}
+              src={coverPhotoUrl}
               alt="Operator cover"
               fill
               className="object-cover object-center"

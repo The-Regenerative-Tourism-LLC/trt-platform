@@ -384,8 +384,8 @@ export function P3ForwardCommitmentStep({
       title="Forward commitment"
       subtitle="Declare your commitment to activating a regenerative programme in a future cycle."
     >
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-1">
-        <p className="text-sm font-semibold text-amber-800">Status D — Forward Commitment</p>
+      <div className="rounded-xl border bg-card p-4 space-y-1">
+        <p className="text-sm font-semibold">Status D — Forward Commitment</p>
         <p className="text-xs text-amber-700">
           Your P3 score will be 0 this cycle. Your GPS is computed from Pillar 1 and Pillar 2 only,
           renormalised to 0–100. A Forward Commitment Record will be created upon submission.

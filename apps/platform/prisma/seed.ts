@@ -24,7 +24,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { createHash } from "node:crypto";
-import { DEFAULT_METHODOLOGY_BUNDLE } from "../src/lib/methodology/default-bundle";
+import { DEFAULT_METHODOLOGY_BUNDLE } from "./methodology/default-bundle";
 
 const prisma = new PrismaClient();
 
