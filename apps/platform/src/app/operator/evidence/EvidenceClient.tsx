@@ -198,9 +198,6 @@ function UploadButton({
       const checksumHex = Array.from(new Uint8Array(hashBuffer))
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
-      const checksumBase64 = btoa(
-        String.fromCharCode(...new Uint8Array(hashBuffer))
-      );
 
       const presignRes = await fetch("/api/v1/storage/presign", {
         method: "POST",
@@ -220,10 +217,7 @@ function UploadButton({
 
       const uploadRes = await fetch(signedUrl, {
         method: "PUT",
-        headers: {
-          "Content-Type": file.type,
-          "x-amz-checksum-sha256": checksumBase64,
-        },
+        headers: { "Content-Type": file.type },
         body: new Blob([fileBuffer], { type: file.type }),
       });
       if (!uploadRes.ok) throw new Error("File upload failed");
