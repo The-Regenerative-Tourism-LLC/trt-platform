@@ -92,11 +92,9 @@ export class S3StorageProvider implements StorageProvider {
       return presign(this.client, cmd, { expiresIn: expiry });
     }
 
-    if (resolvedBucket === this.bucketPublic) {
-      const baseUrl = process.env.STORAGE_PUBLIC_BASE_URL!;
-      return `${baseUrl}/${key}`;
-    }
-
+    // Always generate a presigned GET URL regardless of bucket visibility.
+    // Public pages that need permanent CDN URLs use buildPublicStorageUrl()
+    // (which reads STORAGE_PUBLIC_BASE_URL directly) instead of this method.
     const expiry = Math.min(expiresInSeconds ?? GET_EXPIRY_SECONDS, GET_EXPIRY_SECONDS);
     const cmd = new GetObjectCommand({ Bucket: resolvedBucket, Key: key });
     return presign(this.client, cmd, { expiresIn: expiry });
