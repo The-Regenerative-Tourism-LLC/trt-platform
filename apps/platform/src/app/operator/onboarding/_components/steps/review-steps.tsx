@@ -80,9 +80,9 @@ export function GpsPreviewStep({
 
           {/* Reference DPI warning */}
           {referenceDpi && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 px-4 py-3 flex items-start gap-3">
+            <div className="rounded-xl border bg-card px-4 py-3 flex items-start gap-3">
               <MapPin className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+              <p className="text-sm  leading-relaxed">
                 We do not yet have a DPI calculated for this destination.
                 The current calculation uses Madeira as a reference territory, so the results may not fully reflect your local market.
               </p>
@@ -201,9 +201,9 @@ export function ReviewSubmitStep({
 
       {/* Reference DPI warning */}
       {referenceDpi && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800/40 dark:bg-amber-950/20 px-4 py-3 flex items-start gap-3">
+        <div className="rounded-xl border bg-card px-4 py-3 flex items-start gap-3">
           <MapPin className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+          <p className="text-sm leading-relaxed">
             We do not yet have a DPI calculated for this destination.
             The current calculation uses Madeira as a reference territory, so the results may not fully reflect your local market.
           </p>

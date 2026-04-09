@@ -1,35 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import {
   Upload,
-  FileText,
   CheckCircle2,
   Clock,
   XCircle,
   AlertTriangle,
+  ChevronUp,
   ChevronDown,
-  ChevronRight,
   ArrowLeft,
+  HelpCircle,
   Paperclip,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 type EvidenceTier = "T1" | "T2" | "T3" | "Proxy";
 type VerificationState = "pending" | "verified" | "rejected" | "lapsed";
@@ -52,108 +40,124 @@ interface EvidenceApiResponse {
   evidence: EvidenceRef[];
 }
 
-interface PillarIndicator {
+interface IndicatorDef {
   id: string;
   label: string;
+  hint: string;
   tier: EvidenceTier;
 }
 
 interface PillarGroup {
   pillar: string;
   name: string;
-  weight: string;
-  colorClass: string;
-  indicators: PillarIndicator[];
+  indicators: IndicatorDef[];
 }
 
 const PILLAR_GROUPS: PillarGroup[] = [
   {
     pillar: "P1",
     name: "Operational Footprint",
-    weight: "40%",
-    colorClass: "bg-primary",
     indicators: [
-      { id: "p1_1a_energy_intensity", label: "1A Energy Intensity", tier: "T1" },
-      { id: "p1_1a_renewable_pct", label: "1A Renewable Share", tier: "T1" },
-      { id: "p1_1b_water_intensity", label: "1B Water Intensity", tier: "T1" },
-      { id: "p1_1b_recirculation_score", label: "1B Water Recirculation", tier: "T2" },
-      { id: "p1_1c_waste_diversion_pct", label: "1C Waste Diversion", tier: "T1" },
-      { id: "p1_1d_carbon_intensity", label: "1D Carbon Intensity", tier: "T1" },
-      { id: "p1_1e_site_score", label: "1E Site & Land Use", tier: "T2" },
+      {
+        id: "p1_1a_energy_intensity",
+        label: "Energy Intensity",
+        hint: "kWh per guest-night from utility bills or meter readings",
+        tier: "T1",
+      },
+      {
+        id: "p1_1a_renewable_pct",
+        label: "Renewable Energy %",
+        hint: "Certificate from energy supplier or solar installation invoice",
+        tier: "T1",
+      },
+      {
+        id: "p1_1b_water_intensity",
+        label: "Water Intensity",
+        hint: "Litres per guest-night from water bills or meter readings",
+        tier: "T1",
+      },
+      {
+        id: "p1_1c_waste_diversion_pct",
+        label: "Waste Diversion",
+        hint: "Waste audit report or recycling service contract",
+        tier: "T1",
+      },
+      {
+        id: "p1_1d_carbon_intensity",
+        label: "Carbon Intensity",
+        hint: "Carbon footprint report or emissions calculation",
+        tier: "T1",
+      },
+      {
+        id: "p1_1e_site_score",
+        label: "Site & Land Use",
+        hint: "Site management plan or ecological assessment",
+        tier: "T2",
+      },
     ],
   },
   {
     pillar: "P2",
     name: "Local Integration",
-    weight: "30%",
-    colorClass: "bg-amber-500",
     indicators: [
-      { id: "p2_2a_local_employment_rate", label: "2A Local Employment", tier: "T1" },
-      { id: "p2_2a_employment_quality", label: "2A Employment Quality", tier: "T2" },
-      { id: "p2_2b_local_fb_rate", label: "2B Local F&B Procurement", tier: "T1" },
-      { id: "p2_2b_local_nonfb_rate", label: "2B Non-F&B Procurement", tier: "T1" },
-      { id: "p2_2c_direct_booking_rate", label: "2C Direct Booking Rate", tier: "T1" },
-      { id: "p2_2c_local_ownership_pct", label: "2C Local Ownership", tier: "T1" },
-      { id: "p2_2d_community_score", label: "2D Community Integration", tier: "T2" },
+      {
+        id: "p2_2a_local_employment_rate",
+        label: "Local Employment",
+        hint: "Payroll records showing employee residency",
+        tier: "T1",
+      },
+      {
+        id: "p2_2a_employment_quality",
+        label: "Employment Quality",
+        hint: "Contracts, benefits documentation, training records",
+        tier: "T2",
+      },
+      {
+        id: "p2_2b_local_fb_rate",
+        label: "Local F&B Sourcing",
+        hint: "Supplier invoices showing local food & beverage purchases",
+        tier: "T1",
+      },
+      {
+        id: "p2_2b_local_nonfb_rate",
+        label: "Local Non-F&B Sourcing",
+        hint: "Supplier invoices for local services and materials",
+        tier: "T1",
+      },
+      {
+        id: "p2_2c_direct_booking_rate",
+        label: "Direct Booking Rate",
+        hint: "Booking channel report from PMS or OTA dashboard",
+        tier: "T1",
+      },
+      {
+        id: "p2_2d_community_score",
+        label: "Community Engagement",
+        hint: "Community programme documentation or meeting minutes",
+        tier: "T2",
+      },
     ],
   },
   {
     pillar: "P3",
     name: "Regenerative Contribution",
-    weight: "30%",
-    colorClass: "bg-teal-500",
     indicators: [
-      { id: "p3_3a_category_scope", label: "3A Category & Scope", tier: "T3" },
-      { id: "p3_3b_traceability", label: "3B Institutional Traceability", tier: "T3" },
-      { id: "p3_3c_additionality", label: "3C Additionality", tier: "T3" },
-      { id: "p3_3d_continuity", label: "3D Continuity & Commitment", tier: "T3" },
+      {
+        id: "p3_3a_contribution_programme",
+        label: "Contribution Programme",
+        hint: "Programme description, budget, and impact measurement",
+        tier: "T3",
+      },
     ],
   },
 ];
 
-const TIER_INFO: Record<EvidenceTier, { label: string; color: string }> = {
-  T1: { label: "T1 Primary", color: "bg-secondary text-primary" },
-  T2: { label: "T2 Secondary", color: "bg-blue-100 text-blue-800" },
-  T3: { label: "T3 Institutional", color: "bg-teal-100 text-teal-800" },
-  Proxy: { label: "Proxy", color: "bg-purple-100 text-purple-800" },
-};
+const ALL_INDICATORS = PILLAR_GROUPS.flatMap((g) => g.indicators);
 
-const STATE_ICON: Record<VerificationState, { icon: typeof CheckCircle2; color: string }> = {
-  pending: { icon: Clock, color: "text-amber-500" },
-  verified: { icon: CheckCircle2, color: "text-primary" },
-  rejected: { icon: XCircle, color: "text-destructive" },
-  lapsed: { icon: AlertTriangle, color: "text-muted-foreground/60" },
-};
-
-function fetchEvidence(): Promise<EvidenceApiResponse> {
-  return fetch("/api/v1/operator/evidence").then((r) => {
-    if (!r.ok) throw new Error("Failed to fetch evidence");
-    return r.json();
-  });
-}
-
-interface UploadPayload {
-  assessmentSnapshotId: string;
-  indicatorId: string;
-  tier: EvidenceTier;
-  fileName: string;
-  storagePath: string;
-  checksum: string;
-}
-
-async function submitEvidence(
-  payload: UploadPayload
-): Promise<{ success: boolean; evidenceRefId: string }> {
-  const res = await fetch("/api/v1/evidence", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error ?? "Submission failed");
-  }
-  return res.json();
+async function fetchEvidence(): Promise<EvidenceApiResponse> {
+  const r = await fetch("/api/v1/operator/evidence");
+  if (!r.ok) throw new Error("Failed to fetch evidence");
+  return r.json();
 }
 
 function formatDate(iso: string) {
@@ -164,11 +168,125 @@ function formatDate(iso: string) {
   });
 }
 
+function UploadButton({
+  indicatorId,
+  tier,
+  assessmentSnapshotId,
+  onUploaded,
+}: {
+  indicatorId: string;
+  tier: EvidenceTier;
+  assessmentSnapshotId: string | null;
+  onUploaded: () => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!assessmentSnapshotId) {
+      toast.error("No assessment snapshot found. Complete an assessment first.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileBuffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", fileBuffer);
+      const checksumHex = Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      const checksumBase64 = btoa(
+        String.fromCharCode(...new Uint8Array(hashBuffer))
+      );
+
+      const presignRes = await fetch("/api/v1/storage/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceType: "evidence",
+          contentType: file.type,
+          sizeBytes: file.size,
+          checksum: checksumHex,
+        }),
+      });
+      if (!presignRes.ok) {
+        const body = await presignRes.json().catch(() => ({}));
+        throw new Error(body?.error ?? "Failed to get upload URL");
+      }
+      const { key, signedUrl } = await presignRes.json();
+
+      const uploadRes = await fetch(signedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+          "x-amz-checksum-sha256": checksumBase64,
+        },
+        body: new Blob([fileBuffer], { type: file.type }),
+      });
+      if (!uploadRes.ok) throw new Error("File upload failed");
+
+      const confirmRes = await fetch("/api/v1/evidence/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key,
+          fileName: file.name,
+          mimeType: file.type,
+          sizeBytes: file.size,
+          checksum: checksumHex,
+          assessmentSnapshotId,
+          indicatorId,
+          tier,
+        }),
+      });
+      if (!confirmRes.ok) {
+        const body = await confirmRes.json().catch(() => ({}));
+        throw new Error(body?.error ?? "Failed to register evidence");
+      }
+
+      toast.success("Evidence uploaded successfully");
+      onUploaded();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  return (
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <button
+        type="button"
+        disabled={uploading || !assessmentSnapshotId}
+        onClick={() => fileInputRef.current?.click()}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1a1a1a] text-white text-sm font-medium hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        {uploading ? (
+          <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+        ) : (
+          <Upload className="h-4 w-4" />
+        )}
+        {uploading ? "Uploading..." : "Upload"}
+      </button>
+    </>
+  );
+}
+
 export function EvidenceClient() {
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [expandedPillars, setExpandedPillars] = useState<string[]>(["P1", "P2", "P3"]);
-  const [uploadingIndicator, setUploadingIndicator] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["operator-evidence"],
@@ -176,46 +294,14 @@ export function EvidenceClient() {
     enabled: !!user,
   });
 
-  // Upload form state
-  const [tier, setTier] = useState<EvidenceTier>("T1");
-  const [fileName, setFileName] = useState("");
-  const [storagePath, setStoragePath] = useState("");
-  const [checksum, setChecksum] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: submitEvidence,
-    onSuccess: () => {
-      toast.success("Evidence submitted successfully");
-      queryClient.invalidateQueries({ queryKey: ["operator-evidence"] });
-      setUploadingIndicator(null);
-      setFileName("");
-      setStoragePath("");
-      setChecksum("");
-    },
-    onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to submit evidence");
-    },
-  });
-
-  function handleSubmit(indicatorId: string) {
-    if (!data?.latestAssessmentSnapshotId) {
-      toast.error("No assessment snapshot found.");
-      return;
-    }
-    mutation.mutate({
-      assessmentSnapshotId: data.latestAssessmentSnapshotId,
-      indicatorId,
-      tier,
-      fileName: fileName.trim(),
-      storagePath: storagePath.trim(),
-      checksum: checksum.trim(),
-    });
-  }
-
   function togglePillar(pillar: string) {
     setExpandedPillars((prev) =>
       prev.includes(pillar) ? prev.filter((p) => p !== pillar) : [...prev, pillar]
     );
+  }
+
+  function invalidateEvidence() {
+    queryClient.invalidateQueries({ queryKey: ["operator-evidence"] });
   }
 
   if (authLoading || isLoading) {
@@ -227,6 +313,8 @@ export function EvidenceClient() {
   }
 
   const evidence = data?.evidence ?? [];
+  const assessmentSnapshotId = data?.latestAssessmentSnapshotId ?? null;
+
   const evidenceByIndicator = new Map<string, EvidenceRef[]>();
   for (const e of evidence) {
     const existing = evidenceByIndicator.get(e.indicatorId) ?? [];
@@ -234,295 +322,190 @@ export function EvidenceClient() {
     evidenceByIndicator.set(e.indicatorId, existing);
   }
 
-  const allIndicators = PILLAR_GROUPS.flatMap((g) => g.indicators);
-  const verified = allIndicators.filter((ind) =>
+  const totalCount = ALL_INDICATORS.length;
+  const verifiedCount = ALL_INDICATORS.filter((ind) =>
     evidenceByIndicator.get(ind.id)?.some((e) => e.verificationState === "verified")
   ).length;
-  const pending = allIndicators.filter((ind) =>
-    evidenceByIndicator.get(ind.id)?.some((e) => e.verificationState === "pending") &&
-    !evidenceByIndicator.get(ind.id)?.some((e) => e.verificationState === "verified")
+  const pendingCount = ALL_INDICATORS.filter(
+    (ind) =>
+      evidenceByIndicator.get(ind.id)?.some((e) => e.verificationState === "pending") &&
+      !evidenceByIndicator.get(ind.id)?.some((e) => e.verificationState === "verified")
   ).length;
-  const missing = allIndicators.length - verified - pending;
-  const coveragePct = Math.round((verified / allIndicators.length) * 100);
+  const missingCount = totalCount - verifiedCount - pendingCount;
+  const coveragePct = Math.round((verifiedCount / totalCount) * 100);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Evidence Management</h1>
-          <p className="text-muted-foreground mt-1">
-            Submit and track supporting evidence for each assessment indicator.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/operator/dashboard">
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Dashboard
-          </Link>
-        </Button>
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Back link */}
+      <Link
+        href="/operator/dashboard"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Dashboard
+      </Link>
+
+      {/* Page heading */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Evidence</h1>
+        <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+          Upload documents to verify your assessment data. Higher-tier evidence improves your score
+          confidence.
+        </p>
       </div>
 
-      {/* Coverage overview */}
-      <Card>
-        <CardContent className="py-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Evidence Coverage</p>
-            <span className="text-sm tabular-nums font-bold">{coveragePct}%</span>
-          </div>
-          <Progress value={coveragePct} className="h-2" />
-          <div className="flex gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-primary" />
-              {verified} verified
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              {pending} pending
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-zinc-300" />
-              {missing} missing
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Coverage card */}
+      <div className="rounded-xl border bg-card p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">Evidence coverage</span>
+          <span className="text-sm text-muted-foreground tabular-nums">
+            {verifiedCount} of {totalCount} indicators
+          </span>
+        </div>
+        <Progress value={coveragePct} className="h-1.5" />
+        <div className="flex items-center gap-5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-foreground" />
+            {verifiedCount} verified
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            {pendingCount} pending
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full border border-muted-foreground/40 bg-transparent" />
+            {missingCount} missing
+          </span>
+        </div>
+      </div>
 
-      {/* Pillar-grouped indicators */}
+      {/* Help box */}
+      <div className="rounded-xl border bg-card p-5 space-y-3">
+        <div className="flex items-center gap-2">
+          <HelpCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="text-sm font-semibold">Not sure what to upload?</span>
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          <span className="font-medium text-foreground">📎 Upload any document you have</span> —
+          utility invoices, supplier receipts, contracts, meter readings, screenshots, or even photos
+          of paper records. We accept any format (PDF, images, spreadsheets).
+        </p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          <span className="font-medium text-foreground">😊 Prefer in-person verification?</span> —
+          If you&apos;re not comfortable sharing documents online, we can arrange a visit to review
+          your records on-site. Contact us after submission and we&apos;ll coordinate a time that
+          works for you.
+        </p>
+      </div>
+
+      {/* No snapshot warning */}
+      {!assessmentSnapshotId && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+          <p className="text-sm text-amber-800">
+            No assessment snapshot found. Complete an assessment before uploading evidence.
+          </p>
+          <Link
+            href="/operator/onboarding"
+            className="ml-auto text-sm font-medium text-amber-800 underline underline-offset-2 hover:no-underline whitespace-nowrap"
+          >
+            Start Assessment
+          </Link>
+        </div>
+      )}
+
+      {/* Pillar sections */}
       {PILLAR_GROUPS.map((group) => {
         const isExpanded = expandedPillars.includes(group.pillar);
-        const groupEvidence = group.indicators.map((ind) => ({
-          ...ind,
-          evidence: evidenceByIndicator.get(ind.id) ?? [],
-        }));
-        const groupVerified = groupEvidence.filter((ind) =>
-          ind.evidence.some((e) => e.verificationState === "verified")
+        const groupVerified = group.indicators.filter((ind) =>
+          evidenceByIndicator.get(ind.id)?.some((e) => e.verificationState === "verified")
         ).length;
 
         return (
-          <Card key={group.pillar}>
+          <div key={group.pillar} className="rounded-xl border bg-card overflow-hidden">
+            {/* Pillar header */}
             <button
               type="button"
               onClick={() => togglePillar(group.pillar)}
-              className="w-full flex items-center justify-between p-5 text-left"
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/30 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${group.colorClass}`} />
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                  {group.pillar === "P1" ? "P1" : group.pillar === "P2" ? "👤" : "🌱"}
+                </div>
                 <div>
-                  <p className="font-semibold text-sm">
+                  <p className="text-sm font-semibold">
                     {group.pillar} — {group.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Weight: {group.weight} · {groupVerified}/{group.indicators.length} verified
+                    {groupVerified} of {group.indicators.length} covered
                   </p>
                 </div>
               </div>
               {isExpanded ? (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <ChevronUp className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               )}
             </button>
 
+            {/* Indicator rows */}
             {isExpanded && (
-              <div className="border-t">
-                {groupEvidence.map((ind) => {
-                  const latestEvidence = ind.evidence.sort(
-                    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-                  )[0];
-                  const state = latestEvidence?.verificationState;
-                  const StateInfo = state ? STATE_ICON[state] : null;
-                  const isUploading = uploadingIndicator === ind.id;
+              <div className="border-t divide-y">
+                {group.indicators.map((ind) => {
+                  const indEvidence = (evidenceByIndicator.get(ind.id) ?? []).sort(
+                    (a, b) =>
+                      new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+                  );
+                  const latest = indEvidence[0];
+                  const state = latest?.verificationState;
 
                   return (
-                    <div key={ind.id} className="border-b last:border-b-0">
-                      <div className="flex items-center justify-between px-5 py-3">
-                        <div className="flex items-center gap-3 min-w-0">
-                          {StateInfo ? (
-                            <StateInfo.icon className={`h-4 w-4 shrink-0 ${StateInfo.color}`} />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-dashed border-muted-foreground/30 shrink-0" />
-                          )}
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{ind.label}</p>
-                            {latestEvidence && (
-                              <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                                <Paperclip className="h-3 w-3" />
-                                <span className="truncate max-w-[200px]">{latestEvidence.fileName}</span>
-                                <span>· {formatDate(latestEvidence.submittedAt)}</span>
-                              </p>
+                    <div
+                      key={ind.id}
+                      className="flex items-center justify-between px-5 py-4 gap-4"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold leading-snug">{ind.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                          {ind.hint}
+                        </p>
+                        {latest && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1.5">
+                            {state === "verified" && (
+                              <CheckCircle2 className="h-3 w-3 text-green-600 shrink-0" />
                             )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Badge variant="outline" className={`text-[10px] ${TIER_INFO[ind.tier].color}`}>
-                            {TIER_INFO[ind.tier].label}
-                          </Badge>
-                          {state && (
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] ${
-                                state === "verified"
-                                  ? "bg-secondary text-primary"
-                                  : state === "pending"
-                                    ? "bg-amber-50 text-amber-700"
-                                    : state === "rejected"
-                                      ? "bg-destructive/10 text-destructive"
-                                      : "bg-muted text-muted-foreground"
-                              }`}
-                            >
-                              {state.charAt(0).toUpperCase() + state.slice(1)}
-                            </Badge>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs"
-                            onClick={() =>
-                              setUploadingIndicator(isUploading ? null : ind.id)
-                            }
-                          >
-                            <Upload className="h-3 w-3 mr-1" />
-                            {latestEvidence ? "Replace" : "Upload"}
-                          </Button>
-                        </div>
+                            {state === "pending" && (
+                              <Clock className="h-3 w-3 text-amber-500 shrink-0" />
+                            )}
+                            {state === "rejected" && (
+                              <XCircle className="h-3 w-3 text-destructive shrink-0" />
+                            )}
+                            {state === "lapsed" && (
+                              <AlertTriangle className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+                            )}
+                            <Paperclip className="h-3 w-3 shrink-0" />
+                            <span className="truncate max-w-[220px]">{latest.fileName}</span>
+                            <span className="shrink-0">· {formatDate(latest.submittedAt)}</span>
+                          </p>
+                        )}
                       </div>
-
-                      {/* Inline upload form */}
-                      {isUploading && (
-                        <div className="px-5 pb-4 bg-muted/30">
-                          <div className="grid sm:grid-cols-2 gap-3 mb-3">
-                            <div className="space-y-1">
-                              <label className="text-xs font-medium text-muted-foreground">File Name</label>
-                              <Input
-                                value={fileName}
-                                onChange={(e) => setFileName(e.target.value)}
-                                placeholder="e.g. energy-bill-q1-2026.pdf"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-medium text-muted-foreground">Evidence Tier</label>
-                              <select
-                                value={tier}
-                                onChange={(e) => setTier(e.target.value as EvidenceTier)}
-                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                              >
-                                <option value="T1">T1 — Primary verified data</option>
-                                <option value="T2">T2 — Secondary data</option>
-                                <option value="T3">T3 — Institutional evidence</option>
-                                <option value="Proxy">Proxy — Estimated data</option>
-                              </select>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-medium text-muted-foreground">Storage Path</label>
-                              <Input
-                                value={storagePath}
-                                onChange={(e) => setStoragePath(e.target.value)}
-                                placeholder="evidence/operator/file.pdf"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-xs font-medium text-muted-foreground">SHA-256 Checksum</label>
-                              <Input
-                                value={checksum}
-                                onChange={(e) => setChecksum(e.target.value)}
-                                placeholder="a665a459..."
-                                className="font-mono text-xs"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              className="bg-primary text-primary-foreground hover:bg-primary/90"
-                              disabled={mutation.isPending || !fileName.trim() || !checksum.trim() || !data?.latestAssessmentSnapshotId}
-                              onClick={() => handleSubmit(ind.id)}
-                            >
-                              {mutation.isPending ? "Submitting..." : "Submit Evidence"}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setUploadingIndicator(null)}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      )}
+                      <div className="shrink-0">
+                        <UploadButton
+                          indicatorId={ind.id}
+                          tier={ind.tier}
+                          assessmentSnapshotId={assessmentSnapshotId}
+                          onUploaded={invalidateEvidence}
+                        />
+                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
-          </Card>
+          </div>
         );
       })}
-
-      {/* All evidence table */}
-      {evidence.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
-              All Evidence Records
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Indicator</TableHead>
-                  <TableHead>Tier</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>File</TableHead>
-                  <TableHead>Submitted</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {evidence.map((e) => {
-                  const StateInfo = STATE_ICON[e.verificationState];
-                  return (
-                    <TableRow key={e.id}>
-                      <TableCell className="font-mono text-xs">{e.indicatorId}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`text-[10px] ${TIER_INFO[e.tier].color}`}>
-                          {e.tier}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="flex items-center gap-1.5">
-                          <StateInfo.icon className={`h-3.5 w-3.5 ${StateInfo.color}`} />
-                          <span className="text-xs capitalize">{e.verificationState}</span>
-                        </span>
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate text-xs text-muted-foreground">
-                        {e.fileName}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatDate(e.submittedAt)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {!data?.latestAssessmentSnapshotId && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="py-4 flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
-            <p className="text-sm text-amber-800">
-              No assessment snapshot found. Complete an assessment before submitting evidence.
-            </p>
-            <Button size="sm" className="ml-auto bg-amber-600 hover:bg-amber-700" asChild>
-              <Link href="/operator/onboarding">Start Assessment</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

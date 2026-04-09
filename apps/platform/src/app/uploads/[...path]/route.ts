@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import { resolve, normalize } from "path";
+import { requireSession } from "@/lib/auth/session";
 
 const CONTENT_TYPES: Record<string, string> = {
   jpg: "image/jpeg",
@@ -27,6 +28,17 @@ export async function GET(
     return new NextResponse(null, { status: 400 });
   }
 
+  // Evidence objects are private — require a valid session in local dev to
+  // emulate the private-bucket access control of the production S3/R2 path.
+  const isEvidence = path[0] === "operators" && path[2] === "evidence";
+  if (isEvidence) {
+    try {
+      await requireSession();
+    } catch {
+      return new NextResponse(null, { status: 401 });
+    }
+  }
+
   const baseDir = resolve(
     process.cwd(),
     process.env.STORAGE_LOCAL_DIR ?? "storage"
@@ -49,7 +61,9 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cache-Control": isEvidence
+          ? "private, no-store"
+          : "public, max-age=31536000, immutable",
         "X-Content-Type-Options": "nosniff",
       },
     });

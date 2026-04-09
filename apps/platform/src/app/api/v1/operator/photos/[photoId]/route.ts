@@ -40,12 +40,29 @@ export async function DELETE(
 
     // Delete from storage (best-effort — don't let storage failure block DB cleanup)
     try {
-      await getStorageProvider().delete(photo.storageKey);
+      await getStorageProvider().delete(photo.storageKey, "public");
     } catch (err) {
       console.error(`[delete:photo] storage delete failed photoId=${photoId} key=${photo.storageKey}`, err);
     }
 
-    await prisma.operatorPhoto.delete({ where: { id: photoId } });
+    // Delete and, if this was the cover, promote the next oldest photo to cover — atomically.
+    await prisma.$transaction(async (tx) => {
+      await tx.operatorPhoto.delete({ where: { id: photoId } });
+
+      if (photo.isCover) {
+        const next = await tx.operatorPhoto.findFirst({
+          where: { operatorId: operator.id },
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+          select: { id: true },
+        });
+        if (next) {
+          await tx.operatorPhoto.update({
+            where: { id: next.id },
+            data: { isCover: true },
+          });
+        }
+      }
+    });
 
     await logAuditEvent({
       actor: session.userId,
