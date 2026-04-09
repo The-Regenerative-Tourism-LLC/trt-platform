@@ -1204,10 +1204,6 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
         const checksumHex = Array.from(new Uint8Array(hashBuffer))
           .map((b) => b.toString(16).padStart(2, "0"))
           .join("");
-        // S3/R2 ChecksumSHA256 uses base64 encoding
-        const checksumBase64 = btoa(
-          String.fromCharCode(...new Uint8Array(hashBuffer))
-        );
 
         const presignRes = await fetch("/api/v1/storage/presign", {
           method: "POST",
@@ -1227,10 +1223,7 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
 
         const uploadRes = await fetch(putUrl, {
           method: "PUT",
-          headers: {
-            "Content-Type": file.type,
-            "x-amz-checksum-sha256": checksumBase64,
-          },
+          headers: { "Content-Type": file.type },
           body: new Blob([fileBuffer], { type: file.type }),
         });
         if (!uploadRes.ok) throw new Error("File upload failed");

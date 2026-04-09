@@ -71,21 +71,23 @@ export class S3StorageProvider implements StorageProvider {
     operation: "get" | "put",
     expiresInSeconds?: number,
     contentType?: string,
-    sizeBytes?: number,
+    _sizeBytes?: number,
     bucket?: StorageBucket,
-    checksumSHA256?: string
+    _checksumSHA256?: string
   ): Promise<string> {
     const resolvedBucket = this.resolveBucket(bucket);
 
     if (operation === "put") {
       if (!contentType) throw new Error("contentType is required for PUT signed URLs");
       const expiry = Math.min(expiresInSeconds ?? PUT_EXPIRY_SECONDS, PUT_EXPIRY_SECONDS);
+      // ContentLength and ChecksumSHA256 are intentionally excluded from the
+      // presigned command: including them adds them to X-Amz-SignedHeaders,
+      // but browsers normalise/strip those headers on PUT, causing 403 on R2/S3.
+      // The client-computed SHA-256 is stored in the DB via the confirm body instead.
       const cmd = new PutObjectCommand({
         Bucket: resolvedBucket,
         Key: key,
         ContentType: contentType,
-        ...(sizeBytes !== undefined ? { ContentLength: sizeBytes } : {}),
-        ...(checksumSHA256 ? { ChecksumSHA256: checksumSHA256 } : {}),
       });
       return presign(this.client, cmd, { expiresIn: expiry });
     }
