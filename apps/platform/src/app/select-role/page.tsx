@@ -5,6 +5,7 @@ import { SelectRoleForm } from "./SelectRoleForm";
 
 export const metadata: Metadata = {
   title: "Choose Your Role",
+  robots: { index: false, follow: false },
 };
 
 export default function SelectRolePage() {

@@ -14,9 +14,22 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Pricing",
+  title: "Pricing & Assessment Tiers",
   description:
-    "Assessment pricing for operators — from free self-assessment to verified publication.",
+    "Assessment pricing for regenerative tourism operators — from free self-assessment to independently verified publication on Green Passport.",
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "Pricing & Assessment Tiers · Green Passport",
+    description:
+      "Assessment pricing for regenerative tourism operators — from free self-assessment to independently verified publication.",
+    url: "/pricing",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing & Assessment Tiers · Green Passport",
+    description:
+      "Assessment pricing for operators — from free self-assessment to verified publication.",
+  },
 };
 
 export default function PricingPage() {

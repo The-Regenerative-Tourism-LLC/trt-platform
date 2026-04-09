@@ -5,6 +5,7 @@ import { SignupForm } from "./SignupForm";
 
 export const metadata: Metadata = {
   title: "Operator Signup",
+  robots: { index: false, follow: false },
 };
 
 export default function SignupPage() {

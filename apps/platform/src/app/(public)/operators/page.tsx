@@ -13,9 +13,22 @@ function buildPublicStorageUrl(storageKey: string): string {
 }
 
 export const metadata: Metadata = {
-  title: "Verified Regenerative Operators · Green Passport",
+  title: "Verified Regenerative Operators",
   description:
-    "Browse and compare verified regenerative tourism operators with GPS scores.",
+    "Browse and compare verified regenerative tourism operators with GPS scores, DPI band context, and pillar breakdowns.",
+  alternates: { canonical: "/operators" },
+  openGraph: {
+    title: "Verified Regenerative Operators · Green Passport",
+    description:
+      "Browse and compare verified regenerative tourism operators with GPS scores, DPI band context, and pillar breakdowns.",
+    url: "/operators",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Verified Regenerative Operators · Green Passport",
+    description:
+      "Browse and compare verified regenerative tourism operators with GPS scores and pillar breakdowns.",
+  },
 };
 
 export const dynamic = "force-dynamic";

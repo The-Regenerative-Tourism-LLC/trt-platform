@@ -62,8 +62,23 @@ export function Footer() {
             </div>
           </div>
 
+          {/* Journal */}
+          <div className="md:col-span-2 space-y-4">
+            <p className="font-hand text-xl text-white/50">
+              Journal
+            </p>
+            <div className="space-y-2.5">
+              <Link
+                href="/blog"
+                className="block text-sm text-white/60 hover:text-white transition-colors"
+              >
+                All Articles
+              </Link>
+            </div>
+          </div>
+
           {/* Methodology */}
-          <div className="md:col-span-4 space-y-4">
+          <div className="md:col-span-2 space-y-4">
             <p className="font-hand text-xl text-white/50">
               Methodology
             </p>
