@@ -41,12 +41,12 @@ export default function BlogPage() {
 
       <div className="min-h-[60vh]">
         {/* Hero */}
-        <section className="bg-black text-white py-20 md:py-28 px-5 md:px-6">
+        <section className="bg-[#1C1C1C] text-[#FDF5EA] py-20 md:py-28 px-5 md:px-6">
           <div className="container mx-auto max-w-7xl">
-            <p className="font-hand text-xl text-white/40 mb-3">Journal</p>
+            <p className="font-hand text-xl text-[#FDF5EA]/40 mb-3">Journal</p>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.05] max-w-2xl">
               Regenerative Tourism{" "}
-              <span className="text-amber-400">Insights</span>
+              <span className="text-[#C5BAA6]">Insights</span>
             </h1>
             <p className="mt-5 text-base md:text-lg text-white/55 max-w-xl leading-relaxed">
               Perspectives on conscious travel, ecosystem care, and the ethics of hospitality — from the Green Passport team.
@@ -63,12 +63,12 @@ export default function BlogPage() {
               </p>
               <Link
                 href={`/blog/${featured.slug}`}
-                className="group block rounded-2xl border border-border bg-white overflow-hidden hover:shadow-md transition-shadow"
+                className="group block rounded-2xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="grid md:grid-cols-2 gap-0">
-                  <div className="bg-gradient-to-br from-stone-900 to-stone-800 flex items-center justify-center p-12 min-h-[260px]">
+                  <div className="bg-gradient-to-br from-[#1C1C1C] to-[#2A2419] flex items-center justify-center p-12 min-h-[260px]">
                     <div className="text-center">
-                      <span className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6">
+                      <span className="inline-flex items-center gap-2 bg-[#C5BAA6]/20 border border-[#C5BAA6]/40 text-[#C5BAA6] text-xs font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6">
                         {featured.category}
                       </span>
                       <p className="font-hand text-5xl text-white/20 leading-none">
@@ -85,7 +85,7 @@ export default function BlogPage() {
                         <span>·</span>
                         <span>{featured.readingTimeMinutes} min read</span>
                       </div>
-                      <h2 className="text-2xl md:text-3xl font-bold leading-tight tracking-tight group-hover:text-amber-700 transition-colors mb-4">
+                      <h2 className="text-2xl md:text-3xl font-bold leading-tight tracking-tight group-hover:text-primary transition-colors mb-4">
                         {featured.title}
                       </h2>
                       <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
@@ -119,10 +119,10 @@ export default function BlogPage() {
                   <Link
                     key={post.slug}
                     href={`/blog/${post.slug}`}
-                    className="group block rounded-xl border border-border bg-white overflow-hidden hover:shadow-md transition-shadow"
+                    className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    <div className="bg-gradient-to-br from-stone-900 to-stone-800 h-40 flex items-center justify-center">
-                      <span className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full">
+                    <div className="bg-gradient-to-br from-[#1C1C1C] to-[#2A2419] h-40 flex items-center justify-center">
+                      <span className="inline-flex items-center gap-2 bg-[#C5BAA6]/20 border border-[#C5BAA6]/40 text-[#C5BAA6] text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full">
                         {post.category}
                       </span>
                     </div>
@@ -134,7 +134,7 @@ export default function BlogPage() {
                         <span>·</span>
                         <span>{post.readingTimeMinutes} min read</span>
                       </div>
-                      <h3 className="font-bold leading-snug tracking-tight group-hover:text-amber-700 transition-colors line-clamp-3">
+                      <h3 className="font-bold leading-snug tracking-tight group-hover:text-primary transition-colors line-clamp-3">
                         {post.title}
                       </h3>
                       <p className="mt-2 text-sm text-muted-foreground line-clamp-2">

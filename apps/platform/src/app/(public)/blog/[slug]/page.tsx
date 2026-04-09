@@ -130,7 +130,7 @@ function BlockRenderer({ block }: { block: BlogBlock }) {
                 {block.columns.map((col) => (
                   <th
                     key={col.title}
-                    className="text-left px-4 py-3 bg-stone-900 text-white font-semibold tracking-tight border border-stone-700 first:rounded-tl-lg last:rounded-tr-lg"
+                    className="text-left px-4 py-3 bg-[#1C1C1C] text-[#FDF5EA] font-semibold tracking-tight border border-[#1C1C1C]/60 first:rounded-tl-lg last:rounded-tr-lg"
                   >
                     {col.title}
                   </th>
@@ -184,7 +184,7 @@ export default async function BlogPostPage({ params }: Props) {
       <JsonLd schema={articleSchema} />
 
       {/* Article header */}
-      <div className="bg-black text-white">
+      <div className="bg-[#1C1C1C] text-[#FDF5EA]">
         <div className="container mx-auto max-w-4xl px-5 md:px-6 py-14 md:py-20">
           <Link
             href="/blog"
@@ -195,7 +195,7 @@ export default async function BlogPostPage({ params }: Props) {
           </Link>
 
           <div className="flex items-center gap-3 mb-6">
-            <span className="inline-flex items-center bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full">
+            <span className="inline-flex items-center bg-[#C5BAA6]/20 border border-[#C5BAA6]/40 text-[#C5BAA6] text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full">
               {post.category}
             </span>
             <span className="text-xs text-white/30">
@@ -212,7 +212,7 @@ export default async function BlogPostPage({ params }: Props) {
           </p>
 
           <div className="flex items-center gap-3 pt-6 border-t border-white/10">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs font-bold">
+            <div className="w-8 h-8 rounded-full bg-[#C5BAA6]/20 border border-[#C5BAA6]/40 flex items-center justify-center text-[#C5BAA6] text-xs font-bold">
               GP
             </div>
             <div>
@@ -260,18 +260,18 @@ export default async function BlogPostPage({ params }: Props) {
         )}
 
         {/* CTA */}
-        <div className="mt-14 rounded-2xl bg-stone-900 text-white p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div className="mt-14 rounded-2xl bg-[#1C1C1C] text-[#FDF5EA] p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
             <p className="font-bold text-lg leading-snug mb-1">
               Is your operation truly regenerative?
             </p>
-            <p className="text-sm text-white/55 max-w-sm leading-relaxed">
+            <p className="text-sm text-[#FDF5EA]/55 max-w-sm leading-relaxed">
               Apply for a Green Passport Score and make your impact visible to conscious travelers worldwide.
             </p>
           </div>
           <Link
             href="/signup"
-            className="inline-flex items-center justify-center shrink-0 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm px-6 h-11 transition-colors"
+            className="inline-flex items-center justify-center shrink-0 rounded-lg bg-[#C5BAA6] hover:bg-[#B8AA97] text-[#1C1C1C] font-semibold text-sm px-6 h-11 transition-colors"
           >
             Get Certified
           </Link>

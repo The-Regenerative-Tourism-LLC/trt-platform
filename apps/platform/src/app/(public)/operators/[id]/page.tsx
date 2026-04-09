@@ -142,7 +142,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               className="object-cover object-center"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/60 to-transparent" />
           </div>
         ) : (
           <div className="h-64 md:h-80 w-full relative overflow-hidden">
@@ -153,7 +153,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               className="object-cover object-center"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/60 to-[#1C1C1C]/20" />
           </div>
         )}
 

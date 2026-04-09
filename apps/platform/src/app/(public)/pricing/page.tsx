@@ -151,7 +151,7 @@ export default function PricingPage() {
                     Field documentation (photo & video)
                   </li>
                   <li className="flex gap-2">
-                    <Star className="h-4 w-4 text-[hsl(var(--trt-amber))] shrink-0 mt-0.5" />
+                    <Star className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                     Permanent &ldquo;Founder&rdquo; badge
                   </li>
                   <li className="flex gap-2">
