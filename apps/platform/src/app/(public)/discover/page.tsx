@@ -3,9 +3,22 @@ import { prisma } from "@/lib/db/prisma";
 import { DiscoverClient } from "./DiscoverClient";
 
 export const metadata: Metadata = {
-  title: "Discover",
+  title: "Discover Regenerative Tourism Operators",
   description:
-    "Browse verified regenerative tourism operators by score, territory, and pillar.",
+    "Browse verified regenerative tourism operators by GPS score, territory, and pillar. Filter by band, destination pressure, and certification tier.",
+  alternates: { canonical: "/discover" },
+  openGraph: {
+    title: "Discover Regenerative Tourism Operators",
+    description:
+      "Browse verified regenerative tourism operators by GPS score, territory, and pillar.",
+    url: "/discover",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Discover Regenerative Tourism Operators",
+    description:
+      "Browse verified regenerative tourism operators by GPS score, territory, and pillar.",
+  },
 };
 
 export const dynamic = "force-dynamic";

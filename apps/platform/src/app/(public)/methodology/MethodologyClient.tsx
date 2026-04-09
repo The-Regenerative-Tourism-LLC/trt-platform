@@ -115,7 +115,7 @@ export function MethodologyClient() {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/60 via-[#1C1C1C]/70 to-[#1C1C1C]/85" />
         <div className="relative z-10 container mx-auto max-w-7xl px-5 md:px-6 py-16 md:py-28">
           <div className="max-w-2xl space-y-5">
             <p className="editorial-label text-white/50">How it works</p>

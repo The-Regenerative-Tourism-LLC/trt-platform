@@ -72,7 +72,7 @@ export function ReminderEmailTemplate({
         To manage which reminder emails you receive, visit your{" "}
         <a
           href="https://app.trtplatform.com/email-preferences"
-          style={{ color: "#1a6b3c" }}
+          style={{ color: "#000000" }}
         >
           email preferences
         </a>

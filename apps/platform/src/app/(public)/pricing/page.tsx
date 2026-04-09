@@ -14,9 +14,22 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Pricing",
+  title: "Pricing & Assessment Tiers",
   description:
-    "Assessment pricing for operators — from free self-assessment to verified publication.",
+    "Assessment pricing for regenerative tourism operators — from free self-assessment to independently verified publication on Green Passport.",
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "Pricing & Assessment Tiers · Green Passport",
+    description:
+      "Assessment pricing for regenerative tourism operators — from free self-assessment to independently verified publication.",
+    url: "/pricing",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing & Assessment Tiers · Green Passport",
+    description:
+      "Assessment pricing for operators — from free self-assessment to verified publication.",
+  },
 };
 
 export default function PricingPage() {
@@ -138,7 +151,7 @@ export default function PricingPage() {
                     Field documentation (photo & video)
                   </li>
                   <li className="flex gap-2">
-                    <Star className="h-4 w-4 text-[hsl(var(--trt-amber))] shrink-0 mt-0.5" />
+                    <Star className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                     Permanent &ldquo;Founder&rdquo; badge
                   </li>
                   <li className="flex gap-2">

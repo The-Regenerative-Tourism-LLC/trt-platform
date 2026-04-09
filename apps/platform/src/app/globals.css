@@ -161,8 +161,8 @@
     100% { transform: translateX(-33.333%); }
   }
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px hsl(80 30% 35% / 0.3); }
-    50% { box-shadow: 0 0 40px hsl(80 30% 35% / 0.6); }
+    0%, 100% { box-shadow: 0 0 20px hsl(30 15% 40% / 0.3); }
+    50% { box-shadow: 0 0 40px hsl(30 15% 40% / 0.6); }
   }
 }
 
@@ -235,17 +235,17 @@
     /* GPS tier + rings */
     --tier-regenerative: 33 22% 55%;
     --tier-regenerative-bg: 40 14% 88%;
-    --tier-advancing: 208 74% 37%;
-    --tier-advancing-bg: 208 65% 94%;
-    --tier-developing: 34 85% 28%;
-    --tier-developing-bg: 42 75% 92%;
+    --tier-advancing: 30 10% 30%;
+    --tier-advancing-bg: 40 12% 92%;
+    --tier-developing: 33 15% 42%;
+    --tier-developing-bg: 40 10% 92%;
     --tier-getting-started: 0 0% 40%;
     --tier-getting-started-bg: 45 10% 90%;
     --gps-footprint: 39 16% 83%;
     --gps-local: 39 21% 71%;
-    --gps-regen: 265 98% 75%;
-    --gps-gradient-start: 8 63% 55%;
-    --gps-gradient-mid: 40 64% 58%;
+    --gps-regen: 30 20% 50%;
+    --gps-gradient-start: 30 12% 30%;
+    --gps-gradient-mid: 33 22% 55%;
     --gps-gradient-end: 0 0% 22%;
 
     /* DPS direction colors */
@@ -259,6 +259,9 @@
     --pressure-low: 0 0% 16%;
     --pressure-moderate: 40 25% 50%;
     --pressure-high: 0 72% 40%;
+
+    /* Shared amber accent — used sparingly for moderate-pressure indicators only */
+    --trt-amber: 40 30% 50%;
 
     /* Editorial CTA */
     --cta-accent: 0 0% 8%;
@@ -674,11 +677,11 @@ body {
 
 /* Farm Minerals aesthetic */
 .fm-page {
-  background: hsl(0 0% 8%);
+  background: #1C1C1C;
 }
 
 .fm-dark {
-  background: hsl(0 0% 8%);
+  background: #1C1C1C;
   color: hsl(45 25% 90%);
 }
 

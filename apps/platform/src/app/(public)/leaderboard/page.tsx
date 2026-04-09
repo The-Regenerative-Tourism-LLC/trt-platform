@@ -5,9 +5,22 @@ import { Trophy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Leaderboard",
+  title: "Regenerative Traveler Leaderboard",
   description:
-    "Top regenerative travelers ranked by cumulative Choice Score.",
+    "Top regenerative travelers ranked by cumulative Choice Score — see who's leading the shift to responsible travel.",
+  alternates: { canonical: "/leaderboard" },
+  openGraph: {
+    title: "Regenerative Traveler Leaderboard · Green Passport",
+    description:
+      "Top regenerative travelers ranked by cumulative Choice Score.",
+    url: "/leaderboard",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Regenerative Traveler Leaderboard · Green Passport",
+    description:
+      "Top regenerative travelers ranked by cumulative Choice Score.",
+  },
 };
 
 export default function LeaderboardPage() {
@@ -22,7 +35,7 @@ export default function LeaderboardPage() {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/70 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/55 via-[#1C1C1C]/70 to-[#1C1C1C]/85" />
         <div className="relative z-10 container mx-auto max-w-7xl py-14 md:py-24 px-5 md:px-6 space-y-4">
           <p className="editorial-label text-white/50">Community</p>
           <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05]">

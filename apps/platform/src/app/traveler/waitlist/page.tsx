@@ -59,7 +59,7 @@ export default function TravelerWaitlistPage() {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/30 via-[#1C1C1C]/50 to-[#1C1C1C]/80" />
         <div className="relative z-10 max-w-[1400px] mx-auto w-full px-6 md:px-16 lg:px-24 pb-16 md:pb-24 grid md:grid-cols-2 gap-10 items-end">
           <div>
             <p className="font-hand text-base md:text-xl italic mb-4 text-white/70">

@@ -121,7 +121,7 @@ export function DiscoverClient({
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/60 via-[#1C1C1C]/70 to-[#1C1C1C]/85" />
         <div className="relative z-10 container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-24 space-y-4">
           <p className="editorial-label text-white/50">Discover</p>
           <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05] max-w-2xl text-white">

@@ -45,7 +45,7 @@ export function ResetPasswordTemplate({
       </EmailBody>
 
       <EmailBody>
-        <a href={resetUrl} style={{ color: "#1a6b3c", wordBreak: "break-all" }}>
+        <a href={resetUrl} style={{ color: "#000000", wordBreak: "break-all" }}>
           {resetUrl}
         </a>
       </EmailBody>

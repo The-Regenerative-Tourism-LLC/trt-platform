@@ -214,7 +214,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 2. PRESS & PARTNERS — Marquee ═══ */}
-      <section className="bg-white border-b border-border overflow-hidden">
+      <section className="bg-[#FDF5EA] border-b border-border overflow-hidden">
         <div className="py-5 md:py-6">
           <div className="animate-marquee flex w-max gap-8 md:gap-12 items-center">
             {[0, 1, 2].map((dup) => (

@@ -75,12 +75,13 @@ const eslintConfig = defineConfig([
   ]),
 
   // ── Architecture guardrails: prevent backend imports in frontend code ──
+  // NOTE: src/app/**/page.tsx is intentionally excluded — Next.js App Router
+  // page.tsx files are server components by default and may access the database directly.
   {
     files: [
       "src/components/**/*.{ts,tsx}",
       "src/hooks/**/*.{ts,tsx}",
       "src/store/**/*.{ts,tsx}",
-      "src/app/**/page.tsx",
       "src/app/**/*Client.tsx",
     ],
     rules: {
