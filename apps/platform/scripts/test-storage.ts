@@ -50,6 +50,8 @@ async function testLocalProvider() {
   process.env.STORAGE_DRIVER = "local";
   process.env.STORAGE_LOCAL_DIR = "storage";
   process.env.STORAGE_PUBLIC_BASE_URL = `${BASE_URL}/uploads`;
+  delete process.env.STORAGE_BUCKET_PUBLIC;
+  delete process.env.STORAGE_BUCKET_PRIVATE;
 
   const { _resetStorageProvider, getStorageProvider } = await import("../src/lib/storage/index.js");
   _resetStorageProvider();
@@ -84,11 +86,12 @@ async function testLocalProvider() {
   }
 
   // Verify URL is reachable
-  const resp = await fetch(result.url).catch(() => null);
+  const fileUrl = result.url ?? `${process.env.STORAGE_PUBLIC_BASE_URL ?? `${BASE_URL}/uploads`}/${key}`;
+  const resp = await fetch(fileUrl).catch(() => null);
   if (resp?.status === 200) {
-    pass(`URL accessible: ${result.url}`);
+    pass(`URL accessible: ${fileUrl}`);
   } else {
-    fail(`URL ${result.url} returned ${resp?.status ?? "network error"} — is dev server running?`);
+    fail(`URL ${fileUrl} returned ${resp?.status ?? "network error"} — is dev server running?`);
   }
 
   // Delete
@@ -102,10 +105,10 @@ async function testLocalProvider() {
   _resetStorageProvider();
 }
 
-// ── Test: Photo upload API ───────────────────────────────────────────────────
+// ── Test: Photo upload API (presign + PUT + confirm) ────────────────────────
 
 async function testPhotoUploadApi(): Promise<string | null> {
-  console.log("\n── Test: POST /api/v1/operator/photos ──");
+  console.log("\n── Test: Photo upload — presign + PUT + confirm ──");
 
   // Tiny 1×1 JPEG
   const tinyJpeg = Buffer.from(
@@ -117,22 +120,60 @@ async function testPhotoUploadApi(): Promise<string | null> {
     "base64"
   );
 
-  const form = new FormData();
-  form.append("file", new File([tinyJpeg], "test.jpg", { type: "image/jpeg" }));
+  const checksumHex = createHash("sha256").update(tinyJpeg).digest("hex");
+  const checksumBase64 = createHash("sha256").update(tinyJpeg).digest("base64");
 
-  const resp = await fetch(`${BASE_URL}/api/v1/operator/photos`, {
+  // Step 1: presign
+  const presignResp = await fetch(`${BASE_URL}/api/v1/storage/presign`, {
     method: "POST",
-    headers: authHeaders,
-    body: form,
+    headers: { ...authHeaders, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      resourceType: "photo",
+      contentType: "image/jpeg",
+      sizeBytes: tinyJpeg.length,
+      checksum: checksumHex,
+    }),
   });
-  const data = await resp.json();
+  const presignData = await presignResp.json();
+  if (presignResp.status !== 200 || !presignData.key || !presignData.signedUrl) {
+    fail(`presign failed: ${presignResp.status} ${JSON.stringify(presignData)}`);
+    return null;
+  }
+  pass(`presign ok key=${presignData.key}`);
 
-  if (resp.status === 201 && data.id && data.url) {
-    pass(`photo uploaded id=${data.id}`);
-    pass(`photo URL: ${data.url}`);
-    return data.id as string;
+  // Step 2: PUT to signed URL
+  const putResp = await fetch(presignData.signedUrl as string, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "image/jpeg",
+      "x-amz-checksum-sha256": checksumBase64,
+    },
+    body: tinyJpeg,
+  });
+  if (!putResp.ok) {
+    fail(`PUT to signed URL failed: ${putResp.status}`);
+    return null;
+  }
+  pass("PUT to signed URL ok");
+
+  // Step 3: confirm
+  const confirmResp = await fetch(`${BASE_URL}/api/v1/operator/photos`, {
+    method: "POST",
+    headers: { ...authHeaders, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      key: presignData.key,
+      fileName: "test.jpg",
+      mimeType: "image/jpeg",
+      sizeBytes: tinyJpeg.length,
+      checksum: checksumHex,
+    }),
+  });
+  const confirmData = await confirmResp.json();
+  if (confirmResp.status === 201 && confirmData.id) {
+    pass(`confirm ok id=${confirmData.id}`);
+    return confirmData.id as string;
   } else {
-    fail(`photo upload failed: ${resp.status} ${JSON.stringify(data)}`);
+    fail(`confirm failed: ${confirmResp.status} ${JSON.stringify(confirmData)}`);
     return null;
   }
 }
@@ -185,18 +226,19 @@ async function testDeletePhoto(photoId: string) {
   }
 }
 
-// ── Test: Invalid MIME type rejection ────────────────────────────────────────
+// ── Test: Invalid MIME type rejection (via presign) ──────────────────────────
 
 async function testInvalidMimeType() {
   console.log("\n── Test: Invalid MIME type rejection ──");
 
-  const form = new FormData();
-  form.append("file", new File(["evil"], "evil.exe", { type: "application/octet-stream" }));
-
-  const resp = await fetch(`${BASE_URL}/api/v1/operator/photos`, {
+  const resp = await fetch(`${BASE_URL}/api/v1/storage/presign`, {
     method: "POST",
-    headers: authHeaders,
-    body: form,
+    headers: { ...authHeaders, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      resourceType: "photo",
+      contentType: "application/octet-stream",
+      sizeBytes: 100,
+    }),
   });
 
   if (resp.status === 400) {
@@ -206,21 +248,21 @@ async function testInvalidMimeType() {
   }
 }
 
-// ── Test: Oversized file rejection ───────────────────────────────────────────
+// ── Test: Oversized file rejection (via presign) ──────────────────────────────
 
 async function testOversizedFile() {
   console.log("\n── Test: Oversized file rejection ──");
 
-  // Create a 11 MB buffer (over 10 MB default limit)
-  const bigFile = Buffer.alloc(11 * 1024 * 1024, 0xff);
+  const overLimit = (parseInt(process.env.STORAGE_MAX_PHOTO_BYTES ?? "10485760", 10)) + 1;
 
-  const form = new FormData();
-  form.append("file", new File([bigFile], "big.jpg", { type: "image/jpeg" }));
-
-  const resp = await fetch(`${BASE_URL}/api/v1/operator/photos`, {
+  const resp = await fetch(`${BASE_URL}/api/v1/storage/presign`, {
     method: "POST",
-    headers: authHeaders,
-    body: form,
+    headers: { ...authHeaders, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      resourceType: "photo",
+      contentType: "image/jpeg",
+      sizeBytes: overLimit,
+    }),
   });
 
   if (resp.status === 400) {
@@ -256,12 +298,10 @@ async function testPathTraversal() {
 async function testUnauthenticated() {
   console.log("\n── Test: Unauthenticated request ──");
 
-  const form = new FormData();
-  form.append("file", new File(["x"], "x.jpg", { type: "image/jpeg" }));
-
-  const resp = await fetch(`${BASE_URL}/api/v1/operator/photos`, {
+  const resp = await fetch(`${BASE_URL}/api/v1/storage/presign`, {
     method: "POST",
-    body: form,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ resourceType: "photo", contentType: "image/jpeg", sizeBytes: 100 }),
   });
 
   if (resp.status === 401) {

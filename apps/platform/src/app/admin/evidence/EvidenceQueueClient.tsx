@@ -111,10 +111,13 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
   async function handleAction(id: string, action: "verify" | "reject") {
     setLoadingIds((prev) => new Set(prev).add(id));
     try {
-      const res = await fetch(`/api/v1/admin/evidence/${id}/verify`, {
+      const endpoint = action === "verify"
+        ? `/api/v1/admin/evidence/${id}/verify`
+        : `/api/v1/admin/evidence/${id}/reject`;
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({}),
       });
 
       if (!res.ok) {

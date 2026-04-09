@@ -1,21 +1,4 @@
-/**
- * POST /api/v1/evidence/upload
- *
- * Upload a file as evidence for an assessment snapshot indicator.
- * Accepts multipart/form-data:
- *   - file: the evidence file (pdf, jpeg, png, webp)
- *   - assessmentSnapshotId: string
- *   - indicatorId: string
- *   - tier: T1 | T2 | T3 | Proxy
- *   - proxyMethod?: string
- *   - proxyCorrectionFactor?: number
- *
- * Checksum is computed server-side — frontend must NOT send it.
- * Storage key is always server-generated.
- */
-
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth/session";
 import { findOperatorByUserId } from "@/lib/db/repositories/operator.repo";
@@ -23,6 +6,7 @@ import { findAssessmentSnapshotById } from "@/lib/db/repositories/assessment.rep
 import { createEvidenceRef } from "@/lib/db/repositories/evidence.repo";
 import { getStorageProvider } from "@/lib/storage";
 import { logAuditEvent } from "@/lib/audit/logger";
+import { prisma } from "@/lib/db/prisma";
 
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -38,19 +22,22 @@ const MIME_TO_EXT: Record<string, string> = {
   "image/webp": "webp",
 };
 
-function maxEvidenceSize(): number {
-  const configured = process.env.STORAGE_MAX_EVIDENCE_BYTES;
-  return configured ? parseInt(configured, 10) : 20 * 1024 * 1024; // 20 MB default
-}
+const KEY_PATTERN =
+  /^operators\/[a-zA-Z0-9]+\/evidence\/[a-f0-9-]+\.(pdf|jpg|png|webp)$/;
 
 const EvidenceTierValues = ["T1", "T2", "T3", "Proxy"] as const;
 
-const metaSchema = z.object({
+const bodySchema = z.object({
+  key: z.string().min(1),
+  fileName: z.string().min(1).max(255),
+  mimeType: z.string().min(1),
+  sizeBytes: z.number().int().positive(),
+  checksum: z.string().regex(/^[0-9a-f]{64}$/).optional(),
   assessmentSnapshotId: z.string().min(1),
   indicatorId: z.string().min(1),
   tier: z.enum(EvidenceTierValues),
   proxyMethod: z.string().optional(),
-  proxyCorrectionFactor: z.coerce.number().min(0).max(1).optional(),
+  proxyCorrectionFactor: z.number().min(0).max(1).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -62,36 +49,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const formData = await req.formData();
-
-    const file = formData.get("file");
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: "Missing file field" }, { status: 400 });
-    }
-
-    if (!ALLOWED_MIME_TYPES.has(file.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Allowed: pdf, jpeg, png, webp" },
-        { status: 400 }
-      );
-    }
-
-    const maxSize = maxEvidenceSize();
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: `File too large. Max ${Math.round(maxSize / 1024 / 1024)} MB` },
-        { status: 400 }
-      );
-    }
-
-    const parsed = metaSchema.safeParse({
-      assessmentSnapshotId: formData.get("assessmentSnapshotId"),
-      indicatorId: formData.get("indicatorId"),
-      tier: formData.get("tier"),
-      proxyMethod: formData.get("proxyMethod") ?? undefined,
-      proxyCorrectionFactor: formData.get("proxyCorrectionFactor") ?? undefined,
-    });
-
+    const json = await req.json();
+    const parsed = bodySchema.safeParse(json);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid request", details: parsed.error.flatten() },
@@ -99,66 +58,100 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { assessmentSnapshotId, indicatorId, tier, proxyMethod, proxyCorrectionFactor } =
-      parsed.data;
+    const {
+      key,
+      fileName,
+      mimeType,
+      sizeBytes,
+      checksum,
+      assessmentSnapshotId,
+      indicatorId,
+      tier,
+      proxyMethod,
+      proxyCorrectionFactor,
+    } = parsed.data;
 
-    // Ownership check
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) {
+      return NextResponse.json(
+        { error: "Invalid mime type" },
+        { status: 400 }
+      );
+    }
+
+    if (!KEY_PATTERN.test(key)) {
+      return NextResponse.json({ error: "Invalid key format" }, { status: 400 });
+    }
+
+    const keyOperatorId = key.split("/")[1];
+    if (keyOperatorId !== operator.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const expectedExt = MIME_TO_EXT[mimeType];
+    if (!key.endsWith(`.${expectedExt}`)) {
+      return NextResponse.json({ error: "Key and mime type do not match" }, { status: 400 });
+    }
+
     const snapshot = await findAssessmentSnapshotById(assessmentSnapshotId);
     if (!snapshot || snapshot.operatorId !== operator.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const ext = MIME_TO_EXT[file.type] ?? "bin";
-    const evidenceId = randomUUID();
-    // IMMUTABILITY: every upload generates a new UUID and storage key.
-    // EvidenceRef records are append-only — storageKey is set once at creation and never updated.
-    // This ensures a complete, tamper-evident audit trail required for certification.
-    const storageKey = `operators/${operator.id}/evidence/${evidenceId}.${ext}`;
-
-    console.log(`[upload:evidence] start operatorId=${operator.id} key=${storageKey} size=${file.size} tier=${tier}`);
-
-    const body = Buffer.from(await file.arrayBuffer());
-    const storage = getStorageProvider();
-
-    let result;
-    try {
-      result = await storage.upload({ key: storageKey, body, contentType: file.type });
-    } catch (err) {
-      console.error(`[upload:evidence] storage upload failed operatorId=${operator.id}`, err);
-      throw err;
+    const maxBytes = parseInt(process.env.STORAGE_MAX_EVIDENCE_BYTES ?? "20971520", 10);
+    if (sizeBytes > maxBytes) {
+      return NextResponse.json(
+        { error: `File too large. Max ${Math.round(maxBytes / 1024 / 1024)} MB` },
+        { status: 400 }
+      );
     }
 
-    const evidenceRef = await createEvidenceRef({
-      assessmentSnapshot: { connect: { id: assessmentSnapshotId } },
-      operator: { connect: { id: operator.id } },
-      indicatorId,
-      tier: tier as "T1" | "T2" | "T3" | "Proxy",
-      fileName: sanitizeFileName(file.name),
-      storageKey: result.key,
-      storagePath: result.key,
-      mimeType: file.type,
-      sizeBytes: body.length,           // actual buffer size
-      checksum: result.checksum ?? "",  // always server-computed
-      proxyMethod,
-      proxyCorrectionFactor,
-    });
+    const storage = getStorageProvider();
+    const verification = await storage.verifyObject(key, "private");
+    if (!verification.exists) {
+      return NextResponse.json(
+        { error: "Upload not found in storage. Upload the file before confirming." },
+        { status: 422 }
+      );
+    }
+    if (verification.sizeBytes !== null && verification.sizeBytes !== sizeBytes) {
+      return NextResponse.json(
+        { error: "File size mismatch" },
+        { status: 422 }
+      );
+    }
+
+    let evidenceRef: Awaited<ReturnType<typeof createEvidenceRef>>;
+    try {
+      evidenceRef = await createEvidenceRef({
+        assessmentSnapshot: { connect: { id: assessmentSnapshotId } },
+        operator: { connect: { id: operator.id } },
+        indicatorId,
+        tier: tier as "T1" | "T2" | "T3" | "Proxy",
+        fileName: sanitizeFileName(fileName),
+        storageKey: key,
+        mimeType,
+        sizeBytes,
+        checksum: checksum ?? "",
+        proxyMethod,
+        proxyCorrectionFactor,
+      });
+    } catch (createErr: unknown) {
+      if ((createErr as { code?: string })?.code === "P2002") {
+        return NextResponse.json(
+          { error: "This file has already been registered." },
+          { status: 409 }
+        );
+      }
+      throw createErr;
+    }
 
     await logAuditEvent({
       actor: session.userId,
       action: "evidence.uploaded",
       entityType: "EvidenceRef",
       entityId: evidenceRef.id,
-      payload: {
-        assessmentSnapshotId,
-        indicatorId,
-        tier,
-        storageKey,
-        checksum: result.checksum,
-        sizeBytes: body.length,
-      },
+      payload: { assessmentSnapshotId, indicatorId, tier, storageKey: key, sizeBytes },
     });
-
-    console.log(`[upload:evidence] success evidenceRefId=${evidenceRef.id} operatorId=${operator.id}`);
 
     return NextResponse.json(
       {

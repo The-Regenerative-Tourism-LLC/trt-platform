@@ -1162,6 +1162,29 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
   const photos = data.photoRefs ?? [];
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (photos.length === 0) return;
+    fetch("/api/v1/operator/photos")
+      .then((r) => r.json())
+      .then((list: Array<{ id: string; storageKey: string; signedUrl: string; isCover: boolean; fileName?: string }>) => {
+        const map: Record<string, string> = {};
+        for (const p of list) map[p.id] = p.signedUrl;
+        setSignedUrls(map);
+        updateField({
+          photoRefs: list.map((p) => ({
+            id: p.id,
+            url: p.storageKey,
+            storageKey: p.storageKey,
+            isCover: p.isCover,
+            fileName: p.fileName,
+          })),
+        });
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleFileInput = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -1173,29 +1196,77 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
 
     try {
       const uploaded: PhotoRef[] = [];
+      const newSignedUrls: Record<string, string> = {};
+
       for (const file of files) {
-        const form = new FormData();
-        form.append("file", file);
+        const fileBuffer = await file.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest("SHA-256", fileBuffer);
+        const checksumHex = Array.from(new Uint8Array(hashBuffer))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+        // S3/R2 ChecksumSHA256 uses base64 encoding
+        const checksumBase64 = btoa(
+          String.fromCharCode(...new Uint8Array(hashBuffer))
+        );
 
-        const res = await fetch("/api/v1/operator/photos", {
+        const presignRes = await fetch("/api/v1/storage/presign", {
           method: "POST",
-          body: form,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            resourceType: "photo",
+            contentType: file.type,
+            sizeBytes: file.size,
+            checksum: checksumHex,
+          }),
         });
+        if (!presignRes.ok) {
+          const body = await presignRes.json().catch(() => ({}));
+          throw new Error(body.error ?? `Failed to get upload URL (${presignRes.status})`);
+        }
+        const { key, signedUrl: putUrl } = await presignRes.json();
 
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.error ?? `Upload failed (${res.status})`);
+        const uploadRes = await fetch(putUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+            "x-amz-checksum-sha256": checksumBase64,
+          },
+          body: new Blob([fileBuffer], { type: file.type }),
+        });
+        if (!uploadRes.ok) throw new Error("File upload failed");
+
+        const confirmRes = await fetch("/api/v1/operator/photos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key,
+            fileName: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+            checksum: checksumHex,
+          }),
+        });
+        if (!confirmRes.ok) {
+          const body = await confirmRes.json().catch(() => ({}));
+          throw new Error(body.error ?? `Upload failed (${confirmRes.status})`);
         }
 
-        const photo = await res.json();
+        const photo = await confirmRes.json();
+        newSignedUrls[photo.id] = photo.signedUrl;
+        const isFirstPhoto = photos.length === 0 && uploaded.length === 0;
+        if (isFirstPhoto) {
+          await fetch(`/api/v1/operator/photos/${photo.id as string}/set-cover`, { method: "POST" }).catch(() => {});
+        }
         uploaded.push({
           id: photo.id as string,
-          url: photo.url as string,
-          isCover: photos.length === 0 && uploaded.length === 0,
+          url: photo.storageKey as string,
+          storageKey: photo.storageKey as string,
+          isCover: isFirstPhoto,
           fileName: photo.fileName as string | undefined,
         });
       }
 
+      setSignedUrls((prev) => ({ ...prev, ...newSignedUrls }));
       const next = [...photos, ...uploaded];
       updateField({ photoRefs: next });
     } catch (err) {
@@ -1213,11 +1284,10 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
         throw new Error(body.error ?? `Delete failed (${res.status})`);
       }
     } catch (err) {
-      // Log but don't block UI — remove from state regardless
       console.error("[photos] delete failed", err);
     }
+    setSignedUrls((prev) => { const next = { ...prev }; delete next[id]; return next; });
     const next = photos.filter((p) => p.id !== id);
-    // If we removed the cover, promote the new first photo
     if (next.length > 0 && !next.some((p) => p.isCover)) {
       next[0] = { ...next[0], isCover: true };
     }
@@ -1255,7 +1325,7 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
             className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3] group"
           >
             <img
-              src={p.url}
+              src={signedUrls[p.id] ?? ""}
               alt={p.fileName ?? "Photo"}
               className="w-full h-full object-cover"
             />

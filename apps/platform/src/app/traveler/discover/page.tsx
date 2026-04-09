@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/db/prisma";
 import { DiscoverClient } from "./DiscoverClient";
 
+function buildPublicStorageUrl(storageKey: string): string {
+  const base = process.env.STORAGE_PUBLIC_BASE_URL;
+  if (base) return `${base}/${storageKey}`;
+  return `/uploads/${storageKey}`;
+}
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -39,6 +45,11 @@ export default async function DiscoverPage() {
             difficulty: true,
           },
         },
+        operatorPhotos: {
+          where: { isCover: true },
+          take: 1,
+          select: { storageKey: true },
+        },
       },
       orderBy: { updatedAt: "desc" },
       take: 24,
@@ -56,7 +67,9 @@ export default async function DiscoverPage() {
     tradingName: op.tradingName ?? null,
     destinationRegion: op.destinationRegion ?? null,
     country: op.country ?? null,
-    coverPhotoUrl: op.coverPhotoUrl ?? null,
+    coverPhotoUrl: op.operatorPhotos[0]?.storageKey
+      ? buildPublicStorageUrl(op.operatorPhotos[0].storageKey)
+      : (op.coverPhotoUrl ?? null),
     territory: op.territory
       ? {
           id: op.territory.id,

@@ -6,6 +6,12 @@ import { GPS_BAND_CONFIG, DPS_BAND_CONFIG } from "@/lib/constants";
 import { Search, MapPin, Filter, Leaf } from "lucide-react";
 import type { GreenPassportBand, DpsBand } from "@/lib/engine/trt-scoring-engine/types";
 
+function buildPublicStorageUrl(storageKey: string): string {
+  const base = process.env.STORAGE_PUBLIC_BASE_URL;
+  if (base) return `${base}/${storageKey}`;
+  return `/uploads/${storageKey}`;
+}
+
 export const metadata: Metadata = {
   title: "Verified Regenerative Operators · Green Passport",
   description:
@@ -92,6 +98,11 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
       },
       territory: {
         select: { id: true, name: true, pressureLevel: true },
+      },
+      operatorPhotos: {
+        where: { isCover: true },
+        take: 1,
+        select: { storageKey: true },
       },
     },
     take: 50,
@@ -290,11 +301,11 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                   href={`/operators/${op.id}`}
                   className="group rounded-lg border border-border bg-card hover:shadow-sm transition-all overflow-hidden flex flex-col card-interactive"
                 >
-                  {/* Cover image */}
-                  {op.coverPhotoUrl ? (
+                  {/* Cover image — prefer new OperatorPhoto source, fall back to legacy field */}
+                  {(op.operatorPhotos[0]?.storageKey ?? op.coverPhotoUrl) ? (
                     <div
                       className="h-40 w-full bg-cover bg-center group-hover:scale-[1.02] transition-transform duration-500"
-                      style={{ backgroundImage: `url(${op.coverPhotoUrl})` }}
+                      style={{ backgroundImage: `url(${op.operatorPhotos[0]?.storageKey ? buildPublicStorageUrl(op.operatorPhotos[0].storageKey) : op.coverPhotoUrl})` }}
                     />
                   ) : (
                     <div className="h-40 w-full bg-secondary flex items-center justify-center">

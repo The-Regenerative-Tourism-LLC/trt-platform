@@ -193,20 +193,58 @@ function UploadButton({
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("assessmentSnapshotId", assessmentSnapshotId);
-      formData.append("indicatorId", indicatorId);
-      formData.append("tier", tier);
+      const fileBuffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", fileBuffer);
+      const checksumHex = Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      const checksumBase64 = btoa(
+        String.fromCharCode(...new Uint8Array(hashBuffer))
+      );
 
-      const res = await fetch("/api/v1/evidence/upload", {
+      const presignRes = await fetch("/api/v1/storage/presign", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceType: "evidence",
+          contentType: file.type,
+          sizeBytes: file.size,
+          checksum: checksumHex,
+        }),
       });
+      if (!presignRes.ok) {
+        const body = await presignRes.json().catch(() => ({}));
+        throw new Error(body?.error ?? "Failed to get upload URL");
+      }
+      const { key, signedUrl } = await presignRes.json();
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? "Upload failed");
+      const uploadRes = await fetch(signedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+          "x-amz-checksum-sha256": checksumBase64,
+        },
+        body: new Blob([fileBuffer], { type: file.type }),
+      });
+      if (!uploadRes.ok) throw new Error("File upload failed");
+
+      const confirmRes = await fetch("/api/v1/evidence/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key,
+          fileName: file.name,
+          mimeType: file.type,
+          sizeBytes: file.size,
+          checksum: checksumHex,
+          assessmentSnapshotId,
+          indicatorId,
+          tier,
+        }),
+      });
+      if (!confirmRes.ok) {
+        const body = await confirmRes.json().catch(() => ({}));
+        throw new Error(body?.error ?? "Failed to register evidence");
       }
 
       toast.success("Evidence uploaded successfully");
@@ -215,7 +253,6 @@ function UploadButton({
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
-      // Reset so same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }

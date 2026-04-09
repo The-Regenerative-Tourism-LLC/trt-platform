@@ -434,6 +434,7 @@ model EvidenceRef {
   assessmentSnapshot    AssessmentSnapshot @relation(fields: [assessmentSnapshotId], references: [id])
   operator              Operator           @relation(fields: [operatorId], references: [id])
 
+  @@unique([storageKey])
   @@map("evidence_refs")
 }
 
@@ -841,6 +842,7 @@ model OperatorPhoto {
 
   operator    Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade)
 
+  @@unique([storageKey])
   @@map("operator_photos")
 }
 
