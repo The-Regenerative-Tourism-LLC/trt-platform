@@ -40,7 +40,7 @@ export function VerifyEmailTemplate({
       </EmailBody>
 
       <EmailBody>
-        <a href={verifyUrl} style={{ color: "#1a6b3c", wordBreak: "break-all" }}>
+        <a href={verifyUrl} style={{ color: "#000000", wordBreak: "break-all" }}>
           {verifyUrl}
         </a>
       </EmailBody>

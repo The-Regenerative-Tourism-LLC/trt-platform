@@ -3,9 +3,22 @@ import { Suspense } from "react";
 import { MethodologyClient } from "./MethodologyClient";
 
 export const metadata: Metadata = {
-  title: "Methodology",
+  title: "Scoring Methodology",
   description:
-    "How the Green Passport Score, Destination Pressure Index, and Traveler Impact Profile are calculated.",
+    "How the Green Passport Score (GPS), Destination Pressure Index (DPI), and Traveler Impact Profile are calculated — full computation methodology.",
+  alternates: { canonical: "/methodology" },
+  openGraph: {
+    title: "Green Passport Scoring Methodology",
+    description:
+      "How the Green Passport Score (GPS), Destination Pressure Index (DPI), and Traveler Impact Profile are calculated.",
+    url: "/methodology",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Green Passport Scoring Methodology",
+    description:
+      "How the GPS, DPI, and Traveler Impact Profile are calculated — full computation methodology.",
+  },
 };
 
 function MethodologyFallback() {

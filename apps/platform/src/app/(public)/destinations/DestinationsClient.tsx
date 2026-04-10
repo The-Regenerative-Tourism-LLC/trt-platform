@@ -56,7 +56,7 @@ export function DestinationsClient({
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/65 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/50 via-[#1C1C1C]/65 to-[#1C1C1C]/80" />
         <div className="relative z-10 container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-24 space-y-4">
           <p className="editorial-label text-white/50">Explore</p>
           <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05] max-w-2xl text-white">
@@ -158,7 +158,7 @@ function LiveDestinationCard({ territory: t }: { territory: Territory }) {
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(80,30%,28%)] to-[hsl(60,20%,32%)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/70 via-[#1C1C1C]/20 to-transparent" />
         {t.compositeDpi != null && (
           <div className="absolute top-4 right-4 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded">
             <span className="text-white font-mono text-xs font-bold">
@@ -239,7 +239,7 @@ function ComingSoonCard({ territory: t }: { territory: Territory }) {
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[hsl(80,20%,28%)] to-[hsl(60,15%,32%)]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/70 via-[#1C1C1C]/30 to-[#1C1C1C]/10" />
         {t.compositeDpi != null && (
           <div className="absolute top-4 right-4 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded">
             <span className="text-white font-mono text-xs font-bold">

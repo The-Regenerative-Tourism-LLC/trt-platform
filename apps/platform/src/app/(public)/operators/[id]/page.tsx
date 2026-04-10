@@ -7,6 +7,7 @@ import { GPS_BAND_CONFIG, DPS_BAND_CONFIG, PRESSURE_CONFIG, OPERATOR_TYPES } fro
 import { GPSCircle, GPSBandBadge, DPSBandBadge, PressureBadge, PillarBar } from "@/components/scoring/ScoreDisplays";
 import { MapPin, Calendar, Shield, ExternalLink, Leaf, ArrowLeft, CheckCircle2, Globe, TrendingUp } from "lucide-react";
 import type { GreenPassportBand, DpsBand } from "@/lib/engine/trt-scoring-engine/types";
+import { JsonLd, operatorSchema } from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     where: { id },
     select: { tradingName: true, legalName: true, destinationRegion: true },
   });
-  if (!operator) return { title: "Operator Not Found" };
+  if (!operator) return { title: "Operator Not Found", robots: { index: false } };
   const name = operator.tradingName ?? operator.legalName;
+  const description = `Verified regenerative tourism profile for ${name}${operator.destinationRegion ? ` in ${operator.destinationRegion}` : ""}. GPS score, pillar breakdown, and audit trail.`;
   return {
-    title: `${name} · Green Passport`,
-    description: `Verified regenerative tourism profile for ${name}${operator.destinationRegion ? ` in ${operator.destinationRegion}` : ""}.`,
+    title: name,
+    description,
+    alternates: { canonical: `/operators/${id}` },
+    openGraph: {
+      title: `${name} · Green Passport`,
+      description,
+      url: `/operators/${id}`,
+      type: "profile",
+      images: [{ url: `/operators/${id}/opengraph-image`, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${name} · Green Passport`,
+      description,
+      images: [`/operators/${id}/opengraph-image`],
+    },
   };
 }
 
@@ -101,8 +117,20 @@ export default async function PublicGreenPassportPage({ params }: Props) {
   const p3 = Number(score.p3Score);
   const dpsTotal = score.dpsTotal ? Number(score.dpsTotal) : null;
 
+  const operatorName = operator.tradingName ?? operator.legalName ?? "";
+
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd
+        schema={operatorSchema({
+          id,
+          name: operatorName,
+          region: operator.destinationRegion,
+          gps: Number(score.gpsTotal),
+          band: score.gpsBand,
+          url: operator.website,
+        })}
+      />
       {/* Hero / Cover */}
       <section className="relative">
         {coverPhotoUrl ? (
@@ -114,7 +142,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               className="object-cover object-center"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/60 to-transparent" />
           </div>
         ) : (
           <div className="h-64 md:h-80 w-full relative overflow-hidden">
@@ -125,7 +153,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               className="object-cover object-center"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1C]/60 to-[#1C1C1C]/20" />
           </div>
         )}
 

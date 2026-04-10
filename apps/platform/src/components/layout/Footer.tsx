@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="bg-black text-white">
+    <footer className="bg-[#1C1C1C] text-[#FDF5EA]">
       <div className="container mx-auto max-w-7xl py-12 md:py-20 px-5 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12">
           {/* Brand */}
@@ -62,8 +62,23 @@ export function Footer() {
             </div>
           </div>
 
+          {/* Journal */}
+          <div className="md:col-span-2 space-y-4">
+            <p className="font-hand text-xl text-white/50">
+              Journal
+            </p>
+            <div className="space-y-2.5">
+              <Link
+                href="/blog"
+                className="block text-sm text-white/60 hover:text-white transition-colors"
+              >
+                All Articles
+              </Link>
+            </div>
+          </div>
+
           {/* Methodology */}
-          <div className="md:col-span-4 space-y-4">
+          <div className="md:col-span-2 space-y-4">
             <p className="font-hand text-xl text-white/50">
               Methodology
             </p>

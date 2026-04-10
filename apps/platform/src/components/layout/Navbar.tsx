@@ -94,6 +94,7 @@ export function Navbar() {
         { href: "/destinations", label: "Destinations" },
         { href: "/methodology", label: "Methodology" },
         { href: "/leaderboard", label: "Impact Record" },
+        { href: "/blog", label: "Journal" },
         { href: "/pricing", label: "Pricing" },
       ];
     }
@@ -119,6 +120,7 @@ export function Navbar() {
       { href: "/destinations", label: "Destinations" },
       { href: "/leaderboard", label: "Impact Record" },
       { href: "/methodology", label: "Methodology" },
+      { href: "/blog", label: "Journal" },
     ];
   }
 
@@ -157,7 +159,7 @@ export function Navbar() {
           <div className="flex items-center gap-2">
             {!loading && !user && (
               <Button
-                className="rounded-lg font-semibold bg-black text-cream hover:bg-black/90 h-10 px-5"
+                className="rounded-lg font-semibold bg-[#1C1C1C] text-cream hover:bg-[#1C1C1C]/90 h-10 px-5"
                 asChild
               >
                 <Link href="/login">Join</Link>
@@ -307,8 +309,8 @@ export function Navbar() {
                   className={cn(
                     "block text-[2rem] leading-[1.15] font-bold tracking-tight py-1 transition-opacity",
                     isActive(l.href)
-                      ? "text-black"
-                      : "text-black/60 hover:text-black active:text-black"
+                      ? "text-[#1C1C1C]"
+                      : "text-[#1C1C1C]/60 hover:text-[#1C1C1C] active:text-[#1C1C1C]"
                   )}
                 >
                   {l.label}
@@ -319,23 +321,23 @@ export function Navbar() {
             <div className="space-y-3">
               {user ? (
                 <div className="space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-black/30">
+                  <p className="text-[10px] uppercase tracking-widest text-[#1C1C1C]/30">
                     Signed in
                   </p>
-                  <p className="text-xs text-black/60 truncate">{user.email}</p>
+                  <p className="text-xs text-[#1C1C1C]/60 truncate">{user.email}</p>
                   <button
                     onClick={() => {
                       signOut();
                       setMobileOpen(false);
                     }}
-                    className="text-xs text-black/40 hover:text-black transition-colors mt-1"
+                    className="text-xs text-[#1C1C1C]/40 hover:text-[#1C1C1C] transition-colors mt-1"
                   >
                     Sign out
                   </button>
                 </div>
               ) : (
                 <Button
-                  className="w-full rounded-lg bg-black text-cream hover:bg-black/90 font-semibold h-11"
+                  className="w-full rounded-lg bg-[#1C1C1C] text-cream hover:bg-[#1C1C1C]/90 font-semibold h-11"
                   asChild
                 >
                   <Link

@@ -44,7 +44,7 @@ export function EvidenceStatusTemplate({
           <Section
             style={{
               backgroundColor: "#f0faf4",
-              borderLeft: "4px solid #1a6b3c",
+              borderLeft: "4px solid #000000",
               borderRadius: "0 6px 6px 0",
               padding: "16px 20px",
               margin: "20px 0",
@@ -52,7 +52,7 @@ export function EvidenceStatusTemplate({
           >
             <Text
               style={{
-                color: "#1a6b3c",
+                color: "#000000",
                 fontSize: "15px",
                 fontWeight: "600",
                 margin: "0",

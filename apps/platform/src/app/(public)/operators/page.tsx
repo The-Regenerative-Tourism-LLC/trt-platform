@@ -13,9 +13,22 @@ function buildPublicStorageUrl(storageKey: string): string {
 }
 
 export const metadata: Metadata = {
-  title: "Verified Regenerative Operators · Green Passport",
+  title: "Verified Regenerative Operators",
   description:
-    "Browse and compare verified regenerative tourism operators with GPS scores.",
+    "Browse and compare verified regenerative tourism operators with GPS scores, DPI band context, and pillar breakdowns.",
+  alternates: { canonical: "/operators" },
+  openGraph: {
+    title: "Verified Regenerative Operators · Green Passport",
+    description:
+      "Browse and compare verified regenerative tourism operators with GPS scores, DPI band context, and pillar breakdowns.",
+    url: "/operators",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Verified Regenerative Operators · Green Passport",
+    description:
+      "Browse and compare verified regenerative tourism operators with GPS scores and pillar breakdowns.",
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -131,7 +144,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/70 to-black/85" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/55 via-[#1C1C1C]/70 to-[#1C1C1C]/85" />
         <div className="relative z-10 container mx-auto max-w-7xl py-14 md:py-24 px-5 md:px-6 space-y-4">
           <div className="inline-flex items-center gap-2 bg-white/10 text-white/60 text-sm px-4 py-1.5 rounded-full">
             <Leaf className="h-3.5 w-3.5" />
