@@ -104,10 +104,9 @@ export default function RootLayout({
       >
         <JsonLd schema={organizationSchema} />
         <JsonLd schema={websiteSchema} />
-        {/* Klaviyo onsite script — replace YOUR_KLAVIYO_PUBLIC_KEY with your account's public API key */}
         <Script
-          src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=YOUR_KLAVIYO_PUBLIC_KEY"
-          strategy="afterInteractive"
+          src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=R9Egnm"
+          strategy="lazyOnload"
         />
         <Providers>{children}</Providers>
       </body>

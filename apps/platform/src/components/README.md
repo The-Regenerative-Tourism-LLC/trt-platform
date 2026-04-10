@@ -16,7 +16,7 @@ This directory contains React components for the TRT platform UI.
 
 ## Subdirectories
 
-- `scoring/` — Score display components (`ScoreDisplays.tsx`, `ScoreRings.tsx`, `TierBadge.tsx`)
+- `scoring/` — Score display components (`ScoreDisplays.tsx`)
   - These components **only present** data — they never compute scores.
 - `layout/` — App layout, navbar, footer
 - `ui/` — Shadcn-style primitives (button, card, dialog, input, etc.)

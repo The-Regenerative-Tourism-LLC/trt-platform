@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, QrCode, BarChart2, FileText, Leaf, User, Eye } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { WaitlistForm } from "./WaitlistForm";
+import { LookbookCta } from "@/components/sections/LookbookCta";
 
 export const metadata: Metadata = {
   title: "Traveler Waitlist",
@@ -80,7 +80,7 @@ export default function TravelerWaitlistPage() {
               see exactly what your travel choices contribute — before you book,
               and after you travel.
             </p>
-            <WaitlistForm />
+            <div className="klaviyo-form-TBARtU max-w-[400px]" />
           </div>
         </div>
       </section>
@@ -193,63 +193,18 @@ export default function TravelerWaitlistPage() {
       </section>
 
       {/* ═══ 4. LOOKBOOK / FINAL CTA ═══ */}
-      <section
-        className="relative overflow-hidden py-24 md:py-36"
-        style={{ backgroundColor: "#F5F1EB" }}
-      >
-        {/* Scattered photos */}
-        <div className="absolute inset-0 pointer-events-none select-none">
-          <div className="absolute left-4 md:left-12 top-8 w-40 md:w-56 rotate-[-5deg] overflow-hidden rounded-lg shadow-md">
-            <Image
-              src="/assets/lookbook-friends.jpg"
-              alt="Travelers"
-              width={300}
-              height={225}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-          <div className="absolute right-4 md:right-12 top-12 w-32 md:w-44 rotate-[3deg] overflow-hidden rounded-lg shadow-md">
-            <Image
-              src="/assets/lookbook-hiker.jpg"
-              alt="Hiker in nature"
-              width={240}
-              height={180}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-          <div className="absolute left-8 md:left-20 bottom-8 w-36 md:w-48 rotate-[2deg] overflow-hidden rounded-lg shadow-md">
-            <Image
-              src="/assets/lookbook-market.jpg"
-              alt="Local market"
-              width={260}
-              height={195}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-          <div className="absolute right-8 md:right-20 bottom-6 w-32 md:w-44 rotate-[-3deg] overflow-hidden rounded-lg shadow-md">
-            <Image
-              src="/assets/lookbook-scan.jpg"
-              alt="Scanning QR code"
-              width={240}
-              height={180}
-              className="w-full aspect-[4/3] object-cover"
-            />
-          </div>
-        </div>
-
-        {/* Centered content */}
-        <div className="relative z-20 flex flex-col items-center justify-center min-h-[60vh] md:min-h-[70vh] px-6 text-center">
-          <p className="font-hand text-base md:text-xl text-muted-foreground italic mb-4">
-            For travelers
-          </p>
-          <h2 className="fm-hero-heading text-foreground mb-10">
+      <LookbookCta
+        eyebrow="For travelers"
+        heading={
+          <>
             You care where you go.
             <br />
             Now you can prove it.
-          </h2>
-          <WaitlistForm compact />
-        </div>
-      </section>
+          </>
+        }
+      >
+        <div className="klaviyo-form-SbN4HA max-w-[400px]" />
+      </LookbookCta>
 
       <Footer />
     </div>

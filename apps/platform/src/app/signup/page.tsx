@@ -13,7 +13,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex flex-col fm-cream">
       <div className="flex-1 flex items-center justify-center px-6 py-12 md:py-20">
         <div className="w-full max-w-lg space-y-8">
-          <div className="space-y-2">
+          <div className="space-y-2 flex flex-col items-center justify-center">
             <Link href="/" className="inline-block mb-4">
               <Image
                 src="/assets/logo-regenerative-tourism-black.svg"
