@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Caveat, JetBrains_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 import { JsonLd, organizationSchema, websiteSchema } from "@/lib/seo/json-ld";
+import { TrackingScripts } from "@/components/TrackingScripts";
 
 const instrumentSans = Instrument_Sans({
   variable: "--font-sans",
@@ -104,11 +104,7 @@ export default function RootLayout({
       >
         <JsonLd schema={organizationSchema} />
         <JsonLd schema={websiteSchema} />
-        {/* Klaviyo onsite script — replace YOUR_KLAVIYO_PUBLIC_KEY with your account's public API key */}
-        <Script
-          src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=YOUR_KLAVIYO_PUBLIC_KEY"
-          strategy="afterInteractive"
-        />
+        <TrackingScripts />
         <Providers>{children}</Providers>
       </body>
     </html>

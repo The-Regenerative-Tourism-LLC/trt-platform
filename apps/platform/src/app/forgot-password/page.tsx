@@ -7,7 +7,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center fm-cream px-6">
       <div className="max-w-sm w-full space-y-8">
-        <div className="space-y-2">
+        <div className="space-y-2 space-y-2 flex flex-col items-center justify-center">
           <Link href="/" className="inline-block mb-4">
             <Image
               src="/assets/logo-regenerative-tourism-black.svg"
