@@ -224,21 +224,24 @@ export function ScoreBar({
 // ── Evidence tier selector ────────────────────────────────────────────────────
 
 export const EVIDENCE_TIERS = [
-  { value: "T1", label: "T1 — Primary", desc: "Utility bills, meter readings, invoices" },
-  { value: "T2", label: "T2 — Secondary", desc: "Estimates from reliable data" },
-  { value: "T3", label: "T3 — Tertiary", desc: "Operator self-estimates" },
-  { value: "Proxy", label: "Proxy", desc: "Industry benchmarks or peer averages" },
+  { value: "T1", label: "T1 — Payroll records / employment contracts (×1.00)" },
+  { value: "T2", label: "T2 — Self-declared with supporting documents (×0.75)" },
+  { value: "T3", label: "T3 — Self-declared, no documentation (×0.50)" },
+  { value: "Proxy", label: "Proxy — No records, using estimate (×0.25)" },
 ] as const;
 
 export function EvidenceTierSelector({
   value,
   onChange,
   label,
+  tiers,
 }: {
   value: EvidenceTier | undefined;
   onChange: (v: EvidenceTier) => void;
   label?: string;
+  tiers?: readonly { value: string; label: string }[];
 }) {
+  const options = tiers ?? EVIDENCE_TIERS;
   return (
     <div className="rounded-2xl bg-muted/50 border border-border/40 px-4 py-4 space-y-2">
       <p className="text-sm text-muted-foreground">
@@ -251,9 +254,9 @@ export function EvidenceTierSelector({
           className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring pr-9"
         >
           <option value="" disabled>Select evidence quality...</option>
-          {EVIDENCE_TIERS.map((tier) => (
+          {options.map((tier) => (
             <option key={tier.value} value={tier.value}>
-              {tier.label} — {tier.desc}
+              {tier.label}
             </option>
           ))}
         </select>

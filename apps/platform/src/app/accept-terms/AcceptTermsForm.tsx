@@ -39,6 +39,18 @@ export function AcceptTermsForm() {
       )}
 
       <div className="rounded-2xl border border-border bg-surface/30 p-5 space-y-4">
+      <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={marketingOptIn}
+            onChange={(e) => setMarketingOptIn(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+          />
+          <span className="text-sm text-muted-foreground">
+            I want to receive news, tips, and updates about regenerative tourism. (Optional)
+          </span>
+        </label>
+
         <label className="flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -57,18 +69,6 @@ export function AcceptTermsForm() {
               Privacy Policy
             </Link>
             . <span className="text-destructive">*</span>
-          </span>
-        </label>
-
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={marketingOptIn}
-            onChange={(e) => setMarketingOptIn(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
-          />
-          <span className="text-sm text-muted-foreground">
-            I want to receive news, tips, and updates about regenerative tourism. (Optional)
           </span>
         </label>
       </div>

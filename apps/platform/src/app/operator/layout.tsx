@@ -12,5 +12,9 @@ export default function OperatorLayout({
   if (pathname?.startsWith("/operator/onboarding")) {
     return <>{children}</>;
   }
+  // Dashboard manages its own layout to allow a full-width cover image
+  if (pathname === "/operator/dashboard") {
+    return <AppLayout fullWidth>{children}</AppLayout>;
+  }
   return <AppLayout maxWidth="max-w-6xl">{children}</AppLayout>;
 }

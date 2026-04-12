@@ -256,9 +256,9 @@
     --dps-critical: 0 72% 40%;
 
     /* Pressure level colors */
-    --pressure-low: 0 0% 16%;
-    --pressure-moderate: 40 25% 50%;
-    --pressure-high: 0 72% 40%;
+    --pressure-low: 142 20% 35%;
+    --pressure-moderate: 38 28% 42%;
+    --pressure-high: 30 12% 28%;
 
     /* Shared amber accent — used sparingly for moderate-pressure indicators only */
     --trt-amber: 40 30% 50%;

@@ -306,8 +306,8 @@ export function SubmissionSuccessScreen({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <div className="flex-1 flex flex-col justify-center px-4 py-16">
-        <div className="max-w-2xl mx-auto w-full space-y-8">
+      <div className="flex-1 flex flex-col justify-center px-3 sm:px-6 py-16">
+        <div className="max-w-onboarding mx-auto w-full space-y-8">
 
           {/* Success hero */}
           <div className="text-center space-y-4">
