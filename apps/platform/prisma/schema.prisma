@@ -403,6 +403,8 @@ model AssessmentSnapshot {
   deltaCurrentScores          Json?
 
   snapshotHash                String?
+  /** Full immutable raw submission payload — written once at submission, never overwritten. */
+  rawSubmissionJson           Json?
   createdAt                   DateTime      @default(now())
 
   operator                    Operator               @relation(fields: [operatorId], references: [id])

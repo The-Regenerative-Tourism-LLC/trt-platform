@@ -140,6 +140,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-1",
       actorUserId: "user-1",
       snapshotInput: BASE_SNAPSHOT_INPUT,
+      rawSubmissionJson: {},
       forwardCommitment: {
         preferredCategory: "biodiversity",
         preferredInstitutionType: "NGO",
@@ -173,6 +174,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-1",
       actorUserId: "user-1",
       snapshotInput: BASE_SNAPSHOT_INPUT,
+      rawSubmissionJson: {},
       forwardCommitment: {
         preferredCategory: "water",
         territoryContext: "Douro Valley",
@@ -194,6 +196,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-1",
       actorUserId: "user-1",
       snapshotInput: { ...BASE_SNAPSHOT_INPUT, p3Status: "E" as const },
+      rawSubmissionJson: {},
     };
 
     await runScoring(input);
@@ -216,6 +219,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
           continuity: 75,
         },
       },
+      rawSubmissionJson: {},
     };
 
     await runScoring(input);
@@ -229,6 +233,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-default",
       actorUserId: "user-1",
       snapshotInput: BASE_SNAPSHOT_INPUT,
+      rawSubmissionJson: {},
       forwardCommitment: {
         preferredCategory: "biodiversity",
       },

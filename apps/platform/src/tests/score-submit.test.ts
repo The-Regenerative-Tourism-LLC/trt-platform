@@ -46,6 +46,8 @@ const SCORING_RESULT = {
   dpsBand: null,
   dpiScore: 50,
   dpiPressureLevel: "moderate",
+  dpiTerritoryId: "ter-1",
+  referenceDpi: false,
   methodologyVersion: "1.0.0",
   isPublished: false,
   publicationBlockedReason: null,

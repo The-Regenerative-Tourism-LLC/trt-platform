@@ -144,6 +144,12 @@ const ScoreRequestSchema = z.object({
       proxyCorrectionFactor: z.number().positive().optional(),
     })
   ).default([]),
+  /**
+   * Full onboarding state snapshot at submission time — stored verbatim in
+   * AssessmentSnapshot.rawSubmissionJson for audit/data-loss-safety.
+   * Not used in scoring logic.
+   */
+  onboardingSnapshot: z.record(z.unknown()),
   /** Required for Status D: forward commitment declaration fields */
   forwardCommitment: z
     .object({
@@ -191,6 +197,8 @@ export async function POST(req: NextRequest) {
     const session = await requireSession();
 
     const body = await req.json();
+    // Capture full raw payload before validation strips/transforms fields.
+    const rawSubmissionJson = body as Record<string, unknown>;
     const parsed = ScoreRequestSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -239,6 +247,7 @@ export async function POST(req: NextRequest) {
       territoryId: data.territoryId,
       actorUserId: session.userId,
       forwardCommitment: data.forwardCommitment,
+      rawSubmissionJson,
       snapshotInput: {
         operatorId: data.operatorId,
         operatorType: data.operatorType,
@@ -297,6 +306,7 @@ export async function POST(req: NextRequest) {
         Array.isArray(v) ? (v as string[]) : undefined;
 
       await updateOperator(data.operatorId, {
+        operatorType: data.operatorType,
         ...(str(d.legalName) && { legalName: str(d.legalName)! }),
         tradingName: str(d.tradingName) ?? null,
         country: str(d.country) ?? null,

@@ -347,6 +347,7 @@ export function IdentityStep({
                 destinationRegion: loc.region ?? data.destinationRegion,
               })
             }
+            onAddressTyped={(val) => updateField({ address: val })}
           />
         </FieldGroup>
 

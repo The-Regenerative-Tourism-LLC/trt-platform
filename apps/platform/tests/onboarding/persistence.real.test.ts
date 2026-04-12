@@ -342,7 +342,7 @@ describe('corrupted data safety: migrateDraft does not throw on bad DB state', (
     // Manually corrupt the stored record — only partial/unknown data
     await prisma.onboardingDraft.update({
       where: { operatorId },
-      data: { dataJson: { random_key: 'garbage', nested: { x: 1 } } as Record<string, unknown> },
+      data: { dataJson: { random_key: 'garbage', nested: { x: 1 } } as unknown as import('@prisma/client').Prisma.InputJsonValue },
     });
 
     const record = await findDraftByOperatorId(operatorId);
@@ -371,7 +371,7 @@ describe('corrupted data safety: migrateDraft does not throw on bad DB state', (
     // v2 data with only capabilities — migrateDraft returns it as-is (no slice population)
     await prisma.onboardingDraft.update({
       where: { operatorId },
-      data: { dataJson: { _v: 2, capabilities: ['accommodation'] } as Record<string, unknown> },
+      data: { dataJson: { _v: 2, capabilities: ['accommodation'] } as unknown as import('@prisma/client').Prisma.InputJsonValue },
     });
 
     const record = await findDraftByOperatorId(operatorId);

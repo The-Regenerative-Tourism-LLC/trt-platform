@@ -101,6 +101,7 @@ function baseScoringInput(evidence: ScoringInput["snapshotInput"]["evidence"] = 
       delta: null,
       evidence,
     },
+    rawSubmissionJson: {},
   };
 }
 
