@@ -357,6 +357,12 @@ export function P2ProcurementStep({
         value={data.evidenceTierProcurement}
         onChange={(v: EvidenceTier) => updateField({ evidenceTierProcurement: v })}
         label="What is the source of this data?"
+        tiers={[
+          { value: "T1", label: "T1 — Supplier invoices / receipts (×1.00)" },
+          { value: "T2", label: "T2 — Estimated from accounts, with documentation (×0.75)" },
+          { value: "T3", label: "T3 — Best estimate, no documentation (×0.50)" },
+          { value: "Proxy", label: "Proxy — No records, using estimate (×0.25)" },
+        ]}
       />
     </StepShell>
   );
@@ -497,6 +503,12 @@ export function P2RevenueStep({
         value={data.evidenceTierRevenue}
         onChange={(v: EvidenceTier) => updateField({ evidenceTierRevenue: v })}
         label="What is the source of this data?"
+        tiers={[
+          { value: "T1", label: "T1 — Booking system / PMS / channel manager records (×1.00)" },
+          { value: "T2", label: "T2 — Estimated from reservation history (×0.75)" },
+          { value: "T3", label: "T3 — Best estimate, no documentation (×0.50)" },
+          { value: "Proxy", label: "Proxy — No records, using estimate (×0.25)" },
+        ]}
       />
     </StepShell>
   );
@@ -605,6 +617,12 @@ export function P2CommunityStep({
         value={data.evidenceTierCommunity}
         onChange={(v: EvidenceTier) => updateField({ evidenceTierCommunity: v })}
         label="What is the source of this data?"
+        tiers={[
+          { value: "T1", label: "T1 — Partnership agreements / MoUs (×1.00)" },
+          { value: "T2", label: "T2 — Photos / event records with context (×0.75)" },
+          { value: "T3", label: "T3 — Self-declared, no documentation (×0.50)" },
+          { value: "Proxy", label: "Proxy — No records, using estimate (×0.25)" },
+        ]}
       />
     </StepShell>
   );

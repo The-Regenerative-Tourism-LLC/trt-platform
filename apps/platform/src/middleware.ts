@@ -91,8 +91,8 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/verify-email", req.url));
   }
 
-  // ── Redirect away from auth/root pages once logged in ────────────────────
-  if (isAuthRoute || isRootRoute) {
+  // ── Redirect away from auth pages once logged in (but allow homepage) ────
+  if (isAuthRoute) {
     return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
@@ -116,7 +116,6 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/",
     "/login",
     "/signup",
     "/select-role",

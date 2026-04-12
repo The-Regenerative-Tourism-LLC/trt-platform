@@ -188,9 +188,9 @@ function EnergySharedTail({
         >
           <option value="">Select evidence quality…</option>
           <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
-          <option value="T2">T2 — Secondary</option>
-          <option value="T3">T3 — Tertiary</option>
-          <option value="Proxy">Proxy</option>
+          <option value="T2">T2 — Supplier estimate / energy audit (×0.75)</option>
+          <option value="T3">T3 — Own calculation / records (×0.50)</option>
+          <option value="Proxy">Proxy — No records, using estimate (×0.25)</option>
         </select>
       </div>
     </>
@@ -568,9 +568,9 @@ export function P1WaterStep({
         >
           <option value="">Select evidence quality…</option>
           <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
-          <option value="T2">T2 — Secondary</option>
-          <option value="T3">T3 — Tertiary</option>
-          <option value="Proxy">Proxy</option>
+          <option value="T2">T2 — Supplier estimate / energy audit (×0.75)</option>
+          <option value="T3">T3 — Own calculation / records (×0.50)</option>
+          <option value="Proxy">Proxy — No records, using estimate (×0.25)</option>
         </select>
       </div>
     </StepShell>
@@ -774,10 +774,10 @@ export function P1WasteStep({
           className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="">Select evidence quality…</option>
-          <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
-          <option value="T2">T2 — Secondary (×0.75)</option>
-          <option value="T3">T3 — Tertiary</option>
-          <option value="Proxy">Proxy</option>
+          <option value="T1">T1 — Waste manifest / hauler report (×1.00)</option>
+          <option value="T2">T2 — Supplier / waste contractor data (×0.75)</option>
+          <option value="T3">T3 — Internal estimate (×0.50)</option>
+          <option value="Proxy">Proxy — No data, benchmark estimate (×0.25)</option>
         </select>
       </div>
     </StepShell>
@@ -946,9 +946,9 @@ export function P1CarbonStep({
         >
           <option value="">Select evidence quality…</option>
           <option value="T1">T1 — Utility invoice / meter reading (×1.00)</option>
-          <option value="T2">T2 — Secondary (×0.75)</option>
-          <option value="T3">T3 — Tertiary</option>
-          <option value="Proxy">Proxy</option>
+          <option value="T2">T2 — Supplier estimate / energy audit (×0.75)</option>
+          <option value="T3">T3 — Own calculation / records (×0.50)</option>
+          <option value="Proxy">Proxy — No records, using estimate (×0.25)</option>
         </select>
       </div>
     </StepShell>
