@@ -186,6 +186,9 @@ model User {
   operator Operator?
   traveler Traveler?
 
+  marketingEmailConsent Boolean   @default(false)
+  consentedAt           DateTime?
+
   secureTokens            SecureToken[]
   emailLogs               EmailLog[]
   notificationPreference  NotificationPreference?

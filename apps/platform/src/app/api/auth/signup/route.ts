@@ -14,6 +14,7 @@ import { z } from "zod";
 import { createToken } from "@/lib/tokens";
 import { sendVerifyEmail, sendWelcomeEmail } from "@/lib/email";
 import { sendAdminNewOperatorEmail } from "@/lib/email";
+import { subscribeToMarketingList } from "@/lib/klaviyo";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL;
@@ -26,6 +27,7 @@ const SignupSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .max(100),
   role: z.enum(["operator", "traveler"]),
+  marketingOptIn: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -40,7 +42,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password, role } = parsed.data;
+    const { name, email, password, role, marketingOptIn } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -54,9 +56,17 @@ export async function POST(req: NextRequest) {
 
     let newUserId: string;
 
+    const consentedAt = marketingOptIn === true ? new Date() : undefined;
+
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
-        data: { name, email, passwordHash },
+        data: {
+          name,
+          email,
+          passwordHash,
+          marketingEmailConsent: marketingOptIn === true,
+          consentedAt,
+        },
       });
       newUserId = user.id;
 
@@ -125,9 +135,15 @@ export async function POST(req: NextRequest) {
             adminUrl: `${APP_URL}/admin/operators`,
           });
         }
+
+        // Klaviyo — only if user explicitly opted in
+        if (marketingOptIn === true) {
+          const firstName = name.split(" ")[0];
+          await subscribeToMarketingList({ email, firstName });
+        }
       } catch (emailErr) {
-        // Email failure must never affect account creation
-        console.error("[signup] Post-signup email dispatch failed:", emailErr);
+        // Email/Klaviyo failure must never affect account creation
+        console.error("[signup] Post-signup async dispatch failed:", emailErr);
       }
     })();
 

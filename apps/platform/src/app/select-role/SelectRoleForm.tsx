@@ -34,6 +34,7 @@ const ROLES = [
 export function SelectRoleForm() {
   const { update } = useSession();
   const [selected, setSelected] = useState<Role | null>(null);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -49,7 +50,7 @@ export function SelectRoleForm() {
         // The action is idempotent: if the user already had a role from a
         // previous partial attempt it recovers the missing profile instead of
         // throwing "Role already assigned".
-        await selectRoleAction({ role: selected });
+        await selectRoleAction({ role: selected, marketingOptIn });
 
         // Passing `{}` (any truthy value) forces Auth.js to POST to
         // /api/auth/session, which triggers trigger === "update" in the jwt
@@ -148,6 +149,18 @@ export function SelectRoleForm() {
           {error}
         </div>
       )}
+
+      <label className="flex items-start gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={marketingOptIn}
+          onChange={(e) => setMarketingOptIn(e.target.checked)}
+          className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+        />
+        <span className="text-sm text-muted-foreground">
+          I want to receive news, tips, and updates about regenerative tourism. (Optional)
+        </span>
+      </label>
 
       <button
         type="button"
