@@ -189,9 +189,14 @@ model User {
   marketingEmailConsent Boolean   @default(false)
   consentedAt           DateTime?
 
+  // GDPR legal basis tracking
+  termsAcceptedAt   DateTime?
+  privacyAcceptedAt DateTime?
+
   secureTokens            SecureToken[]
   emailLogs               EmailLog[]
   notificationPreference  NotificationPreference?
+  cookieConsent           CookieConsent?
 
   @@map("users")
 }
@@ -943,6 +948,22 @@ model NotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
+}
+
+// ── Cookie Consent (per authenticated user, for audit) ────────────────────
+
+model CookieConsent {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  analytics Boolean  @default(false)
+  marketing Boolean  @default(false)
+  version   String   @default("1")
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("cookie_consents")
 }
 
 // ── Traveler Waitlist ──────────────────────────────────────────────────────
