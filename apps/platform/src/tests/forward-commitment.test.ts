@@ -6,25 +6,40 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import * as forwardCommitmentRepo from "@/lib/db/repositories/forward-commitment.repo";
-import * as assessmentRepo from "@/lib/db/repositories/assessment.repo";
-import * as scoreRepo from "@/lib/db/repositories/score.repo";
-import * as evidenceRepo from "@/lib/db/repositories/evidence.repo";
-import * as operatorRepo from "@/lib/db/repositories/operator.repo";
 import * as dpiRepo from "@/lib/db/repositories/dpi.repo";
+import * as scoreRepo from "@/lib/db/repositories/score.repo";
 import * as methodologyBundle from "@/lib/methodology/methodology-bundle.loader";
 import * as auditLogger from "@/lib/audit/logger";
+import * as assessmentSchema from "@/lib/validation/assessment.schema";
 import { runScoring } from "@/lib/orchestration/scoring-orchestrator";
 import { DEFAULT_METHODOLOGY_BUNDLE } from "@/lib/methodology/default-bundle";
 
-vi.mock("@/lib/db/repositories/forward-commitment.repo");
-vi.mock("@/lib/db/repositories/assessment.repo");
-vi.mock("@/lib/db/repositories/score.repo");
-vi.mock("@/lib/db/repositories/evidence.repo");
-vi.mock("@/lib/db/repositories/operator.repo");
+// ── Hoisted prisma mock ───────────────────────────────────────────────────────
+
+const { mockTx } = vi.hoisted(() => {
+  const mockTx = {
+    assessmentSnapshot: { create: vi.fn() },
+    evidenceRef: { create: vi.fn(), count: vi.fn(), findMany: vi.fn() },
+    scoreSnapshot: { create: vi.fn() },
+    forwardCommitmentRecord: { create: vi.fn() },
+    operator: { update: vi.fn() },
+  };
+  return { mockTx };
+});
+
+vi.mock("@/lib/db/prisma", () => ({
+  prisma: {
+    $transaction: vi.fn((cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx)),
+  },
+}));
+
 vi.mock("@/lib/db/repositories/dpi.repo");
+vi.mock("@/lib/db/repositories/score.repo");
 vi.mock("@/lib/methodology/methodology-bundle.loader");
 vi.mock("@/lib/audit/logger");
+vi.mock("@/lib/validation/assessment.schema");
+
+// ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const MOCK_ASSESSMENT = {
   id: "assess-1",
@@ -35,7 +50,7 @@ const MOCK_ASSESSMENT = {
 
 const MOCK_SCORE = {
   id: "score-1",
-  gpsTotal: { toFixed: () => "55" },
+  gpsTotal: 55,
   gpsBand: "advancing",
   p1Score: 70,
   p2Score: 65,
@@ -47,26 +62,11 @@ const MOCK_SCORE = {
   dpsBand: null,
   dpiScore: 50,
   dpiPressureLevel: "moderate",
+  dpiTerritoryId: "ter-1",
+  referenceDpi: true,
   methodologyVersion: "1.0.0",
   isPublished: false,
   publicationBlockedReason: null,
-};
-
-const MOCK_FCR = {
-  id: "fcr-1",
-  operatorId: "op-1",
-  assessmentCycle: 1,
-  preferredCategory: "biodiversity",
-  territoryContext: "ter-1",
-  preferredInstitutionType: "NGO",
-  targetActivationCycle: 2,
-  authorisedSignatory: "Maria Silva",
-  signedAt: new Date("2026-03-01"),
-  status: "pending",
-  createdAt: new Date(),
-  matchedInstitution: null,
-  activatedAt: null,
-  lapsedAt: null,
 };
 
 const BASE_SNAPSHOT_INPUT = {
@@ -108,30 +108,29 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
   beforeEach(() => {
     vi.resetAllMocks();
 
-    vi.mocked(assessmentRepo.createAssessmentSnapshot).mockResolvedValue(
-      MOCK_ASSESSMENT as any
-    );
-    vi.mocked(scoreRepo.createScoreSnapshot).mockResolvedValue(
-      MOCK_SCORE as any
-    );
+    vi.mocked(assessmentSchema.validateTypeCRevenueSplit).mockReturnValue(null);
+    vi.mocked(dpiRepo.findLatestDpiByTerritory).mockResolvedValue(null);
+    vi.mocked(dpiRepo.findMadeiraTerritoryId).mockResolvedValue(null);
     vi.mocked(scoreRepo.findCycle1ScoreByOperator).mockResolvedValue(null);
     vi.mocked(scoreRepo.findLatestScoreByOperator).mockResolvedValue(null);
-    vi.mocked(evidenceRepo.findVerifiedT3Evidence).mockResolvedValue(null as any);
-    vi.mocked(evidenceRepo.findT1EvidenceCoverageBySnapshot).mockResolvedValue({
-      p1: false,
-      p2: false,
-      p3: false,
-    });
-    vi.mocked(operatorRepo.incrementAssessmentCycle).mockResolvedValue({} as any);
-    vi.mocked(dpiRepo.findLatestDpiByTerritory).mockResolvedValue(null);
     vi.mocked(methodologyBundle.loadActiveBundle).mockResolvedValue({
       bundle: DEFAULT_METHODOLOGY_BUNDLE as any,
       hash: "bundle-hash",
     });
     vi.mocked(auditLogger.logAuditEvent).mockResolvedValue(undefined as any);
-    vi.mocked(forwardCommitmentRepo.createForwardCommitmentRecord).mockResolvedValue(
-      MOCK_FCR as any
-    );
+
+    mockTx.assessmentSnapshot.create.mockResolvedValue(MOCK_ASSESSMENT);
+    mockTx.evidenceRef.create.mockResolvedValue({});
+    // T3 gate is skipped for status D — evidenceRef.count won't be called
+    mockTx.evidenceRef.count.mockResolvedValue(0);
+    // T1 coverage check — no T1 evidence → isPublished = false
+    mockTx.evidenceRef.findMany.mockResolvedValue([]);
+    mockTx.scoreSnapshot.create.mockResolvedValue(MOCK_SCORE);
+    mockTx.forwardCommitmentRecord.create.mockResolvedValue({
+      id: "fcr-1",
+      operatorId: "op-1",
+    });
+    mockTx.operator.update.mockResolvedValue({});
   });
 
   it("creates ForwardCommitmentRecord with all provided fields (not just operatorId + assessmentCycle)", async () => {
@@ -140,6 +139,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-1",
       actorUserId: "user-1",
       snapshotInput: BASE_SNAPSHOT_INPUT,
+      rawSubmissionJson: {},
       forwardCommitment: {
         preferredCategory: "biodiversity",
         preferredInstitutionType: "NGO",
@@ -151,20 +151,18 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
 
     await runScoring(input);
 
-    expect(forwardCommitmentRepo.createForwardCommitmentRecord).toHaveBeenCalledOnce();
-    const call = vi.mocked(
-      forwardCommitmentRepo.createForwardCommitmentRecord
-    ).mock.calls[0][0];
+    expect(mockTx.forwardCommitmentRecord.create).toHaveBeenCalledOnce();
+    const call = mockTx.forwardCommitmentRecord.create.mock.calls[0][0];
 
-    expect(call.operatorId).toBe("op-1");
-    expect(call.assessmentCycle).toBe(1);
-    expect(call.preferredCategory).toBe("biodiversity");
-    expect(call.preferredInstitutionType).toBe("NGO");
-    expect(call.targetActivationCycle).toBe(2);
-    expect(call.authorisedSignatory).toBe("Maria Silva");
-    expect(call.signedAt).toBeInstanceOf(Date);
+    expect(call.data.operator.connect.id).toBe("op-1");
+    expect(call.data.assessmentCycle).toBe(1);
+    expect(call.data.preferredCategory).toBe("biodiversity");
+    expect(call.data.preferredInstitutionType).toBe("NGO");
+    expect(call.data.targetActivationCycle).toBe(2);
+    expect(call.data.authorisedSignatory).toBe("Maria Silva");
+    expect(call.data.signedAt).toBeInstanceOf(Date);
     // territoryContext defaults to territoryId when not explicitly provided
-    expect(call.territoryContext).toBe("ter-1");
+    expect(call.data.territoryContext).toBe("ter-1");
   });
 
   it("uses explicit territoryContext when provided in forwardCommitment", async () => {
@@ -173,6 +171,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-1",
       actorUserId: "user-1",
       snapshotInput: BASE_SNAPSHOT_INPUT,
+      rawSubmissionJson: {},
       forwardCommitment: {
         preferredCategory: "water",
         territoryContext: "Douro Valley",
@@ -182,10 +181,8 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
 
     await runScoring(input);
 
-    const call = vi.mocked(
-      forwardCommitmentRepo.createForwardCommitmentRecord
-    ).mock.calls[0][0];
-    expect(call.territoryContext).toBe("Douro Valley");
+    const call = mockTx.forwardCommitmentRecord.create.mock.calls[0][0];
+    expect(call.data.territoryContext).toBe("Douro Valley");
   });
 
   it("record is NOT created when p3Status is not D", async () => {
@@ -194,14 +191,18 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-1",
       actorUserId: "user-1",
       snapshotInput: { ...BASE_SNAPSHOT_INPUT, p3Status: "E" as const },
+      rawSubmissionJson: {},
     };
 
     await runScoring(input);
 
-    expect(forwardCommitmentRepo.createForwardCommitmentRecord).not.toHaveBeenCalled();
+    expect(mockTx.forwardCommitmentRecord.create).not.toHaveBeenCalled();
   });
 
   it("record is NOT created when p3Status is A", async () => {
+    // T3 gate fires for status A — mock count = 0 so publicationBlockedReason is set
+    mockTx.evidenceRef.count.mockResolvedValue(0);
+
     const input = {
       operatorId: "op-1",
       territoryId: "ter-1",
@@ -216,11 +217,12 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
           continuity: 75,
         },
       },
+      rawSubmissionJson: {},
     };
 
     await runScoring(input);
 
-    expect(forwardCommitmentRepo.createForwardCommitmentRecord).not.toHaveBeenCalled();
+    expect(mockTx.forwardCommitmentRecord.create).not.toHaveBeenCalled();
   });
 
   it("territoryContext defaults to territoryId when forwardCommitment has none", async () => {
@@ -229,6 +231,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
       territoryId: "ter-default",
       actorUserId: "user-1",
       snapshotInput: BASE_SNAPSHOT_INPUT,
+      rawSubmissionJson: {},
       forwardCommitment: {
         preferredCategory: "biodiversity",
       },
@@ -236,9 +239,7 @@ describe("ForwardCommitmentRecord — Status D persistence", () => {
 
     await runScoring(input);
 
-    const call = vi.mocked(
-      forwardCommitmentRepo.createForwardCommitmentRecord
-    ).mock.calls[0][0];
-    expect(call.territoryContext).toBe("ter-default");
+    const call = mockTx.forwardCommitmentRecord.create.mock.calls[0][0];
+    expect(call.data.territoryContext).toBe("ter-default");
   });
 });

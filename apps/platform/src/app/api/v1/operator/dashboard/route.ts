@@ -13,6 +13,8 @@ import {
   findPreviousScoreByOperator,
 } from "@/lib/db/repositories/score.repo";
 import { findTerritoryById } from "@/lib/db/repositories/dpi.repo";
+import { prisma } from "@/lib/db/prisma";
+import { getStorageProvider } from "@/lib/storage";
 
 export async function GET() {
   try {
@@ -23,11 +25,20 @@ export async function GET() {
       return NextResponse.json({ operator: null });
     }
 
-    const [latestScore, previousScore, territory] = await Promise.all([
+    const [latestScore, previousScore, territory, coverPhoto] = await Promise.all([
       findLatestScoreByOperator(operator.id),
       findPreviousScoreByOperator(operator.id),
       operator.territoryId ? findTerritoryById(operator.territoryId) : null,
+      prisma.operatorPhoto.findFirst({
+        where: { operatorId: operator.id, isCover: true },
+        select: { storageKey: true },
+      }),
     ]);
+
+    const storage = getStorageProvider();
+    const coverPhotoUrl = coverPhoto
+      ? await storage.getSignedUrl(coverPhoto.storageKey, "get", undefined, undefined, undefined, "public").catch(() => null)
+      : null;
 
     return NextResponse.json({
       operator: {
@@ -42,6 +53,7 @@ export async function GET() {
         onboardingCompleted: operator.onboardingCompleted,
         onboardingStep: operator.onboardingStep,
         onboardingData: operator.onboardingData,
+        coverPhotoUrl: coverPhotoUrl,
         territory: territory
           ? {
               id: territory.id,

@@ -154,6 +154,12 @@ export interface OnboardingData {
   evidenceChecklistOwnership?: boolean;
   /** Required when p3Status is A, B, or C */
   evidenceChecklistP3?: boolean;
+  /** Per-row checked state for the "Detailed Verification" evidence section (4 rows). */
+  evidenceDetailedChecked?: boolean[];
+  /** Per-row checked state for the "Contribution Programme" P3 evidence section (4 rows). */
+  evidenceP3Checked?: boolean[];
+  /** Operator declaration checkbox — must be true to enable final submission. */
+  declarationChecked?: boolean;
 
   // Step 12 — P3: Status
   p3Status?: P3Status;

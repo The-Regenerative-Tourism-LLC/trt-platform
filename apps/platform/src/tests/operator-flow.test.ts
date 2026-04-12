@@ -100,6 +100,7 @@ function buildScoringInput(overrides: { assessmentCycle?: number; delta?: any; e
       delta: overrides.delta ?? null,
       evidence: overrides.evidence ?? [],
     },
+    rawSubmissionJson: {},
   };
 }
 

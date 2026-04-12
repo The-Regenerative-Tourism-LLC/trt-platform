@@ -57,6 +57,7 @@ export const EVIDENCE_FIELDS = new Set<string>([
   'evidenceChecklistElectricity', 'evidenceChecklistGasFuel', 'evidenceChecklistWater',
   'evidenceChecklistWaste', 'evidenceChecklistEmployment', 'evidenceChecklistSupplier',
   'evidenceChecklistBooking', 'evidenceChecklistOwnership', 'evidenceChecklistP3',
+  'evidenceDetailedChecked', 'evidenceP3Checked', 'declarationChecked',
   'evidenceRefs', 'assessmentCycle', 'deltaExplanation',
 ]);
 

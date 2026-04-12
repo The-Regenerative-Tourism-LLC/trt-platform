@@ -7,6 +7,12 @@
  * It must NOT compute, approximate, or infer GPS/DPS/DPI scores.
  * All score values originate from a persisted ScoreSnapshot — never from local calculation.
  * ScoreSnapshots are immutable and append-only; this component only reads and renders them.
+ *
+ * BUSINESS RULES (enforced here at UI layer):
+ * - Each operator has exactly one assessment (Cycle 1). No "New Assessment Cycle" until further notice.
+ * - Submitted assessments are view-only; the Edit button navigates back to the onboarding form.
+ * - Scores use Proxy multipliers (×0.25) until evidence items are individually approved.
+ * - "Complete Public Profile" is disabled in this release.
  */
 
 import { useQuery } from "@tanstack/react-query";
@@ -17,19 +23,20 @@ import Link from "next/link";
 import {
   QrCode,
   FileText,
-  ArrowRight,
-  ExternalLink,
-  TrendingUp,
-  Leaf,
   Globe,
+  Leaf,
   Zap,
+  TrendingUp,
+  Copy,
+  ClipboardList,
+  ArrowRight,
+  MapPin,
 } from "lucide-react";
 import {
   GPSCircle,
   GPSBandBadge,
   DPSBandBadge,
   PressureBadge,
-  PillarBar,
 } from "@/components/scoring/ScoreDisplays";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,6 +57,7 @@ interface OperatorDashboardData {
     onboardingCompleted: boolean;
     onboardingStep: number;
     onboardingData: Record<string, unknown>;
+    coverPhotoUrl: string | null;
     territory: {
       id: string;
       name: string;
@@ -91,6 +99,23 @@ function fetchDashboard(): Promise<OperatorDashboardData> {
   return fetch("/api/v1/operator/dashboard").then((r) => r.json());
 }
 
+function pillarDescription(label: "p1" | "p2" | "p3", score: number): string {
+  if (label === "p1") {
+    if (score >= 70) return "Strong operational footprint. Keep improving.";
+    if (score >= 40) return "Moderate footprint. Renewable energy and water efficiency are key levers.";
+    return "High grid dependence. Significant improvement margin.";
+  }
+  if (label === "p2") {
+    if (score >= 70) return "Strong local integration across employment and procurement.";
+    if (score >= 30) return "Local integration growing. Focus on direct bookings and community ties.";
+    return "Local integration in development.";
+  }
+  // p3
+  if (score >= 50) return "Active regenerative programme with measurable outcomes.";
+  if (score >= 20) return "Early-stage regenerative contribution. Formalise your programme.";
+  return "No formal regenerative programme yet.";
+}
+
 export function OperatorDashboardClient() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -102,14 +127,13 @@ export function OperatorDashboardClient() {
 
   const operator = data?.operator;
 
-  // Redirect to onboarding only if there is no operator profile at all (new account, no draft).
   useEffect(() => {
     if (!isLoading && !authLoading && operator === null) {
       router.replace("/operator/onboarding");
     }
   }, [operator, isLoading, authLoading, router]);
 
-  if (authLoading || isLoading) {
+  if (authLoading || isLoading || !operator) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -117,15 +141,7 @@ export function OperatorDashboardClient() {
     );
   }
 
-  if (!operator) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-      </div>
-    );
-  }
-
-  // Onboarding saved but not yet submitted — show a focused "continue" screen
+  // Onboarding saved but not yet submitted
   if (!operator.onboardingCompleted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4">
@@ -150,44 +166,54 @@ export function OperatorDashboardClient() {
 
   const score = operator.latestScore;
   const prev = operator.previousScore;
+  const territory = operator.territory;
+
+  const displayName = operator.tradingName || operator.legalName;
+  const location = [operator.destinationRegion, operator.country].filter(Boolean).join(", ");
+
+  // Cover photo is stored in object storage; URL is fetched from OperatorPhoto DB record
+  const coverUrl = operator.coverPhotoUrl;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {operator.tradingName || operator.legalName}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {operator.destinationRegion}
-            {operator.country ? `, ${operator.country}` : ""}
-            {operator.operatorType && (
-              <Badge variant="outline" className="ml-2 text-xs">
-                Type {operator.operatorType}
-              </Badge>
+    <div>
+      {/* Cover hero — full viewport width, no container constraints */}
+      <div className="relative w-full h-52 sm:h-64 overflow-hidden">
+        {/* Cover image from step 3 upload, fallback to gradient */}
+        {coverUrl ? (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${coverUrl})` }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-stone-300 via-amber-100 to-stone-200" />
+        )}
+        {/* Bottom fade */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background/80 to-transparent" />
+        {/* Name + location overlay — aligned to the content max-width */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <div className="max-w-6xl mx-auto px-5 sm:px-6 pb-4 space-y-0.5">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground drop-shadow-sm">
+              {displayName}
+            </h1>
+            {location && (
+              <div className="flex items-center gap-1 text-sm text-foreground/70">
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                <span>{location}</span>
+                {operator.operatorType && (
+                  <Badge variant="outline" className="ml-1.5 text-xs bg-background/60">
+                    Type {operator.operatorType}
+                  </Badge>
+                )}
+              </div>
             )}
-          </p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/operator/evidence">
-              <FileText className="h-4 w-4 mr-1" />
-              Evidence
-            </Link>
-          </Button>
-          <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-            <Link href="/operator/onboarding">
-              {(operator.assessmentCycleCount ?? 0) > 0
-                ? "New Assessment"
-                : "Continue Assessment"}
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </Link>
-          </Button>
+          </div>
         </div>
       </div>
 
-      {/* QR Code card */}
+      {/* Constrained content */}
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 py-6 sm:py-8 space-y-5">
+
+      {/* QR / Operator Code card */}
       {operator.operatorCode && (
         <Card>
           <CardContent className="flex items-center gap-4 py-4">
@@ -195,17 +221,60 @@ export function OperatorDashboardClient() {
               <QrCode className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">Operator Code</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                Your Operator Code
+              </p>
               <p className="text-2xl font-mono font-bold tracking-widest mt-0.5">
                 {operator.operatorCode}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Display at reception — travelers scan to check in and earn impact credits
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Display this code at your reception — travelers scan it to check in and earn points
               </p>
             </div>
+            <button
+              onClick={() => navigator.clipboard.writeText(operator.operatorCode ?? "")}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0 border border-border rounded-lg px-3 py-2"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Copy
+            </button>
           </CardContent>
         </Card>
       )}
+
+      {/* Action buttons row */}
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" asChild>
+          <Link href="/operator/evidence">
+            <FileText className="h-4 w-4 mr-1.5" />
+            Evidence
+          </Link>
+        </Button>
+        {/* Action Plan — coming soon */}
+        <Button variant="outline" disabled className="gap-1.5 opacity-50 cursor-not-allowed">
+          <ClipboardList className="h-4 w-4" />
+          Action Plan
+        </Button>
+      </div>
+
+      {/* Complete public profile — disabled in this release */}
+      <Card className="border-border/60">
+        <CardContent className="flex items-center gap-4 py-4">
+          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <Globe className="w-4 h-4 text-muted-foreground" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold">Complete your public profile</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Add your tagline, description, amenities, and languages so travelers can discover you.
+            </p>
+          </div>
+          <Button disabled className="shrink-0 opacity-40 cursor-not-allowed gap-1.5" size="sm">
+            Complete Profile
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        </CardContent>
+      </Card>
 
       {score ? (
         <>
@@ -213,12 +282,14 @@ export function OperatorDashboardClient() {
           <div className="grid md:grid-cols-5 gap-5">
             {/* Score card */}
             <Card className="md:col-span-2">
-              <CardContent className="flex flex-col items-center justify-center gap-4 py-8">
+              <CardContent className="flex flex-col items-center justify-center gap-3 py-7">
                 <GPSCircle score={score.gpsTotal} band={score.gpsBand} size={152} />
-                <GPSBandBadge band={score.gpsBand} />
-                {score.dpsBand && <DPSBandBadge band={score.dpsBand} />}
+                <div className="flex flex-wrap justify-center gap-2">
+                  <GPSBandBadge band={score.gpsBand} />
+                  {score.dpsBand && <DPSBandBadge band={score.dpsBand} />}
+                </div>
                 <Badge
-                  variant={score.isPublished ? "default" : "secondary"}
+                  variant="secondary"
                   className={
                     score.isPublished
                       ? "bg-secondary text-primary border-primary/20"
@@ -227,64 +298,136 @@ export function OperatorDashboardClient() {
                 >
                   {score.isPublished ? "Published" : "Pending verification"}
                 </Badge>
-                {score.publicationBlockedReason && (
-                  <p className="text-xs text-muted-foreground text-center px-4">
-                    {score.publicationBlockedReason}
+                {!score.isPublished && (
+                  <p className="text-[11px] text-muted-foreground text-center px-3 leading-relaxed">
+                    Score calculated with Proxy multipliers (×0.25) until evidence is approved. Score updates automatically as each item is verified.
                   </p>
-                )}
-                {score.isPublished && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/operators/${operator.id}`}>
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      View Public Passport
-                    </Link>
-                  </Button>
                 )}
               </CardContent>
             </Card>
 
             {/* Pillar breakdown */}
             <Card className="md:col-span-3">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
-                  Impact Pillars
+              <CardHeader className="pb-2 pt-5">
+                <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  Assessment Pillars
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5">
-                <PillarBar
-                  label="P1 Operational Footprint"
-                  score={score.p1Score}
-                  weight={0.4}
-                  colorClass="bg-primary"
-                />
-                <PillarBar
-                  label="P2 Local Integration"
-                  score={score.p2Score}
-                  weight={0.3}
-                  colorClass="bg-amber-500"
-                />
-                <PillarBar
-                  label="P3 Regenerative Contribution"
-                  score={score.p3Score}
-                  weight={0.3}
-                  colorClass="bg-teal-500"
-                />
+              <CardContent className="space-y-3 pb-5">
+                {(
+                  [
+                    {
+                      key: "p1" as const,
+                      label: "P1 Operational Footprint",
+                      score: score.p1Score,
+                      color: "bg-green-500",
+                    },
+                    {
+                      key: "p2" as const,
+                      label: "P2 Local Integration",
+                      score: score.p2Score,
+                      color: "bg-amber-500",
+                    },
+                    {
+                      key: "p3" as const,
+                      label: "P3 Regenerative Contribution",
+                      score: score.p3Score,
+                      color: "bg-blue-500",
+                    },
+                  ] as const
+                ).map(({ key, label, score: s, color }) => (
+                  <div key={key} className="rounded-xl border border-border/50 bg-card px-4 py-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${color} shrink-0`} />
+                        <span className="text-sm font-medium">{label}</span>
+                      </div>
+                      <span className="text-sm font-bold tabular-nums shrink-0">{Math.round(s * 10) / 10}</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full ${color} rounded-full transition-all duration-700`}
+                        style={{ width: `${Math.min(s, 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">{pillarDescription(key, s)}</p>
+                  </div>
+                ))}
                 <Separator />
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm px-1">
                   <span className="font-medium">Green Passport Score</span>
-                  <span className="tabular-nums font-bold">
-                    {score.gpsTotal}/100
-                  </span>
+                  <span className="tabular-nums font-bold">{score.gpsTotal}/100</span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* DPS — Directional Progress */}
+          {/* Territory Index (DPI) */}
+          {territory?.compositeDpi != null && (
+            <Card>
+              <CardContent className="pt-5 pb-5 space-y-5">
+                {/* Header row */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    <Globe className="h-3.5 w-3.5" />
+                    Territory Index — {territory.name}
+                  </div>
+                  {territory.pressureLevel && (
+                    <PressureBadge level={territory.pressureLevel} />
+                  )}
+                </div>
+
+                {/* Composite score row */}
+                <div className="flex items-baseline gap-3 border-b border-border/40 pb-4">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-black tabular-nums leading-none">
+                      {territory.compositeDpi}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-medium">/100</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-snug flex-1">
+                    Choosing a high-GPS operator in a high-pressure destination
+                    is the highest-impact booking choice a traveler can make.
+                  </p>
+                </div>
+
+                {/* Metrics grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { label: "Tourist Intensity", value: territory.touristIntensity, weight: "35%" },
+                    { label: "Ecological Sensitivity", value: territory.ecologicalSensitivity, weight: "30%" },
+                    { label: "Economic Leakage", value: territory.economicLeakageRate, weight: "20%" },
+                    { label: "Regen. Performance", value: territory.regenerativePerformance, weight: "15%" },
+                  ].map((m) => (
+                    <div key={m.label} className="space-y-0.5">
+                      <span className="text-xl font-bold tabular-nums">{m.value ?? "—"}</span>
+                      <p className="text-[11px] text-muted-foreground">
+                        {m.label}
+                        <span className="text-muted-foreground/50 ml-1">({m.weight})</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {territory.dpiComputedAt && (
+                  <p className="text-[11px] text-muted-foreground/60">
+                    Last computed{" "}
+                    {new Date(territory.dpiComputedAt).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* DPS — Directional Progress (Cycle 2+) */}
           {score.dpsTotal != null && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
+                <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   Directional Progress Score
                 </CardTitle>
@@ -304,23 +447,12 @@ export function OperatorDashboardClient() {
                       { label: "DPS-2 Consistency", value: score.dps2, range: "[0, +10]" },
                       { label: "DPS-3 P3 Acceleration", value: score.dps3, range: "[0, +5]" },
                     ].map((d) => (
-                      <div
-                        key={d.label}
-                        className="rounded-lg bg-muted p-3 text-center"
-                      >
+                      <div key={d.label} className="rounded-lg bg-muted p-3 text-center">
                         <span className="text-xl font-bold tabular-nums">
-                          {d.value != null
-                            ? d.value > 0
-                              ? `+${d.value}`
-                              : d.value
-                            : "—"}
+                          {d.value != null ? (d.value > 0 ? `+${d.value}` : d.value) : "—"}
                         </span>
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          {d.label}
-                        </p>
-                        <p className="text-[9px] text-muted-foreground/60">
-                          {d.range}
-                        </p>
+                        <p className="text-[10px] text-muted-foreground mt-1">{d.label}</p>
+                        <p className="text-[9px] text-muted-foreground/60">{d.range}</p>
                       </div>
                     ))}
                   </div>
@@ -336,50 +468,29 @@ export function OperatorDashboardClient() {
           {prev && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
+                <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   Change Since Last Assessment
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {([
-                    {
-                      label: "GPS Score",
-                      current: score.gpsTotal,
-                      previous: prev.gpsScore,
-                    },
-                    {
-                      label: "P1 Footprint",
-                      current: score.p1Score,
-                      previous: prev.pillar1Score,
-                    },
-                    {
-                      label: "P2 Integration",
-                      current: score.p2Score,
-                      previous: prev.pillar2Score,
-                    },
-                    {
-                      label: "P3 Regenerative",
-                      current: score.p3Score,
-                      previous: prev.pillar3Score,
-                    },
-                  ] as const).map(({ label, current, previous }) => {
+                  {(
+                    [
+                      { label: "GPS Score", current: score.gpsTotal, previous: prev.gpsScore },
+                      { label: "P1 Footprint", current: score.p1Score, previous: prev.pillar1Score },
+                      { label: "P2 Integration", current: score.p2Score, previous: prev.pillar2Score },
+                      { label: "P3 Regenerative", current: score.p3Score, previous: prev.pillar3Score },
+                    ] as const
+                  ).map(({ label, current, previous }) => {
                     const diff = Math.round((current - previous) * 10) / 10;
                     const positive = diff > 0;
                     const neutral = diff === 0;
                     return (
-                      <div
-                        key={label}
-                        className="rounded-lg bg-muted p-3 text-center space-y-1"
-                      >
+                      <div key={label} className="rounded-lg bg-muted p-3 text-center space-y-1">
                         <span
                           className={`text-xl font-bold tabular-nums ${
-                            neutral
-                              ? "text-muted-foreground"
-                              : positive
-                              ? "text-primary"
-                              : "text-destructive"
+                            neutral ? "text-muted-foreground" : positive ? "text-primary" : "text-destructive"
                           }`}
                         >
                           {neutral ? "±0" : positive ? `+${diff}` : `${diff}`}
@@ -404,107 +515,11 @@ export function OperatorDashboardClient() {
               </CardContent>
             </Card>
           )}
-
-          {/* DPI — Destination Context */}
-          {operator.territory?.compositeDpi != null && (
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    Destination Pressure Index — {operator.territory.name}
-                  </CardTitle>
-                  {operator.territory.pressureLevel && (
-                    <PressureBadge level={operator.territory.pressureLevel} />
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <span className="text-4xl font-black tabular-nums">
-                    {operator.territory.compositeDpi}
-                  </span>
-                  <p className="text-sm text-muted-foreground flex-1">
-                    Choosing a high-GPS operator in a high-pressure destination
-                    is the highest-impact booking choice a traveler can make.
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {[
-                    {
-                      label: "Tourist Intensity",
-                      value: operator.territory.touristIntensity,
-                      weight: "35%",
-                    },
-                    {
-                      label: "Ecological Sensitivity",
-                      value: operator.territory.ecologicalSensitivity,
-                      weight: "30%",
-                    },
-                    {
-                      label: "Economic Leakage",
-                      value: operator.territory.economicLeakageRate,
-                      weight: "20%",
-                    },
-                    {
-                      label: "Regen. Performance",
-                      value: operator.territory.regenerativePerformance,
-                      weight: "15%",
-                    },
-                  ].map((m) => (
-                    <div
-                      key={m.label}
-                      className="rounded-lg bg-muted p-3 text-center"
-                    >
-                      <span className="text-lg font-bold tabular-nums">
-                        {m.value ?? "—"}
-                      </span>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
-                        {m.label} ({m.weight})
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                {operator.territory.dpiComputedAt && (
-                  <p className="text-xs text-muted-foreground">
-                    Last computed{" "}
-                    {new Date(operator.territory.dpiComputedAt).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Quick actions */}
-          <div className="grid sm:grid-cols-3 gap-4">
-            <QuickActionCard
-              icon={<FileText className="h-5 w-5" />}
-              title="Evidence"
-              description="Submit and track supporting evidence for your indicators"
-              href="/operator/evidence"
-            />
-            <QuickActionCard
-              icon={<Leaf className="h-5 w-5" />}
-              title="Assessment"
-              description="Start or continue your operator assessment"
-              href="/operator/onboarding"
-            />
-            <QuickActionCard
-              icon={<Zap className="h-5 w-5" />}
-              title="Public Profile"
-              description="View your Green Passport as travelers see it"
-              href={score.isPublished ? `/operators/${operator.id}` : "#"}
-              disabled={!score.isPublished}
-            />
-          </div>
         </>
       ) : (
         <NoAssessmentState />
       )}
+      </div> {/* end constrained content */}
     </div>
   );
 }
@@ -524,36 +539,4 @@ function NoAssessmentState() {
       </CardContent>
     </Card>
   );
-}
-
-function QuickActionCard({
-  icon,
-  title,
-  description,
-  href,
-  disabled,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  href: string;
-  disabled?: boolean;
-}) {
-  const content = (
-    <Card className={`transition-shadow ${disabled ? "opacity-50" : "hover:shadow-md cursor-pointer"}`}>
-      <CardContent className="py-5 flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0 text-primary">
-          {icon}
-        </div>
-        <div>
-          <p className="font-medium text-sm">{title}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
-  if (disabled) return content;
-
-  return <Link href={href}>{content}</Link>;
 }

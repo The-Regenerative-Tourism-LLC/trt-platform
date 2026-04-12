@@ -3,9 +3,6 @@ import { NextResponse } from "next/server";
 
 /**
  * Returns the primary dashboard URL for a given set of roles.
- * Used to redirect users away from wrong-role routes and public/auth pages.
- * Admin takes precedence; institution_partner has no dashboard yet so falls
- * back to /select-role as a safe default.
  */
 function getDashboardUrl(roles: string[]): string {
   if (roles.includes("admin")) return "/admin/dashboard";
@@ -22,9 +19,9 @@ export default auth((req) => {
   const userRoles: string[] = session?.user?.roles ?? [];
   const hasRole = userRoles.length > 0;
   const needsRoleSelection = !hasRole;
-
-  // isEmailVerified defaults true: existing sessions (pre-field) must not be locked out.
   const emailVerified: boolean = session?.user?.isEmailVerified ?? true;
+  const needsTermsAcceptance: boolean =
+    session?.user?.needsTermsAcceptance ?? false;
 
   console.log("[middleware]", pathname, {
     isLoggedIn,
@@ -41,18 +38,17 @@ export default auth((req) => {
     pathname.startsWith("/traveler") && pathname !== "/traveler/waitlist";
   const isAccountRoute = pathname.startsWith("/account");
   const isSelectRoleRoute = pathname === "/select-role";
+  const isAcceptTermsRoute = pathname === "/accept-terms";
   const isAuthRoute = pathname === "/login" || pathname === "/signup";
-  const isRootRoute = pathname === "/";
 
-  // ── Unauthenticated ──────────────────────────────────────────────────────────
-  // Protected routes require a session. Redirect to login and preserve the
-  // intended destination so the user lands there after signing in.
+  // ── Unauthenticated ──────────────────────────────────────────────────────
   if (!isLoggedIn) {
     if (
       isAdminRoute ||
       isOperatorRoute ||
       isTravelerRoute ||
       isSelectRoleRoute ||
+      isAcceptTermsRoute ||
       isAccountRoute
     ) {
       const loginUrl = new URL("/login", req.url);
@@ -62,24 +58,31 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // ── Authenticated — role not yet assigned ────────────────────────────────────
-  // New users that completed sign-up but haven't selected a role yet must finish
-  // role selection before accessing any other matched route.
+  // ── Role not yet assigned → /select-role (terms captured there) ──────────
   if (needsRoleSelection && !isSelectRoleRoute) {
     return NextResponse.redirect(new URL("/select-role", req.url));
   }
 
-  // ── Authenticated — role already assigned, visiting /select-role ─────────────
   if (isSelectRoleRoute && !needsRoleSelection) {
     return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
-  // ── Email verification gate ──────────────────────────────────────────────────
-  // Credentials users who have not verified their email may not access any
-  // dashboard or account route. They are redirected to /verify-email.
-  // Google OAuth users arrive with emailVerified already set by NextAuth — they
-  // always pass this check.
-  // /account/security is blocked too — prevents a workaround via settings.
+  // ── Terms not yet accepted (established users) → /accept-terms ───────────
+  // Only enforced once the user has a role. New users handle terms in /select-role.
+  if (
+    hasRole &&
+    needsTermsAcceptance &&
+    !isAcceptTermsRoute &&
+    (isAdminRoute || isOperatorRoute || isTravelerRoute || isAccountRoute)
+  ) {
+    return NextResponse.redirect(new URL("/accept-terms", req.url));
+  }
+
+  if (isAcceptTermsRoute && !needsTermsAcceptance) {
+    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+  }
+
+  // ── Email verification gate ──────────────────────────────────────────────
   if (
     !emailVerified &&
     (isAdminRoute || isOperatorRoute || isTravelerRoute || isAccountRoute)
@@ -87,15 +90,12 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/verify-email", req.url));
   }
 
-  // ── Authenticated — redirect away from auth/marketing pages ─────────────────
-  // Once logged in, /login, /signup, and / are no longer meaningful destinations.
-  if (isAuthRoute || isRootRoute) {
+  // ── Redirect away from auth pages once logged in (but allow homepage) ────
+  if (isAuthRoute) {
     return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
   }
 
-  // ── Role enforcement ─────────────────────────────────────────────────────────
-  // Admins can access all role-scoped routes (oversight / support).
-  // Account routes (/account/*) are accessible to any authenticated user.
+  // ── Role enforcement ─────────────────────────────────────────────────────
   const isAdmin = userRoles.includes("admin");
 
   if (isAdminRoute && !isAdmin) {
@@ -114,14 +114,10 @@ export default auth((req) => {
 });
 
 export const config = {
+  // Run on every request except Next.js internals, static assets, and API routes.
+  // This ensures logged-in users without a role are always gated to /select-role,
+  // regardless of which public page they try to access.
   matcher: [
-    "/",
-    "/login",
-    "/signup",
-    "/select-role",
-    "/operator/:path*",
-    "/traveler/:path*",
-    "/admin/:path*",
-    "/account/:path*",
+    "/((?!_next/static|_next/image|favicon\\.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };

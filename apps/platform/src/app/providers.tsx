@@ -4,6 +4,8 @@ import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { CookieBanner } from "@/components/consent/CookieBanner";
+import { ConsentProvider } from "@/lib/consent/ConsentContext";
 import { useState, useEffect, type ReactNode } from "react";
 
 function ScrollRevealObserver() {
@@ -56,11 +58,14 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <ScrollRevealObserver />
-          {children}
-          <Toaster position="top-right" richColors />
-        </TooltipProvider>
+        <ConsentProvider>
+          <TooltipProvider>
+            <ScrollRevealObserver />
+            {children}
+            <CookieBanner />
+            <Toaster position="top-right" richColors />
+          </TooltipProvider>
+        </ConsentProvider>
       </QueryClientProvider>
     </SessionProvider>
   );

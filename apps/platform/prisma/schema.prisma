@@ -186,9 +186,17 @@ model User {
   operator Operator?
   traveler Traveler?
 
+  marketingEmailConsent Boolean   @default(false)
+  consentedAt           DateTime?
+
+  // GDPR legal basis tracking
+  termsAcceptedAt   DateTime?
+  privacyAcceptedAt DateTime?
+
   secureTokens            SecureToken[]
   emailLogs               EmailLog[]
   notificationPreference  NotificationPreference?
+  cookieConsent           CookieConsent?
 
   @@map("users")
 }
@@ -400,6 +408,8 @@ model AssessmentSnapshot {
   deltaCurrentScores          Json?
 
   snapshotHash                String?
+  /** Full immutable raw submission payload — written once at submission, never overwritten. */
+  rawSubmissionJson           Json?
   createdAt                   DateTime      @default(now())
 
   operator                    Operator               @relation(fields: [operatorId], references: [id])
@@ -938,6 +948,22 @@ model NotificationPreference {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
+}
+
+// ── Cookie Consent (per authenticated user, for audit) ────────────────────
+
+model CookieConsent {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  analytics Boolean  @default(false)
+  marketing Boolean  @default(false)
+  version   String   @default("1")
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("cookie_consents")
 }
 
 // ── Traveler Waitlist ──────────────────────────────────────────────────────

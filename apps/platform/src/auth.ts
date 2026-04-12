@@ -72,7 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
 
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, account, trigger }) {
       // On first sign-in, embed roles and emailVerified into the token.
       // Single query covers both to minimise DB round-trips.
       if (user?.id) {
@@ -80,28 +80,45 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { id: user.id },
           select: {
             emailVerified: true,
+            termsAcceptedAt: true,
             roles: { select: { role: true } },
           },
         });
         token.roles = (dbUser?.roles.map((r) => r.role) ?? []) as AppRole[];
         token.needsRoleSelection = token.roles.length === 0;
-        token.isEmailVerified = !!dbUser?.emailVerified;
+        token.needsTermsAcceptance = !dbUser?.termsAcceptedAt;
+
+        // Google guarantees the email is verified. Ensure the DB reflects this
+        // so that the middleware never sends a Google user to /verify-email.
+        // This also handles the case where an existing credentials account is
+        // linked to Google — the adapter won't backfill emailVerified on link.
+        if (account?.provider === "google" && !dbUser?.emailVerified) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { emailVerified: new Date() },
+          });
+        }
+
+        token.isEmailVerified =
+          account?.provider === "google" ? true : !!dbUser?.emailVerified;
       }
 
       // On explicit session update (e.g. after role selection or email
-      // verification), re-fetch both roles and emailVerified.
+      // verification), re-fetch roles, emailVerified, and termsAcceptedAt.
       if (trigger === "update") {
         const userId = token.sub!;
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
           select: {
             emailVerified: true,
+            termsAcceptedAt: true,
             roles: { select: { role: true } },
           },
         });
         token.roles = (dbUser?.roles.map((r) => r.role) ?? []) as AppRole[];
         token.needsRoleSelection = token.roles.length === 0;
         token.isEmailVerified = !!dbUser?.emailVerified;
+        token.needsTermsAcceptance = !dbUser?.termsAcceptedAt;
       }
 
       // Self-heal: JWT may carry stale isEmailVerified=false if the user
@@ -166,6 +183,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.needsRoleSelection = session.user.roles.length === 0;
       // Default true: existing JWTs that pre-date this field are unaffected on deploy.
       session.user.isEmailVerified = token.isEmailVerified ?? true;
+      // Default false: existing sessions are not disrupted on deploy.
+      session.user.needsTermsAcceptance = token.needsTermsAcceptance ?? false;
       return session;
     },
   },

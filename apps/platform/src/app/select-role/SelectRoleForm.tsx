@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { selectRoleAction } from "./actions";
 
 type Role = "operator" | "traveler";
@@ -34,6 +35,8 @@ const ROLES = [
 export function SelectRoleForm() {
   const { update } = useSession();
   const [selected, setSelected] = useState<Role | null>(null);
+  const [termsOptIn, setTermsOptIn] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -42,14 +45,15 @@ export function SelectRoleForm() {
       setError("Please choose a role to continue.");
       return;
     }
+    if (!termsOptIn) {
+      setError("You must accept the Terms & Conditions and Privacy Policy to continue.");
+      return;
+    }
 
     setError("");
     startTransition(async () => {
       try {
-        // The action is idempotent: if the user already had a role from a
-        // previous partial attempt it recovers the missing profile instead of
-        // throwing "Role already assigned".
-        await selectRoleAction({ role: selected });
+        await selectRoleAction({ role: selected, termsOptIn: true, marketingOptIn });
 
         // Passing `{}` (any truthy value) forces Auth.js to POST to
         // /api/auth/session, which triggers trigger === "update" in the jwt
@@ -149,10 +153,46 @@ export function SelectRoleForm() {
         </div>
       )}
 
+      <div className="space-y-3">
+        {/* Optional marketing consent */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={marketingOptIn}
+            onChange={(e) => setMarketingOptIn(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+          />
+          <span className="text-sm text-muted-foreground">
+            I want to receive news, tips, and updates about regenerative tourism. (Optional)
+          </span>
+        </label>
+      {/* Required legal acceptance */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={termsOptIn}
+            onChange={(e) => setTermsOptIn(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+          />
+          <span className="text-sm text-foreground">
+            I have read and agree to the{" "}
+            <Link href="/terms" target="_blank" className="underline hover:text-primary">
+              Terms &amp; Conditions
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" target="_blank" className="underline hover:text-primary">
+              Privacy Policy
+            </Link>
+            . <span className="text-destructive">*</span>
+          </span>
+        </label>
+
+      </div>
+
       <button
         type="button"
         onClick={handleConfirm}
-        disabled={!selected || isPending}
+        disabled={!selected || !termsOptIn || isPending}
         className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
       >
         {isPending ? (

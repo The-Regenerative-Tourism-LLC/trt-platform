@@ -116,8 +116,8 @@ function SectionCard({
 
 export function EvidenceChecklistStep({ data, updateField, shell, preview, previewLoading, floatingGps }: StepProps) {
   const showP3 = data.p3Status === "A" || data.p3Status === "B" || data.p3Status === "C";
-  const [detailedChecked, setDetailedChecked] = useState<boolean[]>(DETAILED_ROWS.map(() => false));
-  const [p3Checked, setP3Checked] = useState<boolean[]>(P3_ROWS.map(() => false));
+  const detailedChecked: boolean[] = data.evidenceDetailedChecked ?? DETAILED_ROWS.map(() => false);
+  const p3Checked: boolean[] = data.evidenceP3Checked ?? P3_ROWS.map(() => false);
 
   const coreCount =
     (data.evidenceChecklistElectricity ? 1 : 0) +
@@ -227,7 +227,10 @@ export function EvidenceChecklistStep({ data, updateField, shell, preview, previ
             key={label}
             label={label}
             checked={detailedChecked[i] ?? false}
-            onChange={(v) => setDetailedChecked((prev) => prev.map((c, j) => j === i ? v : c))}
+            onChange={(v) => {
+              const next = detailedChecked.map((c, j) => j === i ? v : c);
+              updateField({ evidenceDetailedChecked: next });
+            }}
           />
         ))}
       </SectionCard>
@@ -242,8 +245,7 @@ export function EvidenceChecklistStep({ data, updateField, shell, preview, previ
               checked={p3Checked[i] ?? false}
               onChange={(v) => {
                 const next = p3Checked.map((c, j) => j === i ? v : c);
-                setP3Checked(next);
-                updateField({ evidenceChecklistP3: next.some(Boolean) });
+                updateField({ evidenceP3Checked: next, evidenceChecklistP3: next.some(Boolean) });
               }}
               indicator={row.indicator}
             />

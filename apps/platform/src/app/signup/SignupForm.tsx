@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
+import Link from "next/link";
 
 const SignupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -15,6 +16,8 @@ export function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [termsOptIn, setTermsOptIn] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const role = "operator";
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
@@ -29,6 +32,10 @@ export function SignupForm() {
         if (e.path[0]) fieldErrors[e.path[0] as string] = e.message;
       });
       setErrors(fieldErrors);
+      return false;
+    }
+    if (!termsOptIn) {
+      setErrors({ terms: "You must accept the Terms & Conditions and Privacy Policy" });
       return false;
     }
     setErrors({});
@@ -46,7 +53,7 @@ export function SignupForm() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, role, termsOptIn, marketingOptIn }),
       });
 
       const data = await res.json();
@@ -182,9 +189,51 @@ export function SignupForm() {
           </div>
         </div>
 
+        <div className="space-y-3">
+           {/* Optional marketing consent */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={marketingOptIn}
+              onChange={(e) => setMarketingOptIn(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+            />
+            <span className="text-sm text-muted-foreground">
+              I want to receive news, tips, and updates about regenerative tourism. (Optional)
+            </span>
+          </label>
+          
+        {/* Required legal acceptance */}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={termsOptIn}
+              onChange={(e) => setTermsOptIn(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
+              required
+            />
+            <span className="text-sm text-foreground">
+              I have read and agree to the{" "}
+              <Link href="/terms" target="_blank" className="underline hover:text-primary">
+                Terms &amp; Conditions
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" target="_blank" className="underline hover:text-primary">
+                Privacy Policy
+              </Link>
+              . <span className="text-destructive">*</span>
+            </span>
+          </label>
+          {errors.terms && (
+            <p className="text-xs text-destructive">{errors.terms}</p>
+          )}
+
+         
+        </div>
+
         <button
           type="submit"
-          disabled={loading || googleLoading}
+          disabled={loading || googleLoading || !termsOptIn}
           className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           {loading ? (
@@ -192,6 +241,18 @@ export function SignupForm() {
           ) : null}
           {loading ? "Creating account…" : "Create account"}
         </button>
+
+        <p className="text-center text-xs text-muted-foreground">
+          By signing up with Google, you also agree to our{" "}
+          <Link href="/terms" className="underline hover:text-foreground">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline hover:text-foreground">
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </form>
     </div>
   );

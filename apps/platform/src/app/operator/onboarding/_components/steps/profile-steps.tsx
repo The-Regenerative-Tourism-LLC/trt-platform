@@ -347,6 +347,7 @@ export function IdentityStep({
                 destinationRegion: loc.region ?? data.destinationRegion,
               })
             }
+            onAddressTyped={(val) => updateField({ address: val })}
           />
         </FieldGroup>
 
@@ -1317,11 +1318,15 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
             key={p.id}
             className="relative rounded-xl overflow-hidden bg-muted aspect-[4/3] group"
           >
-            <img
-              src={signedUrls[p.id] ?? ""}
-              alt={p.fileName ?? "Photo"}
-              className="w-full h-full object-cover"
-            />
+            {signedUrls[p.id] ? (
+              <img
+                src={signedUrls[p.id]}
+                alt={p.fileName ?? "Photo"}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-muted animate-pulse" />
+            )}
 
             {/* Cover badge */}
             {p.isCover && (

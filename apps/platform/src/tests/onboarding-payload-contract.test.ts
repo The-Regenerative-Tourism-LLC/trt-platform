@@ -22,7 +22,7 @@ function completeData(): OnboardingData {
     operatorType: "A",
     territoryId: "ter-1",
     guestNights: 3000,
-    photoRefs: [{ id: "p1", storageRef: "https://x.example/img.jpg" }],
+    photoRefs: [{ id: "p1", storageKey: "https://x.example/img.jpg", url: "https://x.example/img.jpg", isCover: true }],
     totalElectricityKwh: 20000,
     totalGasKwh: 5000,
     officeElectricityKwh: 0,

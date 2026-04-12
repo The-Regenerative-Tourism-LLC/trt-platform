@@ -678,15 +678,12 @@ describe('STEP_REGISTRY validation — pillar1:water', () => {
     const s = { ...makeInitialState(), pillar1: { waterGreywater: false, waterRainwater: false, waterWastewaterTreatment: false } };
     expect(STEP_REGISTRY['pillar1:water'].validate!(s)).toBe(false);
   });
-  it('fails when water booleans missing', () => {
+  it('passes when totalWaterLitres provided (booleans no longer required)', () => {
     const s = { ...makeInitialState(), pillar1: { totalWaterLitres: 50000 } };
-    expect(STEP_REGISTRY['pillar1:water'].validate!(s)).toBe(false);
+    expect(STEP_REGISTRY['pillar1:water'].validate!(s)).toBe(true);
   });
-  it('passes when totalWaterLitres = 0 and all booleans provided', () => {
-    const s = {
-      ...makeInitialState(),
-      pillar1: { totalWaterLitres: 0, waterGreywater: false, waterRainwater: false, waterWastewaterTreatment: false },
-    };
+  it('passes when totalWaterLitres = 0', () => {
+    const s = { ...makeInitialState(), pillar1: { totalWaterLitres: 0 } };
     expect(STEP_REGISTRY['pillar1:water'].validate!(s)).toBe(true);
   });
   it('tours-only with tourNoFixedBase = true: passes (step is hidden, validation always true)', () => {

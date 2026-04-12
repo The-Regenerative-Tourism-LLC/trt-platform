@@ -1,7 +1,7 @@
 export { JsonLd } from "@/components/seo/JsonLd";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://greenpassport.travel";
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 /** Organization schema for the root layout */
 export const organizationSchema = {
@@ -36,7 +36,7 @@ export const blogListingSchema = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   "@id": `${BASE_URL}/blog`,
-  name: "Green Passport Journal",
+  name: "Green Passport Blog",
   description:
     "Articles on regenerative tourism, sustainability, ethics of travel, and the future of conscious hospitality.",
   url: `${BASE_URL}/blog`,

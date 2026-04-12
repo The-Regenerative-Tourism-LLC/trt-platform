@@ -94,7 +94,7 @@ export function Navbar() {
         { href: "/destinations", label: "Destinations" },
         { href: "/methodology", label: "Methodology" },
         { href: "/leaderboard", label: "Impact Record" },
-        { href: "/blog", label: "Journal" },
+        { href: "/blog", label: "Blog" },
         { href: "/pricing", label: "Pricing" },
       ];
     }
@@ -120,7 +120,7 @@ export function Navbar() {
       { href: "/destinations", label: "Destinations" },
       { href: "/leaderboard", label: "Impact Record" },
       { href: "/methodology", label: "Methodology" },
-      { href: "/blog", label: "Journal" },
+      { href: "/blog", label: "Blog" },
     ];
   }
 

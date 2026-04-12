@@ -27,6 +27,8 @@ interface Props {
   initialLat?: number;
   initialLng?: number;
   onSelect: (loc: PickedLocation) => void;
+  /** Called on input blur with the raw typed value — persists typed address even without suggestion selection. */
+  onAddressTyped?: (address: string) => void;
 }
 
 export function MapboxAddressPicker({
@@ -34,6 +36,7 @@ export function MapboxAddressPicker({
   initialLat,
   initialLng,
   onSelect,
+  onAddressTyped,
 }: Props) {
   // process.env.NEXT_PUBLIC_MAPBOX_TOKEN is inlined at build time — it may be
   // undefined if the variable was not present when Railway ran `next build`.
@@ -125,6 +128,9 @@ export function MapboxAddressPicker({
   // ── Geocoding search ────────────────────────────────────────────────────────
   const handleInputChange = (val: string) => {
     setInput(val);
+    // Sync typed value to store on every keystroke so it is persisted in draft
+    // regardless of whether the user selects a suggestion or blurs the field.
+    onAddressTyped?.(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     if (!token || val.length < 3) {
@@ -179,7 +185,10 @@ export function MapboxAddressPicker({
           value={input}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => suggestions.length > 0 && setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 180)}
+          onBlur={() => {
+        setTimeout(() => setOpen(false), 180);
+        if (input.trim()) onAddressTyped?.(input.trim());
+      }}
           placeholder="Start typing an address…"
           className={inputCls}
           autoComplete="off"
