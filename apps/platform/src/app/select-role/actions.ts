@@ -3,10 +3,16 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
 import { z } from "zod";
+import { subscribeToMarketingList } from "@/lib/klaviyo";
+import { sendWelcomeEmail, sendAdminNewOperatorEmail } from "@/lib/email";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL;
 
 const SelectRoleSchema = z.object({
   role: z.enum(["operator", "traveler"]),
   name: z.string().min(1).optional(),
+  marketingOptIn: z.boolean().optional(),
 });
 
 // Accepts a plain object — NOT FormData.
@@ -16,6 +22,7 @@ const SelectRoleSchema = z.object({
 export async function selectRoleAction(input: {
   role: "operator" | "traveler";
   name?: string;
+  marketingOptIn?: boolean;
 }): Promise<{ role: "operator" | "traveler" }> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -30,7 +37,7 @@ export async function selectRoleAction(input: {
   const userId = session.user.id;
 
   // Resolve display name once — needed in both the new-user and recovery paths.
-  const { role, name } = parsed.data;
+  const { role, name, marketingOptIn } = parsed.data;
   const displayName =
     name ??
     (await prisma.user.findUnique({ where: { id: userId } }))?.name ??
@@ -61,6 +68,14 @@ export async function selectRoleAction(input: {
       }
     }
 
+    // Fire welcome + admin + Klaviyo for the recovery path.
+    // Google OAuth users have emailVerified set — send immediately.
+    // Skips if the role was already fully set up from a previous successful attempt
+    // (welcome was already sent then), but that edge case is acceptable.
+    void firePostRoleActions(userId, effectiveRole, marketingOptIn).catch((err) =>
+      console.error("[select-role] Post-role actions failed (recovery):", err)
+    );
+
     return { role: effectiveRole };
   }
 
@@ -79,5 +94,58 @@ export async function selectRoleAction(input: {
     }
   });
 
+  // Fire welcome + admin + Klaviyo outside the transaction so failures
+  // never roll back the role assignment.
+  void firePostRoleActions(userId, role, marketingOptIn).catch((err) =>
+    console.error("[select-role] Post-role actions failed:", err)
+  );
+
   return { role };
+}
+
+// ── Shared post-role dispatcher ───────────────────────────────────────────────
+// Called after role assignment for Google OAuth users (email already verified).
+// Sends welcome email, admin notification, and subscribes to Klaviyo if opted in.
+async function firePostRoleActions(
+  userId: string,
+  role: "operator" | "traveler",
+  marketingOptIn?: boolean
+) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+
+  const recipientName = user.name ?? user.email;
+  const dashboardUrl =
+    role === "operator"
+      ? `${APP_URL}/operator/dashboard`
+      : `${APP_URL}/traveler/dashboard`;
+
+  await sendWelcomeEmail({
+    to: user.email,
+    userId: user.id,
+    recipientName,
+    role,
+    dashboardUrl,
+  });
+
+  if (role === "operator" && ADMIN_EMAIL) {
+    await sendAdminNewOperatorEmail({
+      to: ADMIN_EMAIL,
+      operatorName: recipientName,
+      operatorEmail: user.email,
+      role: "operator",
+      adminUrl: `${APP_URL}/admin/operators`,
+    });
+  }
+
+  if (marketingOptIn === true && !user.marketingEmailConsent) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { marketingEmailConsent: true, consentedAt: new Date() },
+    });
+    await subscribeToMarketingList({
+      email: user.email,
+      firstName: user.name?.split(" ")[0],
+    });
+  }
 }

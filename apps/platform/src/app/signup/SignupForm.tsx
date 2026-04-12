@@ -15,6 +15,7 @@ export function SignupForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const role = "operator";
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
@@ -46,7 +47,7 @@ export function SignupForm() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password, role, marketingOptIn }),
       });
 
       const data = await res.json();
@@ -181,6 +182,18 @@ export function SignupForm() {
             )}
           </div>
         </div>
+
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={marketingOptIn}
+            onChange={(e) => setMarketingOptIn(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+          />
+          <span className="text-sm text-muted-foreground">
+            I want to receive news, tips, and updates about regenerative tourism. (Optional)
+          </span>
+        </label>
 
         <button
           type="submit"

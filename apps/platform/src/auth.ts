@@ -72,7 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
 
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user, account, trigger }) {
       // On first sign-in, embed roles and emailVerified into the token.
       // Single query covers both to minimise DB round-trips.
       if (user?.id) {
@@ -85,7 +85,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         token.roles = (dbUser?.roles.map((r) => r.role) ?? []) as AppRole[];
         token.needsRoleSelection = token.roles.length === 0;
-        token.isEmailVerified = !!dbUser?.emailVerified;
+
+        // Google guarantees the email is verified. Ensure the DB reflects this
+        // so that the middleware never sends a Google user to /verify-email.
+        // This also handles the case where an existing credentials account is
+        // linked to Google — the adapter won't backfill emailVerified on link.
+        if (account?.provider === "google" && !dbUser?.emailVerified) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { emailVerified: new Date() },
+          });
+        }
+
+        token.isEmailVerified =
+          account?.provider === "google" ? true : !!dbUser?.emailVerified;
       }
 
       // On explicit session update (e.g. after role selection or email

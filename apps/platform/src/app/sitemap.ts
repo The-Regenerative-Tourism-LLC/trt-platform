@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { allPosts } from "@/lib/blog";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://greenpassport.travel";
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [

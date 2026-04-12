@@ -186,6 +186,12 @@ export interface EvidenceData {
     checksum: string;
     verificationState: 'pending' | 'verified' | 'rejected' | 'lapsed';
   }>;
+  /** Per-row checked state for the "Detailed Verification" evidence section (4 rows). */
+  evidenceDetailedChecked?: boolean[];
+  /** Per-row checked state for the "Contribution Programme" P3 evidence section (4 rows). */
+  evidenceP3Checked?: boolean[];
+  /** Operator declaration checkbox — must be true to enable final submission. */
+  declarationChecked?: boolean;
   assessmentCycle?: number;
   deltaExplanation?: string;
 }

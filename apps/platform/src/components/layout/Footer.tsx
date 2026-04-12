@@ -62,10 +62,10 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Journal */}
+          {/* Blog */}
           <div className="md:col-span-2 space-y-4">
             <p className="font-hand text-xl text-white/50">
-              Journal
+              Blog
             </p>
             <div className="space-y-2.5">
               <Link

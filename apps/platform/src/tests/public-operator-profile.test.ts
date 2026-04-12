@@ -222,8 +222,8 @@ describe("GET /api/v1/public/operators/:id", () => {
 
   it("includes delta.priorCycle and delta.explanation from AssessmentSnapshot", async () => {
     const profile = makeProfile();
-    profile.latestScore.assessmentSnapshot.deltaPriorCycle = 1;
-    profile.latestScore.assessmentSnapshot.deltaExplanation = "Improved water management.";
+    (profile.latestScore.assessmentSnapshot as any).deltaPriorCycle = 1;
+    (profile.latestScore.assessmentSnapshot as any).deltaExplanation = "Improved water management.";
     vi.mocked(operatorRepo.findPublishedOperatorProfile).mockResolvedValue(
       profile as any
     );

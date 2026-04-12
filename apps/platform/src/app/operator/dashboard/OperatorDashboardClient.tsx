@@ -159,7 +159,7 @@ export function OperatorDashboardClient() {
           <h1 className="text-3xl font-bold tracking-tight">
             {operator.tradingName || operator.legalName}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <div className="text-muted-foreground mt-1">
             {operator.destinationRegion}
             {operator.country ? `, ${operator.country}` : ""}
             {operator.operatorType && (
@@ -167,7 +167,7 @@ export function OperatorDashboardClient() {
                 Type {operator.operatorType}
               </Badge>
             )}
-          </p>
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" asChild>

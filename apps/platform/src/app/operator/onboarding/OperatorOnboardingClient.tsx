@@ -186,7 +186,6 @@ export function OperatorOnboardingClient() {
   const [saved, setSaved] = useState(false);
   const [draftInitialized, setDraftInitialized] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(true);
-  const [declarationChecked, setDeclarationChecked] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const { preview, loading: previewLoading, refreshPreview } = usePreviewScore(data);
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -373,9 +372,10 @@ export function OperatorOnboardingClient() {
       const res = await fetch("/api/v1/score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          buildScorePayload(data, operator.id, territoryId)
-        ),
+        body: JSON.stringify({
+          ...buildScorePayload(data, operator.id, territoryId),
+          onboardingSnapshot: useOnboardingStore.getState().getOnboardingState(),
+        }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -544,8 +544,8 @@ export function OperatorOnboardingClient() {
           updateField={updateField}
           shell={shell}
           preview={preview}
-          declarationChecked={declarationChecked}
-          onDeclarationChange={setDeclarationChecked}
+          declarationChecked={data.declarationChecked ?? false}
+          onDeclarationChange={(v) => updateField({ declarationChecked: v })}
           onSubmit={handleSubmit}
           onEditSection={setStepId}
           floatingGps={floatingGps}

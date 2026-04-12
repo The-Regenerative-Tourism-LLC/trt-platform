@@ -12,11 +12,9 @@ import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { createToken } from "@/lib/tokens";
-import { sendVerifyEmail, sendWelcomeEmail } from "@/lib/email";
-import { sendAdminNewOperatorEmail } from "@/lib/email";
+import { sendVerifyEmail } from "@/lib/email";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
-const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL;
 
 const SignupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -26,6 +24,7 @@ const SignupSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .max(100),
   role: z.enum(["operator", "traveler"]),
+  marketingOptIn: z.boolean().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -40,7 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password, role } = parsed.data;
+    const { name, email, password, role, marketingOptIn } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -54,9 +53,17 @@ export async function POST(req: NextRequest) {
 
     let newUserId: string;
 
+    const consentedAt = marketingOptIn === true ? new Date() : undefined;
+
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
-        data: { name, email, passwordHash },
+        data: {
+          name,
+          email,
+          passwordHash,
+          marketingEmailConsent: marketingOptIn === true,
+          consentedAt,
+        },
       });
       newUserId = user.id;
 
@@ -83,7 +90,8 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Send email verification + welcome — fire-and-forget, never block response
+    // Send verification email only — welcome email and Klaviyo subscription
+    // are triggered after the user clicks the verification link.
     void (async () => {
       try {
         const { rawToken } = await createToken({
@@ -101,33 +109,9 @@ export async function POST(req: NextRequest) {
           verifyUrl,
           expiresInHours: 24,
         });
-
-        const dashboardUrl =
-          role === "operator"
-            ? `${APP_URL}/operator/dashboard`
-            : `${APP_URL}/traveler/dashboard`;
-
-        await sendWelcomeEmail({
-          to: email,
-          userId: newUserId!,
-          recipientName: name,
-          role,
-          dashboardUrl,
-        });
-
-        // Notify admin of new operator registrations
-        if (role === "operator" && ADMIN_EMAIL) {
-          await sendAdminNewOperatorEmail({
-            to: ADMIN_EMAIL,
-            operatorName: name,
-            operatorEmail: email,
-            role: "operator",
-            adminUrl: `${APP_URL}/admin/operators`,
-          });
-        }
       } catch (emailErr) {
         // Email failure must never affect account creation
-        console.error("[signup] Post-signup email dispatch failed:", emailErr);
+        console.error("[signup] Verification email dispatch failed:", emailErr);
       }
     })();
 

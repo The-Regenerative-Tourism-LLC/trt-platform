@@ -186,6 +186,9 @@ model User {
   operator Operator?
   traveler Traveler?
 
+  marketingEmailConsent Boolean   @default(false)
+  consentedAt           DateTime?
+
   secureTokens            SecureToken[]
   emailLogs               EmailLog[]
   notificationPreference  NotificationPreference?
@@ -400,6 +403,8 @@ model AssessmentSnapshot {
   deltaCurrentScores          Json?
 
   snapshotHash                String?
+  /** Full immutable raw submission payload — written once at submission, never overwritten. */
+  rawSubmissionJson           Json?
   createdAt                   DateTime      @default(now())
 
   operator                    Operator               @relation(fields: [operatorId], references: [id])

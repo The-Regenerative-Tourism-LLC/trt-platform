@@ -29,22 +29,14 @@ import {
 } from "../snapshots/assessment-snapshot.builder";
 import { loadActiveBundle } from "../methodology/methodology-bundle.loader";
 import { findLatestDpiByTerritory, findMadeiraTerritoryId } from "../db/repositories/dpi.repo";
-import { createAssessmentSnapshot } from "../db/repositories/assessment.repo";
 import {
-  createScoreSnapshot,
   findCycle1ScoreByOperator,
   findLatestScoreByOperator,
 } from "../db/repositories/score.repo";
-import {
-  createEvidenceRef,
-  findVerifiedT3Evidence,
-  findT1EvidenceCoverageBySnapshot,
-} from "../db/repositories/evidence.repo";
-import { incrementAssessmentCycle } from "../db/repositories/operator.repo";
-import { createForwardCommitmentRecord } from "../db/repositories/forward-commitment.repo";
 import { logAuditEvent } from "../audit/logger";
 import { validateTypeCRevenueSplit } from "../validation/assessment.schema";
 import type { DpiSnapshot } from "../engine/trt-scoring-engine/types";
+import { prisma } from "../db/prisma";
 
 // Default DPI snapshot when no territory-specific data is available
 const FALLBACK_DPI: DpiSnapshot = {
@@ -75,6 +67,12 @@ export interface ScoringInput {
   snapshotInput: AssessmentSnapshotInput;
   /** Required fields for ForwardCommitmentRecord when p3Status = "D" */
   forwardCommitment?: ForwardCommitmentInput;
+  /**
+   * Full raw submission payload captured at the moment of submission.
+   * Written once to AssessmentSnapshot.rawSubmissionJson — immutable, never overwritten.
+   * Guarantees zero data loss regardless of schema evolution.
+   */
+  rawSubmissionJson: Record<string, unknown>;
 }
 
 export interface ScoringResult {
@@ -175,73 +173,7 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
     ? { ...assessmentSnapshot, delta: lockedDelta }
     : assessmentSnapshot;
 
-  // ── Step 3: Persist the AssessmentSnapshot (with server-locked delta) ───
-  const persistedAssessment = await createAssessmentSnapshot({
-    operator: { connect: { id: input.operatorId } },
-    territory: { connect: { id: input.territoryId } },
-    assessmentCycle: assessmentSnapshot.assessmentCycle,
-    assessmentPeriodEnd: new Date(assessmentSnapshot.assessmentPeriodEnd),
-    operatorType: assessmentSnapshot.operatorType as "A" | "B" | "C",
-    guestNights: assessmentSnapshot.activityUnit.guestNights,
-    visitorDays: assessmentSnapshot.activityUnit.visitorDays,
-    revenueSplitAccommodationPct: assessmentSnapshot.revenueSplit?.accommodationPct,
-    revenueSplitExperiencePct: assessmentSnapshot.revenueSplit?.experiencePct,
-
-    // Pillar 1
-    p1EnergyIntensity: assessmentSnapshot.pillar1.energyIntensity,
-    p1RenewablePct: assessmentSnapshot.pillar1.renewablePct,
-    p1WaterIntensity: assessmentSnapshot.pillar1.waterIntensity,
-    p1RecirculationScore: assessmentSnapshot.pillar1.recirculationScore,
-    p1WasteDiversionPct: assessmentSnapshot.pillar1.wasteDiversionPct,
-    p1CarbonIntensity: assessmentSnapshot.pillar1.carbonIntensity,
-    p1SiteScore: assessmentSnapshot.pillar1.siteScore,
-
-    // Pillar 2
-    p2LocalEmploymentRate: assessmentSnapshot.pillar2.localEmploymentRate,
-    p2EmploymentQuality: assessmentSnapshot.pillar2.employmentQuality,
-    p2LocalFbRate: assessmentSnapshot.pillar2.localFbRate,
-    p2LocalNonfbRate: assessmentSnapshot.pillar2.localNonfbRate,
-    p2DirectBookingRate: assessmentSnapshot.pillar2.directBookingRate,
-    p2LocalOwnershipPct: assessmentSnapshot.pillar2.localOwnershipPct,
-    p2CommunityScore: assessmentSnapshot.pillar2.communityScore,
-
-    // Pillar 3
-    p3Status: assessmentSnapshot.p3Status as "A" | "B" | "C" | "D" | "E",
-    p3CategoryScope: assessmentSnapshot.pillar3.categoryScope,
-    p3Traceability: assessmentSnapshot.pillar3.traceability,
-    p3Additionality: assessmentSnapshot.pillar3.additionality,
-    p3Continuity: assessmentSnapshot.pillar3.continuity,
-
-    // Delta — server-locked values, plus optional operator explanation
-    deltaExplanation: input.snapshotInput.delta?.explanation,
-    deltaPriorCycle: lockedDelta?.priorCycle,
-    deltaBaselineScores: lockedDelta?.baselineScores as Record<string, number> | undefined,
-    deltaPriorScores: lockedDelta?.priorScores as Record<string, number> | undefined,
-    deltaCurrentScores: lockedDelta?.currentScores as Record<string, number> | undefined,
-
-    snapshotHash: assessmentSnapshot.snapshotHash,
-  });
-
-  // ── Step 3b: Persist evidence refs (append-only, never updated) ─────────
-  if (input.snapshotInput.evidence.length > 0) {
-    await Promise.all(
-      input.snapshotInput.evidence.map((e) =>
-        createEvidenceRef({
-          assessmentSnapshot: { connect: { id: persistedAssessment.id } },
-          operator: { connect: { id: input.operatorId } },
-          indicatorId: e.indicatorId,
-          tier: e.tier as "T1" | "T2" | "T3" | "Proxy",
-          checksum: e.checksum,
-          verificationState: (e.verificationState ?? "pending") as "pending" | "verified" | "rejected" | "lapsed",
-          proxyMethod: e.proxyMethod,
-          proxyCorrectionFactor: e.proxyCorrectionFactor,
-        })
-      )
-    );
-  }
-
-  // ── Step 4: Load active DPI snapshot for territory ─────────────────────
-  // If the operator's territory has no DPI, fall back to Madeira as reference.
+  // ── Steps 3–4: Load DPI (reads only, before transaction) ──────────────
   // effectiveDpiRecord  — actual DB record used (for linking ScoreSnapshot.dpiSnapshotId)
   // referenceDpi        — true when operator territory ≠ DPI territory
   // dpiTerritoryId      — territory whose DPI was used (denormalised for analytics)
@@ -297,95 +229,182 @@ export async function runScoring(input: ScoringInput): Promise<ScoringResult> {
   // ── Step 7: Invoke the TRT Scoring Engine ──────────────────────────────
   const engineResult = computeScore(lockedSnapshot, dpiSnapshot, methodology);
 
-  // ── Step 8: T3 evidence gate ───────────────────────────────────────────
-  // If P3 status is A/B/C and no verified T3 evidence exists, P3 score = 0.
-  // Status D and E already return score = 0 from the engine.
-  let finalP3Score = engineResult.p3Score;
-  let publicationBlockedReason: string | null = null;
-
   const p3Status = lockedSnapshot.p3Status;
-  if (p3Status !== "D" && p3Status !== "E") {
-    const hasVerifiedT3 = await findVerifiedT3Evidence(input.operatorId);
-    if (!hasVerifiedT3) {
-      finalP3Score = 0;
-      publicationBlockedReason = "T3 evidence required for P3 scoring";
-    }
-  }
 
-  // GPS total must be recomputed if P3 was zeroed by the T3 gate
-  let finalGpsTotal = engineResult.gpsTotal;
-  if (finalP3Score !== engineResult.p3Score) {
-    const pw = methodology.pillarWeights;
-    const gpsRaw =
-      engineResult.p1Score * pw.p1 +
-      engineResult.p2Score * pw.p2 +
-      finalP3Score * pw.p3 +
-      (engineResult.dpsTotal ?? 0);
-    finalGpsTotal = Math.round(Math.max(0, Math.min(100, gpsRaw)));
-  }
+  // ── Steps 8–12: Atomic persistence ────────────────────────────────────
+  // All DB writes (snapshot, evidence, score, forward-commitment, cycle-count)
+  // execute in a single interactive transaction so that a mid-flight failure
+  // leaves no partial state. T3-gate and T1-coverage reads run inside the
+  // transaction so they see the evidence refs written in the same transaction.
+  const { persistedAssessment, persistedScore, finalP3Score, finalGpsTotal, isPublished, publicationBlockedReason } =
+    await prisma.$transaction(async (tx) => {
+      // Step 8: Persist AssessmentSnapshot (immutable, contains rawSubmissionJson)
+      const persistedAssessment = await tx.assessmentSnapshot.create({
+        data: {
+          operator: { connect: { id: input.operatorId } },
+          territory: { connect: { id: input.territoryId } },
+          assessmentCycle: assessmentSnapshot.assessmentCycle,
+          assessmentPeriodEnd: new Date(assessmentSnapshot.assessmentPeriodEnd),
+          operatorType: assessmentSnapshot.operatorType as "A" | "B" | "C",
+          guestNights: assessmentSnapshot.activityUnit.guestNights,
+          visitorDays: assessmentSnapshot.activityUnit.visitorDays,
+          revenueSplitAccommodationPct: assessmentSnapshot.revenueSplit?.accommodationPct,
+          revenueSplitExperiencePct: assessmentSnapshot.revenueSplit?.experiencePct,
+          p1EnergyIntensity: assessmentSnapshot.pillar1.energyIntensity,
+          p1RenewablePct: assessmentSnapshot.pillar1.renewablePct,
+          p1WaterIntensity: assessmentSnapshot.pillar1.waterIntensity,
+          p1RecirculationScore: assessmentSnapshot.pillar1.recirculationScore,
+          p1WasteDiversionPct: assessmentSnapshot.pillar1.wasteDiversionPct,
+          p1CarbonIntensity: assessmentSnapshot.pillar1.carbonIntensity,
+          p1SiteScore: assessmentSnapshot.pillar1.siteScore,
+          p2LocalEmploymentRate: assessmentSnapshot.pillar2.localEmploymentRate,
+          p2EmploymentQuality: assessmentSnapshot.pillar2.employmentQuality,
+          p2LocalFbRate: assessmentSnapshot.pillar2.localFbRate,
+          p2LocalNonfbRate: assessmentSnapshot.pillar2.localNonfbRate,
+          p2DirectBookingRate: assessmentSnapshot.pillar2.directBookingRate,
+          p2LocalOwnershipPct: assessmentSnapshot.pillar2.localOwnershipPct,
+          p2CommunityScore: assessmentSnapshot.pillar2.communityScore,
+          p3Status: assessmentSnapshot.p3Status as "A" | "B" | "C" | "D" | "E",
+          p3CategoryScope: assessmentSnapshot.pillar3.categoryScope,
+          p3Traceability: assessmentSnapshot.pillar3.traceability,
+          p3Additionality: assessmentSnapshot.pillar3.additionality,
+          p3Continuity: assessmentSnapshot.pillar3.continuity,
+          deltaExplanation: input.snapshotInput.delta?.explanation,
+          deltaPriorCycle: lockedDelta?.priorCycle,
+          deltaBaselineScores: lockedDelta?.baselineScores as Record<string, number> | undefined,
+          deltaPriorScores: lockedDelta?.priorScores as Record<string, number> | undefined,
+          deltaCurrentScores: lockedDelta?.currentScores as Record<string, number> | undefined,
+          snapshotHash: assessmentSnapshot.snapshotHash,
+          rawSubmissionJson: input.rawSubmissionJson as import("@prisma/client").Prisma.InputJsonValue,
+        },
+      });
 
-  // ── Step 9: Evaluate T1 evidence coverage for publication eligibility ──
-  // A score is published only if the operator submitted at least one T1 evidence
-  // item for each of the three pillars (identified by p1_/p2_/p3_ prefix).
-  // If the T3 gate already blocked publication, skip the T1 check.
-  let isPublished = false;
-  if (!publicationBlockedReason) {
-    const t1Coverage = await findT1EvidenceCoverageBySnapshot(persistedAssessment.id);
-    if (t1Coverage.p1 && t1Coverage.p2 && t1Coverage.p3) {
-      isPublished = true;
-    } else {
-      publicationBlockedReason = "Insufficient Tier 1 evidence coverage";
-    }
-  }
+      // Step 8b: Persist evidence refs (append-only)
+      if (input.snapshotInput.evidence.length > 0) {
+        await Promise.all(
+          input.snapshotInput.evidence.map((e) =>
+            tx.evidenceRef.create({
+              data: {
+                assessmentSnapshot: { connect: { id: persistedAssessment.id } },
+                operator: { connect: { id: input.operatorId } },
+                indicatorId: e.indicatorId,
+                tier: e.tier as "T1" | "T2" | "T3" | "Proxy",
+                checksum: e.checksum,
+                verificationState: (e.verificationState ?? "pending") as "pending" | "verified" | "rejected" | "lapsed",
+                proxyMethod: e.proxyMethod,
+                proxyCorrectionFactor: e.proxyCorrectionFactor,
+              },
+            })
+          )
+        );
+      }
 
-  const persistedScore = await createScoreSnapshot({
-    assessmentSnapshot: { connect: { id: persistedAssessment.id } },
-    operator: { connect: { id: input.operatorId } },
-    ...(effectiveDpiRecord ? { dpiSnapshot: { connect: { id: effectiveDpiRecord.id } } } : {}),
-    dpiTerritoryId,
-    referenceDpi,
-    methodologyVersion: methodology.version,
-    inputHash,
-    bundleHash,
-    p1Score: engineResult.p1Score,
-    p2Score: engineResult.p2Score,
-    p3Score: finalP3Score,
-    gpsTotal: finalGpsTotal,
-    gpsBand: engineResult.gpsBand as any,
-    dpsTotal: engineResult.dpsTotal,
-    dps1: engineResult.dps1,
-    dps2: engineResult.dps2,
-    dps3: engineResult.dps3,
-    dpsBand: engineResult.dpsBand as any,
-    dpiScore: engineResult.dpiScore,
-    dpiPressureLevel: engineResult.dpiPressureLevel as any,
-    computationTrace: engineResult.computationTrace as any,
-    isPublished,
-    publicationBlockedReason,
-  });
+      // Step 9: T3 evidence gate (read within tx — sees refs just written above)
+      let finalP3Score = engineResult.p3Score;
+      let publicationBlockedReason: string | null = null;
 
-  // ── Step 10: Create ForwardCommitmentRecord for Status D ───────────────
-  // Persist complete record — not just operatorId + assessmentCycle.
-  if (p3Status === "D") {
-    await createForwardCommitmentRecord({
-      operatorId: input.operatorId,
-      assessmentCycle: lockedSnapshot.assessmentCycle,
-      preferredCategory: input.forwardCommitment?.preferredCategory,
-      territoryContext:
-        input.forwardCommitment?.territoryContext ?? input.territoryId,
-      preferredInstitutionType: input.forwardCommitment?.preferredInstitutionType,
-      targetActivationCycle: input.forwardCommitment?.targetActivationCycle,
-      authorisedSignatory: input.forwardCommitment?.authorisedSignatory,
-      signedAt: input.forwardCommitment?.signedAt
-        ? new Date(input.forwardCommitment.signedAt)
-        : undefined,
+      if (p3Status !== "D" && p3Status !== "E") {
+        const t3Count = await tx.evidenceRef.count({
+          where: { operatorId: input.operatorId, tier: "T3", verificationState: "verified" },
+        });
+        if (!t3Count) {
+          finalP3Score = 0;
+          publicationBlockedReason = "T3 evidence required for P3 scoring";
+        }
+      }
+
+      // GPS recompute if P3 was zeroed by the T3 gate
+      let finalGpsTotal = engineResult.gpsTotal;
+      if (finalP3Score !== engineResult.p3Score) {
+        const pw = methodology.pillarWeights;
+        const gpsRaw =
+          engineResult.p1Score * pw.p1 +
+          engineResult.p2Score * pw.p2 +
+          finalP3Score * pw.p3 +
+          (engineResult.dpsTotal ?? 0);
+        finalGpsTotal = Math.round(Math.max(0, Math.min(100, gpsRaw)));
+      }
+
+      // Step 10: T1 coverage check (read within tx — sees refs just written above)
+      let isPublished = false;
+      if (!publicationBlockedReason) {
+        const t1Evidence = await tx.evidenceRef.findMany({
+          where: {
+            assessmentSnapshotId: persistedAssessment.id,
+            tier: "T1",
+            verificationState: { notIn: ["rejected", "lapsed"] },
+          },
+          select: { indicatorId: true },
+        });
+        const t1Coverage = {
+          p1: t1Evidence.some((e) => e.indicatorId.startsWith("p1_")),
+          p2: t1Evidence.some((e) => e.indicatorId.startsWith("p2_")),
+          p3: t1Evidence.some((e) => e.indicatorId.startsWith("p3_")),
+        };
+        if (t1Coverage.p1 && t1Coverage.p2 && t1Coverage.p3) {
+          isPublished = true;
+        } else {
+          publicationBlockedReason = "Insufficient Tier 1 evidence coverage";
+        }
+      }
+
+      // Step 11: Persist ScoreSnapshot
+      const persistedScore = await tx.scoreSnapshot.create({
+        data: {
+          assessmentSnapshot: { connect: { id: persistedAssessment.id } },
+          operator: { connect: { id: input.operatorId } },
+          ...(effectiveDpiRecord ? { dpiSnapshot: { connect: { id: effectiveDpiRecord.id } } } : {}),
+          dpiTerritoryId,
+          referenceDpi,
+          methodologyVersion: methodology.version,
+          inputHash,
+          bundleHash,
+          p1Score: engineResult.p1Score,
+          p2Score: engineResult.p2Score,
+          p3Score: finalP3Score,
+          gpsTotal: finalGpsTotal,
+          gpsBand: engineResult.gpsBand as any,
+          dpsTotal: engineResult.dpsTotal,
+          dps1: engineResult.dps1,
+          dps2: engineResult.dps2,
+          dps3: engineResult.dps3,
+          dpsBand: engineResult.dpsBand as any,
+          dpiScore: engineResult.dpiScore,
+          dpiPressureLevel: engineResult.dpiPressureLevel as any,
+          computationTrace: engineResult.computationTrace as any,
+          isPublished,
+          publicationBlockedReason,
+        },
+      });
+
+      // Step 12: ForwardCommitmentRecord for Status D
+      if (p3Status === "D") {
+        await tx.forwardCommitmentRecord.create({
+          data: {
+            operator: { connect: { id: input.operatorId } },
+            assessmentCycle: lockedSnapshot.assessmentCycle,
+            preferredCategory: input.forwardCommitment?.preferredCategory,
+            territoryContext: input.forwardCommitment?.territoryContext ?? input.territoryId,
+            preferredInstitutionType: input.forwardCommitment?.preferredInstitutionType,
+            targetActivationCycle: input.forwardCommitment?.targetActivationCycle,
+            authorisedSignatory: input.forwardCommitment?.authorisedSignatory,
+            signedAt: input.forwardCommitment?.signedAt
+              ? new Date(input.forwardCommitment.signedAt)
+              : undefined,
+          },
+        });
+      }
+
+      // Step 13: Increment assessmentCycleCount
+      await tx.operator.update({
+        where: { id: input.operatorId },
+        data: { assessmentCycleCount: { increment: 1 } },
+      });
+
+      return { persistedAssessment, persistedScore, finalP3Score, finalGpsTotal, isPublished, publicationBlockedReason };
     });
-  }
 
-  // ── Step 11: Increment operator assessmentCycleCount ──────────────────
-  await incrementAssessmentCycle(input.operatorId);
-
-  // ── Step 12: Audit log ─────────────────────────────────────────────────
+  // ── Step 14: Audit log (outside transaction — best-effort) ────────────
   await logAuditEvent({
     actor: input.actorUserId,
     action: "score.computed",
