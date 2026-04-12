@@ -16,7 +16,7 @@ export default async function BlogOgImage({ params }: Props) {
   const { slug } = await params;
   const post = getPostBySlug(slug);
 
-  const title = post?.title ?? "Green Passport Journal";
+  const title = post?.title ?? "Green Passport Blog";
   const category = post?.category ?? "Regenerative Tourism";
   const readingTime = post?.readingTimeMinutes;
   const date = post?.publishedAt
@@ -77,7 +77,7 @@ export default async function BlogOgImage({ params }: Props) {
                 textTransform: "uppercase",
               }}
             >
-              Green Passport · Journal
+              Green Passport · Blog
             </span>
           </div>
 

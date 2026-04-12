@@ -7,7 +7,7 @@ import { JsonLd, buildArticleSchema } from "@/lib/seo/json-ld";
 import { ArrowLeft } from "lucide-react";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://greenpassport.travel";
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -191,7 +191,7 @@ export default async function BlogPostPage({ params }: Props) {
             className="inline-flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors mb-8 group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-            Back to Journal
+            Back to Blog
           </Link>
 
           <div className="flex items-center gap-3 mb-6">

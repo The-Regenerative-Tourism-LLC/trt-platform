@@ -43,7 +43,7 @@ export default function BlogPage() {
         {/* Hero */}
         <section className="bg-[#1C1C1C] text-[#FDF5EA] py-20 md:py-28 px-5 md:px-6">
           <div className="container mx-auto max-w-7xl">
-            <p className="font-hand text-xl text-[#FDF5EA]/40 mb-3">Journal</p>
+            <p className="font-hand text-xl text-[#FDF5EA]/40 mb-3">Blog</p>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.05] max-w-2xl">
               Regenerative Tourism{" "}
               <span className="text-[#C5BAA6]">Insights</span>

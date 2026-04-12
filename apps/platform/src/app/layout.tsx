@@ -28,7 +28,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL ?? "https://greenpassport.travel";
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
