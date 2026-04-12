@@ -12,10 +12,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "@/app/api/v1/score/route";
 import * as sessionLib from "@/lib/auth/session";
 import * as operatorRepo from "@/lib/db/repositories/operator.repo";
+import * as draftRepo from "@/lib/db/repositories/onboarding-draft.repo";
 import * as orchestrator from "@/lib/orchestration/scoring-orchestrator";
 
 vi.mock("@/lib/auth/session");
 vi.mock("@/lib/db/repositories/operator.repo");
+vi.mock("@/lib/db/repositories/onboarding-draft.repo");
 vi.mock("@/lib/orchestration/scoring-orchestrator");
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -79,6 +81,7 @@ function validPayload(overrides: Record<string, unknown> = {}) {
     p3Status: "E",
     delta: null,
     evidence: [],
+    onboardingSnapshot: {},
     ...overrides,
   };
 }
@@ -102,6 +105,8 @@ describe("POST /api/v1/score", () => {
       ...OPERATOR,
       onboardingCompleted: true,
     });
+    vi.mocked(operatorRepo.updateOperator).mockResolvedValue(OPERATOR);
+    vi.mocked(draftRepo.findDraftByOperatorId).mockResolvedValue(null);
     vi.mocked(orchestrator.runScoring).mockResolvedValue(SCORING_RESULT);
   });
 

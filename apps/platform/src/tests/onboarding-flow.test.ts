@@ -149,8 +149,8 @@ function typeBData(): Partial<OnboardingData> {
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 describe("ONBOARDING_STEPS", () => {
-  it("has 21 steps defined (merged operation-activity, removed evidence-upload)", () => {
-    expect(ONBOARDING_STEPS).toHaveLength(21);
+  it("has 20 steps defined (merged operation-activity, p3-evidence-quality merged into p3-programme)", () => {
+    expect(ONBOARDING_STEPS).toHaveLength(20);
   });
 
   it("first step is operator-type", () => {
@@ -292,7 +292,7 @@ describe("getVisibleSteps", () => {
     expect(visible).not.toContain("accommodation");
     expect(visible).not.toContain("experience-types");
     expect(visible).toContain("p3-programme");
-    expect(visible).toContain("p3-evidence-quality");
+    expect(visible).not.toContain("p3-evidence-quality"); // merged into p3-programme
     expect(visible).toContain("delta");
   });
 
@@ -499,12 +499,23 @@ describe("validateStep — p3-programme", () => {
     expect(validateStep("p3-programme", { p3Status: "A" })).toBe(false);
   });
 
-  it("passes for status A when required fields present", () => {
+  it("fails for status A when traceability/additionality/continuity are missing", () => {
     expect(validateStep("p3-programme", {
       p3Status: "A",
       p3ContributionCategories: ["Cat1"],
       p3ProgrammeDescription: "Habitat restoration.",
       p3AnnualBudget: 5000,
+      // p3Traceability, p3Additionality, p3Continuity intentionally omitted
+    })).toBe(false);
+  });
+
+  it("passes for status A when categories and evidence quality scores present", () => {
+    expect(validateStep("p3-programme", {
+      p3Status: "A",
+      p3ContributionCategories: ["Cat1"],
+      p3Traceability: 75,
+      p3Additionality: 50,
+      p3Continuity: 75,
     })).toBe(true);
   });
 });
@@ -553,7 +564,7 @@ describe("full navigation — Type A, P3 status E, cycle 1", () => {
 });
 
 describe("full navigation — Type B, P3 status A, cycle 2", () => {
-  it("traverses all visible steps including p3-programme, p3-evidence-quality, and delta", () => {
+  it("traverses all visible steps including p3-programme (evidence quality merged) and delta", () => {
     const data = typeBData() as OnboardingData;
     (data as any).assessmentCycle = 2;
     (data as any).deltaExplanation = "Added solar panels.";
@@ -563,7 +574,7 @@ describe("full navigation — Type B, P3 status A, cycle 2", () => {
     expect(visible).not.toContain("experience-types");
     expect(visible).not.toContain("accommodation");
     expect(visible).toContain("p3-programme");
-    expect(visible).toContain("p3-evidence-quality");
+    expect(visible).not.toContain("p3-evidence-quality"); // merged into p3-programme
     expect(visible).not.toContain("p3-forward-commitment");
     expect(visible).toContain("delta");
   });
