@@ -69,7 +69,7 @@ export function LoginForm() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: "/select-role" });
   };
 
   return (

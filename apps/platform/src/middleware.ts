@@ -40,7 +40,6 @@ export default auth((req) => {
   const isSelectRoleRoute = pathname === "/select-role";
   const isAcceptTermsRoute = pathname === "/accept-terms";
   const isAuthRoute = pathname === "/login" || pathname === "/signup";
-  const isRootRoute = pathname === "/";
 
   // ── Unauthenticated ──────────────────────────────────────────────────────
   if (!isLoggedIn) {
@@ -115,14 +114,10 @@ export default auth((req) => {
 });
 
 export const config = {
+  // Run on every request except Next.js internals, static assets, and API routes.
+  // This ensures logged-in users without a role are always gated to /select-role,
+  // regardless of which public page they try to access.
   matcher: [
-    "/login",
-    "/signup",
-    "/select-role",
-    "/accept-terms",
-    "/operator/:path*",
-    "/traveler/:path*",
-    "/admin/:path*",
-    "/account/:path*",
+    "/((?!_next/static|_next/image|favicon\\.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };
