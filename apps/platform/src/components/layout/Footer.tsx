@@ -117,19 +117,41 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-white/10 mt-12 md:mt-16 pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div className="border-t border-white/10 mt-12 md:mt-16 pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-[11px] text-white/40">
             &copy; {new Date().getFullYear()} The Regenerative Tourism. All
             rights reserved.
           </p>
-          <a
-            href="https://theregenerativetourism.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
-          >
-            theregenerativetourism.com
-          </a>
+
+          {/* Legal links */}
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href="/privacy"
+              className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
+            >
+              Terms &amp; Conditions
+            </Link>
+            <Link
+              href="/cookies"
+              className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
+            >
+              Cookie Policy
+            </Link>
+            <a
+              href="https://theregenerativetourism.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
+            >
+              theregenerativetourism.com
+            </a>
+          </div>
         </div>
       </div>
     </footer>

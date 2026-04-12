@@ -12,6 +12,9 @@ const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL;
 const SelectRoleSchema = z.object({
   role: z.enum(["operator", "traveler"]),
   name: z.string().min(1).optional(),
+  termsOptIn: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the Terms & Conditions and Privacy Policy" }),
+  }),
   marketingOptIn: z.boolean().optional(),
 });
 
@@ -22,6 +25,7 @@ const SelectRoleSchema = z.object({
 export async function selectRoleAction(input: {
   role: "operator" | "traveler";
   name?: string;
+  termsOptIn: true;
   marketingOptIn?: boolean;
 }): Promise<{ role: "operator" | "traveler" }> {
   const session = await auth();
@@ -31,17 +35,26 @@ export async function selectRoleAction(input: {
 
   const parsed = SelectRoleSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error("Invalid role selection");
+    throw new Error(parsed.error.errors[0]?.message ?? "Invalid role selection");
   }
 
   const userId = session.user.id;
-
-  // Resolve display name once — needed in both the new-user and recovery paths.
   const { role, name, marketingOptIn } = parsed.data;
+  const now = new Date();
+
   const displayName =
     name ??
     (await prisma.user.findUnique({ where: { id: userId } }))?.name ??
     "User";
+
+  // Record legal acceptance
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      termsAcceptedAt: now,
+      privacyAcceptedAt: now,
+    },
+  });
 
   // ── Recovery path ─────────────────────────────────────────────────────────
   // A UserRole record may already exist if a previous attempt succeeded at
@@ -68,10 +81,6 @@ export async function selectRoleAction(input: {
       }
     }
 
-    // Fire welcome + admin + Klaviyo for the recovery path.
-    // Google OAuth users have emailVerified set — send immediately.
-    // Skips if the role was already fully set up from a previous successful attempt
-    // (welcome was already sent then), but that edge case is acceptable.
     void firePostRoleActions(userId, effectiveRole, marketingOptIn).catch((err) =>
       console.error("[select-role] Post-role actions failed (recovery):", err)
     );

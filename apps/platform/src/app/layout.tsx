@@ -104,8 +104,10 @@ export default function RootLayout({
       >
         <JsonLd schema={organizationSchema} />
         <JsonLd schema={websiteSchema} />
-        <TrackingScripts />
-        <Providers>{children}</Providers>
+        <Providers>
+          <TrackingScripts />
+          {children}
+        </Providers>
       </body>
     </html>
   );

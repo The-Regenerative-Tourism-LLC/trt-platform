@@ -20,6 +20,11 @@ declare module "next-auth" {
        * Defaults to true for existing JWTs that pre-date this field.
        */
       isEmailVerified: boolean;
+      /**
+       * true  → user has not yet accepted Terms & Privacy Policy
+       * false → user has accepted (or pre-dates enforcement — defaulted to false)
+       */
+      needsTermsAcceptance: boolean;
     };
   }
 }
@@ -29,5 +34,6 @@ declare module "next-auth/jwt" {
     roles?: AppRole[];
     needsRoleSelection?: boolean;
     isEmailVerified?: boolean;
+    needsTermsAcceptance?: boolean;
   }
 }

@@ -24,6 +24,9 @@ const SignupSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .max(100),
   role: z.enum(["operator", "traveler"]),
+  termsOptIn: z.literal(true, {
+    errorMap: () => ({ message: "You must accept the Terms & Conditions and Privacy Policy" }),
+  }),
   marketingOptIn: z.boolean().optional(),
 });
 
@@ -39,7 +42,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password, role, marketingOptIn } = parsed.data;
+    const { name, email, password, role, termsOptIn, marketingOptIn } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -53,7 +56,8 @@ export async function POST(req: NextRequest) {
 
     let newUserId: string;
 
-    const consentedAt = marketingOptIn === true ? new Date() : undefined;
+    const now = new Date();
+    const consentedAt = marketingOptIn === true ? now : undefined;
 
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -63,6 +67,9 @@ export async function POST(req: NextRequest) {
           passwordHash,
           marketingEmailConsent: marketingOptIn === true,
           consentedAt,
+          // GDPR: record explicit acceptance with timestamp
+          termsAcceptedAt: termsOptIn ? now : null,
+          privacyAcceptedAt: termsOptIn ? now : null,
         },
       });
       newUserId = user.id;

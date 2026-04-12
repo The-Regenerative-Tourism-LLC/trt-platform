@@ -77,6 +77,14 @@ export default async function AccountLayout({
                   Security
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/account/privacy"
+                  className="block px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"
+                >
+                  Privacy &amp; Consent
+                </Link>
+              </li>
             </ul>
           </nav>
 
