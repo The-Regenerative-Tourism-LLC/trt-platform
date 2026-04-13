@@ -83,10 +83,9 @@ export default auth((req) => {
   }
 
   // ── Email verification gate ──────────────────────────────────────────────
-  if (
-    !emailVerified &&
-    (isAdminRoute || isOperatorRoute || isTravelerRoute || isAccountRoute)
-  ) {
+  // Unverified users are locked to /verify-email regardless of which route they try.
+  const isVerifyEmailRoute = pathname === "/verify-email";
+  if (!emailVerified && !isVerifyEmailRoute) {
     return NextResponse.redirect(new URL("/verify-email", req.url));
   }
 
