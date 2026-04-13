@@ -22,7 +22,7 @@ const Schema = z.object({
     .max(100),
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 export async function POST(req: NextRequest) {
   try {

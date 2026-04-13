@@ -6,6 +6,7 @@
  */
 
 import { auth } from "@/auth";
+import { prisma } from "@/lib/db/prisma";
 import type { AppRole } from "@prisma/client";
 
 export interface SessionPayload {
@@ -20,6 +21,15 @@ export async function getSession(): Promise<SessionPayload | null> {
 
   const primaryRole = session.user.roles?.[0] ?? null;
   if (!primaryRole) return null;
+
+  // Verify the user still exists in the DB. This guards against stale JWTs
+  // that remain valid after a DB reset or account deletion. A single
+  // lightweight existence check — avoids leaking ghost-user data.
+  const exists = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+  if (!exists) return null;
 
   return {
     userId: session.user.id,

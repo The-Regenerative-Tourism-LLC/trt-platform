@@ -21,7 +21,7 @@ import { createToken } from "@/lib/tokens";
 import { sendVerifyEmail } from "@/lib/email";
 
 const RATE_LIMIT_SECONDS = 60;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 const BodySchema = z.object({
   email: z.string().email().optional(),

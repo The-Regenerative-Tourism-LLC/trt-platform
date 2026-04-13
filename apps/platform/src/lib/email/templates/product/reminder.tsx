@@ -71,7 +71,7 @@ export function ReminderEmailTemplate({
       <EmailBody>
         To manage which reminder emails you receive, visit your{" "}
         <a
-          href="https://app.trtplatform.com/email-preferences"
+          href="https://www.theregenerativetourism.com/email-preferences"
           style={{ color: "#000000" }}
         >
           email preferences

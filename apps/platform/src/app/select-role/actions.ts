@@ -6,7 +6,7 @@ import { z } from "zod";
 import { subscribeToMarketingList } from "@/lib/klaviyo";
 import { sendWelcomeEmail, sendAdminNewOperatorEmail } from "@/lib/email";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL;
 
 const SelectRoleSchema = z.object({
