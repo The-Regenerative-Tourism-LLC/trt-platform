@@ -24,8 +24,8 @@ export default function LoginPage() {
                 className="h-7 w-auto"
               />
             </Link>
-            <h1 className="fm-sub-heading text-foreground">Welcome back.</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="fm-sub-heading text-foreground text-center">Welcome back.</h1>
+            <p className="text-sm text-muted-foreground text-center">
               Sign in to your Green Passport account.
             </p>
           </div>

@@ -71,9 +71,6 @@ export default function BlogPage() {
                       <span className="inline-flex items-center gap-2 bg-[#C5BAA6]/20 border border-[#C5BAA6]/40 text-[#C5BAA6] text-xs font-semibold uppercase tracking-widest px-3 py-1.5 rounded-full mb-6">
                         {featured.category}
                       </span>
-                      <p className="font-hand text-5xl text-white/20 leading-none">
-                        GP
-                      </p>
                     </div>
                   </div>
                   <div className="p-8 md:p-10 flex flex-col justify-between">
