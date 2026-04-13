@@ -162,7 +162,7 @@ export function Navbar() {
                 className="rounded-lg font-semibold bg-[#1C1C1C] text-cream hover:bg-[#1C1C1C]/90 h-10 px-5"
                 asChild
               >
-                <Link href="/login">Join</Link>
+                <Link href="/signup">Join</Link>
               </Button>
             )}
 
@@ -341,7 +341,7 @@ export function Navbar() {
                   asChild
                 >
                   <Link
-                    href="/login"
+                    href="/signup"
                     onClick={() => setMobileOpen(false)}
                   >
                     Join

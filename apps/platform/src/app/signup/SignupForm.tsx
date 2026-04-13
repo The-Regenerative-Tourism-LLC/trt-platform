@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { z } from "zod";
 import Link from "next/link";
@@ -13,19 +14,24 @@ const SignupSchema = z.object({
 });
 
 export function SignupForm() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [termsOptIn, setTermsOptIn] = useState(false);
   const [marketingOptIn, setMarketingOptIn] = useState(false);
-  const role = "operator";
+  const [selectedRole, setSelectedRole] = useState<"operator" | "">("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const validate = () => {
-    const result = SignupSchema.safeParse({ name, email, password, role });
+    if (!selectedRole) {
+      setErrors({ role: "Please select your role to continue" });
+      return false;
+    }
+    const result = SignupSchema.safeParse({ name, email, password, role: selectedRole });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.errors.forEach((e) => {
@@ -53,7 +59,7 @@ export function SignupForm() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role, termsOptIn, marketingOptIn }),
+        body: JSON.stringify({ name, email, password, role: selectedRole, termsOptIn, marketingOptIn }),
       });
 
       const data = await res.json();
@@ -75,8 +81,7 @@ export function SignupForm() {
         setGlobalError("Account created! Please sign in.");
         window.location.href = "/login";
       } else {
-        // Middleware will redirect to the correct dashboard based on role
-        window.location.href = "/";
+        window.location.href = "/operator/dashboard";
       }
     } catch {
       setGlobalError("Something went wrong. Please try again.");
@@ -86,7 +91,7 @@ export function SignupForm() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    await signIn("google", { callbackUrl: "/" });
+    await signIn("google", { callbackUrl: "/select-role" });
   };
 
   return (
@@ -126,6 +131,83 @@ export function SignupForm() {
             {globalError}
           </div>
         )}
+
+        {/* Role selection */}
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-foreground">I am joining as</p>
+          <button
+            type="button"
+            onClick={() => setSelectedRole("operator")}
+            className={`w-full flex gap-5 items-start p-5 rounded-2xl border-2 text-left transition-all ${
+              selectedRole === "operator"
+                ? "border-foreground bg-secondary"
+                : "border-border hover:border-foreground/30 hover:bg-secondary/50"
+            }`}
+          >
+            <span className={`mt-0.5 flex-shrink-0 ${selectedRole === "operator" ? "text-foreground" : "text-muted-foreground"}`}>
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-foreground">Tourism Operator</span>
+                {selectedRole === "operator" && (
+                  <span className="w-5 h-5 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-background" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                I manage a lodge, tour, or experience and want to get my Green Passport Score.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {["GPS assessment", "DPI context", "Public passport"].map((f) => (
+                  <span
+                    key={f}
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      selectedRole === "operator"
+                        ? "bg-foreground/10 text-foreground"
+                        : "bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {f}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </button>
+          {/* Traveler card — redirects to waitlist */}
+          <button
+            type="button"
+            onClick={() => router.push("/traveler/waitlist")}
+            className="w-full flex gap-5 items-start p-5 rounded-2xl border-2 border-border hover:border-foreground/30 hover:bg-secondary/50 text-left transition-all opacity-70"
+          >
+            <span className="mt-0.5 flex-shrink-0 text-muted-foreground">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-foreground">Traveler</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-medium">Coming soon</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                The traveler experience isn&apos;t open yet. Join the waitlist to be first when it launches.
+              </p>
+              <span className="text-xs font-medium text-foreground underline underline-offset-2">
+                Join the waitlist →
+              </span>
+            </div>
+          </button>
+
+          {errors.role && (
+            <p className="text-xs text-destructive">{errors.role}</p>
+          )}
+        </div>
 
         <div className="space-y-4 rounded-2xl border border-border bg-surface/30 p-5">
           <div className="space-y-2">
@@ -233,7 +315,7 @@ export function SignupForm() {
 
         <button
           type="submit"
-          disabled={loading || googleLoading || !termsOptIn}
+          disabled={loading || googleLoading || !termsOptIn || !selectedRole}
           className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold py-3 px-4 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
           {loading ? (
