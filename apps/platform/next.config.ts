@@ -14,6 +14,32 @@ const publicStorageHost = storagePublicHostname();
 
 const nextConfig: NextConfig = {
   output: "standalone",
+
+  // Ensure all API routes always return CORS headers — including error
+  // responses (401, 500). Without this, a non-JSON error from the server
+  // can appear as a "CORS error" in the browser console, masking the real cause.
+  async headers() {
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
+    return [
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: origin },
+          { key: "Access-Control-Allow-Credentials", value: "true" },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+        ],
+      },
+    ];
+  },
+
   images: {
     remotePatterns: [
       {

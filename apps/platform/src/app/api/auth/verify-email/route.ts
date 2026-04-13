@@ -13,7 +13,7 @@ import { verifyToken } from "@/lib/tokens";
 import { sendWelcomeEmail, sendAdminNewOperatorEmail } from "@/lib/email";
 import { subscribeToMarketingList } from "@/lib/klaviyo";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL;
 
 const Schema = z.object({

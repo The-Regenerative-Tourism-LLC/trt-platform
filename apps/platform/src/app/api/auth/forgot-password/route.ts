@@ -15,7 +15,7 @@ const Schema = z.object({
   email: z.string().email(),
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 export async function POST(req: NextRequest) {
   try {

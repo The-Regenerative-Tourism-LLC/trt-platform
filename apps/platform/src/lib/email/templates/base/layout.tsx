@@ -23,7 +23,7 @@ const BLACK = "#000000";
 const LIGHT_BROWN = "#DDD9D4";
 const TEXT_PRIMARY = "#111827";
 const TEXT_MUTED = "#6b7280";
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.trtplatform.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
 
 interface BaseLayoutProps {
   preview?: string;
