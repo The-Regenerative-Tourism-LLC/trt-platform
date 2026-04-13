@@ -17,10 +17,10 @@ export default function ForgotPasswordPage() {
               className="h-7 w-auto"
             />
           </Link>
-          <h1 className="fm-sub-heading text-foreground">
+          <h1 className="fm-sub-heading text-foreground text-center">
             Reset your password
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             Enter your email address and we will send you a reset link.
           </p>
         </div>
