@@ -16,6 +16,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { fetchJson } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -96,7 +97,7 @@ interface OperatorDashboardData {
 }
 
 function fetchDashboard(): Promise<OperatorDashboardData> {
-  return fetch("/api/v1/operator/dashboard").then((r) => r.json());
+  return fetchJson<OperatorDashboardData>("/api/v1/operator/dashboard");
 }
 
 function pillarDescription(label: "p1" | "p2" | "p3", score: number): string {

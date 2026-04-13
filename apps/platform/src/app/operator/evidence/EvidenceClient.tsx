@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { apiFetch } from "@/lib/api/client";
 import Link from "next/link";
 import {
   Upload,
@@ -155,8 +156,8 @@ const PILLAR_GROUPS: PillarGroup[] = [
 const ALL_INDICATORS = PILLAR_GROUPS.flatMap((g) => g.indicators);
 
 async function fetchEvidence(): Promise<EvidenceApiResponse> {
-  const r = await fetch("/api/v1/operator/evidence");
-  if (!r.ok) throw new Error("Failed to fetch evidence");
+  const r = await apiFetch("/api/v1/operator/evidence");
+  if (!r.ok) throw Object.assign(new Error("Failed to fetch evidence"), { status: r.status });
   return r.json();
 }
 

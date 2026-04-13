@@ -21,6 +21,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { apiFetch } from "@/lib/api/client";
 import type { OnboardingData } from "@/lib/onboarding/onboarding-steps";
 import {
   ONBOARDING_STEPS,
@@ -115,7 +116,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
         saveDraft: async () => {
           const s = get();
           const idx = getStepIndex(s.stepId);
-          const res = await fetch("/api/v1/onboarding/draft", {
+          const res = await apiFetch("/api/v1/onboarding/draft", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -135,7 +136,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
               },
             }),
           });
-          if (!res.ok) throw new Error("Draft save failed");
+          if (!res.ok) throw Object.assign(new Error("Draft save failed"), { status: res.status });
         },
 
         resetOnboarding: () => {

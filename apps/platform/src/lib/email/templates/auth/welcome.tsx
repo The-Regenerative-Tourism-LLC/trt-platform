@@ -65,7 +65,7 @@ export function WelcomeEmailTemplate({
 
       <Text style={{ color: "#6b7280", fontSize: "14px", lineHeight: "1.5" }}>
         Questions? Reply to this email or visit our{" "}
-        <a href="https://app.trtplatform.com/methodology" style={{ color: "#000000" }}>
+        <a href="https://www.theregenerativetourism.com/methodology" style={{ color: "#000000" }}>
           methodology page
         </a>{" "}
         to learn how TRT scoring works.

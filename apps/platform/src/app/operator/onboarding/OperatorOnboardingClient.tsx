@@ -20,6 +20,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { fetchJson } from "@/lib/api/client";
 import { useOnboardingStore, type OnboardingData } from "@/store/onboarding-store";
 import {
   getVisibleSteps,
@@ -212,19 +213,17 @@ export function OperatorOnboardingClient() {
 
   const { data: onboardingData } = useQuery({
     queryKey: ["onboarding"],
-    queryFn: () => fetch("/api/v1/onboarding").then((r) => r.json()),
+    queryFn: () => fetchJson<any>("/api/v1/onboarding"),
   });
 
   const { data: draftData, isLoading: draftLoading } = useQuery({
     queryKey: ["onboarding-draft"],
-    queryFn: () =>
-      fetch("/api/v1/onboarding/draft").then((r) => r.json()),
+    queryFn: () => fetchJson<any>("/api/v1/onboarding/draft"),
   });
 
   const { data: priorScoreData, isLoading: priorLoading } = useQuery({
     queryKey: ["operator-prior-scores"],
-    queryFn: () =>
-      fetch("/api/v1/operator/prior-scores").then((r) => r.json()),
+    queryFn: () => fetchJson<any>("/api/v1/operator/prior-scores"),
     enabled: stepId === "delta",
   });
 
