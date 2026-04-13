@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { z } from "zod";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -57,8 +57,18 @@ export function LoginForm() {
       if (result?.error) {
         setGlobalError("Invalid email or password. Please try again.");
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        // If there's a specific callbackUrl (e.g. from a protected route redirect), honour it.
+        // Otherwise resolve the user's dashboard from the session.
+        if (callbackUrl && callbackUrl !== "/") {
+          window.location.href = callbackUrl;
+        } else {
+          const session = await getSession();
+          const roles: string[] = (session?.user as { roles?: string[] })?.roles ?? [];
+          if (roles.includes("admin")) window.location.href = "/admin/dashboard";
+          else if (roles.includes("operator")) window.location.href = "/operator/dashboard";
+          else if (roles.includes("traveler")) window.location.href = "/traveler/dashboard";
+          else window.location.href = "/select-role";
+        }
       }
     } catch {
       setGlobalError("Something went wrong. Please try again.");
@@ -69,6 +79,7 @@ export function LoginForm() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
+    // Middleware will redirect /select-role → dashboard if user already has a role.
     await signIn("google", { callbackUrl: "/select-role" });
   };
 
