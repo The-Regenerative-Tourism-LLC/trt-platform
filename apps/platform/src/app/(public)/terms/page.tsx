@@ -3,12 +3,14 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
-  description: "Terms and conditions for using the Green Passport platform.",
+  description: "Terms and conditions for using The Regenerative Tourism platform.",
 };
 
-const LAST_UPDATED = "12 April 2026";
+const LAST_UPDATED = "14 April 2026";
 const CONTACT_EMAIL = "admin@theregenerativetourism.com";
-const COMPANY_NAME = "The Regenerative Tourism Lda";
+const HELLO_EMAIL = "hello@theregenerativetourism.com";
+const COMPANY_NAME = "THE REGENERATIVE TOURISM LLC";
+const COMPANY_LOCATION = "Wyoming, United States";
 
 export default function TermsPage() {
   return (
@@ -17,7 +19,7 @@ export default function TermsPage() {
         <p className="text-sm text-muted-foreground mb-2">Last updated: {LAST_UPDATED}</p>
         <h1 className="text-3xl font-bold text-foreground">Terms &amp; Conditions</h1>
         <p className="mt-4 text-muted-foreground">
-          These Terms &amp; Conditions (&quot;Terms&quot;) govern your access to and use of the Green Passport platform operated by {COMPANY_NAME} (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). By creating an account or using the Platform, you agree to these Terms.
+          These Terms &amp; Conditions (&quot;Terms&quot;) govern your access to and use of The Regenerative Tourism platform operated by {COMPANY_NAME} (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). By creating an account or using the Platform, you agree to these Terms.
         </p>
       </div>
 
@@ -33,7 +35,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">2. Description of service</h2>
           <p className="text-muted-foreground">
-            Green Passport is a regenerative tourism certification and verification platform that provides:
+            The Regenerative Tourism platform provides:
           </p>
           <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
             <li>Green Passport Score (GPS) assessments for tourism operators.</li>
@@ -115,19 +117,26 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">11. Limitation of liability</h2>
           <p className="text-muted-foreground">
-            TO THE MAXIMUM EXTENT PERMITTED BY LAW, {COMPANY_NAME.toUpperCase()} SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE PLATFORM, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR TOTAL LIABILITY SHALL NOT EXCEED THE FEES PAID BY YOU IN THE 12 MONTHS PRECEDING THE CLAIM.
+            TO THE MAXIMUM EXTENT PERMITTED BY LAW, {COMPANY_NAME} SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE PLATFORM, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR TOTAL LIABILITY SHALL NOT EXCEED THE FEES PAID BY YOU IN THE 12 MONTHS PRECEDING THE CLAIM.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold mb-3">12. Governing law and disputes</h2>
           <p className="text-muted-foreground">
-            These Terms are governed by the laws of Portugal and the European Union. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the courts of Lisbon, Portugal, without prejudice to your rights as a consumer under applicable EU law.
+            These Terms are governed by the laws of the State of Wyoming, United States, without regard to conflict of law principles. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the state and federal courts located in Wyoming, United States.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold mb-3">13. Changes to these Terms</h2>
+          <h2 className="text-xl font-semibold mb-3">13. Company</h2>
+          <p className="text-muted-foreground">
+            {COMPANY_NAME} — Wyoming Limited Liability Company, {COMPANY_LOCATION}.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-semibold mb-3">14. Changes to these Terms</h2>
           <p className="text-muted-foreground">
             We may update these Terms from time to time. If we make material changes, we will notify you by email and require your re-acceptance before you can continue using the Platform. The &quot;Last updated&quot; date at the top reflects the most recent revision.
           </p>
@@ -136,8 +145,9 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">14. Contact</h2>
           <p className="text-muted-foreground">
-            For questions about these Terms, contact us at:{" "}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>
+            For questions about these Terms, contact us at:<br />
+            <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a><br />
+            <a href={`mailto:${HELLO_EMAIL}`} className="underline">{HELLO_EMAIL}</a>
           </p>
         </section>
       </div>

@@ -16,17 +16,17 @@ import {
 export const metadata: Metadata = {
   title: "Pricing & Assessment Tiers",
   description:
-    "Assessment pricing for regenerative tourism operators — from free self-assessment to independently verified publication on Green Passport.",
+    "Assessment pricing for regenerative tourism operators — from free self-assessment to independently verified publication on The Regenerative Tourism platform.",
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "Pricing & Assessment Tiers · Green Passport",
+    title: "Pricing & Assessment Tiers · The Regenerative Tourism",
     description:
       "Assessment pricing for regenerative tourism operators — from free self-assessment to independently verified publication.",
     url: "/pricing",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pricing & Assessment Tiers · Green Passport",
+    title: "Pricing & Assessment Tiers · The Regenerative Tourism",
     description:
       "Assessment pricing for operators — from free self-assessment to verified publication.",
   },
@@ -256,7 +256,7 @@ export default function PricingPage() {
             {[
               {
                 q: "Can I really do the assessment for free?",
-                a: "Yes. The full assessment across all three pillars is completely free. You'll see your internal score and receive AI recommendations to improve.",
+                a: "Yes. The full assessment across all three pillars is completely free. You'll see your internal score and receive recommendations to improve.",
               },
               {
                 q: 'What does "published" mean?',

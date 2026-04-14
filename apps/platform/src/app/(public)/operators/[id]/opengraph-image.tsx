@@ -94,7 +94,7 @@ export default async function OgImage({ params }: Props) {
           >
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: AMBER }} />
             <span style={{ color: AMBER, fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-              Green Passport · Verified Operator
+              The Regenerative Tourism · Verified Operator
             </span>
           </div>
         </div>

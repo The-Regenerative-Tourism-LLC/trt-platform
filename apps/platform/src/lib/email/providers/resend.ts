@@ -9,7 +9,7 @@ import { Resend } from "resend";
 import type { SendEmailOptions, SendEmailResult } from "../types";
 
 const FROM_ADDRESS =
-  process.env.EMAIL_FROM ?? "TRT Platform <noreply@mail.trtplatform.com>";
+  process.env.EMAIL_FROM ?? "The Regenerative Tourism <noreply@mail.theregenerativetourism.com>";
 
 let _resend: Resend | null = null;
 

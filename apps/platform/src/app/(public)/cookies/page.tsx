@@ -4,7 +4,7 @@ import { CookiePreferencesLink } from "./_CookiePreferencesLink";
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
-  description: "How Green Passport uses cookies and how to manage your preferences.",
+  description: "How The Regenerative Tourism uses cookies and how to manage your preferences.",
 };
 
 const LAST_UPDATED = "12 April 2026";
@@ -16,7 +16,7 @@ export default function CookiePolicyPage() {
         <p className="text-sm text-muted-foreground mb-2">Last updated: {LAST_UPDATED}</p>
         <h1 className="text-3xl font-bold text-foreground">Cookie Policy</h1>
         <p className="mt-4 text-muted-foreground">
-          This Cookie Policy explains how Green Passport uses cookies and similar tracking technologies on our platform and website.
+          This Cookie Policy explains how The Regenerative Tourism uses cookies and similar tracking technologies on our platform and website.
         </p>
       </div>
 

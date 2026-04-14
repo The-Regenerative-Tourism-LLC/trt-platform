@@ -7,7 +7,7 @@ const BASE_URL =
 export const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Green Passport",
+  name: "The Regenerative Tourism",
   url: BASE_URL,
   logo: `${BASE_URL}/assets/logo-regenerative-tourism.png`,
   sameAs: [],
@@ -19,7 +19,7 @@ export const organizationSchema = {
 export const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Green Passport",
+  name: "The Regenerative Tourism",
   url: BASE_URL,
   potentialAction: {
     "@type": "SearchAction",
@@ -36,7 +36,7 @@ export const blogListingSchema = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   "@id": `${BASE_URL}/blog`,
-  name: "Green Passport Blog",
+  name: "The Regenerative Tourism Blog",
   description:
     "Articles on regenerative tourism, sustainability, ethics of travel, and the future of conscious hospitality.",
   url: `${BASE_URL}/blog`,
@@ -71,12 +71,12 @@ export function buildArticleSchema({
     image: `${BASE_URL}/blog/${slug}/opengraph-image`,
     author: {
       "@type": "Organization",
-      name: "Green Passport",
+      name: "The Regenerative Tourism",
       url: BASE_URL,
     },
     publisher: {
       "@type": "Organization",
-      name: "Green Passport",
+      name: "The Regenerative Tourism",
       url: BASE_URL,
       logo: {
         "@type": "ImageObject",

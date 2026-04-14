@@ -3,13 +3,14 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Green Passport collects, uses, and protects your personal data.",
+  description: "How The Regenerative Tourism collects, uses, and protects your personal data.",
 };
 
-const LAST_UPDATED = "12 April 2026";
+const LAST_UPDATED = "14 April 2026";
 const CONTROLLER_EMAIL = "admin@theregenerativetourism.com";
-const CONTROLLER_NAME = "The Regenerative Tourism Lda";
-const CONTROLLER_ADDRESS = "Portugal";
+const HELLO_EMAIL = "hello@theregenerativetourism.com";
+const CONTROLLER_NAME = "THE REGENERATIVE TOURISM LLC";
+const CONTROLLER_LOCATION = "Wyoming, United States";
 
 export default function PrivacyPolicyPage() {
   return (
@@ -18,14 +19,14 @@ export default function PrivacyPolicyPage() {
         <p className="text-sm text-muted-foreground mb-2">Last updated: {LAST_UPDATED}</p>
         <h1 className="text-3xl font-bold text-foreground">Privacy Policy</h1>
         <p className="mt-4 text-muted-foreground">
-          This Privacy Policy explains how {CONTROLLER_NAME} (&quot;Green Passport&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, shares, and protects information in relation to our website and platform at{" "}
+          This Privacy Policy explains how {CONTROLLER_NAME} (&quot;The Regenerative Tourism&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, shares, and protects information in relation to our website and platform at{" "}
           <Link href="https://www.theregenerativetourism.com" className="underline">
             theregenerativetourism.com
           </Link>{" "}
           (&quot;the Platform&quot;).
         </p>
         <p className="mt-3 text-muted-foreground">
-          We act as the data controller for the personal data described in this policy and are subject to the General Data Protection Regulation (GDPR) and Portuguese data protection law.
+          We are incorporated in the State of Wyoming, United States. Where we process personal data of individuals located in the European Union or United Kingdom, we apply the standards of the General Data Protection Regulation (GDPR) and UK GDPR as a matter of good practice and to meet our legal obligations.
         </p>
       </div>
 
@@ -35,7 +36,7 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-xl font-semibold mb-3">1. Data controller</h2>
           <p className="text-muted-foreground">
             {CONTROLLER_NAME}<br />
-            {CONTROLLER_ADDRESS}<br />
+            {CONTROLLER_LOCATION}<br />
             Email: <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a>
           </p>
         </section>
@@ -56,10 +57,11 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2 className="text-xl font-semibold mb-3">3. Legal basis for processing</h2>
           <div className="space-y-3 text-muted-foreground">
-            <p><strong>Contract (Article 6(1)(b) GDPR):</strong> Processing your account data, running assessments, and delivering the platform features you request.</p>
-            <p><strong>Legal obligation (Article 6(1)(c) GDPR):</strong> Compliance with financial, tax, and regulatory obligations.</p>
-            <p><strong>Legitimate interests (Article 6(1)(f) GDPR):</strong> Platform security, fraud prevention, service improvement, internal analytics, and audit logging. We have assessed that these interests are not overridden by your rights.</p>
-            <p><strong>Consent (Article 6(1)(a) GDPR):</strong> Marketing emails (Klaviyo), analytics cookies (Google Analytics, Microsoft Clarity), and marketing cookies (Meta Pixel, Google Ads). You may withdraw consent at any time via your account settings or the cookie banner.</p>
+            <p><strong>Contract:</strong> Processing your account data, running assessments, and delivering the platform features you request.</p>
+            <p><strong>Legal obligation:</strong> Compliance with financial, tax, and regulatory obligations under US federal and state law.</p>
+            <p><strong>Legitimate interests:</strong> Platform security, fraud prevention, service improvement, internal analytics, and audit logging.</p>
+            <p><strong>Consent:</strong> Marketing emails (Klaviyo), analytics cookies (Google Analytics, Microsoft Clarity), and marketing cookies (Meta Pixel, Google Ads). You may withdraw consent at any time via your account settings or the cookie banner.</p>
+            <p className="text-sm italic">For users located in the EU/UK, the above bases correspond respectively to Articles 6(1)(b), 6(1)(c), 6(1)(f), and 6(1)(a) of the GDPR.</p>
           </div>
         </section>
 
@@ -103,7 +105,7 @@ export default function PrivacyPolicyPage() {
             </table>
           </div>
           <p className="text-muted-foreground mt-3">
-            Transfers to processors outside the EEA are protected by Standard Contractual Clauses (SCCs) or adequacy decisions.
+            For EU/UK users: transfers to processors outside the EEA are protected by Standard Contractual Clauses (SCCs) or adequacy decisions.
           </p>
         </section>
 
@@ -120,20 +122,19 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">7. Your rights</h2>
-          <p className="text-muted-foreground mb-3">Under GDPR you have the following rights:</p>
+          <p className="text-muted-foreground mb-3">You have the following rights regarding your personal data:</p>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-            <li><strong>Right of access:</strong> Request a copy of the personal data we hold about you.</li>
-            <li><strong>Right to rectification:</strong> Correct inaccurate or incomplete data.</li>
-            <li><strong>Right to erasure:</strong> Request deletion of your data where there is no compelling reason for continued processing.</li>
-            <li><strong>Right to data portability:</strong> Receive your data in a structured, commonly used, machine-readable format.</li>
-            <li><strong>Right to restriction:</strong> Ask us to restrict processing of your data in certain circumstances.</li>
-            <li><strong>Right to object:</strong> Object to processing based on legitimate interests.</li>
-            <li><strong>Right to withdraw consent:</strong> Withdraw any consent you have given at any time, without affecting the lawfulness of prior processing.</li>
+            <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
+            <li><strong>Rectification:</strong> Correct inaccurate or incomplete data.</li>
+            <li><strong>Erasure:</strong> Request deletion of your data where there is no compelling reason for continued processing.</li>
+            <li><strong>Portability:</strong> Receive your data in a structured, commonly used, machine-readable format.</li>
+            <li><strong>Restriction:</strong> Ask us to restrict processing of your data in certain circumstances.</li>
+            <li><strong>Objection:</strong> Object to processing based on legitimate interests.</li>
+            <li><strong>Withdraw consent:</strong> Withdraw any consent you have given at any time, without affecting the lawfulness of prior processing.</li>
           </ul>
           <p className="text-muted-foreground mt-3">
             To exercise any of these rights, contact us at{" "}
-            <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a>. We will respond within 30 days. You also have the right to lodge a complaint with the Portuguese data protection authority, the{" "}
-            <a href="https://www.cnpd.pt" target="_blank" rel="noopener noreferrer" className="underline">CNPD</a>.
+            <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a>. We will respond within 30 days. EU/UK users also have the right to lodge a complaint with their local data protection authority.
           </p>
         </section>
 
@@ -172,7 +173,8 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-xl font-semibold mb-3">12. Contact</h2>
           <p className="text-muted-foreground">
             For any privacy-related questions or requests, contact us at:<br />
-            <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a>
+            <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a><br />
+            <a href={`mailto:${HELLO_EMAIL}`} className="underline">{HELLO_EMAIL}</a>
           </p>
         </section>
       </div>
