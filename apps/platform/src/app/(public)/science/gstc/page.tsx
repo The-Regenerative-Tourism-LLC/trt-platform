@@ -70,7 +70,7 @@ const CRITERIA = [
   },
 ];
 
-const OUTER = "max-w-2xl mx-auto px-6 md:px-10";
+const OUTER = "container mx-auto max-w-3xl px-6 md:px-10";
 
 export default function GstcPage() {
   return (

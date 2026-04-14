@@ -137,7 +137,7 @@ const FAQ_ITEMS = [
   {
     question: "What if my score is low?",
     answer:
-      "That's a starting point. We provide insights and guidance to help improve over time. The goal is progress — not perfection.",
+      "That's a starting point. We provide Insights and guidance to help improve over time. The goal is progress — not perfection.",
   },
   {
     question: "How can I join?",

@@ -35,11 +35,11 @@ export const websiteSchema = {
 export const blogListingSchema = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  "@id": `${BASE_URL}/blog`,
-  name: "The Regenerative Tourism Blog",
+  "@id": `${BASE_URL}/journal`,
+  name: "The Regenerative Tourism Journal",
   description:
     "Articles on regenerative tourism, sustainability, ethics of travel, and the future of conscious hospitality.",
-  url: `${BASE_URL}/blog`,
+  url: `${BASE_URL}/journal`,
   isPartOf: { "@id": BASE_URL },
 };
 
@@ -83,7 +83,7 @@ export function buildArticleSchema({
         url: `${BASE_URL}/assets/logo-regenerative-tourism.png`,
       },
     },
-    isPartOf: { "@id": `${BASE_URL}/blog` },
+    isPartOf: { "@id": `${BASE_URL}/journal` },
     ...(tags && tags.length > 0 ? { keywords: tags.join(", ") } : {}),
   };
 }

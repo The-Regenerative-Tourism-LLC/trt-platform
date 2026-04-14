@@ -11,7 +11,7 @@ export function Footer() {
             <div className="flex items-center gap-2">
               <Image
                 src="/assets/logo-regenerative-tourism-white.svg"
-                alt="Green Passport"
+                alt="The Regenerative Tourism"
                 width={140}
                 height={32}
                 className="h-7 w-auto"
@@ -62,17 +62,29 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Blog */}
+          {/* Journal */}
           <div className="md:col-span-2 space-y-4">
             <p className="font-hand text-xl text-white/50">
-              Blog
+              Journal
             </p>
             <div className="space-y-2.5">
               <Link
-                href="/blog"
+                href="/journal"
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                All Articles
+                Blog
+              </Link>
+              <Link
+                href="/journal?tab=press"
+                className="block text-sm text-white/60 hover:text-white transition-colors"
+              >
+                Press &amp; Coverage
+              </Link>
+              <Link
+                href="/journal?tab=research"
+                className="block text-sm text-white/60 hover:text-white transition-colors"
+              >
+                Scientific Research
               </Link>
             </div>
           </div>

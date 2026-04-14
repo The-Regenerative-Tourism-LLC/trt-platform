@@ -76,15 +76,13 @@ const SDGS = [
   },
 ];
 
-const OUTER = "max-w-2xl mx-auto px-6 md:px-10";
-
 export default function SdgsPage() {
   return (
     <>
       <JsonLd schema={sdgsSchema} />
 
       <div className="min-h-[60vh] bg-background">
-        <div className={`${OUTER} py-16 md:py-24`}>
+        <div className="container mx-auto max-w-3xl px-6 md:px-10 py-16 md:py-24">
 
           {/* Badge + heading */}
           <div className="space-y-6 mb-14">

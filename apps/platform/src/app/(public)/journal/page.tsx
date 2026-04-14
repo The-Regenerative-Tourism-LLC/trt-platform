@@ -4,12 +4,12 @@ import { allPosts } from "@/lib/blog";
 import { JsonLd, blogListingSchema } from "@/lib/seo/json-ld";
 import { ArrowRight } from "lucide-react";
 
-type Tab = "insights" | "press" | "research";
+type Tab = "Blog" | "press" | "research";
 
 const TABS: { id: Tab; label: string; description: string }[] = [
   {
-    id: "insights",
-    label: "Insights",
+    id: "Blog",
+    label: "Blog",
     description: "Articles on regenerative tourism, sustainability, ethics of travel, and the future of conscious hospitality.",
   },
   {
@@ -44,23 +44,23 @@ const RESEARCH_RESOURCES = [
 ];
 
 const TAB_METADATA: Record<Tab, { title: string; description: string; canonical: string }> = {
-  insights: {
-    title: "Insights · Regenerative Tourism Blog",
+  Blog: {
+    title: "Blog · Regenerative Tourism Journal",
     description:
       "Articles on regenerative tourism, sustainability, ethics of travel, and the future of conscious hospitality — from The Regenerative Tourism team.",
-    canonical: "/blog",
+    canonical: "/journal",
   },
   press: {
     title: "Press & Coverage · The Regenerative Tourism",
     description:
       "Media coverage, press releases, and announcements from The Regenerative Tourism team — the verified signal for regenerative tourism.",
-    canonical: "/blog?tab=press",
+    canonical: "/journal?tab=press",
   },
   research: {
     title: "Scientific Research · Green Passport Score Methodology",
     description:
       "Peer-reviewed frameworks, GSTC alignment, UN SDG mapping, and academic foundations underpinning the Green Passport Score methodology.",
-    canonical: "/blog?tab=research",
+    canonical: "/journal?tab=research",
   },
 };
 
@@ -70,8 +70,8 @@ export async function generateMetadata({
   searchParams: Promise<{ tab?: string }>;
 }): Promise<Metadata> {
   const { tab } = await searchParams;
-  const activeTab: Tab = (tab as Tab) ?? "insights";
-  const meta = TAB_METADATA[activeTab] ?? TAB_METADATA.insights;
+  const activeTab: Tab = (tab as Tab) ?? "Blog";
+  const meta = TAB_METADATA[activeTab] ?? TAB_METADATA.Blog;
 
   return {
     title: meta.title,
@@ -98,13 +98,13 @@ function formatDate(iso: string) {
   });
 }
 
-export default async function BlogPage({
+export default async function JournalPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab } = await searchParams;
-  const activeTab: Tab = (tab as Tab) ?? "insights";
+  const activeTab: Tab = (tab as Tab) ?? "Blog";
 
   const featured = allPosts[0];
   const rest = allPosts.slice(1);
@@ -136,7 +136,7 @@ export default async function BlogPage({
               {TABS.map((t) => (
                 <Link
                   key={t.id}
-                  href={t.id === "insights" ? "/blog" : `/blog?tab=${t.id}`}
+                  href={t.id === "Blog" ? "/journal" : `/journal?tab=${t.id}`}
                   className={`relative px-4 md:px-6 h-full text-sm font-medium transition-colors whitespace-nowrap shrink-0 flex items-center ${
                     activeTab === t.id
                       ? "text-foreground"
@@ -155,8 +155,8 @@ export default async function BlogPage({
 
         <div className="container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-20">
 
-          {/* ── Insights tab ── */}
-          {activeTab === "insights" && (
+          {/* ── Blog tab ── */}
+          {activeTab === "Blog" && (
             <div className="tab-panel">
               {featured && (
                 <div className="mb-16">
@@ -214,7 +214,7 @@ export default async function BlogPage({
                     {rest.map((post) => (
                       <Link
                         key={post.slug}
-                        href={`/blog/${post.slug}`}
+                        href={`/journal/${post.slug}`}
                         className="group block rounded-xl border border-border bg-card overflow-hidden hover:shadow-md transition-shadow"
                       >
                         <div className="bg-gradient-to-br from-[#1C1C1C] to-[#2A2419] h-40 flex items-center justify-center">
