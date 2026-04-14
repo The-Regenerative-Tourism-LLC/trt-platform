@@ -18,14 +18,14 @@ export const metadata: Metadata = {
     "Browse and compare verified regenerative tourism operators with GPS scores, DPI band context, and pillar breakdowns.",
   alternates: { canonical: "/operators" },
   openGraph: {
-    title: "Verified Regenerative Operators · Green Passport",
+    title: "Verified Regenerative Operators · The Regenerative Tourism",
     description:
       "Browse and compare verified regenerative tourism operators with GPS scores, DPI band context, and pillar breakdowns.",
     url: "/operators",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Verified Regenerative Operators · Green Passport",
+    title: "Verified Regenerative Operators · The Regenerative Tourism",
     description:
       "Browse and compare verified regenerative tourism operators with GPS scores and pillar breakdowns.",
   },

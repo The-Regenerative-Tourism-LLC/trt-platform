@@ -149,7 +149,7 @@ export default function AcceptInvitePage() {
           <Link href="/" className="inline-block mb-5">
             <Image
               src="/assets/logo-regenerative-tourism-black.svg"
-              alt="Green Passport"
+              alt="The Regenerative Tourism"
               width={130}
               height={30}
               className="h-7 w-auto mx-auto"
@@ -159,7 +159,7 @@ export default function AcceptInvitePage() {
             Accept your invitation
           </h1>
           <p className="text-muted-foreground text-sm">
-            Create your Green Passport account to get started.
+            Create your account to get started.
           </p>
         </div>
 

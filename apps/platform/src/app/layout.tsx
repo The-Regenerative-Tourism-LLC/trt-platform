@@ -33,8 +33,8 @@ const BASE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Green Passport · The Regenerative Tourism Standard",
-    template: "%s · Green Passport",
+    default: "The Regenerative Tourism · Verified Impact for Conscious Travel",
+    template: "%s · The Regenerative Tourism",
   },
   description:
     "The verified signal for regenerative tourism operators. GPS scores, DPI context, and Traveler Impact Profiles — all computation-auditable.",
@@ -50,9 +50,9 @@ export const metadata: Metadata = {
     "responsible travel",
     "tourism certification",
   ],
-  authors: [{ name: "Green Passport" }],
-  creator: "Green Passport",
-  publisher: "Green Passport",
+  authors: [{ name: "The Regenerative Tourism" }],
+  creator: "The Regenerative Tourism",
+  publisher: "The Regenerative Tourism",
   robots: {
     index: true,
     follow: true,
@@ -66,9 +66,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "Green Passport",
+    siteName: "The Regenerative Tourism",
     url: BASE_URL,
-    title: "Green Passport · The Regenerative Tourism Standard",
+    title: "The Regenerative Tourism · Verified Impact for Conscious Travel",
     description:
       "The verified signal for regenerative tourism operators. GPS scores, DPI context, and Traveler Impact Profiles — all computation-auditable.",
     images: [
@@ -76,13 +76,13 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Green Passport — The Regenerative Tourism Standard",
+        alt: "The Regenerative Tourism — Verified Impact for Conscious Travel",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Green Passport · The Regenerative Tourism Standard",
+    title: "The Regenerative Tourism · Verified Impact for Conscious Travel",
     description:
       "The verified signal for regenerative tourism operators. GPS scores, DPI context, and Traveler Impact Profiles.",
     images: ["/opengraph-image"],

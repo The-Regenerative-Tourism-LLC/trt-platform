@@ -10,14 +10,14 @@ export const metadata: Metadata = {
     "Top regenerative travelers ranked by cumulative Choice Score — see who's leading the shift to responsible travel.",
   alternates: { canonical: "/leaderboard" },
   openGraph: {
-    title: "Regenerative Traveler Leaderboard · Green Passport",
+    title: "Regenerative Traveler Leaderboard · The Regenerative Tourism",
     description:
       "Top regenerative travelers ranked by cumulative Choice Score.",
     url: "/leaderboard",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Regenerative Traveler Leaderboard · Green Passport",
+    title: "Regenerative Traveler Leaderboard · The Regenerative Tourism",
     description:
       "Top regenerative travelers ranked by cumulative Choice Score.",
   },

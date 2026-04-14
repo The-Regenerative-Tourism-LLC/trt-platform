@@ -690,28 +690,47 @@ body {
   color: hsl(var(--cream-foreground));
 }
 
-/* Hero heading — massive, tight tracking */
+/* ── Typography scale ────────────────────────────────────────
+   H1  fm-hero-heading    →  mobile: ~32px   desktop: 72px
+   H2  fm-section-heading →  mobile: ~28px   desktop: 64px
+   H3  fm-sub-heading     →  mobile: ~22px   desktop: 44px
+   Card fm-card-heading   →  fixed 24px
+   Body fm-body           →  fixed 16px
+   Body-sm fm-body-sm     →  fixed 14px
+   Eyebrow fm-eyebrow     →  Caveat italic 16px
+──────────────────────────────────────────────────────────── */
+
+/* Hero heading — H1 */
 .fm-hero-heading {
-  font-size: clamp(2rem, 5.5vw, 4.5rem);
+  font-size: clamp(2rem, 5vw, 4rem);
   font-weight: 700;
   line-height: 0.92;
   letter-spacing: -0.03em;
 }
+@media (min-width: 1024px) {
+  .fm-hero-heading { font-size: 4.5rem; } /* 72px — enforced minimum */
+}
 
-/* Section heading — large editorial */
+/* Section heading — H2 */
 .fm-section-heading {
-  font-size: clamp(1.75rem, 4.5vw, 4.5rem);
+  font-size: clamp(1.75rem, 4vw, 3.5rem);
   font-weight: 700;
   line-height: 1.0;
   letter-spacing: -0.025em;
 }
+@media (min-width: 1024px) {
+  .fm-section-heading { font-size: 4rem; } /* 64px — enforced minimum */
+}
 
-/* Sub-section heading — medium */
+/* Sub-section heading — H3 */
 .fm-sub-heading {
-  font-size: clamp(1.375rem, 3vw, 2.8rem);
+  font-size: clamp(1.375rem, 3vw, 2.75rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
+}
+@media (min-width: 1024px) {
+  .fm-sub-heading { font-size: 2.75rem; } /* 44px */
 }
 
 /* Stat heading — medium-large */
@@ -722,12 +741,32 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Card heading */
+/* Card heading — fixed 24px */
 .fm-card-heading {
-  font-size: clamp(0.95rem, 1.3vw, 1.25rem);
+  font-size: 1.5rem; /* 24px */
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.01em;
+}
+
+/* Body paragraph — fixed 16px */
+.fm-body {
+  font-size: 1rem;   /* 16px */
+  line-height: 1.65;
+}
+
+/* Small body — fixed 14px */
+.fm-body-sm {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.6;
+}
+
+/* Caveat italic eyebrow label — 16px */
+.fm-eyebrow {
+  font-family: var(--font-hand);
+  font-style: italic;
+  font-size: 1.2rem; /* 20px */
+  line-height: 1.4;
 }
 
 /* Film grain overlay */
@@ -759,6 +798,22 @@ body {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Tab panel entry animation */
+@keyframes tab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-panel {
+  animation: tab-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Card hover lift */

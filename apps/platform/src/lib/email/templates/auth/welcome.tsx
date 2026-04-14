@@ -58,7 +58,7 @@ export function WelcomeEmailTemplate({
       <EmailButton href={dashboardUrl}>{copy.cta}</EmailButton>
 
       <EmailCallout>
-        TRT Platform certifies operators using the GPS (Green Performance Score)
+        TRT Platform certifies operators using the Green Passport Score (GPS)
         methodology — a rigorous, evidence-based framework across three pillars:
         Footprint, Local Economy, and Regeneration.
       </EmailCallout>

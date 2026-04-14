@@ -17,7 +17,7 @@ export default function SignupPage() {
             <Link href="/" className="inline-block mb-4">
               <Image
                 src="/assets/logo-regenerative-tourism-black.svg"
-                alt="Green Passport"
+                alt="The Regenerative Tourism"
                 width={130}
                 height={30}
                 className="h-7 w-auto"
