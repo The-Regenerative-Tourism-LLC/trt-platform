@@ -7,7 +7,7 @@ import { Search, MapPin, TrendingUp, Leaf, Globe, Lock } from "lucide-react";
 
 const DESTINATION_IMAGES: Record<string, string> = {
   "madeira": "/assets/dest-madeira.jpg",
-  "azores": "/assets/dest-azores.jpg",
+  // "azores": "/assets/dest-azores.jpg",
   "misiones": "/assets/dest-misiones.jpg",
   "continental portugal": "/assets/dest-continental-portugal.jpg",
 };
