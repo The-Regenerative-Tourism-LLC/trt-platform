@@ -35,7 +35,7 @@ export function ScoreUpdatedTemplate({
       <EmailBody>{greeting}</EmailBody>
 
       <EmailBody>
-        Your Green Performance Score for <strong>{operatorName}</strong> has
+        Your Green Passport Score for <strong>{operatorName}</strong> has
         been computed and published to your public profile.
       </EmailBody>
 

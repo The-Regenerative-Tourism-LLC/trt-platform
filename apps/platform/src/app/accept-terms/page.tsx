@@ -16,7 +16,7 @@ export default function AcceptTermsPage() {
           <Link href="/" className="inline-block mb-4">
             <Image
               src="/assets/logo-regenerative-tourism-black.svg"
-              alt="Green Passport"
+              alt="The Regenerative Tourism"
               width={130}
               height={30}
               className="h-7 w-auto"
@@ -26,7 +26,7 @@ export default function AcceptTermsPage() {
             One last step
           </h1>
           <p className="text-sm text-muted-foreground max-w-sm">
-            We&apos;ve updated our terms. Please review and accept them to continue using Green Passport.
+            We&apos;ve updated our terms. Please review and accept them to continue using The Regenerative Tourism platform.
           </p>
         </div>
 

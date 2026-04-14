@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical: `/operators/${id}` },
     openGraph: {
-      title: `${name} · Green Passport`,
+      title: `${name} · The Regenerative Tourism`,
       description,
       url: `/operators/${id}`,
       type: "profile",
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${name} · Green Passport`,
+      title: `${name} · The Regenerative Tourism`,
       description,
       images: [`/operators/${id}/opengraph-image`],
     },

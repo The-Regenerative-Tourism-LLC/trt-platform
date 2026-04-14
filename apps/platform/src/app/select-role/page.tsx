@@ -16,16 +16,16 @@ export default function SelectRolePage() {
           <Link href="/" className="inline-block mb-4">
             <Image
               src="/assets/logo-regenerative-tourism-black.svg"
-              alt="Green Passport"
+              alt="The Regenerative Tourism"
               width={130}
               height={30}
               className="h-7 w-auto"
             />
           </Link>
-          <h1 className="fm-sub-heading text-foreground">
-            Welcome to Green Passport
+          <h1 className="fm-sub-heading text-foreground text-center">
+            Welcome to The Regenerative Tourism
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center">
             One last step — tell us how you&apos;ll use the platform
           </p>
         </div>

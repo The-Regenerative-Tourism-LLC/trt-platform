@@ -71,7 +71,7 @@ export function BaseLayout({ preview, children }: BaseLayoutProps) {
             </Link>
           </Text>
           <Text style={styles.footerAddress}>
-            © {new Date().getFullYear()} TRT Platform. All rights reserved.
+            © {new Date().getFullYear()} THE REGENERATIVE TOURISM LLC. All rights reserved.
           </Text>
         </Container>
       </Body>
