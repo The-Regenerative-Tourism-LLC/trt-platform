@@ -187,11 +187,11 @@ export default async function BlogPostPage({ params }: Props) {
       <div className="bg-[#1C1C1C] text-[#FDF5EA]">
         <div className="container mx-auto max-w-4xl px-5 md:px-6 py-14 md:py-20">
           <Link
-            href="/blog"
+            href="/journal"
             className="inline-flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors mb-8 group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-            Back to Blog
+            Back to Journal
           </Link>
 
           <div className="flex items-center gap-3 mb-6">
@@ -279,7 +279,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         <div className="mt-10 text-center">
           <Link
-            href="/blog"
+            href="/journal"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
