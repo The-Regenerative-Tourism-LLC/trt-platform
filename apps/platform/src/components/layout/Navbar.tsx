@@ -111,6 +111,8 @@ export function Navbar() {
         { href: "/discover", label: "Discover" },
         { href: "/destinations", label: "Destinations" },
         { href: "/methodology", label: "Methodology" },
+        { href: "/leaderboard", label: "Impact Record" },
+        { href: "/pricing", label: "Pricing" },
         { href: "/operator/dashboard", label: "Dashboard" },
       ];
     }
