@@ -10,6 +10,7 @@ import {
 import type { OnboardingData } from "@/store/onboarding-store";
 import type { StepShellBaseProps } from "../shell";
 import { StepShell } from "../shell";
+import { uploadPhotoBatch, fetchCurrentPhotos } from "@/lib/photos/upload-batch";
 import {
   FieldGroup,
   NumberInput,
@@ -1157,8 +1158,6 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
 
 // ── Photos ────────────────────────────────────────────────────────────────────
 
-type PhotoRef = NonNullable<OnboardingData["photoRefs"]>[number];
-
 export function PhotosStep({ data, updateField, shell }: StepProps) {
   const photos = data.photoRefs ?? [];
   const [uploading, setUploading] = useState(false);
@@ -1166,24 +1165,18 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (photos.length === 0) return;
-    fetch("/api/v1/operator/photos")
-      .then((r) => r.json())
-      .then((list: Array<{ id: string; storageKey: string; signedUrl: string; isCover: boolean; fileName?: string }>) => {
-        const map: Record<string, string> = {};
-        for (const p of list) map[p.id] = p.signedUrl;
-        setSignedUrls(map);
-        updateField({
-          photoRefs: list.map((p) => ({
-            id: p.id,
-            url: p.storageKey,
-            storageKey: p.storageKey,
-            isCover: p.isCover,
-            fileName: p.fileName,
-          })),
-        });
-      })
-      .catch(() => {});
+    // Always sync from backend on mount — ensures DB and UI are consistent
+    // regardless of whether local draft/store has photos or is empty.
+    // Only update state on success; preserve existing state on any fetch failure.
+    fetchCurrentPhotos((url) => fetch(url).then((r) => ({
+      ok: r.ok,
+      json: () => r.json(),
+    }))).then((result) => {
+      if (result.ok) {
+        setSignedUrls(result.signedUrls);
+        updateField({ photoRefs: result.refs });
+      }
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1196,75 +1189,46 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
     setError(null);
 
     try {
-      const uploaded: PhotoRef[] = [];
-      const newSignedUrls: Record<string, string> = {};
+      await uploadPhotoBatch(files, photos, {
+      presign: (body) =>
+        fetch("/api/v1/storage/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(async (r) => ({ ok: r.ok, status: r.status, json: () => r.json() })),
 
-      for (const file of files) {
-        const fileBuffer = await file.arrayBuffer();
-        const hashBuffer = await crypto.subtle.digest("SHA-256", fileBuffer);
-        const checksumHex = Array.from(new Uint8Array(hashBuffer))
+      putToStorage: (url, blob, contentType) =>
+        fetch(url, { method: "PUT", headers: { "Content-Type": contentType }, body: blob }),
+
+      confirmPhoto: (body) =>
+        fetch("/api/v1/operator/photos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(async (r) => ({ ok: r.ok, status: r.status, json: () => r.json() })),
+
+      setCover: (id) => {
+        fetch(`/api/v1/operator/photos/${id}/set-cover`, { method: "POST" }).catch(() => {});
+      },
+
+      cleanupOrphan: (key) => {
+        fetch(`/api/v1/storage/presign?key=${encodeURIComponent(key)}`, { method: "DELETE" }).catch(() => {});
+      },
+
+      onPhotoSaved: (ref, url, allPhotos) => {
+        setSignedUrls((prev) => ({ ...prev, [ref.id]: url }));
+        updateField({ photoRefs: allPhotos });
+      },
+
+      onError: (msg) => setError(msg),
+
+      sha256hex: async (buffer) => {
+        const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+        return Array.from(new Uint8Array(hashBuffer))
           .map((b) => b.toString(16).padStart(2, "0"))
           .join("");
-
-        const presignRes = await fetch("/api/v1/storage/presign", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            resourceType: "photo",
-            contentType: file.type,
-            sizeBytes: file.size,
-            checksum: checksumHex,
-          }),
-        });
-        if (!presignRes.ok) {
-          const body = await presignRes.json().catch(() => ({}));
-          throw new Error(body.error ?? `Failed to get upload URL (${presignRes.status})`);
-        }
-        const { key, signedUrl: putUrl } = await presignRes.json();
-
-        const uploadRes = await fetch(putUrl, {
-          method: "PUT",
-          headers: { "Content-Type": file.type },
-          body: new Blob([fileBuffer], { type: file.type }),
-        });
-        if (!uploadRes.ok) throw new Error("File upload failed");
-
-        const confirmRes = await fetch("/api/v1/operator/photos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            key,
-            fileName: file.name,
-            mimeType: file.type,
-            sizeBytes: file.size,
-            checksum: checksumHex,
-          }),
-        });
-        if (!confirmRes.ok) {
-          const body = await confirmRes.json().catch(() => ({}));
-          throw new Error(body.error ?? `Upload failed (${confirmRes.status})`);
-        }
-
-        const photo = await confirmRes.json();
-        newSignedUrls[photo.id] = photo.signedUrl;
-        const isFirstPhoto = photos.length === 0 && uploaded.length === 0;
-        if (isFirstPhoto) {
-          await fetch(`/api/v1/operator/photos/${photo.id as string}/set-cover`, { method: "POST" }).catch(() => {});
-        }
-        uploaded.push({
-          id: photo.id as string,
-          url: photo.storageKey as string,
-          storageKey: photo.storageKey as string,
-          isCover: isFirstPhoto,
-          fileName: photo.fileName as string | undefined,
-        });
-      }
-
-      setSignedUrls((prev) => ({ ...prev, ...newSignedUrls }));
-      const next = [...photos, ...uploaded];
-      updateField({ photoRefs: next });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      },
+    });
     } finally {
       setUploading(false);
     }
