@@ -80,6 +80,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unsupported content type" }, { status: 400 });
     }
 
+    if (resourceType === "photo") {
+      const photoLimit = parseInt(process.env.STORAGE_MAX_OPERATOR_PHOTOS ?? "10", 10);
+      const photoCount = await prisma.operatorPhoto.count({
+        where: { operatorId: operator.id },
+      });
+      if (photoCount >= photoLimit) {
+        return NextResponse.json(
+          { error: `Photo limit reached. Max ${photoLimit} photos per operator.` },
+          { status: 422 }
+        );
+      }
+    }
+
     const folder = resourceType === "photo" ? "photos" : "evidence";
     const key = `operators/${operator.id}/${folder}/${randomUUID()}.${ext}`;
     const bucket = resourceType === "photo" ? "public" : "private";
@@ -98,6 +111,68 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     console.error("[POST /api/v1/storage/presign]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+const ORPHAN_PHOTO_KEY_PATTERN =
+  /^operators\/[a-zA-Z0-9]+\/photos\/[a-f0-9-]+\.(jpg|png|webp)$/;
+
+/**
+ * DELETE /api/v1/storage/presign?key=...
+ *
+ * Cleans up an orphaned photo object — one that was PUT to storage but whose
+ * /api/v1/operator/photos confirm call failed. Only deletes if:
+ *   1. The key belongs to the authenticated operator.
+ *   2. No operatorPhoto DB record references the key (truly orphaned).
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await requireSession();
+
+    const { searchParams } = new URL(req.url);
+    const key = searchParams.get("key");
+
+    if (!key || !ORPHAN_PHOTO_KEY_PATTERN.test(key)) {
+      return NextResponse.json({ error: "Invalid key" }, { status: 400 });
+    }
+
+    const operator = await findOperatorByUserId(session.userId);
+    if (!operator) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const keyOperatorId = key.split("/")[1];
+    if (keyOperatorId !== operator.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Safety: only delete if not registered in DB (prevents deleting legitimate photos)
+    const registered = await prisma.operatorPhoto.findFirst({
+      where: { storageKey: key },
+      select: { id: true },
+    });
+    if (registered) {
+      return NextResponse.json(
+        { error: "Photo is registered. Use DELETE /api/v1/operator/photos/:id instead." },
+        { status: 409 }
+      );
+    }
+
+    const storage = getStorageProvider();
+    try {
+      await storage.delete(key, "public");
+    } catch {
+      // Object may not exist — log but don't fail the request
+      console.warn("[DELETE /api/v1/storage/presign] storage delete skipped for key", key);
+    }
+
+    return new NextResponse(null, { status: 204 });
+  } catch (err) {
+    if (err instanceof Error && err.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("[DELETE /api/v1/storage/presign]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
