@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 function storagePublicHostname(): string | null {
   const base = process.env.STORAGE_PUBLIC_BASE_URL;
@@ -53,4 +54,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "the-regenerative-tourism",
+  project: "javascript-nextjs",
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  tunnelRoute: "/sentry-tunnel",
+  silent: !process.env.CI,
+});

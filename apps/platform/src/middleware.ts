@@ -117,6 +117,6 @@ export const config = {
   // This ensures logged-in users without a role are always gated to /select-role,
   // regardless of which public page they try to access.
   matcher: [
-    "/((?!_next/static|_next/image|favicon\\.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|api/|sentry-tunnel|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };
