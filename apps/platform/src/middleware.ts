@@ -16,27 +16,42 @@ function detectLocale(pathname: string): string {
   return match?.[1] ?? "en";
 }
 
-// Wrapper around next-intl's middleware that fixes English-locale paths.
+// Wrapper around next-intl's middleware that handles English routing correctly
+// in Railway's proxy environment.
 //
-// For /pt/... and /es/..., handleI18nRouting returns NextResponse.next() —
-// just a pass-through with the locale header. Works fine everywhere.
+// Root cause (confirmed by logs): in Railway, NextResponse.rewrite() does NOT
+// stay internal — it triggers an actual external HTTP request back through the
+// load balancer. This means the middleware runs a SECOND time for the rewrite
+// destination. With next-intl's default behaviour this creates an infinite loop:
 //
-// For English paths (no locale prefix: /, /signup, /login, /operator/...,
-// etc.), handleI18nRouting builds NextResponse.rewrite(new URL("/en/...",
-// req.url)).  req.url in Railway's proxy environment carries the *external*
-// hostname (e.g. trt-platform-staging.up.railway.app). Next.js compares the
-// rewrite destination against the server's *internal* address (localhost:PORT)
-// and, finding a different host, may treat it as an external HTTP fetch —
-// causing a deadlock where the server waits on itself indefinitely.
+//   1. Request "/"     → middleware rewrites to "/en"  (external HTTP GET)
+//   2. Request "/en"   → next-intl redirects /en → "/" (unnecessary prefix)
+//   3. Browser follows redirect to "/"  →  back to step 1  →  loop
 //
-// Fix: intercept all English (no-prefix) paths and perform the rewrite using
-// req.nextUrl.clone(), which is a NextURL object that Next.js always resolves
-// as an internal route regardless of hostname.
+// Fix — two-part:
+//   A. English paths WITHOUT a locale prefix (/, /signup, /login, …):
+//      rewrite to /en/… so the [locale] App Router segment gets a value.
+//      Use req.nextUrl.clone() (NextURL) rather than new URL(…, req.url) so
+//      that Next.js always resolves it as an internal route.
+//
+//   B. /en/… paths that arrive here as the SECOND request caused by the rewrite
+//      above: serve them directly with NextResponse.next() instead of letting
+//      next-intl redirect back to "/" — that redirect is what causes the loop.
+//
+// /pt/… and /es/… paths are unaffected — next-intl already returns
+// NextResponse.next() for them (no rewrite needed, locale is in the URL).
 function handleI18nRoutingFixed(req: NextRequest): NextResponse {
   const { pathname } = req.nextUrl;
-  const hasLocalePrefix = /^\/(en|pt|es)(\/|$)/.test(pathname);
 
-  if (!hasLocalePrefix) {
+  // Part B: /en or /en/… — serve English content directly, do NOT redirect to /
+  if (/^\/(en)(\/|$)/.test(pathname)) {
+    const headers = new Headers(req.headers);
+    headers.set("X-NEXT-INTL-LOCALE", "en");
+    return NextResponse.next({ request: { headers } });
+  }
+
+  // Part A: no locale prefix → English default → rewrite to /en/…
+  if (!/^\/(pt|es)(\/|$)/.test(pathname)) {
     const url = req.nextUrl.clone();
     url.pathname = pathname === "/" ? "/en" : `/en${pathname}`;
     const headers = new Headers(req.headers);
@@ -44,6 +59,7 @@ function handleI18nRoutingFixed(req: NextRequest): NextResponse {
     return NextResponse.rewrite(url, { request: { headers } });
   }
 
+  // /pt/… and /es/… — next-intl handles these (NextResponse.next() with header)
   return handleI18nRouting(req) as NextResponse;
 }
 
