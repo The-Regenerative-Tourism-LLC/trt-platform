@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
 
 function storagePublicHostname(): string | null {
   const base = process.env.STORAGE_PUBLIC_BASE_URL;
@@ -54,7 +55,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
+export default withSentryConfig(withNextIntl(nextConfig), {
   org: "the-regenerative-tourism",
   project: "javascript-nextjs",
   authToken: process.env.SENTRY_AUTH_TOKEN,

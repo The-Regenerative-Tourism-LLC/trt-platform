@@ -1,7 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
+import { withLocalePath } from "@/i18n/pathname";
 
 export function Footer() {
+  const t = useTranslations("public.footer");
+  const locale = useLocale();
+  const withLocale = (path: string) => withLocalePath(path, locale);
+
   return (
     <footer className="bg-[#1C1C1C] text-[#FDF5EA]">
       <div className="container mx-auto max-w-7xl py-12 md:py-20 px-5 md:px-6">
@@ -18,46 +26,45 @@ export function Footer() {
               />
             </div>
             <p className="text-sm text-white/50 max-w-xs leading-relaxed">
-              A verification layer for tourism — making impact visible at the
-              moment it matters most.
+              {t("tagline")}
             </p>
           </div>
 
           {/* Platform */}
           <div className="md:col-span-3 space-y-4">
             <p className="font-hand text-xl text-white/50">
-              Platform
+              {t("platform")}
             </p>
             <div className="space-y-2.5">
               <Link
-                href="/discover"
+                href={withLocale("/discover")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Discover
+                {t("discover")}
               </Link>
               <Link
-                href="/destinations"
+                href={withLocale("/destinations")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Destinations
+                {t("destinations")}
               </Link>
               <Link
-                href="/signup"
+                href={withLocale("/signup")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Operator Signup
+                {t("operatorSignup")}
               </Link>
               <Link
-                href="/leaderboard"
+                href={withLocale("/leaderboard")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Impact Record
+                {t("impactRecord")}
               </Link>
               <Link
-                href="/pricing"
+                href={withLocale("/pricing")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Pricing
+                {t("pricing")}
               </Link>
             </div>
           </div>
@@ -65,26 +72,26 @@ export function Footer() {
           {/* Journal */}
           <div className="md:col-span-2 space-y-4">
             <p className="font-hand text-xl text-white/50">
-              Journal
+              {t("journal")}
             </p>
             <div className="space-y-2.5">
               <Link
-                href="/journal"
+                href={withLocale("/journal")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Blog
+                {t("blog")}
               </Link>
               <Link
-                href="/journal?tab=press"
+                href={withLocale("/journal?tab=press")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Press &amp; Coverage
+                {t("press")}
               </Link>
               <Link
-                href="/journal?tab=research"
+                href={withLocale("/journal?tab=research")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Scientific Research
+                {t("research")}
               </Link>
             </div>
           </div>
@@ -92,38 +99,38 @@ export function Footer() {
           {/* Methodology */}
           <div className="md:col-span-2 space-y-4">
             <p className="font-hand text-xl text-white/50">
-              Methodology
+              {t("methodology")}
             </p>
             <div className="space-y-2.5">
               <Link
-                href="/methodology"
+                href={withLocale("/methodology")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Full Methodology
+                {t("fullMethodology")}
               </Link>
               <Link
-                href="/methodology?tab=gps"
+                href={withLocale("/methodology?tab=gps")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Green Passport Score
+                {t("gps")}
               </Link>
               <Link
-                href="/methodology?tab=dpi"
+                href={withLocale("/methodology?tab=dpi")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Destination Pressure Index
+                {t("dpi")}
               </Link>
               <Link
-                href="/methodology?tab=tip"
+                href={withLocale("/methodology?tab=tip")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Traveler Impact Profile
+                {t("tip")}
               </Link>
               <Link
-                href="/methodology?tab=evidence"
+                href={withLocale("/methodology?tab=evidence")}
                 className="block text-sm text-white/60 hover:text-white transition-colors"
               >
-                Evidence Framework
+                {t("evidence")}
               </Link>
             </div>
           </div>
@@ -131,29 +138,28 @@ export function Footer() {
 
         <div className="border-t border-white/10 mt-12 md:mt-16 pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-[11px] text-white/40">
-            &copy; {new Date().getFullYear()} The Regenerative Tourism. All
-            rights reserved.
+            {t("copyright", { year: new Date().getFullYear() })}
           </p>
 
           {/* Legal links */}
           <div className="flex flex-wrap gap-4">
             <Link
-              href="/privacy"
+              href={withLocale("/privacy")}
               className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
             >
-              Privacy Policy
+              {t("privacy")}
             </Link>
             <Link
-              href="/terms"
+              href={withLocale("/terms")}
               className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
             >
-              Terms &amp; Conditions
+              {t("terms")}
             </Link>
             <Link
-              href="/cookies"
+              href={withLocale("/cookies")}
               className="text-[11px] text-white/40 hover:text-white/70 transition-colors"
             >
-              Cookie Policy
+              {t("cookies")}
             </Link>
             <a
               href="https://theregenerativetourism.com"

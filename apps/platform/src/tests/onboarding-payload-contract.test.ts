@@ -11,9 +11,9 @@
 
 import { describe, it, expect } from "vitest";
 import { buildPreviewPayload } from "@/hooks/usePreviewScore";
-import { buildScorePayload } from "@/app/operator/onboarding/OperatorOnboardingClient";
+import { buildScorePayload } from "../app/[locale]/operator/onboarding/OperatorOnboardingClient";
 import type { OnboardingData, EvidenceTier } from "@/lib/onboarding/onboarding-steps";
-import { EVIDENCE_TIERS } from "@/app/operator/onboarding/_components/primitives";
+import { EVIDENCE_TIERS } from "../app/[locale]/operator/onboarding/_components/primitives";
 
 // ── Fixture: complete Type A data ─────────────────────────────────────────────
 

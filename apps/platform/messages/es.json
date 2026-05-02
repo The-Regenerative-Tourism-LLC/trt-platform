@@ -1,0 +1,1830 @@
+{
+  "common": {
+    "joinAsOperator": "Unirse como operador",
+    "joinUs": "Únete a nosotros",
+    "forTravelers": "Para viajeros",
+    "exploreMore": "Explorar más",
+    "exploreDestinations": "Explorar destinos",
+    "contactUs": "Contáctanos",
+    "joinUsAsOperator": "Únete como operador",
+    "learnMore": "Saber más",
+    "submissionProfileIncomplete": "Perfil del operador incompleto — territorio no asignado",
+    "submissionFailed": "Error al enviar",
+    "submissionRequestFailed": "No se pudo enviar la evaluación",
+    "unknownStep": "Paso desconocido",
+    "stepNotImplemented": "Este paso aún no se ha implementado.",
+    "stepUnavailable": "El paso \"{stepId}\" aún no está disponible."
+  },
+  "nav": {
+    "methodology": "Metodología",
+    "operators": "Operadores",
+    "destinations": "Destinos",
+    "science": "Ciencia",
+    "pricing": "Precios",
+    "blog": "Blog",
+    "login": "Iniciar sesión",
+    "signup": "Comenzar"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "El primer mapa regenerativo del turismo",
+      "heading": "Impacto de viaje. Visible en el momento de la reserva.",
+      "body": "Estamos construyendo algo que nunca ha existido en el turismo — una capa de impacto en vivo que muestra qué hace el turismo a los lugares, las personas y las comunidades.\n\nPara operadores listos para medir y mejorar — una forma de ser encontrado por viajeros que se preocupan. Para viajeros — una forma de hacer que cada viaje cuente.",
+      "ctaTravelers": "Para viajeros"
+    },
+    "manifesto": {
+      "heading": "No habrá industria turística en un planeta muerto.",
+      "subheading": "Seguimos hablando de viajes sostenibles mientras los lugares que amamos desaparecen silenciosamente. El problema no es que los viajeros no se preocupen. El problema es que preocuparse nunca ha sido suficiente.",
+      "body": "Puedes querer hacer lo correcto y aun así no tener forma de saber si lo estás haciendo. Puedes ser un operador haciendo todo bien — y aun así perder ante alguien que no lo hace. Porque el sistema no fue construido para hacer esa diferencia. Estamos construyendo ese sistema.",
+      "imageCaption": "2026 — Empezamos aquí en Madeira"
+    },
+    "foundingCohort": {
+      "eyebrow": "Cohorte fundadora · Madeira 2026",
+      "heading": "30 operadores.\nUna isla.\nEl primer mapa regenerativo\nen la historia del turismo."
+    },
+    "experiencePreview": {
+      "eyebrow": "Próximamente — Fuera de los caminos trillados.",
+      "heading": "Así es como se ve la reserva cuando el impacto es visible.",
+      "body": "Guía local de Madeira con tours en coche eléctrico a lugares que la mayoría de los visitantes nunca alcanzan. 100% operador local, cero emisiones directas, destinos de baja presión.",
+      "caption": "100% eléctrico · 100% local"
+    },
+    "meetTheScore": {
+      "eyebrow": "Conoce el Green Passport",
+      "heading": "Tu puntuación de impacto verificada — visible en el momento de la reserva.",
+      "pillars": {
+        "footprint": {
+          "title": "Huella Operacional",
+          "desc": "¿Qué tan liviana es tu operación en el planeta? Energía, agua, residuos y carbono — medidos contra datos reales, no estimaciones."
+        },
+        "local": {
+          "title": "Integración Local",
+          "desc": "¿Cuánto de lo que ganas se queda aquí? Empleos locales, proveedores locales, reservas directas."
+        },
+        "regen": {
+          "title": "Contribución Regenerativa",
+          "desc": "¿Qué devuelves activamente? Tus propios programas, iniciativas comunitarias o asociaciones institucionales — siempre que sea real y rastreable."
+        }
+      },
+      "cta": "Tu puntuación Green Passport — verificada y en vivo en la reserva."
+    },
+    "howItWorks": {
+      "eyebrow": "Simple, transparente, verificado",
+      "heading": "Esto es lo que pasa cuando solicitas",
+      "steps": {
+        "assessment": {
+          "num": "01",
+          "title": "Completa tu evaluación",
+          "desc": "Responde preguntas sobre tus operaciones reales — energía, agua, empleo local, lo que devuelves. Sin estimaciones a menos que sea todo lo que tienes. Sin greenwashing."
+        },
+        "verify": {
+          "num": "02",
+          "title": "Verificamos",
+          "desc": "Nuestro equipo revisa tus datos antes de que cualquier cosa se publique. No es automático. No es instantáneo. Riguroso a propósito."
+        },
+        "live": {
+          "num": "03",
+          "title": "Tu puntuación se publica",
+          "desc": "Visible para los viajeros en el momento en que reservan. Todo lo que haces bien — finalmente visible para las personas que buscan exactamente eso."
+        }
+      }
+    },
+    "dpi": {
+      "eyebrow": "Cada destino es diferente",
+      "heading": "El contexto importa.\nNosotros lo medimos también.",
+      "body": "El Índice de Presión de Destino contextualiza tu puntuación según el lugar donde operas — intensidad turística, sensibilidad ecológica, fuga económica.\n\nOperar de manera responsable aquí no es abstracto. Es urgente. Y ahora es medible."
+    },
+    "forwardCommitment": {
+      "heading": "¿Puntuación baja hoy?\nEso es un punto de partida.",
+      "body": "El Green Passport no penaliza — mapea dónde estás. Firma un Compromiso Adelantado, recibe 15 puntos base en el Pilar 3 y sé emparejado con instituciones locales verificadas."
+    },
+    "faq": {
+      "eyebrow": "Preguntas Frecuentes",
+      "heading": "Preguntas Comunes",
+      "items": {
+        "whatIs": {
+          "question": "¿Qué es la plataforma The Regenerative Tourism?",
+          "answer": "Una capa de verificación para el turismo. Medimos y hacemos visible el impacto ambiental y social real de los operadores — en el momento de la reserva."
+        },
+        "greenPassport": {
+          "question": "¿Qué es el Green Passport?",
+          "answer": "Tu identidad de impacto verificada como operador turístico. Una puntuación de 0 a 100 en tres pilares, actualizada cada ciclo, visible para los viajeros cuando reservan."
+        },
+        "different": {
+          "question": "¿En qué se diferencia de las certificaciones de sostenibilidad?",
+          "answer": "La mayoría de las certificaciones son estáticas y difíciles de comparar. Usamos un sistema de puntuación dinámico diseñado para ser visible, transparente y continuamente actualizado."
+        },
+        "verification": {
+          "question": "¿Cómo funciona el proceso de verificación?",
+          "answer": "Los operadores completan una evaluación, envían datos de respaldo y reciben una puntuación verificada. El proceso es estructurado, pero diseñado para ser simple."
+        },
+        "lowScore": {
+          "question": "¿Qué pasa si mi puntuación es baja?",
+          "answer": "Eso es un punto de partida. Proporcionamos Insights y orientación para ayudar a mejorar con el tiempo. El objetivo es el progreso — no la perfección."
+        },
+        "join": {
+          "question": "¿Cómo puedo unirme?",
+          "answer": "Puedes solicitar ser parte de la cohorte fundadora o comenzar la evaluación gratuita para entender tu impacto."
+        }
+      }
+    }
+  },
+  "public": {
+    "shared": {
+      "join": "Unirse",
+      "discover": "Descubrir",
+      "impactRecord": "Registro de Impacto",
+      "journal": "Journal",
+      "overview": "Resumen",
+      "evidence": "Evidencias",
+      "dashboard": "Panel",
+      "operatorDashboard": "Panel del Operador",
+      "adminDashboard": "Panel Admin",
+      "myImpact": "Mi Impacto",
+      "signOut": "Cerrar sesión",
+      "signedIn": "Sesión iniciada",
+      "openMenu": "Abrir menú",
+      "closeMenu": "Cerrar menú"
+    },
+    "footer": {
+      "tagline": "Una capa de verificación para el turismo, haciendo visible el impacto en el momento en que más importa.",
+      "platform": "Plataforma",
+      "discover": "Descubrir",
+      "destinations": "Destinos",
+      "operatorSignup": "Registro de Operador",
+      "impactRecord": "Registro de Impacto",
+      "pricing": "Precios",
+      "journal": "Journal",
+      "blog": "Blog",
+      "press": "Prensa y Cobertura",
+      "research": "Investigación Científica",
+      "methodology": "Metodología",
+      "fullMethodology": "Metodología Completa",
+      "gps": "Green Passport Score",
+      "dpi": "Destination Pressure Index",
+      "tip": "Traveler Impact Profile",
+      "evidence": "Marco de Evidencia",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos y Condiciones",
+      "cookies": "Política de Cookies",
+      "copyright": "© {year} The Regenerative Tourism. Todos los derechos reservados."
+    },
+    "pricing": {
+      "badge": "Precios",
+      "titleLine1": "Una evaluación.",
+      "titleLine2": "Dos formas de usarla.",
+      "subtitle": "Cada operador puede completar la evaluación Green Passport gratis. La publicación en el mapa regenerativo y la puntuación verificada requieren una suscripción.",
+      "free": {
+        "badge": "Autoevaluación",
+        "subtitle": "Completa la evaluación completa sin costo",
+        "features": {
+          "one": "Evaluación completa en los tres pilares",
+          "two": "Puntuación interna visible solo para ti",
+          "three": "Recomendaciones de mejora generadas por IA",
+          "four": "La puntuación no se publica en el mapa",
+          "five": "Sin página pública de Green Passport"
+        },
+        "cta": "Empezar evaluación gratuita"
+      },
+      "founder": {
+        "badge": "Operador Fundador",
+        "subtitle": "Primeros 30 operadores — cohorte Madeira",
+        "notice": "Limitado a 30 plazas — 3 meses gratis para empezar",
+        "features": {
+          "one": "Todo lo del plan gratuito, más:",
+          "two": "Puntuación publicada en el mapa regenerativo",
+          "three": "Página pública de Green Passport",
+          "four": "Guía de contribución del Pilar 3",
+          "five": "Documentación de campo (foto y video)",
+          "six": "Insignia permanente de “Founder”",
+          "seven": "Precio fijo — €29/mes para siempre"
+        },
+        "cta": "Unirse a la cohorte fundadora"
+      },
+      "standard": {
+        "badge": "Standard",
+        "subtitle": "Para operadores que se unen después de la cohorte fundadora",
+        "features": {
+          "one": "Todo lo del plan gratuito, más:",
+          "two": "Puntuación publicada en el mapa regenerativo",
+          "three": "Página pública de Green Passport",
+          "four": "Recomendaciones de mejora con IA",
+          "five": "Widget de verificación integrable",
+          "six": "Panel analítico"
+        },
+        "cta": "Comenzar"
+      },
+      "global": {
+        "eyebrow": "Madeira primero, luego en todas partes",
+        "title": "Estamos lanzando en Madeira y luego iremos al mundo.",
+        "body": "La cohorte fundadora de 30 operadores en Madeira establecerá el primer conjunto de datos regenerativos verificados. Después de esta fase inicial, la capa de evaluación y verificación se abrirá a operadores de todo el mundo.",
+        "cta": "Leer la metodología completa"
+      },
+      "faq": {
+        "title": "Preguntas frecuentes",
+        "items": {
+          "one": {
+            "q": "¿De verdad puedo hacer la evaluación gratis?",
+            "a": "Sí. La evaluación completa en los tres pilares es totalmente gratuita. Verás tu puntuación interna y recibirás recomendaciones para mejorar."
+          },
+          "two": {
+            "q": "¿Qué significa “publicado”?",
+            "a": "Los operadores publicados aparecen en el mapa regenerativo, obtienen una página pública de Green Passport para compartir con huéspedes y pueden integrar un widget de verificación en su propio sitio."
+          },
+          "three": {
+            "q": "¿Qué pasa después del período gratuito de 3 meses para fundadores?",
+            "a": "Los operadores fundadores pasan a €29/mes, una tarifa fijada de forma permanente. Esto incluye verificación continua, documentación de campo y orientación del Pilar 3."
+          },
+          "four": {
+            "q": "No estoy en Madeira, ¿aun así puedo unirme?",
+            "a": "Por supuesto. Cualquier operador del mundo puede completar la evaluación hoy. Una vez que ampliemos más allá de la cohorte fundadora, podrás suscribirte a la tarifa estándar de €60/mes para publicar tu puntuación."
+          }
+        }
+      }
+    },
+    "destinations": {
+      "eyebrow": "Explorar",
+      "title": "Índice de presión del destino",
+      "subtitle": "Cada destino tiene una puntuación medible de presión, combinando intensidad turística, sensibilidad ecológica, fuga económica y desempeño regenerativo.",
+      "searchPlaceholder": "Buscar destinos...",
+      "empty": "No se encontraron destinos",
+      "liveLabel": "En vivo — DPI verificado",
+      "comingSoonLabel": "Próximamente",
+      "comingSoonPill": "Próximamente",
+      "comingSoonBody": "Cada territorio recibirá un DPI calculado científicamente a partir de datos regionales de oficinas estadísticas oficiales, agencias de conservación e investigación económica.",
+      "metrics": {
+        "touristIntensity": "Intensidad Turística",
+        "ecology": "Ecología",
+        "leakage": "Fuga"
+      },
+      "pressure": {
+        "high": "presión alta",
+        "moderate": "presión moderada",
+        "low": "presión baja"
+      }
+    },
+    "science": {
+      "gstc": {
+        "badge": "Alineación de Marco",
+        "title": "Alineación con GSTC",
+        "subtitle": "El Global Sustainable Tourism Council (GSTC) establece la línea de base global para el turismo sostenible. La metodología Green Passport Score se alinea y extiende los criterios GSTC, convirtiendo requisitos cualitativos en métricas cuantitativas y comparables, mientras añade la dimensión de contribución regenerativa que va más allá del cumplimiento.",
+        "mappingTitle": "Mapeo de Criterios",
+        "requirement": "Requisito GSTC",
+        "implementation": "Implementación TRT",
+        "beyondTitle": "Más allá del cumplimiento",
+        "visit": "Visitar sitio de GSTC",
+        "fullMethodology": "Metodología Completa"
+      },
+      "sdgs": {
+        "badge": "Alineación con la Agenda 2030 de la ONU",
+        "title": "Objetivos de Desarrollo Sostenible de la ONU",
+        "subtitle": "El turismo es el único sector económico mencionado explícitamente en tres Objetivos de Desarrollo Sostenible de las Naciones Unidas (ODS 8.9, ODS 12.b, ODS 14.7). Los tres pilares de este marco se conectan directa y verificablemente con cinco ODS.",
+        "visit": "Más información sobre los ODS",
+        "fullMethodology": "Metodología Completa"
+      }
+    },
+    "operators": {
+      "hero": {
+        "badge": "Verificado por Green Passport",
+        "title": "Operadores Regenerativos Verificados",
+        "description": "Cada operador listado aquí ha sido evaluado de forma independiente en tres pilares de impacto regenerativo. Las puntuaciones se calculan, no se declaran.",
+        "noMatch": "Ningún operador coincide con tus filtros",
+        "count": "{count, plural, one {# operador con puntuación GPS publicada} other {# operadores con puntuaciones GPS publicadas}}"
+      },
+      "filters": {
+        "searchLabel": "Buscar",
+        "searchPlaceholder": "Buscar operadores, regiones...",
+        "bandLabel": "Banda GPS",
+        "allBands": "Todas las bandas",
+        "territoryLabel": "Territorio",
+        "allTerritories": "Todos los territorios",
+        "sortLabel": "Ordenar por",
+        "apply": "Aplicar",
+        "active": "Filtros activos:",
+        "clearAll": "Limpiar todo"
+      },
+      "sort": {
+        "recent": "Más Reciente",
+        "score": "Puntuación Más Alta",
+        "name": "Nombre A–Z"
+      },
+      "band": {
+        "regenerativeLeader": "Líder Regenerativo",
+        "regenerativePractice": "Práctica Regenerativa",
+        "advancing": "En Avance",
+        "developing": "En Desarrollo"
+      },
+      "empty": {
+        "title": "No se encontraron operadores",
+        "description": "Intenta ajustar tu búsqueda o filtros.",
+        "clearAll": "Limpiar todos los filtros"
+      },
+      "detail": {
+        "backToAll": "Todos los Operadores",
+        "verifiedBadge": "Pasaporte Verde Verificado",
+        "scoreTitle": "Puntuación del Pasaporte Verde",
+        "p1": {
+          "barLabel": "P1 Huella Operacional",
+          "label": "Huella Operacional",
+          "description": "Intensidad de energía, agua, residuos, carbono y uso del suelo por unidad de actividad."
+        },
+        "p2": {
+          "barLabel": "P2 Integración Local",
+          "label": "Integración Local",
+          "description": "Empleo, adquisiciones, retención de ingresos e implicación comunitaria."
+        },
+        "p3": {
+          "barLabel": "P3 Contribución Regenerativa",
+          "label": "Contribución Regenerativa",
+          "description": "Contribución ecológica, cultural o científica activa con trazabilidad institucional."
+        },
+        "directionTitle": "Dirección de Mejora",
+        "dpsDescriptionPre": "Este operador está",
+        "dpsDescriptionPost": "— midiendo la rapidez y consistencia con que mejora a lo largo de los ciclos de evaluación.",
+        "dps": {
+          "rate": "Tasa de Mejora",
+          "consistency": "Consistencia",
+          "p3Accel": "Aceleración P3"
+        },
+        "forwardCommitment": {
+          "title": "Compromiso Futuro — Pilar 3 en Desarrollo",
+          "description": "Este operador se ha comprometido formalmente con el establecimiento de un programa de contribución regenerativa.",
+          "category": "Categoría",
+          "status": "Estado"
+        },
+        "destinationContext": "Contexto del Destino — {name}",
+        "dpiDescription": "El Índice de Presión del Destino mide la presión ecológica y social a la que está sometido este destino.",
+        "dpiHighImpact": "Elegir un operador con GPS alto en un destino de alta presión es la elección de reserva de mayor impacto.",
+        "dpiMetrics": {
+          "touristIntensity": "Intensidad Turística",
+          "ecologicalSensitivity": "Sensibilidad Ecológica",
+          "economicLeakage": "Fuga Económica",
+          "regenPerformance": "Desempeño Regenerativo"
+        },
+        "historyTitle": "Historial de Evaluaciones",
+        "current": "Actual",
+        "cycle": "Ciclo {n}",
+        "evidenceTitle": "Evidencia Verificada",
+        "evidenceCount": "{count, plural, one {# elemento verificado} other {# elementos verificados}}",
+        "evidenceNote": "La evidencia de indicadores ha sido revisada y verificada por un evaluador TRT. Tier 1 = documentos de fuente primaria · Tier 2 = datos secundarios · Tier 3 = registros de asociaciones institucionales.",
+        "auditTitle": "Verificación y Auditoría",
+        "auditMethodology": "Metodología",
+        "auditComputed": "Calculado",
+        "auditSnapshotId": "ID de Snapshot",
+        "auditDescription": "Esta puntuación es calculada por el Motor de Puntuación TRT — una capa de computación determinista y sin estado. Cualquier GPS puede reproducirse de forma independiente pasando el AssessmentSnapshot y el MethodologyBundle al motor. Las puntuaciones mostradas aquí se leen de ScoreSnapshots persistidos, nunca calculadas en tiempo real."
+      }
+    },
+    "methodology": {
+      "hero": {
+        "eyebrow": "Cómo funciona",
+        "title": "Cómo medimos\nla regeneración",
+        "description": "Tres preguntas que ninguna plataforma de reservas puede responder: ¿Cuál es la huella ambiental de este operador? ¿El dinero se queda en la comunidad? ¿Y el lugar está mejorando porque están aquí?"
+      },
+      "tabs": {
+        "gps": "La Puntuación",
+        "dpi": "El Destino",
+        "tip": "El Viajero",
+        "evidence": "La Evidencia"
+      },
+      "pillars": {
+        "p1": {
+          "num": "P1",
+          "title": "Huella Operacional",
+          "weight": "40 %",
+          "question": "¿Cuán ligeramente toca este operador la tierra?",
+          "explanation": "Medimos cinco cosas que toda operación turística utiliza: energía, agua, residuos, emisiones de carbono y tierra. Para cada una, calculamos cuánto usa el operador por huésped por noche — y lo comparamos con puntos de referencia claros. Menos consumo, mayor puntuación.",
+          "indicators": {
+            "energy": {
+              "code": "Energía",
+              "weight": "30 %",
+              "desc": "Electricidad y combustible por huésped por noche — y cuánto proviene de renovables."
+            },
+            "water": {
+              "code": "Agua",
+              "weight": "25 %",
+              "desc": "Litros consumidos por huésped por noche. Bonificación por captación de agua, reutilización de aguas grises o tratamiento."
+            },
+            "waste": {
+              "code": "Residuos",
+              "weight": "20 %",
+              "desc": "Porcentaje desviado del vertedero — reciclado, compostado o recuperado de otra forma."
+            },
+            "carbon": {
+              "code": "Carbono",
+              "weight": "15 %",
+              "desc": "Huella de carbono por huésped por noche del uso de energía en el sitio."
+            },
+            "site": {
+              "code": "Terreno y Uso del Suelo",
+              "weight": "10 %",
+              "desc": "Integración con el entorno natural — biodiversidad, paisajismo, sensibilidad ecológica."
+            }
+          }
+        },
+        "p2": {
+          "num": "P2",
+          "title": "Integración Local",
+          "weight": "30 %",
+          "question": "¿El dinero se queda en la comunidad?",
+          "explanation": "El turismo puede extraer riqueza de un lugar o reinvertir en él. Este pilar mide cuán profundamente está integrado un operador en la economía local — a través de contratación, abastecimiento, propiedad y vínculos comunitarios.",
+          "indicators": {
+            "employment": {
+              "code": "Empleo",
+              "weight": "35 %",
+              "desc": "Porcentaje de personal local, salarios justos, contratos permanentes, condiciones de trabajo."
+            },
+            "procurement": {
+              "code": "Aprovisionamiento",
+              "weight": "30 %",
+              "desc": "Alimentos, suministros y servicios comprados a empresas locales."
+            },
+            "revenue": {
+              "code": "Retención de Ingresos",
+              "weight": "20 %",
+              "desc": "Ingresos retenidos localmente — reservas directas y propiedad local."
+            },
+            "community": {
+              "code": "Comunidad",
+              "weight": "15 %",
+              "desc": "Participación activa — alianzas, recursos compartidos, actividades culturales."
+            }
+          }
+        },
+        "p3": {
+          "num": "P3",
+          "title": "Contribución Regenerativa",
+          "weight": "30 %",
+          "question": "¿Está este operador mejorando activamente el lugar del que depende?",
+          "explanation": "\"El pilar más difícil.\" Pregunta si el operador va más allá de 'hacer menos daño' y contribuye activamente a restaurar la capacidad ecológica, cultural o científica. Verificado, trazable, adicional.",
+          "indicators": {
+            "scope": {
+              "code": "Alcance",
+              "weight": "40 %",
+              "desc": "Áreas cubiertas — restauración ecológica, preservación cultural, investigación, capacitación comunitaria."
+            },
+            "traceability": {
+              "code": "Trazabilidad",
+              "weight": "30 %",
+              "desc": "¿La contribución puede rastrearse hasta un resultado específico? Un árbol, una especie, un artículo."
+            },
+            "additionality": {
+              "code": "Adicionalidad",
+              "weight": "20 %",
+              "desc": "¿El programa crea algo genuinamente nuevo — en vez de reetiquetar actividades existentes?"
+            },
+            "continuity": {
+              "code": "Continuidad",
+              "weight": "10 %",
+              "desc": "Compromiso durante todo el año vs gesto estacional."
+            }
+          }
+        }
+      },
+      "gpsBands": {
+        "regenerativeLeader": {
+          "band": "Líder Regenerativo",
+          "range": "85+"
+        },
+        "regenerativePractice": {
+          "band": "Práctica Regenerativa",
+          "range": "70 – 84"
+        },
+        "advancing": {
+          "band": "En Avance",
+          "range": "55 – 69"
+        },
+        "developing": {
+          "band": "En Desarrollo",
+          "range": "40 – 54"
+        },
+        "notYetPublished": {
+          "band": "Aún No Publicado",
+          "range": "Menos de 40"
+        }
+      },
+      "dpiComponents": {
+        "touristIntensity": {
+          "label": "Intensidad Turística",
+          "weight": "35 %",
+          "friendly": "¿Cuántos visitantes en relación a la población local? Las islas pequeñas con millones de turistas enfrentan más presión."
+        },
+        "ecologicalSensitivity": {
+          "label": "Sensibilidad Ecológica",
+          "weight": "30 %",
+          "friendly": "¿Cuán frágil es este lugar? Áreas protegidas, cobertura forestal, reservas marinas — lugares que necesitan una gestión cuidadosa."
+        },
+        "economicLeakage": {
+          "label": "Fuga Económica",
+          "weight": "20 %",
+          "friendly": "¿Cuántos ingresos turísticos se quedan en el destino — versus fluir hacia cadenas internacionales y plataformas globales?"
+        },
+        "regenPerformance": {
+          "label": "Desempeño Regenerativo",
+          "weight": "15 %",
+          "friendly": "¿Qué tan bien están rindiendo los operadores locales? Puntuaciones bajas en general significan más presión en el destino."
+        }
+      },
+      "evidenceTiers": {
+        "t1": {
+          "num": "01",
+          "label": "Evidencia directa",
+          "desc": "Lecturas de medidores, facturas de servicios, facturas, registros de nómina."
+        },
+        "t2": {
+          "num": "02",
+          "label": "Documentos de respaldo",
+          "desc": "Certificados de proveedores, informes de terceros, documentación de auditoría."
+        },
+        "t3": {
+          "num": "03",
+          "label": "Auto-declarado",
+          "desc": "Declaraciones del operador — aceptadas pero con menor peso, marcadas para verificación."
+        },
+        "proxy": {
+          "num": "04",
+          "label": "Cálculo proxy",
+          "desc": "Métodos de estimación validados con factor de corrección integrado."
+        }
+      }
+    },
+    "leaderboard": {
+      "hero": {
+        "label": "Comunidad",
+        "title": "Registro de Impacto",
+        "description": "Viajeros clasificados por puntuación de elección acumulada — obtenida mediante reservas regenerativas verificadas, actividades y registros."
+      },
+      "comingSoon": {
+        "title": "Próximamente",
+        "description": "El clasificador de viajeros estará disponible cuando se lancen las cuentas de viajero. Gana puntos reservando operadores verificados, registrándote vía código QR y participando en actividades regenerativas."
+      },
+      "joinAsTraveler": "Unirse como viajero"
+    },
+    "discover": {
+      "hero": {
+        "label": "Descubrir",
+        "title": "Operadores regenerativos verificados",
+        "description": "Explora operadores con Puntuaciones de Pasaporte Verde verificadas. Filtra por territorio, banda o tipo — y encuentra operadores que hacen trabajo real."
+      },
+      "tabs": {
+        "all": "Todos",
+        "stay": "Estancias",
+        "experiences": "Experiencias"
+      },
+      "search": {
+        "placeholder": "Buscar operadores..."
+      },
+      "sort": {
+        "label": "Ordenar",
+        "scoreDesc": "Mayor Puntuación",
+        "scoreAsc": "Menor Puntuación",
+        "nameAsc": "Nombre A-Z"
+      },
+      "filters": {
+        "button": "Filtros",
+        "territory": "Territorio",
+        "band": "Banda",
+        "allTerritories": "Todos los territorios",
+        "allBands": "Todas las bandas",
+        "clear": "Limpiar"
+      },
+      "results": {
+        "count": "{count, plural, one {# operador encontrado} other {# operadores encontrados}}",
+        "empty": "Ningún operador coincide con tus filtros"
+      },
+      "pillars": {
+        "footprint": "Huella",
+        "local": "Local",
+        "regen": "Regen"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de vuelta",
+      "subtitle": "Inicia sesión en tu cuenta.",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Tu contraseña",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión…",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "googleCta": "Continuar con Google",
+      "divider": "o",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Crea una",
+      "errors": {
+        "invalidCredentials": "Correo o contraseña inválidos. Inténtalo de nuevo.",
+        "unexpected": "Algo salió mal. Inténtalo de nuevo."
+      },
+      "validation": {
+        "emailInvalid": "Ingresa un correo válido",
+        "passwordRequired": "La contraseña es obligatoria"
+      }
+    },
+    "signup": {
+      "title": "Crea tu cuenta",
+      "subtitle": "Únete a la capa de verificación para el turismo regenerativo.",
+      "googleCta": "Continuar con Google",
+      "divider": "o",
+      "rolePrompt": "Me uno como",
+      "operator": {
+        "label": "Operador turístico",
+        "description": "Gestiono un alojamiento, tour o experiencia y quiero obtener mi Green Passport Score.",
+        "features": {
+          "gpsAssessment": "Evaluación GPS",
+          "dpiContext": "Contexto DPI",
+          "publicPassport": "Pasaporte público"
+        }
+      },
+      "traveler": {
+        "label": "Viajero",
+        "comingSoon": "Próximamente",
+        "description": "La experiencia para viajeros todavía no está abierta. Únete a la lista de espera para ser el primero cuando se lance.",
+        "cta": "Unirse a la lista de espera →"
+      },
+      "nameLabel": "Nombre completo",
+      "namePlaceholder": "Jane Smith",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "passwordLabel": "Contraseña",
+      "passwordPlaceholder": "Al menos 8 caracteres",
+      "marketingOptIn": "Quiero recibir noticias, consejos y actualizaciones sobre turismo regenerativo. (Opcional)",
+      "termsAgreement": "He leído y acepto los <terms>Términos y Condiciones</terms> y la <privacy>Política de Privacidad</privacy>. <required>*</required>",
+      "submit": "Crear cuenta",
+      "submitting": "Creando cuenta…",
+      "hasAccount": "¿Ya tienes cuenta?",
+      "signIn": "Iniciar sesión",
+      "googleConsent": "Al registrarte con Google, también aceptas nuestros <terms>Términos</terms> y la <privacy>Política de Privacidad</privacy>.",
+      "errors": {
+        "roleRequired": "Selecciona tu rol para continuar",
+        "termsRequired": "Debes aceptar los Términos y Condiciones y la Política de Privacidad",
+        "signupFailed": "No se pudo crear la cuenta. Inténtalo de nuevo.",
+        "accountCreatedSignIn": "¡Cuenta creada! Inicia sesión.",
+        "unexpected": "Algo salió mal. Inténtalo de nuevo."
+      },
+      "validation": {
+        "nameRequired": "El nombre es obligatorio",
+        "emailInvalid": "Ingresa un correo válido",
+        "passwordMin": "La contraseña debe tener al menos 8 caracteres"
+      }
+    },
+    "forgotPassword": {
+      "title": "Restablece tu contraseña",
+      "subtitle": "Ingresa tu correo y te enviaremos un enlace para restablecerla.",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "tu@empresa.com",
+      "submit": "Enviar enlace de restablecimiento",
+      "sending": "Enviando…",
+      "backToLogin": "Volver al inicio de sesión",
+      "rememberPassword": "¿Recordaste tu contraseña?",
+      "signIn": "Iniciar sesión",
+      "success": {
+        "title": "Revisa tu bandeja de entrada",
+        "body": "Si existe una cuenta con <email></email>, recibirás un enlace de restablecimiento en unos minutos.",
+        "hint": "Revisa tu carpeta de spam si no lo ves."
+      },
+      "errors": {
+        "unexpected": "Ocurrió un error inesperado. Inténtalo de nuevo."
+      }
+    },
+    "resetPassword": {
+      "title": "Elige una nueva contraseña",
+      "subtitle": "Tu nueva contraseña debe tener al menos 8 caracteres.",
+      "invalidLink": "Enlace de restablecimiento inválido. Solicita uno nuevo.",
+      "requestNewLink": "Solicitar nuevo enlace",
+      "passwordLabel": "Nueva contraseña",
+      "passwordPlaceholder": "Mín. 8 caracteres",
+      "confirmPasswordLabel": "Confirmar nueva contraseña",
+      "confirmPasswordPlaceholder": "Repite tu contraseña",
+      "submit": "Establecer nueva contraseña",
+      "submitting": "Actualizando…",
+      "success": {
+        "title": "Contraseña actualizada",
+        "body": "Tu contraseña se ha cambiado correctamente. Redirigiendo al inicio de sesión…",
+        "cta": "Ir al inicio de sesión ahora"
+      },
+      "errors": {
+        "mismatch": "Las contraseñas no coinciden.",
+        "passwordMin": "La contraseña debe tener al menos 8 caracteres.",
+        "unexpected": "Ocurrió un error inesperado. Inténtalo de nuevo."
+      }
+    },
+    "verifyEmail": {
+      "verifying": {
+        "title": "Verificando tu correo…",
+        "body": "Esto solo tomará un momento."
+      },
+      "success": {
+        "title": "Correo verificado",
+        "body": "Ahora puedes iniciar sesión en tu cuenta.",
+        "redirecting": "Llevándote a tu panel…",
+        "cta": "Ir al inicio de sesión"
+      },
+      "expired": {
+        "title": "Enlace expirado o ya utilizado"
+      },
+      "checkInbox": {
+        "title": "Revisa tu bandeja de entrada",
+        "body": "Enviamos un enlace de verificación a <email></email>. Haz clic para activar tu cuenta.",
+        "fallbackEmail": "tu dirección de correo"
+      },
+      "resend": {
+        "prompt": "¿No lo recibiste? Solicita un nuevo enlace.",
+        "emailPlaceholder": "tu@email.com",
+        "submit": "Enviar correo de verificación",
+        "sending": "Enviando…",
+        "rateLimit": "Puedes solicitar un correo por minuto."
+      },
+      "backToLogin": "Volver al inicio de sesión",
+      "messages": {
+        "alreadyVerified": "Tu correo ya está verificado. Puedes iniciar sesión.",
+        "sent": "Correo de verificación enviado. Revisa tu bandeja de entrada."
+      },
+      "errors": {
+        "openLink": "Abre el enlace de verificación de tu correo para continuar.",
+        "verificationFailed": "La verificación falló.",
+        "resendFailed": "No se pudo enviar. Inténtalo de nuevo.",
+        "resendUnexpected": "Ocurrió un error. Inténtalo de nuevo.",
+        "unexpected": "Ocurrió un error inesperado. Inténtalo de nuevo."
+      }
+    },
+    "selectRole": {
+      "title": "Bienvenido a The Regenerative Tourism",
+      "subtitle": "Un último paso: dinos cómo usarás la plataforma",
+      "operator": {
+        "label": "Operador turístico",
+        "description": "Gestiono un alojamiento, tour o experiencia y quiero obtener mi Green Passport Score.",
+        "features": {
+          "gpsAssessment": "Evaluación GPS",
+          "dpiContext": "Contexto DPI",
+          "publicPassport": "Pasaporte público"
+        }
+      },
+      "marketingOptIn": "Quiero recibir noticias, consejos y actualizaciones sobre turismo regenerativo. (Opcional)",
+      "termsAgreement": "He leído y acepto los <terms>Términos y Condiciones</terms> y la <privacy>Política de Privacidad</privacy>. <required>*</required>",
+      "submit": "Continuar",
+      "submitting": "Configurando tu cuenta…",
+      "errors": {
+        "roleRequired": "Elige un rol para continuar.",
+        "termsRequired": "Debes aceptar los Términos y Condiciones y la Política de Privacidad para continuar.",
+        "unexpected": "Algo salió mal. Inténtalo de nuevo."
+      }
+    },
+    "acceptTerms": {
+      "title": "Un último paso",
+      "subtitle": "Hemos actualizado nuestros términos. Revísalos y acéptalos para seguir usando la plataforma The Regenerative Tourism.",
+      "marketingOptIn": "Quiero recibir noticias, consejos y actualizaciones sobre turismo regenerativo. (Opcional)",
+      "termsAgreement": "He leído y acepto los <terms>Términos y Condiciones</terms> y la <privacy>Política de Privacidad</privacy>. <required>*</required>",
+      "submit": "Continuar",
+      "submitting": "Guardando…",
+      "footer": "Lee nuestra <privacy>Política de Privacidad</privacy>, los <terms>Términos y Condiciones</terms> y la <cookies>Política de Cookies</cookies>.",
+      "errors": {
+        "termsRequired": "Debes aceptar los Términos y Condiciones y la Política de Privacidad para continuar.",
+        "unexpected": "Algo salió mal. Inténtalo de nuevo."
+      }
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenido a The Regenerative Tourism",
+      "subtitle": "Construyamos tu Green Passport",
+      "start": "Iniciar evaluación",
+      "description": "Esta evaluación toma aproximadamente 20–30 minutos. Puedes guardar y regresar en cualquier momento.",
+      "buildTitle": "Construyamos tu Green Passport",
+      "buildDescription": "Te guiaremos por 4 secciones sobre tu operación. Toma unos 20 minutos — guarda en cualquier momento y vuelve donde lo dejaste.",
+      "autosave": "Tu progreso se guarda automáticamente. Puedes salir y retomar donde lo dejaste.",
+      "nda": "Tus datos están protegidos bajo nuestro NDA. Solo se comparten públicamente puntuaciones agregadas y anonimizadas.",
+      "sectionStarted": "Iniciado",
+      "sections": {
+        "profile": {
+          "label": "Tu operación",
+          "desc": "Información básica sobre tu negocio"
+        },
+        "p1": {
+          "label": "Pilar 1 — Huella Operacional (40%)",
+          "desc": "Energía, agua, residuos, carbono y uso del suelo"
+        },
+        "p2": {
+          "label": "Pilar 2 — Integración Local (30%)",
+          "desc": "Empleo, compras, retención de ingresos y comunidad"
+        },
+        "p3": {
+          "label": "Pilar 3 — Contribución Regenerativa (30%)",
+          "desc": "Cómo mejoras activamente el lugar del que dependes"
+        }
+      }
+    },
+    "navigation": {
+      "next": "Siguiente",
+      "back": "Atrás",
+      "save": "Guardar",
+      "saveAndContinue": "Guardar y continuar",
+      "saveDraft": "Guardar borrador",
+      "saving": "Guardando…",
+      "saved": "Guardado ✓",
+      "saveError": "No se pudo guardar el progreso",
+      "submitting": "Enviando…",
+      "submitAssessment": "Enviar Evaluación",
+      "completeRequired": "Completa los campos requeridos para continuar",
+      "tickConfirm": "Marca la confirmación de arriba para enviar."
+    },
+    "gps": {
+      "preview": "Vista Previa GPS",
+      "notPublished": "Aún No Publicado",
+      "p1": "P1 Huella",
+      "p2": "P2 Integración",
+      "p3": "P3 Contribución"
+    },
+    "privacy": {
+      "nda": "Tus datos están protegidos bajo nuestro NDA. Solo se comparten públicamente puntuaciones agregadas y anonimizadas. Los datos operativos individuales permanecen confidenciales."
+    },
+    "evidenceTier": {
+      "sourceLabel": "¿Cuál es la fuente de estos datos?",
+      "selectPlaceholder": "Selecciona la calidad de la evidencia...",
+      "t1": "T1 — Registros de nómina / contratos de trabajo (×1.00)",
+      "t2": "T2 — Auto-declarado con documentos de respaldo (×0.75)",
+      "t3": "T3 — Auto-declarado, sin documentación (×0.50)",
+      "proxy": "Proxy — Sin registros, usando estimación (×0.25)"
+    },
+    "profile": {
+      "operatorType": {
+        "title": "¿Qué tipo de operador eres?",
+        "subtitle": "Selecciona la categoría que mejor describe tu operación.",
+        "stepTitle": "¿Qué tipo de operación gestionas?",
+        "stepSubtitle": "Esto determina qué preguntas te haremos. Los operadores de alojamiento se comparan por noche de huésped, los operadores de experiencias por día de visitante.",
+        "hotel": "Hotel",
+        "lodge": "Lodge / Eco-lodge",
+        "guesthouse": "Casa de huéspedes / B&B",
+        "hostel": "Hostal",
+        "glamping": "Glamping",
+        "campsite": "Camping",
+        "villa": "Villa / Alojamiento autónomo",
+        "tour": "Operador de tours",
+        "activity": "Proveedor de actividades",
+        "restaurant": "Restaurante",
+        "other": "Otro",
+        "accommodationLabel": "Alojamiento",
+        "accommodationDesc": "Hotel, casa de huéspedes, hostal, BnB, glamping, eco-lodge, surf lodge",
+        "experienceLabel": "Experiencias / Tours",
+        "experienceDesc": "Tours de día, talleres, actividades guiadas, tours fotográficos, viajes en barco",
+        "combinedLabel": "Combinado",
+        "combinedDesc": "Alojamiento Y experiencias — puntuado usando los límites de alojamiento",
+        "accomGateQuestion": "¿Tu operación incluye algún alojamiento nocturno pagado por los huéspedes?",
+        "accomGateYes": "Sí",
+        "accomGateNo": "No",
+        "accomGateWarn": "Parece que puedes ser un operador combinado. Selecciona el Tipo C (Ambos).",
+        "accomGateSelectC": "Volver y seleccionar Tipo C",
+        "confirmedNoAccom": "Confirmado: sin alojamiento pagado",
+        "infoBox": "Esta elección afecta todos los benchmarks de puntuación. Los operadores de alojamiento se miden por noche de huésped; los operadores de experiencias por día de visitante con umbrales más bajos."
+      },
+      "identity": {
+        "title": "Cuéntanos sobre tu operación",
+        "stepTitle": "Sobre tu negocio",
+        "stepSubtitle": "Estos detalles son necesarios para la publicación pero no se puntúan.",
+        "name": "Nombre del negocio",
+        "namePlaceholder": "Nombre de tu negocio",
+        "legalName": "Nombre legal / registrado",
+        "legalNamePlaceholder": "ej. Green Lodge Lda",
+        "tradingName": "Nombre comercial / marca (opcional)",
+        "tradingNamePlaceholder": "ej. The Green Lodge",
+        "website": "Sitio web (opcional)",
+        "websitePlaceholder": "https://",
+        "yearStarted": "Año de inicio de operaciones",
+        "yearStartedPlaceholder": "ej. 2018",
+        "description": "Breve descripción",
+        "descriptionPlaceholder": "Describe tu operación en pocas frases",
+        "location": "Ubicación",
+        "locationPlaceholder": "Busca tu dirección",
+        "locationSection": "Ubicación",
+        "meetingPoint": "Punto de encuentro / dirección base",
+        "fullAddress": "Dirección completa",
+        "destinationRegion": "Destino / región",
+        "destinationRegionPlaceholder": "ej. Madeira",
+        "country": "País",
+        "countryPlaceholder": "ej. Portugal",
+        "noDpiWarning": "Aún no tenemos un DPI calculado para este destino. El cálculo actual usa Madeira como territorio de referencia, por lo que los resultados pueden no reflejar completamente tu mercado local."
+      },
+      "ownership": {
+        "title": "Propiedad",
+        "confidential": "Esta información es confidencial y está protegida bajo nuestro NDA",
+        "ownershipType": "Tipo de propiedad",
+        "selectPlaceholder": "— Seleccionar —",
+        "soleProprietor": "Empresario individual",
+        "localCompany": "Empresa local",
+        "partnership": "Sociedad",
+        "privateCompany": "Empresa privada",
+        "publicCompany": "Empresa pública / grupo",
+        "livesLocally": "¿Vives en la región de destino?",
+        "livesLocallyYes": "Sí — yo/nosotros vivimos localmente",
+        "livesLocallyNo": "No — con base en otro lugar",
+        "localEquity": "% del capital en manos de residentes locales",
+        "chainToggle": "Parte de una cadena hotelera o grupo",
+        "chainName": "Nombre de la cadena / grupo",
+        "chainNamePlaceholder": "Nombre de la cadena o grupo",
+        "stepTitle": "Estructura de propiedad",
+        "stepSubtitle": "Entender quién es el propietario de tu negocio y cómo se opera.",
+        "howStructured": "¿Cómo está legalmente estructurado el negocio?",
+        "localEquityHint": "Porcentaje del capital en manos de residentes en un radio de 50 km de tu operación.",
+        "partOfChain": "¿Parte de una cadena o grupo?",
+        "chainMember": "Miembro de cadena / grupo",
+        "independent": "Independiente",
+        "soloQuestion": "¿Eres un operador individual / propietario-operador?",
+        "soloHint": "Si es así, las métricas de empleo son del 100% y puedes omitir los campos de empleo.",
+        "soloYes": "Sí — operador individual",
+        "soloNo": "No — tengo personal"
+      },
+      "accommodation": {
+        "stepTitle": "Detalles de la propiedad",
+        "stepSubtitle": "Cuéntanos sobre tu alojamiento — esto nos ayuda a establecer los benchmarks correctos.",
+        "propertyType": "Tipo de propiedad",
+        "propertyTypeHint": "Selecciona la categoría que mejor describe tu propiedad.",
+        "rooms": "Número de habitaciones",
+        "roomsHint": "Habitaciones disponibles para alquilar.",
+        "bedCapacity": "Capacidad de camas",
+        "bedCapacityHint": "Máximo de huéspedes simultáneos.",
+        "foodService": "Servicio de alimentación",
+        "foodServiceHint": "¿Qué servicio de A&B ofreces a los huéspedes?",
+        "fullRestaurant": "Restaurante completo",
+        "breakfastOnly": "Solo desayuno",
+        "snacksBar": "Snacks / bar",
+        "noFood": "Sin servicio de alimentación"
+      },
+      "experience": {
+        "stepTitle": "Detalles de la experiencia",
+        "stepSubtitle": "¿Qué tipo de experiencias o tours ofreces? Selecciona todos los que apliquen.",
+        "selectAtLeastOne": "Selecciona al menos un tipo de experiencia."
+      },
+      "activity": {
+        "title": "Actividad operacional",
+        "stepTitle": "Datos de actividad",
+        "stepSubtitle": "La escala de tu operación. Estas cifras normalizan las métricas de intensidad por huésped.",
+        "rooms": "Número de habitaciones / unidades",
+        "beds": "Capacidad total de camas",
+        "employees": "Número de empleados",
+        "founded": "Año de fundación",
+        "annualGuests": "Huéspedes anuales (aproximado)",
+        "guestNights": "Total de noches de huésped",
+        "guestNightsHint": "Suma de noches vendidas a huéspedes en el período de evaluación de 12 meses.",
+        "guestNightsPlaceholder": "ej. 5 000",
+        "visitorDays": "Total de días de visitante",
+        "visitorDaysHint": "Número de visitas individuales / participaciones en tus experiencias.",
+        "visitorDaysPlaceholder": "ej. 2 000",
+        "revenueSplitAccom": "División de ingresos — alojamiento %",
+        "revenueSplitAccomHint": "Proporción de los ingresos anuales totales del alojamiento (debe sumar 100% con las experiencias).",
+        "revenueSplitExp": "División de ingresos — experiencias %",
+        "revenueSplitError": "La división de ingresos debe sumar 100% (actualmente {current}%)."
+      },
+      "operationActivity": {
+        "stepTitleAccom": "Detalles de propiedad y actividad",
+        "stepTitleExp": "Detalles de la experiencia",
+        "stepSubtitle": "Cuéntanos sobre tu operación y su actividad anual.",
+        "accomCategories": "Categorías de alojamiento",
+        "accomCategoriesHint": "Selecciona todos los que apliquen",
+        "roomsLabel": "Número de habitaciones / unidades",
+        "bedCapacityLabel": "Capacidad total de camas",
+        "annualActivity": "Actividad anual",
+        "guestNightsLabel": "Total de noches de huésped (últimos 12 meses)",
+        "guestNightsCalcTitle": "Cómo calcular noches de huésped",
+        "guestNightsCalcBody": "Noches de huésped = número de huéspedes × número de noches de estancia. Por ejemplo, 2 huéspedes que se quedan 3 noches = 6 noches de huésped.",
+        "avgPriceNight": "Precio medio por noche (€)",
+        "foodOnSite": "¿Sirves comida en el lugar?",
+        "foodOnSiteTooltip": "Esto nos ayuda a adaptar la sección de compras — si no sirves comida, no preguntaremos sobre el abastecimiento de alimentos y bebidas.",
+        "foodAgriTip": "Consejo de agroturismo alimentario:",
+        "foodAgriTipBody": "Los operadores con cocinas en el lugar pueden aumentar significativamente su puntuación P2 abasteciendo de granjas y productores locales en un radio de 100 km. Preguntaremos sobre esto en la sección de compras.",
+        "experienceSubcategories": "Subcategorías de experiencias",
+        "experienceSubcategoriesHint": "Selecciona todos los que apliquen",
+        "visitorDaysLabel": "Total de días de visitante (últimos 12 meses)",
+        "visitorDaysTooltip": "Cuenta cada participante por día. Los medios días y sesiones cortas se ponderan fraccionalmente.",
+        "visitorDayDef": "Día de visitante = 8 horas de actividad por participante.",
+        "visitorDayCalc": "Día completo (8h) → 1.00 · Medio día (4h) → 0.50 · Sesión corta (2h) → 0.25",
+        "revenueSplitTitle": "División de ingresos",
+        "revenueSplitAccomPct": "Alojamiento %",
+        "revenueSplitExpPct": "Experiencias %",
+        "revenueSplitMustSum": "Debe sumar 100% (actualmente {current}%).",
+        "fullRestaurantLabel": "Restaurante completo / cocina",
+        "fullRestaurantDesc": "Comidas completas, menú, cocina propia",
+        "breakfastOnlyLabel": "Solo desayuno",
+        "breakfastOnlyDesc": "Desayuno continental o cocinado incluido",
+        "snacksBarLabel": "Snacks / servicio de bar",
+        "snacksBarDesc": "Comida ligera, bebidas o minibar",
+        "noFoodLabel": "Sin servicio de alimentación",
+        "noFoodDesc": "Los huéspedes comen fuera o en self-catering"
+      },
+      "photos": {
+        "title": "Agregar fotos",
+        "stepTitle": "Tu operación, en fotos",
+        "stepSubtitle": "Sube fotos que los viajeros verán. La primera foto se convierte en tu imagen de portada.",
+        "subtitle": "Sube hasta 6 fotos de tu operación.",
+        "upload": "Subir fotos",
+        "addPhotos": "Agregar fotos",
+        "uploading": "Subiendo…",
+        "dragDrop": "Arrastra y suelta o haz clic para subir",
+        "coverBadge": "Portada",
+        "setCover": "Establecer como portada",
+        "remove": "Eliminar",
+        "guidelinesTitle": "Pautas de imagen",
+        "guidelineRatio": "Recomendado: relación 4:3, mínimo 1200×900px",
+        "guidelineResize": "Las imágenes grandes se redimensionan automáticamente a un máximo de 1920px",
+        "guidelineFormat": "JPEG, PNG o WebP — máximo 10MB por archivo",
+        "guidelineDashboard": "Puedes agregar o cambiar fotos en cualquier momento desde tu panel",
+        "photoTip": "¿No tienes fotos profesionales? No hay problema — comparte lo que tienes y podemos ayudarte a crear imágenes pulidas para tu perfil público."
+      }
+    },
+    "p1": {
+      "title": "Pilar 1 — Huella Operacional",
+      "energy": {
+        "title": "Energía",
+        "stepTitle": "Consumo de energía",
+        "stepSubtitle": "Indicador 1A · Peso: 30% del P1 · Impacto GPS: 12%",
+        "renewablePercent": "% de energía de fuentes renovables",
+        "solarInstalled": "¿Energía solar instalada?",
+        "energyAudit": "¿Realizaste una auditoría energética?",
+        "tip": "Incluye paneles solares, turbinas eólicas, energía hidroeléctrica o tarifas de energía verde certificadas.",
+        "multipleBuildings": "Si operas múltiples edificios, ingresa los totales anuales combinados de todos los edificios y medidores.",
+        "primaryFuelType": "Tipo de combustible / transporte principal",
+        "selectFuelType": "Selecciona el tipo de combustible…",
+        "noVehicle": "Sin vehículo — tours a pie, en bicicleta o no motorizados",
+        "diesel": "Diésel — 10,7 kWh/L",
+        "petrol": "Gasolina — 9,5 kWh/L",
+        "marineDiesel": "Diésel marino — 11 kWh/L",
+        "hybrid": "Híbrido — 5,3 kWh/L",
+        "electric": "Eléctrico — 0 emisiones directas",
+        "monthlyElectricVehicle": "Electricidad mensual promedio (vehículo)",
+        "monthlyFuelConsumption": "Consumo mensual promedio de combustible",
+        "noFixedBase": "No tenemos oficina fija, taller ni base de operaciones",
+        "noFixedBaseDesc": "Operaciones móviles — nos encontramos con clientes en senderos, puertos, etc.",
+        "officeElectricity": "Electricidad de oficina / base",
+        "officeElectricityHint": "Solo consumo del edificio — NO incluyas la carga de vehículos",
+        "totalElectricity": "Total de electricidad consumida (anual)",
+        "totalElectricityTooltip": "De la factura anual de servicios",
+        "totalGas": "Total de gas / GLP consumido (anual)",
+        "totalGasHint": "Si no hay gas: 0. 1 kg GLP = 13,9 kWh",
+        "renewableSection": "Energía renovable",
+        "onsiteRenewable": "% de generación renovable en el sitio",
+        "onsiteRenewableDesc": "Solar FV, eólica. Si ninguna: 0",
+        "tariffRenewable": "% de tarifa de energía renovable",
+        "tariffRenewableDesc": "Certificado de tarifa verde del proveedor de energía. Si ninguno: 0",
+        "gridExport": "Energía exportada a la red (anual)",
+        "gridExportTooltip": "Energía renovable excedente (solar, eólica, etc.) devuelta a la red pública. Reduce tu consumo neto de energía y huella de carbono.",
+        "gridExportHint": "De tu inversor o factura de medición neta. Si ninguna: 0",
+        "liveComputation": "Cálculo en Tiempo Real",
+        "netConsumption": "Consumo neto de energía",
+        "energyIntensity": "Intensidad energética",
+        "renewablePct": "% renovable",
+        "subScore1A": "Sub-puntuación 1A",
+        "evidenceSource": "¿Cuál es la fuente de estos datos de energía?",
+        "selectEvidenceQuality": "Selecciona la calidad de la evidencia…",
+        "evidenceT1": "T1 — Factura de servicios / lectura de medidor (×1.00)",
+        "evidenceT2": "T2 — Estimación del proveedor / auditoría energética (×0.75)",
+        "evidenceT3": "T3 — Cálculo propio / registros (×0.50)",
+        "evidenceProxy": "Proxy — Sin registros, usando estimación (×0.25)"
+      },
+      "water": {
+        "title": "Agua",
+        "stepTitle": "Uso del agua",
+        "stepSubtitle": "Indicador 1B · Peso: 25% del P1 · Impacto GPS: 10%",
+        "collectionSystem": "¿Sistema de recolección de agua de lluvia?",
+        "recyclingSystem": "¿Reciclaje de aguas grises?",
+        "consumptionTracked": "¿Monitoreas el consumo de agua?",
+        "tip": "La gestión del agua es especialmente importante en destinos con estrés hídrico.",
+        "totalWater": "Total de agua consumida (anual)",
+        "totalWaterHint": "Del medidor de agua o facturas de servicios. 1 m³ = 1 000 litros.",
+        "recirculationTitle": "Prácticas de recirculación de agua",
+        "recirculationDesc": "Cada práctica agrega +3,3 puntos (máx. +9,9). Selecciona todas las que apliquen.",
+        "greywaterLabel": "Sistema de reciclaje de aguas grises",
+        "rainwaterLabel": "Cosecha de agua de lluvia",
+        "wastewaterLabel": "Tratamiento de aguas residuales en el sitio",
+        "liveComputation": "Cálculo en Tiempo Real",
+        "waterIntensity": "Intensidad hídrica",
+        "recirculationBonus": "Bonificación de recirculación",
+        "subScore1B": "Sub-puntuación 1B",
+        "evidenceSource": "¿Cuál es la fuente de estos datos de agua?",
+        "selectEvidenceQuality": "Selecciona la calidad de la evidencia…",
+        "evidenceT1": "T1 — Facturas de agua / lecturas de medidor (×1.00)",
+        "evidenceT2": "T2 — Datos del proveedor / informes de agua (×0.75)",
+        "evidenceT3": "T3 — Estimación interna (×0.50)",
+        "evidenceProxy": "Proxy — Sin datos, estimado (×0.25)"
+      },
+      "waste": {
+        "title": "Residuos",
+        "stepTitle": "Gestión de residuos",
+        "stepSubtitle": "Indicador 1C · Peso: 20% del P1 · Impacto GPS: 8%",
+        "recyclingProgram": "¿Programa activo de reciclaje?",
+        "compostingProgram": "¿Compostaje?",
+        "singleUsePlastic": "¿Política de plástico de un solo uso?",
+        "tip": "Las prácticas circulares de residuos reducen significativamente tu huella ambiental.",
+        "estimationTitle": "Cómo estimar tus residuos anuales:",
+        "estimationBody": "La mayoría de los operadores no pesan los residuos diariamente — está bien. Usa uno de estos métodos estándar:",
+        "bagCountMethod": "Método de conteo de bolsas:",
+        "bagCountDesc": "Cuenta bolsas por semana × peso promedio de la bolsa (una bolsa de basura estándar de 120L ≈ 8–12 kg) × 52 semanas.",
+        "containerMethod": "Método de contenedores:",
+        "containerDesc": "Número de recolecciones × capacidad del contenedor (ej. contenedor de 240L ≈ 20 kg, contenedor de 1100L ≈ 90 kg).",
+        "invoiceMethod": "Método de factura:",
+        "invoiceDesc": "Consulta tus facturas de recolección de residuos para datos de tonelaje o volumen.",
+        "estimationNote": "Si aún no lo sabes, déjalo en blanco — puedes hacer seguimiento por una semana y volver a completarlo.",
+        "totalWaste": "Total de residuos producidos en los últimos 12 meses (kg)",
+        "totalWasteHint": "Todos los flujos de residuos combinados: general, reciclable, orgánico, peligroso",
+        "breakdownIntro": "Desglosa tus {total} kg en las categorías a continuación. Lo restante ({remaining} kg) se asume que va al vertedero.",
+        "recycled": "Reciclado (kg)",
+        "recycledHint": "Papel, plástico, vidrio, metal enviados a reciclaje. Consulta con tu recolector de residuos el tonelaje de reciclaje.",
+        "composted": "Compostado (kg)",
+        "compostedHint": "Restos de comida, residuos de jardín compostados en el sitio o fuera.",
+        "otherDiverted": "Otra desviación (kg)",
+        "otherDivertedHint": "Donado, reutilizado o cualquier otro residuo mantenido fuera del vertedero (textiles, electrónicos, escombros).",
+        "sentToLandfill": "Enviado al vertedero",
+        "diversionRate": "Tasa de desviación",
+        "bonusPractices": "Prácticas de bonificación (máx. +13 pts)",
+        "noSingleUsePlastics": "Plásticos de un solo uso eliminados (+5 pts)",
+        "foodWasteProgramme": "Programa activo de reducción de desperdicio alimentario (+5 pts)",
+        "wasteEducation": "Educación de huéspedes/personal sobre residuos (+3 pts)",
+        "liveComputation": "Cálculo en tiempo real",
+        "wasteDiversionRate": "Tasa de desviación de residuos",
+        "bonusPoints": "Puntos de bonificación",
+        "subScore1C": "Sub-puntuación 1C",
+        "evidenceSource": "¿Cuál es la fuente de estos datos?",
+        "selectEvidenceQuality": "Selecciona la calidad de la evidencia…",
+        "evidenceT1": "T1 — Manifiesto de residuos / informe del transportista (×1.00)",
+        "evidenceT2": "T2 — Datos del proveedor / contratista de residuos (×0.75)",
+        "evidenceT3": "T3 — Estimación interna (×0.50)",
+        "evidenceProxy": "Proxy — Sin datos, estimación de referencia (×0.25)"
+      },
+      "carbon": {
+        "title": "Carbono",
+        "stepTitle": "Emisiones de carbono",
+        "stepSubtitle": "Indicador 1D · Peso: 15% del P1 · Impacto GPS: 6%",
+        "emissionsTracked": "¿Mides tus emisiones de carbono?",
+        "offsetProgram": "¿Programa de compensación de carbono?",
+        "electricVehicles": "¿Vehículos eléctricos o de bajas emisiones?",
+        "tip": "Monitorear las emisiones es el primer paso para reducirlas.",
+        "autoCalcInfo": "Calculamos automáticamente tus emisiones de carbono a partir de los datos de energía que ya proporcionaste. No se necesita entrada adicional para el Alcance 1 y 2.",
+        "autoCalcTitle": "Valores de emisión calculados automáticamente",
+        "gridFactor": "Factor de emisión de la red: 0,149 kgCO₂/kWh (Portugal, IEA 2023)",
+        "scope1Label": "Alcance 1 — Directo (gas, combustión de combustibles)",
+        "scope2Label": "Alcance 2 — Electricidad (kWh × factor de red × (1 − % tarifa verde))",
+        "scope3Label": "Alcance 3 — Otras emisiones indirectas (kgCO₂)",
+        "scope3Hint": "Opcional. Incluye fugas de refrigerante, viajes de negocios, transporte de residuos y desplazamientos de huéspedes. Déjalo en blanco si aún no lo has medido — no afectará negativamente tu puntuación.",
+        "scope3Title": "¿Cómo se usa el Alcance 3?",
+        "scope3Body": "El Alcance 3 no está incluido en tu puntuación de Intensidad de Carbono (1D) — solo cuentan los Alcances 1 y 2. Este campo se recopila para transparencia e informes futuros.",
+        "scope3Sources": "Si lo monitoreas, las fuentes comunes incluyen:",
+        "scope3Source1": "Transporte de huéspedes desde/hacia tu propiedad",
+        "scope3Source2": "Fuga de gas refrigerante (sistemas HVAC)",
+        "scope3Source3": "Desplazamientos del personal y viajes de negocios",
+        "scope3Source4": "Transporte de recolección y eliminación de residuos",
+        "liveComputation": "Cálculo en tiempo real",
+        "totalEmissions": "Emisiones totales",
+        "carbonIntensity": "Intensidad de carbono",
+        "subScore1D": "Sub-puntuación 1D",
+        "evidenceSource": "¿Cuál es la fuente de estos datos?",
+        "selectEvidenceQuality": "Selecciona la calidad de la evidencia…",
+        "evidenceT1": "T1 — Factura de servicios / lectura de medidor (×1.00)",
+        "evidenceT2": "T2 — Estimación del proveedor / auditoría energética (×0.75)",
+        "evidenceT3": "T3 — Cálculo propio / registros (×0.50)",
+        "evidenceProxy": "Proxy — Sin registros, usando estimación (×0.25)"
+      },
+      "site": {
+        "title": "Sitio y Biodiversidad",
+        "stepTitle": "Sitio y uso del suelo",
+        "stepSubtitle": "Indicador 1E · Peso: 10% del P1 · Impacto GPS: 4%",
+        "nativeVegetation": "¿Vegetación nativa en el sitio?",
+        "wildlifeProtection": "¿Medidas de protección de la fauna?",
+        "certifiedOrganic": "¿Alimentos/productos orgánicos certificados?",
+        "tip": "Proteger los ecosistemas locales es una parte central de la práctica regenerativa.",
+        "environmentQuestion": "¿Cómo describirías el entorno natural que rodea tu operación?",
+        "selectPlaceholder": "Seleccionar",
+        "pristineNatural": "Natural pristino — remoto, impacto humano mínimo",
+        "lowImpactNatural": "Natural de bajo impacto — mayoritariamente natural con infraestructura limitada",
+        "mixed": "Mixto — combinación de áreas naturales y desarrolladas",
+        "mostlyDeveloped": "Mayoritariamente desarrollado — predominantemente urbano o construido",
+        "fullyUrban": "Totalmente urbano — completamente desarrollado, sin entornos naturales",
+        "p1SummaryTitle": "Pilar 1: Huella Operacional (40% del GPS)",
+        "p1Formula": "P1 = p1a×0.30 + p1b×0.25 + p1c×0.20 + p1d×0.15 + p1e×0.10",
+        "footprintScore": "Puntuación de huella",
+        "gpsContribution": "Contribución GPS (P1 × 0.40)"
+      }
+    },
+    "p2": {
+      "title": "Pilar 2 — Integración Local",
+      "employment": {
+        "title": "Empleo",
+        "stepTitle": "Tu equipo",
+        "stepSubtitle": "Indicador 2A · Composición del personal, contratación local, tipos de contrato y salarios",
+        "localEmploymentPercent": "% del personal de la comunidad local",
+        "livingWage": "¿Pagas un salario digno?",
+        "trainingPrograms": "¿Programas de capacitación / desarrollo profesional?",
+        "tip": "El empleo local mantiene el valor en la comunidad.",
+        "confidentialTitle": "Datos de empleo",
+        "confidentialSubtitle": "Confidencial — protegido bajo NDA",
+        "soloToggle": "Soy un operador individual (sin empleados)",
+        "soloToggleDesc": "Empleo local = 100%, contratos permanentes = 100%",
+        "seasonalToggle": "Mi operación es estacional (opera < 9 meses/año)",
+        "seasonalToggleDesc": "% de contrato permanente con suelo del 50% solo en puntuación",
+        "soloSummaryTitle": "Operador individual",
+        "soloSummaryDesc": "Las métricas de empleo son del 100% por defecto para operadores individuales. Puedes continuar.",
+        "totalFteLabel": "Total FTE (equivalentes a tiempo completo)",
+        "totalFteTooltip": "Suma de todas las horas del personal / semana de 40h. Tiempo parcial = 0,5 FTE.",
+        "localFteLabel": "FTE local (en un radio de 100 km)",
+        "localFteTooltip": "Personal cuya residencia principal está en un radio de 100 km.",
+        "localFteError": "El FTE local no puede superar el FTE total.",
+        "permanentContractLabel": "% en contratos permanentes o de larga duración",
+        "permanentContractTooltip": "Incluye personal permanente + contratos de más de 6 meses. Los familiares que trabajan regularmente cuentan como permanentes aunque no tengan contratos formales.",
+        "familyRunTip": "Consejo para negocios familiares:",
+        "familyRunBody": "Los miembros de la familia que trabajan regularmente en el negocio cuentan como personal permanente, aunque no tengan contratos de trabajo formales. Cuéntalos en tu % permanente.",
+        "avgWageLabel": "Salario bruto mensual promedio",
+        "avgWageTooltip": "Promedio de todo el personal local, bruto antes de impuestos.",
+        "minimumWageTip": "Salario mínimo local: €870/mes (Portugal, 2024). El componente salarial alcanza su máximo (50 pts) en 2× el salario mínimo nacional de referencia (€1740/mes)."
+      },
+      "procurement": {
+        "title": "Compras Locales",
+        "stepTitle": "¿De dónde compras?",
+        "stepSubtitle": "Indicador 2B · Peso: 30% del P2 · Impacto GPS: 9%",
+        "localSuppliersPercent": "% de suministros de fuentes locales",
+        "farmToTable": "¿Del campo a la mesa o relaciones directas con agricultores?",
+        "tip": "Las compras locales reducen emisiones y apoyan economías locales.",
+        "confidentialTitle": "Datos de compras",
+        "confidentialSubtitle": "Datos financieros — protegidos bajo NDA",
+        "infoBox": "Estos datos miden cuánto de tu gasto se queda en la economía local. Comparamos el gasto local vs total para calcular tu Tasa de Compras Locales — un indicador clave del P2.",
+        "fbTitle": "Abastecimiento de alimentos y bebidas",
+        "fbContext": "Indicaste {fsLabel} — cuéntanos cuánto gastas en alimentos y bebidas y qué % proviene de proveedores locales.",
+        "totalFbSpend": "Gasto anual total en A&B",
+        "localFbSpend": "De proveedores locales (en un radio de 100 km)",
+        "fbWarning": "El gasto local en A&B no puede superar el total.",
+        "nonFbTitle": "Suministros operativos no alimentarios",
+        "totalNonFbSpend": "Gasto anual total no alimentario",
+        "localNonFbSpend": "De proveedores locales (en un radio de 100 km)",
+        "nonFbWarning": "El gasto local no alimentario no puede superar el total."
+      },
+      "revenue": {
+        "title": "Ingresos y Reservas",
+        "stepTitle": "Cómo los huéspedes te encuentran y reservan",
+        "stepSubtitle": "Indicador 2C · Peso: 20% del P2 · Impacto GPS: 6%",
+        "directBookingPercent": "% de reservas directas (no OTA)",
+        "localPartnerships": "¿Asociaciones con actividades/tours locales?",
+        "tip": "Las reservas directas significan más ingresos para ti y tu comunidad.",
+        "infoBox": "Las reservas directas mantienen más ingresos en tu negocio y señalan una base de huéspedes leal. Las plataformas se cuentan pero se ponderan más bajo en la puntuación P2.",
+        "totalBookings": "Total de reservas en los últimos 12 meses",
+        "totalBookingsTooltip": "Recuento de reservas completadas (llegadas) en el último período de 12 meses.",
+        "directBookingPct": "% reservado directamente contigo",
+        "directBookingTooltip": "Reservas realizadas a través de tu propio sitio web, teléfono, correo electrónico o en persona — excluyendo cualquier OTA o plataforma.",
+        "allDirectToggle": "Todas nuestras reservas son directas — sin plataformas",
+        "allDirectToggleDesc": "Establece tu tasa de reserva directa en 100%",
+        "localOwnershipPct": "% propiedad / capital local",
+        "localOwnershipTooltip": "Porcentaje del negocio en manos de residentes en un radio de 100 km.",
+        "localOwnershipNote": "Prellenado de tu perfil de negocio. Editable aquí.",
+        "whereBookingTitle": "¿Dónde están reservando tus huéspedes?",
+        "directBookingsLabel": "Reservas directas",
+        "platformsLabel": "A través de plataformas en línea"
+      },
+      "community": {
+        "title": "Comunidad",
+        "stepTitle": "Participación comunitaria",
+        "stepSubtitle": "Indicador 2D · Peso: 15% del P2 · Impacto GPS: 4,5%",
+        "communityInvestment": "¿Inviertes en proyectos de la comunidad local?",
+        "culturalPrograms": "¿Programas de patrimonio cultural?",
+        "tip": "La inversión comunitaria fortalece tu puntuación de integración local.",
+        "engagementQuestion": "¿Cómo describirías la participación de tu operación con la comunidad local?",
+        "selectEngagement": "Selecciona el nivel de participación...",
+        "deeplyIntegrated": "Profundamente integrado — acceso comunitario formal, programación cultural, 2+ asociaciones con organizaciones locales",
+        "activeEngagement": "Participación activa — participación regular en eventos locales e iniciativas comunitarias",
+        "moderatePresence": "Presencia moderada — algunas actividades comunitarias o patrocinios locales",
+        "minimalInteraction": "Interacción mínima — limitada a abastecimiento local o referencias ocasionales",
+        "noEngagement": "Sin participación — sin involucramiento comunitario significativo",
+        "p2SummaryTitle": "Pilar 2: Integración Local (30% del GPS)",
+        "p2Formula": "P2 = p2a×0.35 + p2b×0.30 + p2c×0.20 + p2d×0.15",
+        "integrationScore": "Puntuación de integración",
+        "gpsContribution": "Contribución GPS (P2 × 0.30)"
+      }
+    },
+    "p3": {
+      "title": "Pilar 3 — Contribución Regenerativa",
+      "status": {
+        "title": "Estado Regenerativo",
+        "stepTitle": "Devolviendo a tu destino",
+        "stepSubtitle": "Pilar 3: Contribución Regenerativa — 30% de tu puntuación total.",
+        "hasProgram": "¿Tienes un programa regenerativo activo?",
+        "tip": "Un programa regenerativo restaura o mejora activamente el ecosistema local o la comunidad.",
+        "activePartner": "Programa activo con una organización asociada",
+        "activePartnerDesc": "ONG, universidad, organismo público — puntuación completa",
+        "ownProgramme": "Programa propio — autogestionado",
+        "ownProgrammeDesc": "Sin socio externo — puntuación completa",
+        "informalContributions": "Contribuciones informales — aún no formalizadas",
+        "informalContributionsDesc": "Puntuación completa, pero la trazabilidad probablemente sea menor",
+        "forwardCommitment": "Compromiso adelantado — quiero empezar, aún no activo",
+        "forwardCommitmentDesc": "P3 = 15 (crédito parcial). Te emparejamos con un socio local.",
+        "notApplicable": "No aplica por ahora",
+        "notApplicableDesc": "P3 = 0. Saltar al siguiente paso."
+      },
+      "programme": {
+        "title": "Detalles del Programa",
+        "stepTitle": "Tu programa de contribución",
+        "name": "Nombre del programa",
+        "description": "Describe tu programa",
+        "partner": "Socio institucional (si lo hay)",
+        "tip": "Los programas con socios institucionales puntúan más alto debido a la responsabilidad.",
+        "informalCapTitle": "Límite de trazabilidad para contribuciones informales",
+        "informalCapBody": "Las contribuciones informales están limitadas a 'Parcialmente trazable' (50) en la dimensión de Trazabilidad. Para desbloquear puntuaciones de Trazabilidad más altas, formaliza tu programa con un socio institucional (Estado A o B).",
+        "categoryTitle": "¿Qué categorías de contribución cubre tu programa?",
+        "categorySubtitle": "3A — Alcance de Categorías (40% del P3) · 1 categoría = 50, 2 = 75, 3+ = 100",
+        "traceabilityTitle": "¿Qué tan verificable es el impacto de forma independiente?",
+        "traceabilitySubtitle": "3B — Trazabilidad (30% del P3)",
+        "additionalityTitle": "¿En qué medida existiría este programa sin ti?",
+        "additionalitySubtitle": "3C — Adicionalidad (20% del P3)",
+        "continuityTitle": "¿Qué tan establecido está este programa de contribución?",
+        "continuitySubtitle": "3D — Continuidad (10% del P3)",
+        "contextTitle": "Contexto de soporte (no puntuado)",
+        "programmeDescription": "Descripción del programa",
+        "programmeDescriptionHint": "Mín. 50 caracteres",
+        "programmeDescriptionPlaceholder": "Describe tu programa de contribución...",
+        "howLongRunning": "¿Cuánto tiempo lleva en funcionamiento?",
+        "selectDuration": "Seleccionar",
+        "lessThan1": "Menos de 1 año",
+        "oneToThree": "1–3 años",
+        "moreThan3": "Más de 3 años",
+        "startingNow": "Comenzando ahora",
+        "annualBudget": "Presupuesto anual",
+        "partnerName": "Nombre de la institución asociada",
+        "partnerNameHint": "Si aplica",
+        "partnerNamePlaceholder": "ej. Universidad de Madeira",
+        "isCollective": "Este es un programa colectivo/compartido",
+        "p3SummaryTitle": "Pilar 3: Contribución Regenerativa (30% del GPS)",
+        "p3Formula": "P3 = p3a×0.40 + p3b×0.30 + p3c×0.20 + p3d×0.10",
+        "contributionScore": "Puntuación de contribución",
+        "gpsContribution": "Contribución GPS (P3 × 0.30)",
+        "traceabilityFullyVerified": "Totalmente verificado — múltiples instituciones, datos revisados por pares",
+        "traceabilityStrong": "Sólido — socio académico con informes de impacto firmados",
+        "traceabilityGood": "Bueno — ONG local con documentación firmada",
+        "traceabilityBasic": "Básico — socio local, acuerdo informal",
+        "traceabilitySelfReported": "Solo auto-reportado — sin validación externa",
+        "additionalityEntirelyDependent": "Totalmente dependiente — no existiría sin ti",
+        "additionalitySignificant": "Significativamente dependiente — motor principal",
+        "additionalityModerate": "Moderadamente — formalizó algo preexistente",
+        "additionalitySome": "Alguna — contribución financiera pero continuaría",
+        "additionalityMinimal": "Mínima — el programa ocurriría de todas formas",
+        "continuityLongTerm": "Largo plazo — 3+ años con presupuesto anual dedicado",
+        "continuityEstablished": "Establecido — 1–3 años, compromiso plurianual escrito",
+        "continuityGrowing": "En crecimiento — menos de 1 año, presupuesto formal asignado",
+        "continuityStarting": "Comenzando — intención documentada, etapas muy tempranas",
+        "continuityAdHoc": "Ad hoc — sin compromiso formal ni presupuesto",
+        "selectPlaceholder": "Seleccionar"
+      },
+      "forwardCommitment": {
+        "title": "Compromiso Adelantado",
+        "stepTitle": "Compromiso adelantado",
+        "stepSubtitle": "Declara tu compromiso de activar un programa regenerativo en un ciclo futuro.",
+        "sign": "Firmar un Compromiso Adelantado",
+        "description": "Al firmar, te comprometes con objetivos de mejora medibles y ganas 15 puntos base.",
+        "tip": "El Compromiso Adelantado señala la intención de mejorar, incluso desde una base baja.",
+        "statusTitle": "Estado D — Compromiso Adelantado",
+        "statusBody": "Tu puntuación P3 será 0 en este ciclo. Tu GPS se calcula solo del Pilar 1 y Pilar 2, renormalizado a 0–100. Se creará un Registro de Compromiso Adelantado al enviar.",
+        "preferredCategory": "Categoría de contribución preferida",
+        "preferredCategoryHint": "¿Qué categoría se adapta mejor a tu territorio y operación?",
+        "selectCategory": "— Seleccionar —",
+        "territoryContext": "Contexto del territorio",
+        "territoryContextHint": "Describe la necesidad ecológica, cultural o científica en tu territorio. Máx. 200 palabras.",
+        "territoryContextPlaceholder": "¿Por qué esta categoría se adapta a tu territorio?",
+        "institutionType": "Tipo de institución preferida",
+        "institutionTypeHint": "¿Con qué tipo de institución pretendes asociarte?",
+        "selectInstitution": "— Seleccionar —",
+        "institutionNgo": "ONG / Sin fines de lucro",
+        "institutionUniversity": "Universidad / Institución de investigación",
+        "institutionGovernment": "Gobierno / Agencia pública",
+        "institutionCommunity": "Organización comunitaria",
+        "institutionOther": "Otro",
+        "targetCycle": "Ciclo de activación objetivo",
+        "targetCycleHint": "¿En qué ciclo de evaluación te comprometes a tener un socio activo?",
+        "signatory": "Firmante autorizado",
+        "signatoryHint": "Nombre legal completo de la persona que firma este compromiso.",
+        "signatoryPlaceholder": "ej. María Silva",
+        "signatureDate": "Fecha de firma"
+      }
+    },
+    "evidence": {
+      "title": "Evidencia",
+      "checklist": {
+        "title": "Lista de Verificación de Evidencias",
+        "stepTitle": "Lista de verificación de evidencias",
+        "stepSubtitle": "Marca lo que puedes proporcionar — cada documento impacta directamente tu GPS.",
+        "subtitle": "Sube documentos de respaldo para tus respuestas.",
+        "upload": "Subir documento",
+        "tip": "La evidencia verificada mejora tu nivel de puntuación de Declarado a Verificado.",
+        "liveGpsTitle": "Vista Previa GPS en Vivo",
+        "notYetPublished": "Aún No Publicado",
+        "missingEvidenceWarning": "La evidencia faltante reduce tu puntuación en 19,5 puntos",
+        "documentsReady": "{count} de {total} documentos listos",
+        "documentsNote": "No te preocupes si no tienes todo ahora — puedes subir desde tu panel en cualquier momento.",
+        "p1SectionTitle": "Huella Operacional",
+        "p1Badge": "Nivel requerido",
+        "p2SectionTitle": "Integración Local",
+        "p2Badge": "Nivel requerido",
+        "detailedTitle": "Verificación Detallada",
+        "detailedBadge": "Ayuda a subir de nivel",
+        "p3SectionTitle": "Programa de Contribución",
+        "p3Badge": "Si aplica",
+        "electricityBills": "Facturas de electricidad (12 meses)",
+        "gasFuelRecords": "Registros de gas o combustible (12 meses)",
+        "waterBills": "Facturas de agua (12 meses)",
+        "wasteRecords": "Registros de recolección de residuos",
+        "staffHeadcount": "Dotación de personal y tipos de contrato",
+        "suppliersList": "Lista de principales proveedores (con ubicaciones)",
+        "bookingChannel": "Desglose por canal de reserva",
+        "ownershipStructure": "Estructura de propiedad",
+        "monthlyEnergyLog": "Registro mensual de energía y agua",
+        "wasteWeightRecords": "Registros de peso de residuos",
+        "payrollSummary": "Resumen de nómina (anonimizado)",
+        "procurementInvoices": "Facturas de compras",
+        "partnershipAgreement": "Acuerdo de asociación",
+        "partnerVegetationReport": "Informe de vegetación del socio",
+        "programmeBudget": "Presupuesto del programa",
+        "resultsEvidence": "Evidencia de resultados (fotos, datos)",
+        "evidenceQualityNote": "La calidad de la evidencia impacta directamente tu puntuación.",
+        "evidenceQualityDetail": "Cada documento se evalúa por nivel: Primario (×1.00) — facturas, recibos. Secundario (×0.75) — certificados de proveedores. Terciario (×0.50) — auto-declarado. Proxy (×0.25) — sin evidencia.",
+        "uncheckedNote": "Los elementos sin marcar son proxy por defecto (×0.25). Marca los elementos de 'Nivel requerido' para usar la calidad de evidencia seleccionada."
+      },
+      "upload": {
+        "stepTitle": "Evidencia",
+        "stepSubtitle": "Vincula documentos de respaldo a esta evaluación. La evidencia es opcional — los archivos T3 deben verificarse antes de que se publiquen las puntuaciones P3.",
+        "noFilesTitle": "Aún no hay archivos de evidencia disponibles",
+        "noFilesDesc": "Usa la Gestión de Evidencias para subir archivos, luego regresa aquí para vincularlos a esta evaluación.",
+        "noFilesDescPrefix": "Usa la",
+        "evidenceManagement": "Gestión de Evidencias",
+        "noFilesDescSuffix": "para subir archivos, luego regresa aquí para vincularlos a esta evaluación.",
+        "filesLinked": "{selected} de {total} archivo{plural} vinculado{plural}",
+        "addEvidenceTitle": "Agregar archivo de evidencia",
+        "noSnapshotDesc": "Los archivos de evidencia se pueden agregar después de tu primera presentación. También puedes pre-registrarlos en Gestión de Evidencias.",
+        "noSnapshotDescPrefix": "Los archivos de evidencia se pueden agregar después de tu primera presentación. También puedes pre-registrarlos en",
+        "noSnapshotDescSuffix": ".",
+        "indicatorLabel": "Indicador",
+        "selectIndicator": "— Seleccionar indicador —",
+        "tierLabel": "Nivel",
+        "t1Primary": "T1 — Primario",
+        "t2Secondary": "T2 — Secundario",
+        "t3Institutional": "T3 — Institucional",
+        "proxy": "Proxy",
+        "fileNameLabel": "Nombre del archivo",
+        "fileNamePlaceholder": "p. ej. factura_energia_ene_2024.pdf",
+        "storagePathLabel": "Ruta de almacenamiento",
+        "storagePathHint": "Ruta o URL en tu almacenamiento de documentos.",
+        "storagePathPlaceholder": "documentos/energia/factura_ene_2024.pdf",
+        "checksumLabel": "Checksum (SHA-256)",
+        "checksumHint": "Hash de integridad del archivo para rastro de auditoría.",
+        "checksumPlaceholder": "abc123…",
+        "completeAllFields": "Completa todos los campos de la evidencia",
+        "submissionFailed": "Error al enviar la evidencia",
+        "submissionSuccess": "Archivo de evidencia agregado",
+        "submissionRequestFailed": "No se pudo enviar la evidencia",
+        "submitButton": "Agregar archivo de evidencia",
+        "submitting": "Enviando…"
+      },
+      "delta": {
+        "title": "Delta Año a Año",
+        "stepTitle": "Cambio direccional",
+        "stepSubtitle": "Compara el rendimiento de este ciclo con tu evaluación anterior.",
+        "subtitle": "Compara tu desempeño con el ciclo anterior.",
+        "tip": "Mostrar mejora a lo largo del tiempo aumenta tu puntuación de credibilidad.",
+        "noPriorCycle": "No se encontró ciclo anterior. La comparación delta estará disponible a partir del Ciclo 2 en adelante.",
+        "previousAssessment": "Evaluación anterior",
+        "gpsTotal": "GPS total",
+        "p1Footprint": "P1 — Huella",
+        "p2Integration": "P2 — Integración",
+        "p3Regenerative": "P3 — Regenerativo",
+        "methodology": "Metodología",
+        "majorChanges": "Cambios importantes desde el último ciclo",
+        "majorChangesHint": "Opcional. Describe cambios significativos en operaciones, programas o infraestructura.",
+        "majorChangesPlaceholder": "ej. Instalé un array solar de 40 kW, reduciendo la intensidad energética en ~30%. Agregué dos nuevos proveedores locales de A&B…",
+        "dpsNote": "La Puntuación de Desempeño Delta (DPS) se calcula automáticamente a partir de tu línea de base bloqueada del Ciclo 1. No necesitas calcularla manualmente."
+      }
+    },
+    "review": {
+      "gpsPreview": {
+        "title": "Vista previa de GPS",
+        "stepTitle": "Tu Puntuación Green Passport",
+        "stepSubtitle": "Puntuación del Ciclo 1. Tu Modificador de Progreso se desbloquea en el Ciclo 2 — hasta +10 puntos por mejora.",
+        "subtitle": "Esta es tu puntuación estimada del Green Passport basada en tus respuestas.",
+        "note": "Esta es una vista previa. Tu puntuación final será verificada por nuestro equipo.",
+        "scoreSummary": "Resumen de Puntuación · V{version}",
+        "p1Row": "P1 Huella Operacional (40%)",
+        "p2Row": "P2 Integración Local (30%)",
+        "p3Row": "P3 Contribución Regenerativa (30%)",
+        "performanceScore": "Puntuación de Desempeño",
+        "progressModifier": "Modificador de Progreso (Ciclo 1)",
+        "finalGps": "GPS Final",
+        "noDpiWarning": "Aún no tenemos un DPI calculado para este destino. El cálculo actual usa Madeira como territorio de referencia, por lo que los resultados pueden no reflejar completamente tu mercado local.",
+        "dpsTitle": "Cómo funciona el Modificador de Progreso (desde el Ciclo 2)",
+        "dpsBody": "El Modificador de Progreso recompensa la mejora año a año, oscilando entre −5 y +10 puntos aplicados a tu Puntuación de Desempeño.",
+        "dpsNote": "El total bruto DPS se convierte en un modificador acotado: DPS × 0,4, limitado a [−5, +10].",
+        "dps1": "DPS-1: Trayectoria de indicador",
+        "dps2": "DPS-2: Amplitud de mejora",
+        "dps3": "DPS-3: Bonificación de activación de contribución"
+      },
+      "submit": {
+        "title": "Envía tu evaluación",
+        "stepTitle": "Revisar y enviar",
+        "stepSubtitle": "Tu puntuación preliminar del Green Passport basada en los datos proporcionados.",
+        "subtitle": "Revisa tus respuestas antes de enviar.",
+        "submit": "Enviar evaluación",
+        "saveDraft": "Guardar como borrador",
+        "tip": "Una vez enviado, nuestro equipo revisará y verificará tus datos en 5–7 días hábiles.",
+        "gpsScoreTitle": "Puntuación Green Passport",
+        "notYetPublished": "Aún No Publicado",
+        "p1Footprint": "P1 Huella",
+        "p2Integration": "P2 Integración",
+        "p3Contribution": "P3 Contribución",
+        "weight40": "peso 40%",
+        "weight30": "peso 30%",
+        "noDpiWarning": "Aún no tenemos un DPI calculado para este destino. El cálculo actual usa Madeira como territorio de referencia.",
+        "whatHappensTitle": "¿Qué pasa después?",
+        "step1": "Tus datos se guardan y se calcula una puntuación preliminar.",
+        "step2": "Sube evidencia de respaldo desde tu panel de operador.",
+        "step3": "Nuestro equipo revisa y verifica tu envío — normalmente en 5–7 días hábiles.",
+        "step4": "Una vez verificado, tu puntuación se publica en tu perfil público.",
+        "reviewTitle": "¿Quieres revisar tus puntuaciones antes de publicar?",
+        "reviewBody": "Después de enviar, recibirás un plan de acción personalizado. También puedes solicitar una llamada de revisión con nuestro equipo de sostenibilidad — tu puntuación no se publicará hasta que la apruebes.",
+        "baselineWarning": "Esta es tu evaluación de línea de base (Ciclo 1). Los ciclos de evaluación futuros medirán tu trayectoria de mejora a través de la Puntuación de Dirección de Desempeño (DPS).",
+        "howWeProtect": "Cómo protegemos tus datos",
+        "declarationText": "Confirmo que la información proporcionada es precisa y verificable. Entiendo que mi puntuación no se publicará hasta que se revise la evidencia."
+      },
+      "success": {
+        "title": "¡Evaluación enviada!",
+        "subtitle": "Gracias por unirte a The Regenerative Tourism.",
+        "body": "Nuestro equipo revisará tu evaluación en 5–7 días hábiles. Recibirás un correo cuando tu Green Passport esté verificado y en vivo.",
+        "dashboard": "Ir al panel",
+        "assessmentSubmitted": "Evaluación enviada",
+        "heroTitle": "Tu Green Passport está en camino",
+        "heroBody": "Tu evaluación ha sido recibida. Esto es lo que pasa después y cómo aprovechar al máximo tu puntuación.",
+        "whatHappensTitle": "Qué pasa después",
+        "uploadTitle": "Sube tu evidencia",
+        "uploadDesc": "Ve a tu panel de operador y sube documentos de respaldo — facturas de servicios, registros de nómina, facturas de proveedores. La evidencia fortalece tu puntuación.",
+        "reviewTitle": "Nuestro equipo revisa tu envío",
+        "reviewDesc": "Un revisor TRT verificará tus datos y evidencia. Recibirás un correo cuando la revisión esté completa.",
+        "goLiveTitle": "Tu Green Passport se publica",
+        "goLiveDesc": "Una vez verificado, tu puntuación se publica en tu perfil público del Green Passport — visible para viajeros que se preocupan.",
+        "recommendationsTitle": "Recomendaciones para mejorar tu puntuación",
+        "rec1": "Considera cambiar a una tarifa de energía renovable — esto puede impulsar significativamente tu puntuación P1.",
+        "rec2": "Las compras locales son una de las mejoras de mayor impacto que puedes hacer en el P2.",
+        "rec3": "Formalizar tu programa de participación comunitaria puede desbloquear el Estado A del P3.",
+        "goDashboard": "Ir a mi panel →"
+      }
+    },
+    "sections": {
+      "profile": "Perfil",
+      "footprint": "Huella",
+      "localIntegration": "Integración Local",
+      "regenContribution": "Contribución Regen",
+      "evidence": "Evidencia",
+      "review": "Revisión"
+    }
+  },
+  "traveler": {
+    "dashboard": {
+      "welcome": "Bienvenido, {name}",
+      "tagline": "Tu viaje de turismo regenerativo comienza aquí",
+      "signOut": "Cerrar sesión",
+      "passport": {
+        "title": "Tu Pasaporte de Viaje",
+        "description": "Realiza un seguimiento de tus elecciones regenerativas, gana créditos de impacto y descubre operadores verificados que están marcando la diferencia.",
+        "discoverOperators": "Descubrir Operadores →",
+        "viewPassport": "Ver Pasaporte"
+      },
+      "stats": {
+        "tripsBooked": "Viajes Reservados",
+        "cumulativeScore": "Puntuación Acumulada",
+        "contributions": "Contribuciones"
+      }
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Panel de Administración",
+      "stats": {
+        "operators": "Operadores",
+        "totalScores": "Total de Puntuaciones",
+        "published": "Publicadas",
+        "pendingEvidence": "Evidencias Pendientes",
+        "territories": "Territorios"
+      },
+      "actions": {
+        "manageOperators": "Gestionar Operadores",
+        "evidenceQueue": "Cola de Evidencias",
+        "territories": "Territorios & DPI",
+        "scoreSnapshots": "Registros de Puntuación"
+      },
+      "recentScores": {
+        "title": "Cómputos de Puntuación Recientes",
+        "empty": "Aún no hay cómputos de puntuación"
+      }
+    },
+    "evidence": {
+      "title": "Revisión de Evidencias",
+      "subtitle": "Verifique o rechace evidencias de operadores antes de publicar las puntuaciones GPS.",
+      "backToDashboard": "Panel",
+      "stats": {
+        "pending": "Pendientes",
+        "total": "Total",
+        "verified": "Verificadas",
+        "rejected": "Rechazadas"
+      },
+      "tabs": {
+        "pendingReview": "Pendiente de Revisión",
+        "allEvidence": "Todas las Evidencias"
+      },
+      "actions": {
+        "verify": "Verificar",
+        "reject": "Rechazar"
+      },
+      "empty": {
+        "allClear": "No hay evidencias pendientes. ¡Todo en orden!",
+        "noRecords": "No se encontraron registros de evidencia."
+      },
+      "table": {
+        "operator": "Operador",
+        "indicator": "Indicador",
+        "tier": "Nivel",
+        "cycle": "Ciclo",
+        "file": "Archivo",
+        "status": "Estado",
+        "submitted": "Enviado"
+      },
+      "proxyMethod": "Método proxy:",
+      "cycle": "Ciclo {n}",
+      "toast": {
+        "verified": "Evidencia verificada con éxito.",
+        "rejected": "Evidencia rechazada.",
+        "failed": "Acción fallida: {message}"
+      }
+    }
+  },
+  "operator": {
+    "dashboard": {
+      "error": {
+        "title": "Panel no disponible",
+        "description": "No pudimos cargar tu panel de operador en este momento.",
+        "openOnboarding": "Abrir incorporación"
+      },
+      "inProgress": {
+        "title": "Tu evaluación está en curso",
+        "description": "Tu progreso ha sido guardado. Retoma donde lo dejaste para completar tu Pasaporte Verde.",
+        "continue": "Continuar evaluación"
+      },
+      "operatorCode": {
+        "label": "Tu Código de Operador",
+        "hint": "Muestra este código en tu recepción — los viajeros lo escanean para hacer check-in y ganar puntos",
+        "copy": "Copiar"
+      },
+      "actions": {
+        "evidence": "Evidencias",
+        "actionPlan": "Plan de Acción"
+      },
+      "publicProfile": {
+        "title": "Completa tu perfil público",
+        "description": "Agrega tu eslogan, descripción, servicios e idiomas para que los viajeros puedan descubrirte.",
+        "button": "Completar Perfil"
+      },
+      "score": {
+        "published": "Publicado",
+        "pendingVerification": "Pendiente de verificación",
+        "proxyNote": "Puntuación calculada con multiplicadores Proxy (×0.25) hasta que se aprueben las evidencias. La puntuación se actualiza automáticamente a medida que se verifica cada elemento."
+      },
+      "pillars": {
+        "title": "Pilares de Evaluación",
+        "p1": "P1 Huella Operacional",
+        "p2": "P2 Integración Local",
+        "p3": "P3 Contribución Regenerativa",
+        "gpsScore": "Puntuación Green Passport"
+      },
+      "pillarDesc": {
+        "p1": {
+          "high": "Fuerte huella operacional. Sigue mejorando.",
+          "mid": "Huella moderada. La energía renovable y la eficiencia hídrica son palancas clave.",
+          "low": "Alta dependencia de la red eléctrica. Margen de mejora significativo."
+        },
+        "p2": {
+          "high": "Fuerte integración local en empleo y aprovisionamiento.",
+          "mid": "Integración local en crecimiento. Enfócate en reservas directas y vínculos comunitarios.",
+          "low": "Integración local en desarrollo."
+        },
+        "p3": {
+          "high": "Programa regenerativo activo con resultados medibles.",
+          "mid": "Contribución regenerativa en etapa inicial. Formaliza tu programa.",
+          "low": "Aún no hay un programa regenerativo formal."
+        }
+      },
+      "territory": {
+        "label": "Índice Territorial — {name}",
+        "dpiNote": "Elegir un operador de alta puntuación GPS en un destino de alta presión es la elección de reserva de mayor impacto que puede hacer un viajero.",
+        "lastComputed": "Último cómputo {date}",
+        "metrics": {
+          "touristIntensity": "Intensidad Turística",
+          "ecologicalSensitivity": "Sensibilidad Ecológica",
+          "economicLeakage": "Fuga Económica",
+          "regenPerformance": "Desempeño Regen."
+        }
+      },
+      "dps": {
+        "title": "Puntuación de Progreso Direccional",
+        "range": "Recompensa la dirección del recorrido — no solo la posición actual. Rango: -10 a +25.",
+        "metrics": {
+          "rate": "DPS-1 Tasa de Mejora",
+          "consistency": "DPS-2 Consistencia",
+          "acceleration": "DPS-3 Aceleración P3"
+        }
+      },
+      "delta": {
+        "title": "Cambio Desde la Última Evaluación",
+        "comparedTo": "Comparado con la evaluación del {date}.",
+        "metrics": {
+          "gps": "Puntuación GPS",
+          "p1": "P1 Huella",
+          "p2": "P2 Integración",
+          "p3": "P3 Regenerativa"
+        }
+      },
+      "noAssessment": {
+        "title": "Tu evaluación está siendo procesada.",
+        "description": "Tu envío ha sido recibido. Tu Puntuación Green Passport, desglose de pilares y detalles de evaluación aparecerán aquí pronto."
+      }
+    },
+    "evidence": {
+      "backToDashboard": "Volver al Panel",
+      "title": "Evidencias",
+      "subtitle": "Sube documentos para verificar los datos de tu evaluación. Las evidencias de nivel superior mejoran la confianza en tu puntuación.",
+      "coverage": {
+        "title": "Cobertura de evidencias",
+        "of": "{verified} de {total} indicadores",
+        "verified": "{count} verificados",
+        "pending": "{count} pendientes",
+        "missing": "{count} faltantes"
+      },
+      "help": {
+        "title": "¿No sabes qué subir?",
+        "description": "Sube cualquier documento que respalde tus datos. Nuestro equipo revisa cada envío y se pondrá en contacto si necesita más información."
+      },
+      "pillars": {
+        "p1": "Huella Operacional",
+        "p2": "Integración Local",
+        "p3": "Contribución Regenerativa"
+      },
+      "indicators": {
+        "p1_1a_energy_intensity": {
+          "label": "Intensidad Energética",
+          "hint": "kWh por huésped-noche de facturas de servicios o lecturas de medidores"
+        },
+        "p1_1a_renewable_pct": {
+          "label": "% Energía Renovable",
+          "hint": "Certificado del proveedor de energía o factura de instalación solar"
+        },
+        "p1_1b_water_intensity": {
+          "label": "Intensidad Hídrica",
+          "hint": "Litros por huésped-noche de facturas de agua o lecturas de medidores"
+        },
+        "p1_1c_waste_diversion_pct": {
+          "label": "Desvío de Residuos",
+          "hint": "Informe de auditoría de residuos o contrato de servicio de reciclaje"
+        },
+        "p1_1d_carbon_intensity": {
+          "label": "Intensidad de Carbono",
+          "hint": "Informe de huella de carbono o cálculo de emisiones"
+        },
+        "p1_1e_site_score": {
+          "label": "Terreno y Uso del Suelo",
+          "hint": "Plan de gestión del sitio o evaluación ecológica"
+        },
+        "p2_2a_local_employment_rate": {
+          "label": "Empleo Local",
+          "hint": "Registros de nómina que muestren residencia de empleados"
+        },
+        "p2_2a_employment_quality": {
+          "label": "Calidad del Empleo",
+          "hint": "Contratos, documentación de beneficios, registros de capacitación"
+        },
+        "p2_2b_local_fb_rate": {
+          "label": "Aprovisionamiento Local A&B",
+          "hint": "Facturas de proveedores que muestren compras locales de alimentos y bebidas"
+        },
+        "p2_2b_local_nonfb_rate": {
+          "label": "Aprovisionamiento Local No-A&B",
+          "hint": "Facturas de proveedores de servicios y materiales locales"
+        },
+        "p2_2c_direct_booking_rate": {
+          "label": "Tasa de Reserva Directa",
+          "hint": "Informe de canal de reservas del PMS o panel OTA"
+        },
+        "p2_2d_community_score": {
+          "label": "Participación Comunitaria",
+          "hint": "Documentación del programa comunitario o actas de reuniones"
+        },
+        "p3_3a_contribution_programme": {
+          "label": "Programa de Contribución",
+          "hint": "Descripción del programa, presupuesto y medición de impacto"
+        }
+      },
+      "upload": {
+        "button": "Subir",
+        "uploading": "Subiendo..."
+      },
+      "toast": {
+        "uploadSuccess": "Evidencia subida con éxito",
+        "uploadFailed": "Subida fallida",
+        "noAssessment": "No se encontró registro de evaluación. Completa primero una evaluación."
+      }
+    }
+  }
+}

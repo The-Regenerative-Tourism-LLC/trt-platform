@@ -1,19 +1,42 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
 
-/**
- * Returns the primary dashboard URL for a given set of roles.
- */
-function getDashboardUrl(roles: string[]): string {
-  if (roles.includes("admin")) return "/admin/dashboard";
-  if (roles.includes("operator")) return "/operator/dashboard";
-  if (roles.includes("traveler")) return "/traveler/dashboard";
-  return "/select-role";
+const handleI18nRouting = createMiddleware(routing);
+
+// Strip /pt or /es prefix — English is the default with no prefix.
+function stripLocale(pathname: string): string {
+  return pathname.replace(/^\/(pt|es)(?=\/|$)/, "") || "/";
+}
+
+// Detect locale from pathname.
+function detectLocale(pathname: string): string {
+  const match = pathname.match(/^\/(pt|es)(?=\/|$)/);
+  return match?.[1] ?? "en";
+}
+
+// Prefix a path with locale (English has no prefix).
+function withLocale(path: string, locale: string): string {
+  if (locale === "en") return path;
+  return `/${locale}${path}`;
+}
+
+function getDashboardUrl(roles: string[], locale: string): string {
+  if (roles.includes("admin")) return withLocale("/admin/dashboard", locale);
+  if (roles.includes("operator"))
+    return withLocale("/operator/dashboard", locale);
+  if (roles.includes("traveler"))
+    return withLocale("/traveler/dashboard", locale);
+  return withLocale("/select-role", locale);
 }
 
 export default auth((req) => {
   const session = req.auth;
   const { pathname } = req.nextUrl;
+
+  const locale = detectLocale(pathname);
+  const cleanPath = stripLocale(pathname);
 
   const isLoggedIn = !!session?.user?.id;
   const userRoles: string[] = session?.user?.roles ?? [];
@@ -24,6 +47,8 @@ export default auth((req) => {
     session?.user?.needsTermsAcceptance ?? false;
 
   console.log("[middleware]", pathname, {
+    locale,
+    cleanPath,
     isLoggedIn,
     hasRole,
     roles: userRoles,
@@ -32,14 +57,14 @@ export default auth((req) => {
     needsRoleSelection_derived: needsRoleSelection,
   });
 
-  const isAdminRoute = pathname.startsWith("/admin");
-  const isOperatorRoute = pathname.startsWith("/operator");
+  const isAdminRoute = cleanPath.startsWith("/admin");
+  const isOperatorRoute = cleanPath.startsWith("/operator");
   const isTravelerRoute =
-    pathname.startsWith("/traveler") && pathname !== "/traveler/waitlist";
-  const isAccountRoute = pathname.startsWith("/account");
-  const isSelectRoleRoute = pathname === "/select-role";
-  const isAcceptTermsRoute = pathname === "/accept-terms";
-  const isAuthRoute = pathname === "/login" || pathname === "/signup";
+    cleanPath.startsWith("/traveler") && cleanPath !== "/traveler/waitlist";
+  const isAccountRoute = cleanPath.startsWith("/account");
+  const isSelectRoleRoute = cleanPath === "/select-role";
+  const isAcceptTermsRoute = cleanPath === "/accept-terms";
+  const isAuthRoute = cleanPath === "/login" || cleanPath === "/signup";
 
   // ── Unauthenticated ──────────────────────────────────────────────────────
   if (!isLoggedIn) {
@@ -51,71 +76,84 @@ export default auth((req) => {
       isAcceptTermsRoute ||
       isAccountRoute
     ) {
-      const loginUrl = new URL("/login", req.url);
+      const loginUrl = new URL(withLocale("/login", locale), req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
-    return NextResponse.next();
+    return handleI18nRouting(req);
   }
 
-  // ── Role not yet assigned → /select-role (terms captured there) ──────────
+  // ── Role not yet assigned → /select-role ────────────────────────────────
   if (needsRoleSelection && !isSelectRoleRoute) {
-    return NextResponse.redirect(new URL("/select-role", req.url));
+    return NextResponse.redirect(
+      new URL(withLocale("/select-role", locale), req.url)
+    );
   }
 
   if (isSelectRoleRoute && !needsRoleSelection) {
-    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+    return NextResponse.redirect(
+      new URL(getDashboardUrl(userRoles, locale), req.url)
+    );
   }
 
-  // ── Terms not yet accepted (established users) → /accept-terms ───────────
-  // Only enforced once the user has a role. New users handle terms in /select-role.
+  // ── Terms not yet accepted → /accept-terms ───────────────────────────────
   if (
     hasRole &&
     needsTermsAcceptance &&
     !isAcceptTermsRoute &&
     (isAdminRoute || isOperatorRoute || isTravelerRoute || isAccountRoute)
   ) {
-    return NextResponse.redirect(new URL("/accept-terms", req.url));
+    return NextResponse.redirect(
+      new URL(withLocale("/accept-terms", locale), req.url)
+    );
   }
 
   if (isAcceptTermsRoute && !needsTermsAcceptance) {
-    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+    return NextResponse.redirect(
+      new URL(getDashboardUrl(userRoles, locale), req.url)
+    );
   }
 
   // ── Email verification gate ──────────────────────────────────────────────
-  // Unverified users are locked to /verify-email regardless of which route they try.
-  const isVerifyEmailRoute = pathname === "/verify-email";
+  const isVerifyEmailRoute = cleanPath === "/verify-email";
   if (!emailVerified && !isVerifyEmailRoute) {
-    return NextResponse.redirect(new URL("/verify-email", req.url));
+    return NextResponse.redirect(
+      new URL(withLocale("/verify-email", locale), req.url)
+    );
   }
 
-  // ── Redirect away from auth pages once logged in (but allow homepage) ────
+  // ── Redirect away from auth pages once logged in ─────────────────────────
   if (isAuthRoute) {
-    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+    return NextResponse.redirect(
+      new URL(getDashboardUrl(userRoles, locale), req.url)
+    );
   }
 
   // ── Role enforcement ─────────────────────────────────────────────────────
   const isAdmin = userRoles.includes("admin");
 
   if (isAdminRoute && !isAdmin) {
-    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+    return NextResponse.redirect(
+      new URL(getDashboardUrl(userRoles, locale), req.url)
+    );
   }
 
   if (isOperatorRoute && !userRoles.includes("operator") && !isAdmin) {
-    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+    return NextResponse.redirect(
+      new URL(getDashboardUrl(userRoles, locale), req.url)
+    );
   }
 
   if (isTravelerRoute && !userRoles.includes("traveler") && !isAdmin) {
-    return NextResponse.redirect(new URL(getDashboardUrl(userRoles), req.url));
+    return NextResponse.redirect(
+      new URL(getDashboardUrl(userRoles, locale), req.url)
+    );
   }
 
-  return NextResponse.next();
+  return handleI18nRouting(req);
 });
 
 export const config = {
-  // Run on every request except Next.js internals, static assets, and API routes.
-  // This ensures logged-in users without a role are always gated to /select-role,
-  // regardless of which public page they try to access.
   matcher: [
     "/((?!_next/static|_next/image|favicon\\.ico|api/|sentry-tunnel|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
