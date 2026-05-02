@@ -16,25 +16,34 @@ function detectLocale(pathname: string): string {
   return match?.[1] ?? "en";
 }
 
-// Wrapper around next-intl's middleware that fixes the English root path.
+// Wrapper around next-intl's middleware that fixes English-locale paths.
 //
-// For /pt and /es, handleI18nRouting returns NextResponse.next() — just a
-// pass-through with the locale header. For / (English default), it returns
-// NextResponse.rewrite(new URL("/en", req.url)) which uses req.url — the
-// *external* Railway URL. In Railway's proxy environment this absolute URL
-// can be treated as an external fetch, causing a deadlock where the server
-// waits for itself indefinitely.
+// For /pt/... and /es/..., handleI18nRouting returns NextResponse.next() —
+// just a pass-through with the locale header. Works fine everywhere.
 //
-// We detect this case and perform the rewrite using req.nextUrl.clone()
-// (the internal URL) instead, which Next.js always handles as a local rewrite.
+// For English paths (no locale prefix: /, /signup, /login, /operator/...,
+// etc.), handleI18nRouting builds NextResponse.rewrite(new URL("/en/...",
+// req.url)).  req.url in Railway's proxy environment carries the *external*
+// hostname (e.g. trt-platform-staging.up.railway.app). Next.js compares the
+// rewrite destination against the server's *internal* address (localhost:PORT)
+// and, finding a different host, may treat it as an external HTTP fetch —
+// causing a deadlock where the server waits on itself indefinitely.
+//
+// Fix: intercept all English (no-prefix) paths and perform the rewrite using
+// req.nextUrl.clone(), which is a NextURL object that Next.js always resolves
+// as an internal route regardless of hostname.
 function handleI18nRoutingFixed(req: NextRequest): NextResponse {
-  if (req.nextUrl.pathname === "/") {
+  const { pathname } = req.nextUrl;
+  const hasLocalePrefix = /^\/(en|pt|es)(\/|$)/.test(pathname);
+
+  if (!hasLocalePrefix) {
     const url = req.nextUrl.clone();
-    url.pathname = "/en";
+    url.pathname = pathname === "/" ? "/en" : `/en${pathname}`;
     const headers = new Headers(req.headers);
     headers.set("X-NEXT-INTL-LOCALE", "en");
     return NextResponse.rewrite(url, { request: { headers } });
   }
+
   return handleI18nRouting(req) as NextResponse;
 }
 
