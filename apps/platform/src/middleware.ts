@@ -1,19 +1,41 @@
 import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
 
-// Strip /pt or /es prefix — English is the default with no prefix.
+// Strip locale prefix — English is the default with no prefix.
 function stripLocale(pathname: string): string {
-  return pathname.replace(/^\/(pt|es)(?=\/|$)/, "") || "/";
+  return pathname.replace(/^\/(en|pt|es)(?=\/|$)/, "") || "/";
 }
 
 // Detect locale from pathname.
 function detectLocale(pathname: string): string {
-  const match = pathname.match(/^\/(pt|es)(?=\/|$)/);
+  const match = pathname.match(/^\/(en|pt|es)(?=\/|$)/);
   return match?.[1] ?? "en";
+}
+
+// Wrapper around next-intl's middleware that fixes the English root path.
+//
+// For /pt and /es, handleI18nRouting returns NextResponse.next() — just a
+// pass-through with the locale header. For / (English default), it returns
+// NextResponse.rewrite(new URL("/en", req.url)) which uses req.url — the
+// *external* Railway URL. In Railway's proxy environment this absolute URL
+// can be treated as an external fetch, causing a deadlock where the server
+// waits for itself indefinitely.
+//
+// We detect this case and perform the rewrite using req.nextUrl.clone()
+// (the internal URL) instead, which Next.js always handles as a local rewrite.
+function handleI18nRoutingFixed(req: NextRequest): NextResponse {
+  if (req.nextUrl.pathname === "/") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/en";
+    const headers = new Headers(req.headers);
+    headers.set("X-NEXT-INTL-LOCALE", "en");
+    return NextResponse.rewrite(url, { request: { headers } });
+  }
+  return handleI18nRouting(req) as NextResponse;
 }
 
 // Prefix a path with locale (English has no prefix).
@@ -80,7 +102,7 @@ export default auth((req) => {
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
-    return handleI18nRouting(req);
+    return handleI18nRoutingFixed(req);
   }
 
   // ── Role not yet assigned → /select-role ────────────────────────────────
@@ -150,7 +172,7 @@ export default auth((req) => {
     );
   }
 
-  return handleI18nRouting(req);
+  return handleI18nRoutingFixed(req);
 });
 
 export const config = {
