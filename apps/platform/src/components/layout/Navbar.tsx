@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Menu,
   X,
@@ -22,6 +23,8 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { withLocalePath } from "@/i18n/pathname";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +45,9 @@ function getInitials(name: string | null | undefined): string {
 }
 
 export function Navbar() {
+  const tNav = useTranslations("nav");
+  const tPublic = useTranslations("public.shared");
+  const locale = useLocale();
   const { user, loading, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -57,12 +63,14 @@ export function Navbar() {
   const isAdmin = user?.roles?.includes("admin");
   const isOperator = user?.roles?.includes("operator");
   const isTraveler = user?.roles?.includes("traveler");
+  const withLocale = (path: string) => withLocalePath(path, locale);
 
-  const isAdminRoute = pathname?.startsWith("/admin");
-  const isOperatorRoute = pathname?.startsWith("/operator");
+  const cleanPathname = pathname?.replace(/^\/(pt|es)(?=\/|$)/, "") || "/";
+  const isAdminRoute = cleanPathname.startsWith("/admin");
+  const isOperatorRoute = cleanPathname.startsWith("/operator");
 
   const isActive = (path: string) =>
-    pathname === path || pathname?.startsWith(path + "/");
+    cleanPathname === path || cleanPathname?.startsWith(path + "/");
 
   const linkCls = (path: string) =>
     cn(
@@ -90,40 +98,40 @@ export function Navbar() {
   function getNavLinks() {
     if (!user) {
       return [
-        { href: "/discover", label: "Discover" },
-        { href: "/destinations", label: "Destinations" },
-        { href: "/methodology", label: "Methodology" },
-        { href: "/leaderboard", label: "Impact Record" },
-        { href: "/journal", label: "Journal" },
-        { href: "/pricing", label: "Pricing" },
+        { href: withLocale("/discover"), label: tPublic("discover") },
+        { href: withLocale("/destinations"), label: tNav("destinations") },
+        { href: withLocale("/methodology"), label: tNav("methodology") },
+        { href: withLocale("/leaderboard"), label: tPublic("impactRecord") },
+        { href: withLocale("/journal"), label: tPublic("journal") },
+        { href: withLocale("/pricing"), label: tNav("pricing") },
       ];
     }
 
     if (isAdminRoute && isAdmin) {
       return [
-        { href: "/admin/dashboard", label: "Overview" },
-        { href: "/admin/evidence", label: "Evidence" },
+        { href: withLocale("/admin/dashboard"), label: tPublic("overview") },
+        { href: withLocale("/admin/evidence"), label: tPublic("evidence") },
       ];
     }
 
     if (isOperatorRoute && isOperator) {
       return [
-        { href: "/discover", label: "Discover" },
-        { href: "/destinations", label: "Destinations" },
-        { href: "/methodology", label: "Methodology" },
-        { href: "/leaderboard", label: "Impact Record" },
-        { href: "/pricing", label: "Pricing" },
-        { href: "/operator/dashboard", label: "Dashboard" },
+        { href: withLocale("/discover"), label: tPublic("discover") },
+        { href: withLocale("/destinations"), label: tNav("destinations") },
+        { href: withLocale("/methodology"), label: tNav("methodology") },
+        { href: withLocale("/leaderboard"), label: tPublic("impactRecord") },
+        { href: withLocale("/pricing"), label: tNav("pricing") },
+        { href: withLocale("/operator/dashboard"), label: tPublic("dashboard") },
       ];
     }
 
     return [
-      { href: "/discover", label: "Discover" },
-      { href: "/destinations", label: "Destinations" },
-      { href: "/leaderboard", label: "Impact Record" },
-      { href: "/methodology", label: "Methodology" },
-      { href: "/journal", label: "Journal" },
-      { href: "/pricing", label: "Pricing" },
+      { href: withLocale("/discover"), label: tPublic("discover") },
+      { href: withLocale("/destinations"), label: tNav("destinations") },
+      { href: withLocale("/leaderboard"), label: tPublic("impactRecord") },
+      { href: withLocale("/methodology"), label: tNav("methodology") },
+      { href: withLocale("/journal"), label: tPublic("journal") },
+      { href: withLocale("/pricing"), label: tNav("pricing") },
     ];
   }
 
@@ -144,8 +152,8 @@ export function Navbar() {
       >
         <div className="container mx-auto max-w-7xl flex items-center justify-between h-14 px-5 md:px-6">
           {/* Logo */}
-          <Link
-            href="/"
+            <Link
+            href={withLocale("/")}
             className="flex items-center gap-2 shrink-0 relative z-[60]"
           >
             <Image
@@ -165,7 +173,7 @@ export function Navbar() {
                 className="rounded-lg font-semibold bg-[#1C1C1C] text-cream hover:bg-[#1C1C1C]/90 h-10 px-5"
                 asChild
               >
-                <Link href="/signup">Join</Link>
+                <Link href={withLocale("/signup")}>{tPublic("join")}</Link>
               </Button>
             )}
 
@@ -201,20 +209,20 @@ export function Navbar() {
                     <>
                       <DropdownMenuItem asChild>
                         <Link
-                          href="/operator/dashboard"
+                          href={withLocale("/operator/dashboard")}
                           className="cursor-pointer"
                         >
                           <LayoutDashboard className="w-4 h-4 mr-2" />
-                          Operator Dashboard
+                          {tPublic("operatorDashboard")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link
-                          href="/operator/evidence"
+                          href={withLocale("/operator/evidence")}
                           className="cursor-pointer"
                         >
                           <FileCheck className="w-4 h-4 mr-2" />
-                          Evidence
+                          {tPublic("evidence")}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -224,20 +232,20 @@ export function Navbar() {
                     <>
                       <DropdownMenuItem asChild>
                         <Link
-                          href="/traveler/dashboard"
+                          href={withLocale("/traveler/dashboard")}
                           className="cursor-pointer"
                         >
                           <LayoutDashboard className="w-4 h-4 mr-2" />
-                          Dashboard
+                          {tPublic("dashboard")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link
-                          href="/traveler/discover"
+                          href={withLocale("/traveler/discover")}
                           className="cursor-pointer"
                         >
                           <User className="w-4 h-4 mr-2" />
-                          My Impact
+                          {tPublic("myImpact")}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -248,26 +256,26 @@ export function Navbar() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link
-                          href="/admin/dashboard"
+                          href={withLocale("/admin/dashboard")}
                           className="cursor-pointer"
                         >
                           <Shield className="w-4 h-4 mr-2" />
-                          Admin Dashboard
+                          {tPublic("adminDashboard")}
                         </Link>
                       </DropdownMenuItem>
                     </>
                   )}
 
                   <DropdownMenuItem asChild>
-                    <Link href="/discover" className="cursor-pointer">
+                    <Link href={withLocale("/discover")} className="cursor-pointer">
                       <Search className="w-4 h-4 mr-2" />
-                      Discover
+                      {tPublic("discover")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/destinations" className="cursor-pointer">
+                    <Link href={withLocale("/destinations")} className="cursor-pointer">
                       <MapPin className="w-4 h-4 mr-2" />
-                      Destinations
+                      {tNav("destinations")}
                     </Link>
                   </DropdownMenuItem>
 
@@ -277,16 +285,18 @@ export function Navbar() {
                     className="cursor-pointer text-destructive focus:text-destructive"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sign out
+                    {tPublic("signOut")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
 
+            <LocaleSwitcher className="hidden md:flex" />
+
             <button
               className="p-2 rounded-full hover:bg-secondary relative z-[60]"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-label={mobileOpen ? tPublic("closeMenu") : tPublic("openMenu")}
             >
               {mobileOpen ? (
                 <X className="w-5 h-5" />
@@ -322,10 +332,12 @@ export function Navbar() {
             </nav>
 
             <div className="space-y-3">
+              <LocaleSwitcher className="md:hidden" />
+
               {user ? (
                 <div className="space-y-1">
                   <p className="text-[10px] uppercase tracking-widest text-[#1C1C1C]/30">
-                    Signed in
+                    {tPublic("signedIn")}
                   </p>
                   <p className="text-xs text-[#1C1C1C]/60 truncate">{user.email}</p>
                   <button
@@ -335,7 +347,7 @@ export function Navbar() {
                     }}
                     className="text-xs text-[#1C1C1C]/40 hover:text-[#1C1C1C] transition-colors mt-1"
                   >
-                    Sign out
+                    {tPublic("signOut")}
                   </button>
                 </div>
               ) : (
@@ -344,10 +356,10 @@ export function Navbar() {
                   asChild
                 >
                   <Link
-                    href="/signup"
+                    href={withLocale("/signup")}
                     onClick={() => setMobileOpen(false)}
                   >
-                    Join
+                    {tPublic("join")}
                   </Link>
                 </Button>
               )}

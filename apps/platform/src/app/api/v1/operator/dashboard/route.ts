@@ -14,7 +14,15 @@ import {
 } from "@/lib/db/repositories/score.repo";
 import { findTerritoryById } from "@/lib/db/repositories/dpi.repo";
 import { prisma } from "@/lib/db/prisma";
-import { getStorageProvider } from "@/lib/storage";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function buildPublicStorageUrl(storageKey: string): string {
+  const base = process.env.STORAGE_PUBLIC_BASE_URL;
+  if (base) return `${base}/${storageKey}`;
+  return `/uploads/${storageKey}`;
+}
 
 export async function GET() {
   try {
@@ -35,9 +43,8 @@ export async function GET() {
       }),
     ]);
 
-    const storage = getStorageProvider();
     const coverPhotoUrl = coverPhoto
-      ? await storage.getSignedUrl(coverPhoto.storageKey, "get", undefined, undefined, undefined, "public").catch(() => null)
+      ? buildPublicStorageUrl(coverPhoto.storageKey)
       : null;
 
     return NextResponse.json({

@@ -23,13 +23,10 @@ export async function GET(
 
   const { path } = await params;
 
-  // Reject segments that look like traversal
   if (path.some((segment) => segment.includes("..") || segment.includes("\0"))) {
     return new NextResponse(null, { status: 400 });
   }
 
-  // Evidence objects are private — require a valid session in local dev to
-  // emulate the private-bucket access control of the production S3/R2 path.
   const isEvidence = path[0] === "operators" && path[2] === "evidence";
   if (isEvidence) {
     try {
@@ -46,7 +43,6 @@ export async function GET(
 
   const filePath = resolve(baseDir, normalize(path.join("/")));
 
-  // Prevent escaping the storage root
   if (!filePath.startsWith(baseDir + "/") && filePath !== baseDir) {
     return new NextResponse(null, { status: 400 });
   }
