@@ -5,65 +5,57 @@ import { routing } from "./i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
 
-// Strip locale prefix — English is the default with no prefix.
 function stripLocale(pathname: string): string {
   return pathname.replace(/^\/(en|pt|es)(?=\/|$)/, "") || "/";
 }
 
-// Detect locale from pathname.
 function detectLocale(pathname: string): string {
   const match = pathname.match(/^\/(en|pt|es)(?=\/|$)/);
   return match?.[1] ?? "en";
 }
 
-// Wrapper around next-intl's middleware that handles English routing correctly
-// in Railway's proxy environment.
+// English paths have no URL prefix with localePrefix: "as-needed".
+// The [locale] App Router segment is populated by rewriting /… → /en/….
 //
-// Root cause (confirmed by logs): in Railway, NextResponse.rewrite() does NOT
-// stay internal — it triggers an actual external HTTP request back through the
-// load balancer. This means the middleware runs a SECOND time for the rewrite
-// destination. With next-intl's default behaviour this creates an infinite loop:
+// Railway externalizes NextResponse.rewrite() as a real HTTP request through
+// its load balancer, so the proxy runs twice:
+//   1. /login  → Part A: rewrite to /en/login  (sets x-en-rewrite: 1)
+//   2. /en/login arrives with x-en-rewrite: 1 → Part B: serve directly
 //
-//   1. Request "/"     → middleware rewrites to "/en"  (external HTTP GET)
-//   2. Request "/en"   → next-intl redirects /en → "/" (unnecessary prefix)
-//   3. Browser follows redirect to "/"  →  back to step 1  →  loop
-//
-// Fix — two-part:
-//   A. English paths WITHOUT a locale prefix (/, /signup, /login, …):
-//      rewrite to /en/… so the [locale] App Router segment gets a value.
-//      Use req.nextUrl.clone() (NextURL) rather than new URL(…, req.url) so
-//      that Next.js always resolves it as an internal route.
-//
-//   B. /en/… paths that arrive here as the SECOND request caused by the rewrite
-//      above: serve them directly with NextResponse.next() instead of letting
-//      next-intl redirect back to "/" — that redirect is what causes the loop.
-//
-// /pt/… and /es/… paths are unaffected — next-intl already returns
-// NextResponse.next() for them (no rewrite needed, locale is in the URL).
-function handleI18nRoutingFixed(req: NextRequest): NextResponse {
+// The marker header distinguishes Railway's internal re-request (serve)
+// from a user navigating directly to /en/… (redirect to clean URL).
+const REWRITE_MARKER = "x-en-rewrite";
+
+function handleLocaleRouting(req: NextRequest): NextResponse {
   const { pathname } = req.nextUrl;
 
-  // Part B: /en or /en/… — serve English content directly, do NOT redirect to /
+  // Part B — /en/… arrived
   if (/^\/(en)(\/|$)/.test(pathname)) {
-    const headers = new Headers(req.headers);
-    headers.set("X-NEXT-INTL-LOCALE", "en");
-    return NextResponse.next({ request: { headers } });
+    if (req.headers.get(REWRITE_MARKER) === "1") {
+      // Came from our own Part A rewrite — serve directly
+      const headers = new Headers(req.headers);
+      headers.set("X-NEXT-INTL-LOCALE", "en");
+      return NextResponse.next({ request: { headers } });
+    }
+    // Direct browser navigation to /en/… — redirect to the clean URL
+    const clean = pathname.replace(/^\/en/, "") || "/";
+    return NextResponse.redirect(new URL(clean, req.url));
   }
 
-  // Part A: no locale prefix → English default → rewrite to /en/…
-  if (!/^\/(pt|es)(\/|$)/.test(pathname)) {
-    const url = req.nextUrl.clone();
-    url.pathname = pathname === "/" ? "/en" : `/en${pathname}`;
-    const headers = new Headers(req.headers);
-    headers.set("X-NEXT-INTL-LOCALE", "en");
-    return NextResponse.rewrite(url, { request: { headers } });
+  // /pt/… and /es/… — next-intl handles locale header + NextResponse.next()
+  if (/^\/(pt|es)(\/|$)/.test(pathname)) {
+    return handleI18nRouting(req) as NextResponse;
   }
 
-  // /pt/… and /es/… — next-intl handles these (NextResponse.next() with header)
-  return handleI18nRouting(req) as NextResponse;
+  // Part A — no prefix → English → rewrite to /en/… with marker header
+  const url = req.nextUrl.clone();
+  url.pathname = pathname === "/" ? "/en" : `/en${pathname}`;
+  const headers = new Headers(req.headers);
+  headers.set("X-NEXT-INTL-LOCALE", "en");
+  headers.set(REWRITE_MARKER, "1");
+  return NextResponse.rewrite(url, { request: { headers } });
 }
 
-// Prefix a path with locale (English has no prefix).
 function withLocale(path: string, locale: string): string {
   if (locale === "en") return path;
   return `/${locale}${path}`;
@@ -93,7 +85,7 @@ export default auth((req) => {
   const needsTermsAcceptance: boolean =
     session?.user?.needsTermsAcceptance ?? false;
 
-  console.log("[middleware]", pathname, {
+  console.log("[proxy]", pathname, {
     locale,
     cleanPath,
     isLoggedIn,
@@ -127,7 +119,7 @@ export default auth((req) => {
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
-    return handleI18nRoutingFixed(req);
+    return handleLocaleRouting(req);
   }
 
   // ── Role not yet assigned → /select-role ────────────────────────────────
@@ -197,7 +189,7 @@ export default auth((req) => {
     );
   }
 
-  return handleI18nRoutingFixed(req);
+  return handleLocaleRouting(req);
 });
 
 export const config = {
