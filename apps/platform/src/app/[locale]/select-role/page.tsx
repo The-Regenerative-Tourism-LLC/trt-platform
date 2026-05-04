@@ -16,7 +16,7 @@ export default async function SelectRolePage() {
   const homeHref = withLocalePath("/", locale);
 
   return (
-    <div className="min-h-screen flex items-center justify-center fm-cream px-6">
+    <div className="min-h-screen flex items-center justify-center bg-background px-6">
       <div className="w-full max-w-lg space-y-8">
         <div className="space-y-2">
           <Link href={homeHref} className="inline-block mb-4">
@@ -28,15 +28,15 @@ export default async function SelectRolePage() {
               className="h-7 w-auto"
             />
           </Link>
-          <h1 className="fm-sub-heading text-foreground text-center">
+          <h1 className="type-h2 text-foreground text-center">
             {t("title")}
           </h1>
-          <p className="text-sm text-muted-foreground text-center">
+          <p className="type-s text-muted-foreground text-center">
             {t("subtitle")}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+        <div className="card">
           <SelectRoleForm />
         </div>
       </div>

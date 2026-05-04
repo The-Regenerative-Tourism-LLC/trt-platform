@@ -19,7 +19,7 @@ export default async function AcceptTermsPage() {
   const cookiesHref = withLocalePath("/cookies", locale);
 
   return (
-    <div className="min-h-screen flex items-center justify-center fm-cream px-6 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-background px-6 py-12">
       <div className="w-full max-w-lg space-y-8">
         <div className="space-y-2 flex flex-col items-center text-center">
           <Link href={homeHref} className="inline-block mb-4">
@@ -31,19 +31,19 @@ export default async function AcceptTermsPage() {
               className="h-7 w-auto"
             />
           </Link>
-          <h1 className="fm-sub-heading text-foreground">
+          <h1 className="type-h2 text-foreground">
             {t("title")}
           </h1>
-          <p className="text-sm text-muted-foreground max-w-sm">
+          <p className="type-s text-muted-foreground max-w-sm">
             {t("subtitle")}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+        <div className="card">
           <AcceptTermsForm />
         </div>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center type-xs text-muted-foreground">
           {t.rich("footer", {
             privacy: (chunks) => (
               <Link href={privacyHref} className="underline hover:text-foreground">

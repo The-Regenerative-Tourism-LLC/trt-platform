@@ -122,7 +122,7 @@ export function RoadmapScreen({
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
                   ) : (
-                    <span className="font-hand font-normal text-base sm:text-lg leading-none">
+                    <span className="font-normal text-base sm:text-lg leading-none">
                       {s.num}
                     </span>
                   )}

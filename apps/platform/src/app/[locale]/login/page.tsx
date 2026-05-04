@@ -18,7 +18,7 @@ export default async function LoginPage() {
   const signupHref = withLocalePath("/signup", locale);
 
   return (
-    <div className="min-h-screen flex flex-col fm-cream">
+    <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center px-6 py-16 md:py-24">
         <div className="w-full max-w-sm space-y-8">
           <div className="space-y-2 flex flex-col items-center justify-center">
@@ -31,8 +31,8 @@ export default async function LoginPage() {
                 className="h-7 w-auto"
               />
             </Link>
-            <h1 className="fm-sub-heading text-foreground text-center">{t("title")}</h1>
-            <p className="text-sm text-muted-foreground text-center">
+            <h1 className="type-h2 text-foreground text-center">{t("title")}</h1>
+            <p className="type-s text-muted-foreground text-center">
               {t("subtitle")}
             </p>
           </div>
@@ -47,7 +47,7 @@ export default async function LoginPage() {
             <LoginForm />
           </Suspense>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center type-s text-muted-foreground">
             {t("noAccount")}{" "}
             <Link href={signupHref} className="text-foreground font-medium hover:underline">
               {t("signUp")}

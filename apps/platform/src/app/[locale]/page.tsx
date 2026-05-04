@@ -40,63 +40,12 @@ function ScoreRings({
       viewBox={`0 0 ${size} ${size}`}
       style={{ transform: "rotate(-90deg)" }}
     >
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r1}
-        fill="none"
-        stroke="currentColor"
-        strokeOpacity="0.1"
-        strokeWidth={sw}
-      />
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r2}
-        fill="none"
-        stroke="currentColor"
-        strokeOpacity="0.1"
-        strokeWidth={sw}
-      />
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r3}
-        fill="none"
-        stroke="currentColor"
-        strokeOpacity="0.1"
-        strokeWidth={sw}
-      />
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r1}
-        fill="none"
-        stroke="hsl(var(--gps-footprint))"
-        strokeWidth={sw}
-        strokeDasharray={dash(r1, fp)}
-        strokeLinecap="round"
-      />
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r2}
-        fill="none"
-        stroke="hsl(var(--gps-local))"
-        strokeWidth={sw}
-        strokeDasharray={dash(r2, lc)}
-        strokeLinecap="round"
-      />
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r3}
-        fill="none"
-        stroke="hsl(var(--gps-regen))"
-        strokeWidth={sw}
-        strokeDasharray={dash(r3, rg)}
-        strokeLinecap="round"
-      />
+      <circle cx={cx} cy={cy} r={r1} fill="none" style={{ stroke: "var(--brand-pink)" }} strokeWidth={sw} />
+      <circle cx={cx} cy={cy} r={r2} fill="none" style={{ stroke: "var(--brand-pink)" }} strokeWidth={sw} />
+      <circle cx={cx} cy={cy} r={r3} fill="none" style={{ stroke: "var(--brand-pink)" }} strokeWidth={sw} />
+      <circle cx={cx} cy={cy} r={r1} fill="none" style={{ stroke: "var(--brand-green)" }} strokeWidth={sw} strokeDasharray={dash(r1, fp)} strokeLinecap="round" />
+      <circle cx={cx} cy={cy} r={r2} fill="none" style={{ stroke: "var(--brand-blue)" }} strokeWidth={sw} strokeDasharray={dash(r2, lc)} strokeLinecap="round" />
+      <circle cx={cx} cy={cy} r={r3} fill="none" style={{ stroke: "var(--brand-lime)" }} strokeWidth={sw} strokeDasharray={dash(r3, rg)} strokeLinecap="round" />
       <text
         x={cx}
         y={cy}
@@ -152,7 +101,7 @@ export default function LandingPage() {
   const faqRight = FAQ_ITEMS.slice(mid);
 
   return (
-    <div className="min-h-screen bg-[hsl(0,0%,8%)] overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
 
       {/* ═══ 1. HERO ═══ */}
@@ -166,16 +115,17 @@ export default function LandingPage() {
         >
           <source src="/assets/hero-walk.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(0,0%,5%)] via-[hsl(0,0%,6%)]/55 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(0,0%,6%)]/40 to-transparent" />
+        {/* Image overlays — opacity allowed for video/image overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
 
-        <div className="relative z-10 w-full px-6 md:px-16 lg:px-24 pb-16 md:pb-24">
-          <div className="max-w-[1400px] mx-auto grid md:grid-cols-[1.2fr_1fr] gap-10 md:gap-20 items-end">
+        <div className="relative z-10 w-full pb-16 md:pb-24">
+          <div className="container-section grid md:grid-cols-[1.2fr_1fr] gap-10 md:gap-20 items-end">
             <div>
-              <p className="font-hand text-base md:text-lg text-white/60 mb-4 italic">
+              <p className="type-label text-dark-foreground italic mb-4">
                 The first regenerative map of tourism
               </p>
-              <h1 className="fm-hero-heading text-white">
+              <h1 className="type-h1 text-dark-foreground">
                 Travel impact.
                 <br />
                 Visible at the
@@ -185,7 +135,7 @@ export default function LandingPage() {
             </div>
 
             <div className="space-y-6 md:pb-4">
-              <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-md">
+              <p className="type-m text-dark-foreground">
                 We&apos;re building something that&apos;s never existed in
                 tourism — a live impact layer that tells what tourism does to
                 places, people and communities.
@@ -196,15 +146,12 @@ export default function LandingPage() {
                 count.
               </p>
               <div className="flex items-center gap-4 flex-wrap">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center bg-[hsl(var(--cream))] text-foreground hover:bg-[hsl(var(--cream))]/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
-                >
+                <Link href="/signup" className="btn btn-primary">
                   Join as operator
                 </Link>
                 <Link
                   href="/traveler/waitlist"
-                  className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white font-medium transition-colors"
+                  className="inline-flex items-center gap-2 type-s text-dark-foreground hover:text-lime transition-colors"
                 >
                   For travelers <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -215,7 +162,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 2. PRESS & PARTNERS — Marquee ═══ */}
-      <section className="bg-[#ffffff] border-b border-border overflow-hidden">
+      <section className="bg-background border-b border-border overflow-hidden">
         <div className="py-5 md:py-6">
           <div className="animate-marquee flex w-max gap-8 md:gap-12 items-center">
             {[0, 1, 2].map((dup) => (
@@ -227,65 +174,65 @@ export default function LandingPage() {
                   href="https://retreat.startupmadeira.eu/finalists-2026/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 hover:opacity-70 transition-opacity shrink-0"
+                  className="flex items-center gap-2 shrink-0"
                 >
                   <Image
                     src="/assets/madeira-startup-retreat.png"
                     alt="Madeira Startup Retreat"
                     width={120}
                     height={40}
-                    className="h-10 w-auto object-contain grayscale opacity-50"
+                    className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
                   />
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-medium text-[hsl(var(--tan))]">
+                  <span className="type-label text-muted-foreground">
                     Cohort 2026
                   </span>
                 </a>
-                <div className="w-px h-5 shrink-0 bg-[hsl(var(--tan))]/30" />
+                <div className="w-px h-5 shrink-0 bg-border" />
                 <a
                   href="https://www.clarin.com/viajes/viajar-cuidar-destino-innovador-proyecto-jovenes-argentinos-brasileno-llego-europa_0_fexstVhMcf.html"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-70 transition-opacity shrink-0"
+                  className="shrink-0"
                 >
                   <Image
                     src="/assets/clarin-logo.svg"
                     alt="Clarín"
                     width={80}
                     height={32}
-                    className="h-8 w-auto object-contain grayscale opacity-50"
+                    className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
                   />
                 </a>
-                <div className="w-px h-5 shrink-0 bg-[hsl(var(--tan))]/30" />
+                <div className="w-px h-5 shrink-0 bg-border" />
                 <a
                   href="https://www.canal12misiones.com/noticias-de-misiones/turismo/misioneros-finalistas-concurso-portugal"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-70 transition-opacity shrink-0"
+                  className="shrink-0"
                 >
                   <Image
                     src="/assets/canal12-logo.png"
                     alt="Canal 12 Misiones"
                     width={120}
                     height={40}
-                    className="h-10 w-auto object-contain grayscale opacity-50"
+                    className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
                   />
                 </a>
-                <div className="w-px h-5 shrink-0 bg-[hsl(var(--tan))]/30" />
+                <div className="w-px h-5 shrink-0 bg-border" />
                 <a
                   href="https://www.instagram.com/reel/DUGuXlpjtDp/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:opacity-70 transition-opacity shrink-0"
+                  className="shrink-0"
                 >
                   <Image
                     src="/assets/silicon-misiones-logo.png"
                     alt="Silicon Misiones"
                     width={100}
                     height={32}
-                    className="h-8 w-auto object-contain grayscale opacity-50"
+                    className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
                   />
                 </a>
-                <div className="w-px h-5 shrink-0 bg-[hsl(var(--tan))]/30" />
+                <div className="w-px h-5 shrink-0 bg-border" />
               </div>
             ))}
           </div>
@@ -293,11 +240,11 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 3. MANIFESTO ═══ */}
-      <section className="fm-cream">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-24">
+      <section className="section">
+        <div className="container-section">
           <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 md:gap-16 items-end">
             <div className="reveal">
-              <h2 className="fm-sub-heading text-foreground">
+              <h2 className="type-h2 text-foreground">
                 There will be no tourism industry on a dead planet.
                 <span className="block mt-1 text-muted-foreground">
                   We keep talking about sustainable travel while the places we
@@ -306,7 +253,7 @@ export default function LandingPage() {
                   enough.
                 </span>
               </h2>
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mt-10">
+              <p className="type-m text-muted-foreground mt-10">
                 You can want to do the right thing and still have no way to know
                 if you are. You can be an operator doing everything right — and
                 still lose to someone who isn&apos;t. Because the system
@@ -314,17 +261,14 @@ export default function LandingPage() {
                 that system.
               </p>
               <div className="mt-8">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
-                >
+                <Link href="/signup" className="btn btn-dark">
                   Join us
                 </Link>
               </div>
             </div>
 
             <div className="space-y-4 reveal">
-              <div className="rounded-2xl overflow-hidden aspect-[3/4] max-h-[480px]">
+              <div className="overflow-hidden aspect-[3/4] max-h-[480px]">
                 <Image
                   src="/assets/madeira-nature.jpg"
                   alt="Mountain stream and wildflowers in Madeira"
@@ -333,7 +277,7 @@ export default function LandingPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="font-hand text-lg md:text-xl text-muted-foreground italic text-right">
+              <p className="type-s text-muted-foreground italic text-right">
                 2026 — We start here in Madeira
               </p>
             </div>
@@ -342,21 +286,21 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 4. FOUNDING COHORT ═══ */}
-      <section className="relative overflow-hidden bg-[hsl(var(--tan))]">
+      <section className="section section-dark relative overflow-hidden">
         <Image
           src="/assets/madeira-map.svg"
           alt=""
           fill
-          className="object-contain opacity-30 pointer-events-none"
-          style={{ objectPosition: "center 60%" }}
+          className="object-contain pointer-events-none"
+          style={{ objectPosition: "center 60%", opacity: 0.15 }}
           aria-hidden="true"
         />
-        <div className="relative max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-28 md:py-44 text-center">
+        <div className="relative container-section text-center">
           <div className="reveal">
-            <p className="font-hand text-lg md:text-xl text-white/70 italic">
+            <p className="type-label text-pink italic">
               Founding cohort · Madeira 2026
             </p>
-            <h2 className="fm-section-heading text-white mt-4 max-w-3xl mx-auto">
+            <h2 className="type-h1 text-dark-foreground mt-4 max-w-text mx-auto">
               30 operators.
               <br />
               One island.
@@ -366,10 +310,7 @@ export default function LandingPage() {
               in tourism history.
             </h2>
             <div className="mt-8">
-              <Link
-                href="/signup"
-                className="inline-flex items-center bg-[hsl(var(--cream))] text-foreground hover:bg-[hsl(var(--cream))]/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
-              >
+              <Link href="/signup" className="btn btn-primary">
                 Join us
               </Link>
             </div>
@@ -378,40 +319,37 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 5. EXPERIENCE PREVIEW ═══ */}
-      <section className="fm-cream border-t border-border">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 pt-24 pb-12 md:pt-40 md:pb-20">
+      <section className="section border-t border-border">
+        <div className="container-section">
           <div className="text-center reveal">
-            <p className="font-hand text-lg md:text-xl text-muted-foreground italic">
+            <p className="type-label text-muted-foreground italic">
               Coming soon — Off the beaten track.
             </p>
-            <h2 className="fm-section-heading text-foreground mt-4">
+            <h2 className="type-h2 text-foreground mt-4">
               This is what booking looks like
               <br />
               when impact is visible.
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto mt-5">
+            <p className="type-m text-muted-foreground max-w-text mx-auto mt-5">
               Local Madeiran guide running electric-car tours to places most
               visitors never reach. 100% local operator, zero direct emissions,
               low-pressure destinations.
             </p>
             <div className="flex justify-center mt-6">
-              <Link
-                href="/discover"
-                className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
-              >
+              <Link href="/discover" className="btn btn-dark">
                 Explore more
               </Link>
             </div>
           </div>
 
-          <div className="relative mt-16 max-w-3xl mx-auto reveal">
+          <div className="relative mt-16 max-w-[768px] mx-auto reveal">
             {/* Green Passport card — desktop */}
-            <div className="hidden md:block absolute -left-24 top-8 w-52 bg-background rounded-2xl border border-border shadow-lg p-4 space-y-3 z-10">
+            <div className="hidden md:block absolute -left-24 top-8 w-52 card card-sm space-y-3 z-10">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center">
-                  <Leaf className="w-4 h-4 text-accent" />
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                  <Leaf className="w-4 h-4 text-accent-foreground" />
                 </div>
-                <span className="text-[10px] font-bold text-foreground uppercase tracking-[0.2em]">
+                <span className="type-label text-foreground">
                   Green Passport
                 </span>
               </div>
@@ -419,13 +357,11 @@ export default function LandingPage() {
                 <ScoreRings fp={82} lc={88} rg={61} total={76} size={80} />
               </div>
               <div className="text-center">
-                <span className="inline-block text-[10px] font-semibold px-2.5 py-1 bg-primary/10 text-primary rounded-full uppercase tracking-wide">
-                  Regenerative Practice
-                </span>
+                <span className="badge badge-lime">Regenerative Practice</span>
               </div>
             </div>
 
-            <div className="rounded-2xl overflow-hidden shadow-2xl aspect-[3/4] max-h-[550px] mx-auto md:max-w-md">
+            <div className="overflow-hidden aspect-[3/4] max-h-[550px] mx-auto md:max-w-md">
               <Image
                 src="/assets/madeira-coast-drone.jpg"
                 alt="Aerial view of Madeira coastline"
@@ -436,8 +372,8 @@ export default function LandingPage() {
             </div>
 
             {/* Verified Metrics card — desktop */}
-            <div className="hidden md:block absolute -right-20 bottom-12 w-56 bg-background rounded-2xl border border-border shadow-lg p-4 space-y-2.5 z-10">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+            <div className="hidden md:block absolute -right-20 bottom-12 w-56 card card-sm space-y-4 z-10">
+              <p className="type-label text-muted-foreground">
                 Verified Metrics
               </p>
               <div className="space-y-2">
@@ -451,10 +387,10 @@ export default function LandingPage() {
                     key={m.label}
                     className="flex justify-between items-center"
                   >
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="type-xs text-muted-foreground">
                       {m.label}
                     </span>
-                    <span className="text-[10px] font-bold text-foreground">
+                    <span className="type-xs font-bold text-foreground">
                       {m.value}
                     </span>
                   </div>
@@ -465,12 +401,12 @@ export default function LandingPage() {
 
           {/* Mobile-only cards */}
           <div className="grid grid-cols-2 gap-3 mt-6 md:hidden">
-            <div className="bg-background rounded-2xl border border-border p-4 space-y-3">
+            <div className="card card-sm space-y-3">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-accent/15 flex items-center justify-center">
-                  <Leaf className="w-3.5 h-3.5 text-accent" />
+                <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
+                  <Leaf className="w-3.5 h-3.5 text-accent-foreground" />
                 </div>
-                <span className="text-[9px] font-bold text-foreground uppercase tracking-[0.15em]">
+                <span className="type-label text-foreground">
                   Green Passport
                 </span>
               </div>
@@ -478,13 +414,11 @@ export default function LandingPage() {
                 <ScoreRings fp={82} lc={88} rg={61} total={76} size={70} />
               </div>
               <div className="text-center">
-                <span className="inline-block text-[10px] font-semibold px-2 py-0.5 bg-primary/10 text-primary rounded-full uppercase tracking-wide">
-                  Regen Practice
-                </span>
+                <span className="badge badge-lime">Regen Practice</span>
               </div>
             </div>
-            <div className="bg-background rounded-2xl border border-border p-4 space-y-2.5">
-              <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.15em]">
+            <div className="card card-sm space-y-4">
+              <p className="type-label text-muted-foreground">
                 Verified Metrics
               </p>
               <div className="space-y-2">
@@ -498,10 +432,10 @@ export default function LandingPage() {
                     key={m.label}
                     className="flex justify-between items-center"
                   >
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="type-xs text-muted-foreground">
                       {m.label}
                     </span>
-                    <span className="text-[10px] font-bold text-foreground">
+                    <span className="type-xs font-bold text-foreground">
                       {m.value}
                     </span>
                   </div>
@@ -510,20 +444,20 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <p className="font-hand text-base text-muted-foreground italic text-center mt-8">
+          <p className="type-s text-muted-foreground italic text-center mt-8">
             100% electric · 100% local
           </p>
         </div>
       </section>
 
       {/* ═══ 6. MEET THE SCORE ═══ */}
-      <section className="fm-cream">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-24 md:py-40">
+      <section className="section">
+        <div className="container-section">
           <div className="text-center reveal">
-            <p className="font-hand text-lg md:text-xl text-muted-foreground italic mb-4">
+            <p className="type-label text-muted-foreground italic mb-4">
               Meet the Green Passport
             </p>
-            <h2 className="fm-section-heading text-foreground">
+            <h2 className="type-h2 text-foreground">
               Your verified impact score — visible at the moment of booking.
             </h2>
           </div>
@@ -545,35 +479,26 @@ export default function LandingPage() {
             ].map((pillar, i) => (
               <div
                 key={i}
-                className="bg-[hsl(var(--surface))] rounded-2xl overflow-hidden hover:-translate-y-1 transition-transform duration-500 h-full reveal"
+                className="card card-muted card-interactive space-y-4 h-full reveal"
               >
-                <div className="p-8 md:p-10 space-y-4">
-                  <h3 className="fm-card-heading text-foreground">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-base text-foreground/70 leading-relaxed">
-                    {pillar.desc}
-                  </p>
-                </div>
+                <h3 className="type-h5 text-foreground">{pillar.title}</h3>
+                <p className="type-m text-muted-foreground">{pillar.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-8 bg-[hsl(var(--tan))] rounded-2xl p-8 md:p-12 grid md:grid-cols-2 gap-8 items-center reveal">
+          <div className="mt-8 card card-dark grid md:grid-cols-2 gap-8 items-center reveal">
             <div className="text-center md:text-left">
-              <h3 className="fm-sub-heading text-foreground mt-3">
+              <h3 className="type-h4 text-dark-foreground mt-3">
                 Your Green Passport Score — verified and live at booking.
               </h3>
               <div className="mt-6">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
-                >
+                <Link href="/signup" className="btn btn-primary">
                   Join us
                 </Link>
               </div>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center text-dark-foreground">
               <ScoreRings fp={78} lc={71} rg={65} total={74} size={200} />
             </div>
           </div>
@@ -581,7 +506,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 7. HOW IT WORKS ═══ */}
-      <section className="fm-cream">
+      <section>
         <div className="grid md:grid-cols-[1fr_1fr] min-h-[600px] md:min-h-[700px]">
           <div className="relative h-[350px] md:h-auto overflow-hidden">
             <Image
@@ -594,7 +519,7 @@ export default function LandingPage() {
               href="https://www.instagram.com/julieta.artsphotos/"
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute bottom-4 left-4 z-10 bg-foreground/70 backdrop-blur-sm text-white/90 text-[10px] tracking-wide px-3 py-1.5 rounded-full hover:bg-foreground/90 transition-colors"
+              className="absolute bottom-4 left-4 z-10 bg-dark text-dark-foreground type-xs px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-colors"
             >
               📷 @julieta.artsphotos
             </a>
@@ -602,10 +527,10 @@ export default function LandingPage() {
 
           <div className="flex flex-col justify-center px-8 md:px-16 lg:px-24 py-16 md:py-24">
             <div className="reveal">
-              <p className="font-hand text-lg md:text-xl text-muted-foreground italic mb-3">
+              <p className="type-label text-muted-foreground italic mb-3">
                 Simple, transparent, verified
               </p>
-              <h2 className="fm-section-heading text-foreground mb-12">
+              <h2 className="type-h2 text-foreground mb-12">
                 Here&apos;s what happens when you apply
               </h2>
             </div>
@@ -632,26 +557,21 @@ export default function LandingPage() {
                   key={i}
                   className="flex items-start gap-6 py-7 border-t border-border reveal"
                 >
-                  <span className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground leading-none min-w-[60px]">
+                  <span className="type-h2 text-foreground leading-none min-w-[60px]">
                     {step.num}
                   </span>
                   <div className="flex-1">
-                    <span className="font-hand text-lg md:text-xl text-foreground block mb-1">
+                    <span className="type-h5 text-foreground block mb-1">
                       {step.title}
                     </span>
-                    <p className="text-base text-muted-foreground leading-relaxed">
-                      {step.desc}
-                    </p>
+                    <p className="type-m text-muted-foreground">{step.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="mt-10 text-center reveal">
-              <Link
-                href="/signup"
-                className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors"
-              >
+              <Link href="/signup" className="btn btn-dark">
                 Join us as operator
               </Link>
             </div>
@@ -660,19 +580,19 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 8. DPI — Context matters ═══ */}
-      <section className="bg-[hsl(var(--surface))]">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-24 md:py-40">
+      <section className="section section-muted">
+        <div className="container-section">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
             <div className="reveal">
-              <p className="font-hand text-lg md:text-xl text-foreground/60 italic mb-4">
+              <p className="type-label text-muted-foreground italic mb-4">
                 Every destination is different
               </p>
-              <h2 className="fm-section-heading text-foreground">
+              <h2 className="type-h2 text-foreground">
                 Context matters.
                 <br />
                 We measure that too.
               </h2>
-              <p className="text-base md:text-lg text-foreground/70 leading-relaxed max-w-md mt-6">
+              <p className="type-m text-muted-foreground mt-6">
                 The Destination Pressure Index contextualises your score against
                 where you operate — tourist intensity, ecological sensitivity,
                 economic leakage.
@@ -681,39 +601,32 @@ export default function LandingPage() {
                 Operating responsibly here isn&apos;t abstract. It&apos;s
                 urgent. And now it&apos;s measurable.
               </p>
-              <Link
-                href="/destinations"
-                className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 px-7 h-12 text-sm font-semibold rounded-lg transition-colors mt-8"
-              >
+              <Link href="/destinations" className="btn btn-dark mt-8">
                 Explore destinations
               </Link>
             </div>
 
             <div className="reveal">
-              <div className="border border-[hsl(var(--tan))]/40 rounded-2xl p-8 md:p-10 bg-[hsl(var(--tan))]/10">
-                <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/60 font-medium mb-4">
+              <div className="card">
+                <p className="type-label text-muted-foreground mb-4">
                   DPI · Madeira
                 </p>
                 <div className="flex items-end gap-2">
-                  <span className="text-5xl md:text-7xl font-bold tracking-tighter text-foreground">
-                    73
-                  </span>
-                  <span className="text-lg text-foreground/50 mb-2">/100</span>
+                  <span className="type-h1 text-foreground tabular-nums">73</span>
+                  <span className="type-m text-muted-foreground mb-2">/100</span>
                 </div>
-                <span className="inline-block text-[10px] font-semibold px-3 py-1 bg-destructive/20 text-destructive mt-4 rounded-full uppercase tracking-wider">
-                  High Pressure
-                </span>
-                <div className="flex gap-8 mt-6 pt-6 border-t border-[hsl(var(--tan))]/15">
+                <span className="badge badge-pink mt-4">High Pressure</span>
+                <div className="flex gap-8 mt-6 pt-6 border-t border-border">
                   {[
                     { label: "Intensity", value: "100/100" },
                     { label: "Sensitivity", value: "72/100" },
                     { label: "Leakage", value: "51/100" },
                   ].map((m) => (
                     <div key={m.label}>
-                      <span className="text-[10px] text-foreground/50 block uppercase tracking-wider">
+                      <span className="type-label text-muted-foreground block">
                         {m.label}
                       </span>
-                      <span className="text-sm font-mono text-foreground">
+                      <span className="type-s font-semibold tabular-nums text-foreground">
                         {m.value}
                       </span>
                     </div>
@@ -726,11 +639,10 @@ export default function LandingPage() {
       </section>
 
       {/* ═══ 9. FORWARD COMMITMENT ═══ */}
-      <section style={{ backgroundColor: "#F5F1EB" }}>
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 lg:px-12 py-10 md:py-14">
+      <section className="section">
+        <div className="container-section">
           <div className="grid md:grid-cols-[1fr_1.4fr] gap-4 md:gap-5">
-            {/* Image card */}
-            <div className="relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-auto md:h-full min-h-[240px] reveal">
+            <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-full min-h-[240px] reveal">
               <Image
                 src="/assets/madeira-cliff-coast.jpg"
                 alt="Dramatic cliff coastline in Madeira"
@@ -741,31 +653,27 @@ export default function LandingPage() {
                 href="https://www.instagram.com/javierlomont/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute bottom-4 left-4 z-10 bg-foreground/70 backdrop-blur-sm text-white/90 text-[10px] tracking-wide px-3 py-1.5 rounded-full hover:bg-foreground/90 transition-colors"
+                className="absolute bottom-4 left-4 z-10 bg-dark text-dark-foreground type-xs px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 📷 @javierlomont
               </a>
             </div>
 
-            {/* Text card */}
-            <div className="bg-[hsl(var(--surface))] rounded-2xl p-8 md:p-10 lg:p-12 flex flex-col justify-between min-h-[240px] text-center reveal">
+            <div className="card card-muted card-lg flex flex-col justify-between min-h-[240px] text-center reveal">
               <div>
-                <h2 className="fm-sub-heading text-foreground">
+                <h2 className="type-h2 text-foreground">
                   Low score today?
                   <br />
                   That&apos;s a starting point.
                 </h2>
-                <p className="text-base text-muted-foreground leading-relaxed max-w-lg mt-4 mx-auto">
+                <p className="type-m text-muted-foreground max-w-text mx-auto mt-4">
                   The Green Passport doesn&apos;t penalise — it maps where you
                   are. Sign a Forward Commitment, receive 15 baseline Pillar 3
                   points, and get matched with verified local institutions.
                 </p>
               </div>
               <div className="mt-8 flex justify-center">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center bg-foreground text-background hover:bg-foreground/90 h-12 px-8 text-sm font-semibold rounded-lg transition-colors"
-                >
+                <Link href="/signup" className="btn btn-dark">
                   Join us
                 </Link>
               </div>
@@ -785,22 +693,20 @@ export default function LandingPage() {
           </>
         }
       >
-       <div className="klaviyo-form-SbN4HA max-w-[400px]" />
+        <div className="klaviyo-form-SbN4HA max-w-[400px]" />
       </LookbookCta>
 
       {/* ═══ 11. FAQ ═══ */}
-      <section className="fm-dark">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-24 space-y-10">
+      <section className="section section-dark">
+        <div className="container-section space-y-10">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <p className="font-hand text-lg md:text-xl italic mb-3">
-                FAQs
-              </p>
-              <h2 className="fm-section-heading">Common Questions</h2>
+              <p className="type-label text-pink italic mb-3">FAQs</p>
+              <h2 className="type-h2 text-dark-foreground">Common Questions</h2>
             </div>
             <a
               href="mailto:hello@theregenerativetourism.com"
-              className="inline-flex items-center bg-[hsl(var(--cream))] text-foreground hover:bg-[hsl(var(--cream))]/90 h-12 px-7 text-sm font-semibold rounded-lg transition-colors shrink-0"
+              className="btn btn-primary shrink-0"
             >
               Contact us
             </a>
@@ -809,41 +715,31 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-x-12">
             <div>
               {faqLeft.map((item, i) => (
-                <details
-                  key={i}
-                  className="group border-t border-white/10"
-                >
-                  <summary className="flex items-center justify-between w-full py-5 text-sm font-semibold cursor-pointer list-none gap-4">
+                <details key={i} className="group border-t border-pink">
+                  <summary className="flex items-center justify-between w-full py-5 type-s font-semibold cursor-pointer list-none gap-4 text-dark-foreground">
                     <span>{item.question}</span>
-                    <span className="shrink-0 text-white/50 transition-transform duration-200 group-open:rotate-45 text-lg leading-none">
+                    <span className="shrink-0 type-xl text-pink transition-transform duration-200 group-open:rotate-45">
                       +
                     </span>
                   </summary>
-                  <p className="text-sm text-white/60 leading-relaxed pb-5">
-                    {item.answer}
-                  </p>
+                  <p className="type-s text-pink pb-5">{item.answer}</p>
                 </details>
               ))}
-              <div className="border-t border-white/10" />
+              <div className="border-t border-pink" />
             </div>
             <div>
               {faqRight.map((item, i) => (
-                <details
-                  key={i}
-                  className="group border-t border-white/10"
-                >
-                  <summary className="flex items-center justify-between w-full py-5 text-sm font-semibold cursor-pointer list-none gap-4">
+                <details key={i} className="group border-t border-pink">
+                  <summary className="flex items-center justify-between w-full py-5 type-s font-semibold cursor-pointer list-none gap-4 text-dark-foreground">
                     <span>{item.question}</span>
-                    <span className="shrink-0 text-white/50 transition-transform duration-200 group-open:rotate-45 text-lg leading-none">
+                    <span className="shrink-0 type-xl text-pink transition-transform duration-200 group-open:rotate-45">
                       +
                     </span>
                   </summary>
-                  <p className="text-sm text-white/60 leading-relaxed pb-5">
-                    {item.answer}
-                  </p>
+                  <p className="type-s text-pink pb-5">{item.answer}</p>
                 </details>
               ))}
-              <div className="border-t border-white/10" />
+              <div className="border-t border-pink" />
             </div>
           </div>
         </div>

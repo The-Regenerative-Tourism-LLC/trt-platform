@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Instrument_Sans, Caveat, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import { Providers } from "../providers";
 import { JsonLd, organizationSchema, websiteSchema } from "@/lib/seo/json-ld";
@@ -10,27 +9,25 @@ import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 
-const instrumentSans = Instrument_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
+/*
+  Font: "TWK Lausanne" must be self-hosted via next/font/local.
+  Add font files to /public/fonts/ and uncomment below when ready.
 
-const caveat = Caveat({
-  variable: "--font-hand",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+  import localFont from "next/font/google";
+  const twkLausanne = localFont({
+    src: [
+      { path: "../../../public/fonts/TWKLausanne-400.woff2", weight: "400" },
+      { path: "../../../public/fonts/TWKLausanne-500.woff2", weight: "500" },
+      { path: "../../../public/fonts/TWKLausanne-600.woff2", weight: "600" },
+      { path: "../../../public/fonts/TWKLausanne-700.woff2", weight: "700" },
+    ],
+    variable: "--font-sans",
+    display: "swap",
+  });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+  Then add twkLausanne.variable to body className.
+  Until then, system-ui is the effective fallback.
+*/
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "https://www.theregenerativetourism.com";
@@ -92,9 +89,7 @@ export const metadata: Metadata = {
       "The verified signal for regenerative tourism operators. GPS scores, DPI context, and Traveler Impact Profiles.",
     images: ["/opengraph-image"],
   },
-  alternates: {
-    canonical: BASE_URL,
-  },
+  alternates: { canonical: BASE_URL },
 };
 
 export default async function LocaleLayout({
@@ -114,9 +109,7 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${instrumentSans.variable} ${caveat.variable} ${jetbrainsMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <JsonLd schema={organizationSchema} />
         <JsonLd schema={websiteSchema} />
         <NextIntlClientProvider messages={messages}>

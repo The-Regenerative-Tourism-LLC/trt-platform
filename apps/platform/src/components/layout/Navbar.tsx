@@ -10,12 +10,10 @@ import {
   X,
   LayoutDashboard,
   FileCheck,
-  BarChart3,
   Shield,
   MapPin,
   Search,
   LogOut,
-  ChevronDown,
   Building2,
   Compass,
   User,
@@ -72,27 +70,11 @@ export function Navbar() {
   const isActive = (path: string) =>
     cleanPathname === path || cleanPathname?.startsWith(path + "/");
 
-  const linkCls = (path: string) =>
-    cn(
-      "px-3 py-1.5 text-sm rounded-full transition-colors whitespace-nowrap",
-      isActive(path)
-        ? "bg-foreground/5 text-foreground font-medium"
-        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-    );
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
   function getNavLinks() {
@@ -106,14 +88,12 @@ export function Navbar() {
         { href: withLocale("/pricing"), label: tNav("pricing") },
       ];
     }
-
     if (isAdminRoute && isAdmin) {
       return [
         { href: withLocale("/admin/dashboard"), label: tPublic("overview") },
         { href: withLocale("/admin/evidence"), label: tPublic("evidence") },
       ];
     }
-
     if (isOperatorRoute && isOperator) {
       return [
         { href: withLocale("/discover"), label: tPublic("discover") },
@@ -124,7 +104,6 @@ export function Navbar() {
         { href: withLocale("/operator/dashboard"), label: tPublic("dashboard") },
       ];
     }
-
     return [
       { href: withLocale("/discover"), label: tPublic("discover") },
       { href: withLocale("/destinations"), label: tNav("destinations") },
@@ -143,16 +122,13 @@ export function Navbar() {
     <>
       <nav
         className={cn(
-          "sticky top-0 z-50 transition-all duration-300",
-          scrolled
-            ? "bg-cream/95 backdrop-blur-xl shadow-sm border-b border-border/40"
-            : "bg-cream/80 backdrop-blur-xl",
+          "sticky top-0 z-50 bg-background transition-all duration-300",
+          scrolled ? "border-b border-border" : "",
           mobileOpen && "z-[60]"
         )}
       >
-        <div className="container mx-auto max-w-7xl flex items-center justify-between h-14 px-5 md:px-6">
-          {/* Logo */}
-            <Link
+        <div className="container mx-auto max-w-page flex items-center justify-between h-14 px-5 md:px-6">
+          <Link
             href={withLocale("/")}
             className="flex items-center gap-2 shrink-0 relative z-[60]"
           >
@@ -166,13 +142,9 @@ export function Navbar() {
             />
           </Link>
 
-          {/* Right side */}
           <div className="flex items-center gap-2">
             {!loading && !user && (
-              <Button
-                className="rounded-lg font-semibold bg-[#1C1C1C] text-cream hover:bg-[#1C1C1C]/90 h-10 px-5"
-                asChild
-              >
+              <Button variant="dark" size="sm" asChild>
                 <Link href={withLocale("/signup")}>{tPublic("join")}</Link>
               </Button>
             )}
@@ -180,25 +152,17 @@ export function Navbar() {
             {!loading && user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-semibold hover:opacity-90 transition-opacity">
+                  <button className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-semibold transition-colors hover:bg-dark hover:text-dark-foreground">
                     {initials}
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel className="font-normal">
                     <p className="text-sm font-medium">{displayName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {user.email}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
                     {user.role && (
-                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-                        {isOperator ? (
-                          <Building2 className="w-3 h-3" />
-                        ) : isAdmin ? (
-                          <Shield className="w-3 h-3" />
-                        ) : (
-                          <Compass className="w-3 h-3" />
-                        )}
+                      <span className="inline-flex items-center gap-1 mt-1 type-label text-muted-foreground">
+                        {isOperator ? <Building2 className="w-3 h-3" /> : isAdmin ? <Shield className="w-3 h-3" /> : <Compass className="w-3 h-3" />}
                         {user.role}
                       </span>
                     )}
@@ -208,21 +172,13 @@ export function Navbar() {
                   {isOperator && (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link
-                          href={withLocale("/operator/dashboard")}
-                          className="cursor-pointer"
-                        >
-                          <LayoutDashboard className="w-4 h-4 mr-2" />
-                          {tPublic("operatorDashboard")}
+                        <Link href={withLocale("/operator/dashboard")} className="cursor-pointer">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />{tPublic("operatorDashboard")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link
-                          href={withLocale("/operator/evidence")}
-                          className="cursor-pointer"
-                        >
-                          <FileCheck className="w-4 h-4 mr-2" />
-                          {tPublic("evidence")}
+                        <Link href={withLocale("/operator/evidence")} className="cursor-pointer">
+                          <FileCheck className="w-4 h-4 mr-2" />{tPublic("evidence")}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -231,21 +187,13 @@ export function Navbar() {
                   {isTraveler && !isOperator && (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link
-                          href={withLocale("/traveler/dashboard")}
-                          className="cursor-pointer"
-                        >
-                          <LayoutDashboard className="w-4 h-4 mr-2" />
-                          {tPublic("dashboard")}
+                        <Link href={withLocale("/traveler/dashboard")} className="cursor-pointer">
+                          <LayoutDashboard className="w-4 h-4 mr-2" />{tPublic("dashboard")}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link
-                          href={withLocale("/traveler/discover")}
-                          className="cursor-pointer"
-                        >
-                          <User className="w-4 h-4 mr-2" />
-                          {tPublic("myImpact")}
+                        <Link href={withLocale("/traveler/discover")} className="cursor-pointer">
+                          <User className="w-4 h-4 mr-2" />{tPublic("myImpact")}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -255,12 +203,8 @@ export function Navbar() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link
-                          href={withLocale("/admin/dashboard")}
-                          className="cursor-pointer"
-                        >
-                          <Shield className="w-4 h-4 mr-2" />
-                          {tPublic("adminDashboard")}
+                        <Link href={withLocale("/admin/dashboard")} className="cursor-pointer">
+                          <Shield className="w-4 h-4 mr-2" />{tPublic("adminDashboard")}
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -268,14 +212,12 @@ export function Navbar() {
 
                   <DropdownMenuItem asChild>
                     <Link href={withLocale("/discover")} className="cursor-pointer">
-                      <Search className="w-4 h-4 mr-2" />
-                      {tPublic("discover")}
+                      <Search className="w-4 h-4 mr-2" />{tPublic("discover")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href={withLocale("/destinations")} className="cursor-pointer">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {tNav("destinations")}
+                      <MapPin className="w-4 h-4 mr-2" />{tNav("destinations")}
                     </Link>
                   </DropdownMenuItem>
 
@@ -284,8 +226,7 @@ export function Navbar() {
                     onClick={signOut}
                     className="cursor-pointer text-destructive focus:text-destructive"
                   >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    {tPublic("signOut")}
+                    <LogOut className="w-4 h-4 mr-2" />{tPublic("signOut")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -294,25 +235,19 @@ export function Navbar() {
             <LocaleSwitcher className="hidden md:flex" />
 
             <button
-              className="p-2 rounded-full hover:bg-secondary relative z-[60]"
+              className="p-2 rounded-full transition-colors hover:bg-muted hover:text-muted-foreground relative z-[60]"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={mobileOpen ? tPublic("closeMenu") : tPublic("openMenu")}
             >
-              {mobileOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Full-screen overlay menu */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[55] flex mobile-overlay-enter">
-          {/* Left panel with nav links */}
-          <div className="w-[65%] max-w-[420px] bg-cream flex flex-col justify-between h-full pt-20 pb-8 px-6 md:px-10 mobile-panel-enter">
+          <div className="w-[65%] max-w-[420px] bg-background flex flex-col justify-between h-full pt-20 pb-8 px-6 md:px-10 mobile-panel-enter border-r border-border">
             <nav className="flex flex-col gap-1">
               {navLinks.map((l) => (
                 <Link
@@ -320,10 +255,8 @@ export function Navbar() {
                   href={l.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "block text-[2rem] leading-[1.15] font-bold tracking-tight py-1 transition-opacity",
-                    isActive(l.href)
-                      ? "text-[#1C1C1C]"
-                      : "text-[#1C1C1C]/60 hover:text-[#1C1C1C] active:text-[#1C1C1C]"
+                    "block type-h3 py-1 transition-colors",
+                    isActive(l.href) ? "text-primary" : "text-foreground hover:text-primary"
                   )}
                 >
                   {l.label}
@@ -336,29 +269,18 @@ export function Navbar() {
 
               {user ? (
                 <div className="space-y-1">
-                  <p className="text-[10px] uppercase tracking-widest text-[#1C1C1C]/30">
-                    {tPublic("signedIn")}
-                  </p>
-                  <p className="text-xs text-[#1C1C1C]/60 truncate">{user.email}</p>
+                  <p className="type-label text-muted-foreground">{tPublic("signedIn")}</p>
+                  <p className="type-s text-foreground truncate">{user.email}</p>
                   <button
-                    onClick={() => {
-                      signOut();
-                      setMobileOpen(false);
-                    }}
-                    className="text-xs text-[#1C1C1C]/40 hover:text-[#1C1C1C] transition-colors mt-1"
+                    onClick={() => { signOut(); setMobileOpen(false); }}
+                    className="type-s text-muted-foreground hover:text-foreground transition-colors mt-1"
                   >
                     {tPublic("signOut")}
                   </button>
                 </div>
               ) : (
-                <Button
-                  className="w-full rounded-lg bg-[#1C1C1C] text-cream hover:bg-[#1C1C1C]/90 font-semibold h-11"
-                  asChild
-                >
-                  <Link
-                    href={withLocale("/signup")}
-                    onClick={() => setMobileOpen(false)}
-                  >
+                <Button variant="dark" className="w-full" asChild>
+                  <Link href={withLocale("/signup")} onClick={() => setMobileOpen(false)}>
                     {tPublic("join")}
                   </Link>
                 </Button>
@@ -366,9 +288,8 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Right side — blurred backdrop */}
           <div
-            className="flex-1 bg-background/60 backdrop-blur-md"
+            className="flex-1 bg-dark"
             onClick={() => setMobileOpen(false)}
           />
         </div>

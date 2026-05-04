@@ -3,27 +3,31 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "badge",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
-        leader: "border-transparent bg-band-leader text-green-foreground",
-        practice: "border-transparent bg-band-practice text-teal-foreground",
-        advancing: "border-transparent bg-band-advancing text-secondary-foreground",
-        developing: "border-transparent bg-band-developing text-amber-foreground",
-        unpublished: "border-transparent bg-band-unpublished text-muted-foreground",
-        accelerating: "border-transparent bg-dps-accelerating text-green-foreground",
-        progressing: "border-transparent bg-dps-progressing text-teal-foreground",
-        stable: "border-transparent bg-dps-stable text-secondary-foreground",
-        regressing: "border-transparent bg-dps-regressing text-amber-foreground",
-        critical: "border-transparent bg-dps-critical text-destructive-foreground",
-        "pressure-low": "border-transparent bg-pressure-low text-green-foreground",
-        "pressure-moderate": "border-transparent bg-pressure-moderate text-amber-foreground",
-        "pressure-high": "border-transparent bg-pressure-high text-destructive-foreground",
+        default:     "bg-primary text-primary-foreground border-primary",
+        secondary:   "badge-pink",
+        destructive: "badge-purple",
+        outline:     "bg-transparent text-foreground border-border",
+        success:     "badge-green",
+        /* GPS band variants */
+        leader:      "badge-dark",
+        practice:    "bg-success text-success-foreground border-success",
+        advancing:   "badge-lime",
+        developing:  "badge-pink",
+        unpublished: "bg-card text-card-foreground border-border",
+        /* DPS variants */
+        accelerating: "badge-dark",
+        progressing:  "bg-success text-success-foreground border-success",
+        stable:       "badge-pink",
+        regressing:   "badge-purple",
+        critical:     "badge-purple",
+        /* Pressure variants */
+        "pressure-low":      "badge-green",
+        "pressure-moderate": "badge-lime",
+        "pressure-high":     "badge-purple",
       },
     },
     defaultVariants: {

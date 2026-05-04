@@ -51,7 +51,7 @@ export default function TravelerWaitlistPage() {
       <Navbar />
 
       {/* ═══ 1. HERO ═══ */}
-      <section className="relative min-h-[60vh] flex items-end overflow-hidden text-white">
+      <section className="relative min-h-[60vh] flex items-end overflow-hidden">
         <Image
           src="/assets/waitlist-hero.jpg"
           alt="Travelers in nature"
@@ -59,13 +59,12 @@ export default function TravelerWaitlistPage() {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/30 via-[#1C1C1C]/50 to-[#1C1C1C]/80" />
-        <div className="relative z-10 max-w-[1400px] mx-auto w-full px-6 md:px-16 lg:px-24 pb-16 md:pb-24 grid md:grid-cols-2 gap-10 items-end">
+        {/* Image overlay — opacity allowed */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
+        <div className="relative z-10 container-section pb-16 md:pb-24 grid md:grid-cols-2 gap-10 items-end">
           <div>
-            <p className="font-hand text-base md:text-xl italic mb-4 text-white/70">
-              For travelers
-            </p>
-            <h1 className="fm-hero-heading leading-none">
+            <p className="type-label text-pink italic mb-4">For travelers</p>
+            <h1 className="type-h1 text-dark-foreground">
               Your impact
               <br />
               will be
@@ -74,7 +73,7 @@ export default function TravelerWaitlistPage() {
             </h1>
           </div>
           <div className="space-y-5">
-            <p className="text-sm md:text-base text-white/80 leading-relaxed max-w-sm">
+            <p className="type-m text-pink max-w-sm">
               We&apos;re building the traveler experience right now. Once our
               first cohort of verified operators is live, you&apos;ll be able to
               see exactly what your travel choices contribute — before you book,
@@ -86,39 +85,39 @@ export default function TravelerWaitlistPage() {
       </section>
 
       {/* ═══ 2. WHAT YOU CAN DO TODAY ═══ */}
-      <section style={{ backgroundColor: "#F5F1EB" }}>
-        <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-24">
-          <p className="font-hand text-base md:text-xl italic mb-3 text-muted-foreground">
+      <section className="section">
+        <div className="container-section">
+          <p className="type-label text-muted-foreground italic mb-3">
             Available now
           </p>
-          <h2 className="fm-section-heading mb-3">What you can do today</h2>
-          <p className="text-sm text-muted-foreground max-w-md mb-10 leading-relaxed">
+          <h2 className="type-h2 mb-3">What you can do today</h2>
+          <p className="type-s text-muted-foreground max-w-md mb-10">
             While the full traveler experience is being built, you can already
             explore what&apos;s on the map.
           </p>
           <div className="grid md:grid-cols-2 gap-4 max-w-3xl">
-            <div className="rounded-2xl border border-border bg-background p-6 flex flex-col gap-4">
-              <h3 className="font-semibold text-base">Browse destinations</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+            <div className="card flex flex-col gap-4">
+              <h3 className="type-m font-semibold">Browse destinations</h3>
+              <p className="type-s text-muted-foreground flex-1">
                 See the Destination Pressure Index for Madeira and upcoming
                 territories.
               </p>
               <Link
                 href="/destinations"
-                className="inline-flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
+                className="inline-flex items-center gap-1 type-s font-medium text-foreground hover:underline"
               >
                 Explore <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
-            <div className="rounded-2xl border border-border bg-background p-6 flex flex-col gap-4">
-              <h3 className="font-semibold text-base">Discover operators</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+            <div className="card flex flex-col gap-4">
+              <h3 className="type-m font-semibold">Discover operators</h3>
+              <p className="type-s text-muted-foreground flex-1">
                 See verified Green Passport Scores for operators already in the
                 program.
               </p>
               <Link
                 href="/discover"
-                className="inline-flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
+                className="inline-flex items-center gap-1 type-s font-medium text-foreground hover:underline"
               >
                 Browse <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -128,13 +127,11 @@ export default function TravelerWaitlistPage() {
       </section>
 
       {/* ═══ 3. HOW IT WILL WORK ═══ */}
-      <section style={{ backgroundColor: "#EDEAE4" }}>
-        <div className="max-w-[1400px] mx-auto px-6 md:px-16 lg:px-24 py-16 md:py-24">
-          <p className="font-hand text-base md:text-xl italic mb-3 text-muted-foreground">
-            Coming soon
-          </p>
-          <h2 className="fm-section-heading mb-3">How it will work</h2>
-          <p className="text-sm text-muted-foreground max-w-lg mb-12 leading-relaxed">
+      <section className="section section-dark">
+        <div className="container-section">
+          <p className="type-label text-pink italic mb-3">Coming soon</p>
+          <h2 className="type-h2 text-dark-foreground mb-3">How it will work</h2>
+          <p className="type-s text-pink max-w-lg mb-12">
             When you visit a verified operator, scan their QR code. Your visit
             is logged and verified — and after your trip, you see exactly what
             your stay contributed.
@@ -142,22 +139,17 @@ export default function TravelerWaitlistPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f) => (
-              <div
-                key={f.title}
-                className="rounded-2xl border border-border/60 bg-background/50 p-6 space-y-3"
-              >
-                <span className="text-muted-foreground">{f.icon}</span>
-                <h3 className="font-semibold text-sm">{f.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {f.desc}
-                </p>
+              <div key={f.title} className="card card-dashed space-y-3">
+                <span className="text-dark-foreground">{f.icon}</span>
+                <h3 className="type-s font-semibold text-dark-foreground">{f.title}</h3>
+                <p className="type-xs text-pink">{f.desc}</p>
               </div>
             ))}
           </div>
 
           {/* Dark explainer card */}
-          <div className="mt-8 rounded-2xl bg-foreground text-background p-8 md:p-12">
-            <div className="mb-5 opacity-50">
+          <div className="mt-8 card card-dark">
+            <div className="mb-5 text-pink">
               <svg
                 className="w-6 h-6"
                 viewBox="0 0 24 24"
@@ -172,19 +164,19 @@ export default function TravelerWaitlistPage() {
                 />
               </svg>
             </div>
-            <h3 className="font-bold text-base md:text-lg mb-5">
+            <h3 className="type-m font-bold text-dark-foreground mb-5">
               Why use the Green Passport instead of booking directly?
             </h3>
-            <p className="text-sm text-background/70 leading-relaxed max-w-2xl">
+            <p className="type-s text-pink max-w-2xl">
               When you book or check in through the platform, your visit is{" "}
-              <strong className="text-background font-semibold">
+              <strong className="text-dark-foreground font-semibold">
                 verified and measured
               </strong>
               . The operator gets credit for the work they do — creating a
               feedback loop that rewards regenerative practices over extractive
               ones.
             </p>
-            <p className="text-sm text-background/70 leading-relaxed mt-4 max-w-2xl">
+            <p className="type-s text-pink mt-4 max-w-2xl">
               And when post-trip reports launch, you&apos;ll see exactly what
               your stay contributed.
             </p>

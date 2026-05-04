@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { GPS_BAND_CONFIG, OPERATOR_TYPES } from "@/lib/constants";
 import type { GreenPassportBand } from "@/lib/engine/trt-scoring-engine/types";
 import {
@@ -43,6 +42,13 @@ interface Territory {
 
 type SortOption = "score_desc" | "score_asc" | "name_asc";
 type TabKey = "all" | "stay" | "experiences";
+
+/* Pillar colors mapped to brand palette */
+const PILLAR_COLORS = {
+  footprint: "var(--brand-green)",
+  local:     "var(--brand-blue)",
+  regen:     "var(--brand-lime)",
+};
 
 export function DiscoverClient({
   operators,
@@ -119,7 +125,7 @@ export function DiscoverClient({
 
   return (
     <>
-      {/* Hero */}
+      {/* Hero — image overlay, opacity allowed */}
       <section className="relative overflow-hidden">
         <Image
           src="/assets/discover-hero-seixal.jpg"
@@ -128,21 +134,21 @@ export function DiscoverClient({
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1C1C]/60 via-[#1C1C1C]/70 to-[#1C1C1C]/85" />
-        <div className="relative z-10 container mx-auto max-w-7xl px-5 md:px-6 py-14 md:py-24 space-y-4">
-          <p className="editorial-label text-white/50">{t("hero.label")}</p>
-          <h1 className="text-2xl md:text-[3rem] font-bold tracking-tight leading-[1.05] max-w-2xl text-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/85" />
+        <div className="relative z-10 container-section py-14 md:py-24 space-y-4">
+          <p className="type-label text-pink">{t("hero.label")}</p>
+          <h1 className="type-h1 text-dark-foreground max-w-2xl">
             {t("hero.title")}
           </h1>
-          <p className="text-sm text-white/50 max-w-lg leading-relaxed">
+          <p className="type-m text-pink max-w-lg">
             {t("hero.description")}
           </p>
         </div>
       </section>
 
       {/* Sticky filter bar */}
-      <div className="sticky top-14 z-30 bg-background/90 backdrop-blur-xl border-b border-border">
-        <div className="container mx-auto max-w-7xl px-5 md:px-6">
+      <div className="sticky top-14 z-30 bg-background border-b border-border">
+        <div className="container-section">
           {/* Tabs + search */}
           <div className="flex items-center gap-4 py-3">
             <div className="flex items-center gap-1 border border-border rounded-full overflow-hidden bg-card">
@@ -150,7 +156,7 @@ export function DiscoverClient({
                 <button
                   key={tabItem.key}
                   onClick={() => setActiveTabKey(tabItem.key)}
-                  className={`px-4 py-1.5 text-xs font-medium transition-all ${
+                  className={`px-4 py-1.5 type-xs font-medium transition-all ${
                     activeTabKey === tabItem.key
                       ? "bg-foreground text-background"
                       : "text-muted-foreground hover:text-foreground"
@@ -167,13 +173,13 @@ export function DiscoverClient({
                 placeholder={t("search.placeholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 border-border bg-card h-9 text-sm"
+                className="pl-9 border-border bg-card h-9 type-s"
               />
             </div>
 
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 type-xs font-medium rounded-full border transition-colors ${
                 hasActiveFilters
                   ? "bg-accent text-accent-foreground border-accent"
                   : "bg-card border-border text-muted-foreground hover:text-foreground"
@@ -182,18 +188,18 @@ export function DiscoverClient({
               <SlidersHorizontal className="w-3.5 h-3.5" />
               {t("filters.button")}
               {hasActiveFilters && (
-                <span className="w-4 h-4 bg-background text-foreground rounded-full text-[10px] flex items-center justify-center font-bold">
+                <span className="badge badge-dark w-4 h-4 type-xs flex items-center justify-center font-bold">
                   {(selectedTerritory ? 1 : 0) + (selectedBand ? 1 : 0)}
                 </span>
               )}
             </button>
 
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="hidden sm:flex items-center gap-1.5 type-xs text-muted-foreground">
               <ArrowUpDown className="w-3.5 h-3.5" />
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortOption)}
-                className="bg-transparent text-xs font-medium focus:outline-none cursor-pointer"
+                className="bg-transparent type-xs font-medium focus:outline-none cursor-pointer"
               >
                 {SORT_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -206,15 +212,15 @@ export function DiscoverClient({
 
           {/* Expanded filters */}
           {showFilters && (
-            <div className="pb-3 flex flex-wrap gap-3 items-end border-t border-border/50 pt-3">
+            <div className="pb-3 flex flex-wrap gap-3 items-end border-t border-border pt-3">
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">
+                <label className="type-label text-muted-foreground block mb-1">
                   {t("filters.territory")}
                 </label>
                 <select
                   value={selectedTerritory}
                   onChange={(e) => setSelectedTerritory(e.target.value)}
-                  className="h-8 px-3 text-xs border border-border rounded bg-card focus:outline-none"
+                  className="h-8 px-3 type-xs border border-border bg-card focus:outline-none"
                 >
                   <option value="">{t("filters.allTerritories")}</option>
                   {territories.map((terr) => (
@@ -225,13 +231,13 @@ export function DiscoverClient({
                 </select>
               </div>
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">
+                <label className="type-label text-muted-foreground block mb-1">
                   {t("filters.band")}
                 </label>
                 <select
                   value={selectedBand}
                   onChange={(e) => setSelectedBand(e.target.value)}
-                  className="h-8 px-3 text-xs border border-border rounded bg-card focus:outline-none"
+                  className="h-8 px-3 type-xs border border-border bg-card focus:outline-none"
                 >
                   <option value="">{t("filters.allBands")}</option>
                   {Object.entries(GPS_BAND_CONFIG).map(([key, cfg]) => (
@@ -247,7 +253,7 @@ export function DiscoverClient({
                     setSelectedTerritory("");
                     setSelectedBand("");
                   }}
-                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  className="type-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
                 >
                   <X className="w-3 h-3" /> {t("filters.clear")}
                 </button>
@@ -258,13 +264,13 @@ export function DiscoverClient({
       </div>
 
       {/* Results */}
-      <div className="container mx-auto max-w-7xl py-8 md:py-12 px-5 md:px-6">
-        <p className="text-xs text-muted-foreground mb-6">
+      <div className="container-section py-8 md:py-12">
+        <p className="type-xs text-muted-foreground mb-6">
           {t("results.count", { count: filtered.length })}
         </p>
 
         {filtered.length === 0 ? (
-          <div className="text-center text-muted-foreground py-20 text-sm">
+          <div className="text-center text-muted-foreground py-20 type-s">
             {t("results.empty")}
           </div>
         ) : (
@@ -283,34 +289,26 @@ function OperatorCard({ operator: op }: { operator: Operator }) {
   const t = useTranslations("public.discover");
   const gpsBand = op.gpsBand as GreenPassportBand | null;
   const bandConfig = gpsBand ? GPS_BAND_CONFIG[gpsBand] : null;
-  const typeConfig = op.operatorType
-    ? OPERATOR_TYPES[op.operatorType]
-    : null;
+  const typeConfig = op.operatorType ? OPERATOR_TYPES[op.operatorType] : null;
 
   const pillars = [
-    { label: t("pillars.footprint"), value: op.p1Score, color: "hsl(var(--gps-footprint))" },
-    { label: t("pillars.local"), value: op.p2Score, color: "hsl(var(--gps-local))" },
-    { label: t("pillars.regen"), value: op.p3Score, color: "hsl(var(--gps-regen))" },
+    { label: t("pillars.footprint"), value: op.p1Score, color: PILLAR_COLORS.footprint },
+    { label: t("pillars.local"),     value: op.p2Score, color: PILLAR_COLORS.local },
+    { label: t("pillars.regen"),     value: op.p3Score, color: PILLAR_COLORS.regen },
   ];
 
   return (
     <Link
       href={`/operators/${op.id}`}
-      className="border border-border rounded-xl overflow-hidden card-interactive block"
+      className="border border-border overflow-hidden card-interactive block"
     >
       {/* Score header */}
-      <div
-        className="px-5 py-4 flex items-center justify-between"
-        style={{
-          background:
-            "linear-gradient(135deg, hsl(var(--navy)), hsl(80 15% 22%))",
-        }}
-      >
+      <div className="px-5 py-4 flex items-center justify-between bg-dark">
         <div>
-          <p className="font-bold text-white text-sm leading-tight">
+          <p className="type-s font-bold text-dark-foreground">
             {op.tradingName ?? op.legalName}
           </p>
-          <p className="text-[10px] text-white/40 mt-0.5 flex items-center gap-1">
+          <p className="type-xs text-pink mt-0.5 flex items-center gap-1">
             <MapPin className="w-3 h-3" />
             {op.destinationRegion}
             {op.country ? `, ${op.country}` : ""}
@@ -318,12 +316,10 @@ function OperatorCard({ operator: op }: { operator: Operator }) {
         </div>
         {op.gpsTotal != null && (
           <div className="text-right">
-            <span className="text-2xl font-black tabular-nums text-white">
+            <span className="type-h5 font-black tabular-nums text-dark-foreground">
               {op.gpsTotal}
             </span>
-            <p className="text-[9px] text-white/30 uppercase tracking-wider">
-              GPS
-            </p>
+            <p className="type-label text-pink">GPS</p>
           </div>
         )}
       </div>
@@ -334,19 +330,16 @@ function OperatorCard({ operator: op }: { operator: Operator }) {
         <div className="space-y-2">
           {pillars.map((p) => (
             <div key={p.label} className="space-y-1">
-              <div className="flex justify-between text-[10px]">
+              <div className="flex justify-between type-xs">
                 <span className="text-muted-foreground">{p.label}</span>
-                <span className="font-mono font-semibold">
+                <span className="tabular-nums font-semibold">
                   {p.value ?? "—"}
                 </span>
               </div>
               <div className="h-1.5 bg-border rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-700"
-                  style={{
-                    width: `${p.value ?? 0}%`,
-                    backgroundColor: p.color,
-                  }}
+                  style={{ width: `${p.value ?? 0}%`, backgroundColor: p.color }}
                 />
               </div>
             </div>
@@ -356,23 +349,19 @@ function OperatorCard({ operator: op }: { operator: Operator }) {
         {/* Meta */}
         <div className="flex items-center gap-2 flex-wrap">
           {bandConfig && (
-            <Badge
-              variant="secondary"
-              className="text-[10px] rounded-full text-white"
-              style={{ backgroundColor: `var(--color-${bandConfig.color.replace("bg-", "")})` }}
-            >
+            <span className={`badge ${bandConfig.badgeClass ?? "badge-dark"}`}>
               {bandConfig.label}
-            </Badge>
+            </span>
           )}
           {typeConfig && (
-            <Badge variant="outline" className="text-[10px] rounded-full">
+            <span className="badge badge-pink">
               {typeConfig.label}
-            </Badge>
+            </span>
           )}
         </div>
 
         {op.territory && (
-          <p className="text-[10px] text-muted-foreground">
+          <p className="type-xs text-muted-foreground">
             📍 {op.territory.name}
             {op.territory.pressureLevel && (
               <span
@@ -380,8 +369,8 @@ function OperatorCard({ operator: op }: { operator: Operator }) {
                   op.territory.pressureLevel === "high"
                     ? "text-destructive"
                     : op.territory.pressureLevel === "moderate"
-                      ? "text-[hsl(var(--trt-amber))]"
-                      : "text-accent"
+                      ? "text-accent-foreground"
+                      : "text-success"
                 }`}
               >
                 · {op.territory.pressureLevel} DPI

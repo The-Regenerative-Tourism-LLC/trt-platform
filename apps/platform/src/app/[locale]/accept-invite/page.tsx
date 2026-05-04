@@ -18,10 +18,10 @@ function AcceptInviteForm() {
   if (!token) {
     return (
       <div className="text-center">
-        <p className="text-destructive text-sm mb-4">
+        <p className="text-destructive type-s mb-4">
           Invalid invitation link.
         </p>
-        <Link href="/login" className="text-primary text-sm font-medium hover:underline">
+        <Link href="/login" className="text-primary type-s font-medium hover:underline">
           Back to login
         </Link>
       </div>
@@ -65,16 +65,16 @@ function AcceptInviteForm() {
   if (success) {
     return (
       <div className="text-center">
-        <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
-          <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="w-12 h-12 rounded-full bg-success flex items-center justify-center mx-auto mb-4">
+          <svg className="w-6 h-6 text-success-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-lg font-semibold text-foreground mb-2">Account created</h2>
-        <p className="text-muted-foreground text-sm mb-4">
+        <h2 className="type-m font-semibold text-foreground mb-2">Account created</h2>
+        <p className="text-muted-foreground type-s mb-4">
           Your account is ready. Redirecting to login…
         </p>
-        <Link href="/login" className="text-primary text-sm font-medium hover:underline">
+        <Link href="/login" className="text-primary type-s font-medium hover:underline">
           Go to login now
         </Link>
       </div>
@@ -84,7 +84,7 @@ function AcceptInviteForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
+        <label htmlFor="name" className="block type-s font-medium text-foreground mb-1">
           Full name
         </label>
         <input
@@ -94,12 +94,12 @@ function AcceptInviteForm() {
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           placeholder="Your name"
-          className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus-visible:ring-ring focus:border-transparent"
+          className="w-full px-3 py-2 border border-border type-s focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
+        <label htmlFor="password" className="block type-s font-medium text-foreground mb-1">
           Password
         </label>
         <input
@@ -109,12 +109,12 @@ function AcceptInviteForm() {
           value={form.password}
           onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
           placeholder="Min. 8 characters"
-          className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus-visible:ring-ring focus:border-transparent"
+          className="w-full px-3 py-2 border border-border type-s focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1">
+        <label htmlFor="confirmPassword" className="block type-s font-medium text-foreground mb-1">
           Confirm password
         </label>
         <input
@@ -124,16 +124,16 @@ function AcceptInviteForm() {
           value={form.confirmPassword}
           onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
           placeholder="Repeat password"
-          className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus-visible:ring-ring focus:border-transparent"
+          className="w-full px-3 py-2 border border-border type-s focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
         />
       </div>
 
-      {error && <p className="text-destructive text-sm">{error}</p>}
+      {error && <p className="text-destructive type-s">{error}</p>}
 
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-primary text-primary-foreground text-sm font-semibold py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="btn btn-primary w-full disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
       >
         {isLoading ? "Creating account…" : "Accept invitation"}
       </button>
@@ -143,7 +143,7 @@ function AcceptInviteForm() {
 
 export default function AcceptInvitePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center fm-cream px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-5">
@@ -155,15 +155,15 @@ export default function AcceptInvitePage() {
               className="h-7 w-auto mx-auto"
             />
           </Link>
-          <h1 className="fm-sub-heading text-foreground mb-2">
+          <h1 className="type-h2 text-foreground mb-2">
             Accept your invitation
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground type-s">
             Create your account to get started.
           </p>
         </div>
 
-        <div className="bg-card rounded-xl shadow-sm border border-border p-8">
+        <div className="card">
           <Suspense>
             <AcceptInviteForm />
           </Suspense>
