@@ -31,7 +31,7 @@ export default async function SelectRolePage() {
           <h1 className="type-h2 text-foreground text-center">
             {t("title")}
           </h1>
-          <p className="type-s text-muted-foreground text-center">
+          <p className="type-s text-black text-center">
             {t("subtitle")}
           </p>
         </div>

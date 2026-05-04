@@ -16,16 +16,16 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="max-w-3xl mx-auto px-5 py-16 md:py-24">
       <div className="mb-10">
-        <p className="text-sm text-muted-foreground mb-2">Last updated: {LAST_UPDATED}</p>
+        <p className="text-sm text-black mb-2">Last updated: {LAST_UPDATED}</p>
         <h1 className="text-3xl font-bold text-foreground">Privacy Policy</h1>
-        <p className="mt-4 text-muted-foreground">
+        <p className="mt-4 text-black">
           This Privacy Policy explains how {CONTROLLER_NAME} (&quot;The Regenerative Tourism&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) collects, uses, shares, and protects information in relation to our website and platform at{" "}
           <Link href="https://www.theregenerativetourism.com" className="underline">
             theregenerativetourism.com
           </Link>{" "}
           (&quot;the Platform&quot;).
         </p>
-        <p className="mt-3 text-muted-foreground">
+        <p className="mt-3 text-black">
           We are incorporated in the State of Wyoming, United States. Where we process personal data of individuals located in the European Union or United Kingdom, we apply the standards of the General Data Protection Regulation (GDPR) and UK GDPR as a matter of good practice and to meet our legal obligations.
         </p>
       </div>
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">1. Data controller</h2>
-          <p className="text-muted-foreground">
+          <p className="text-black">
             {CONTROLLER_NAME}<br />
             {CONTROLLER_LOCATION}<br />
             Email: <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a>
@@ -43,8 +43,8 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">2. Data we collect</h2>
-          <p className="text-muted-foreground mb-3">We collect the following categories of personal data:</p>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+          <p className="text-black mb-3">We collect the following categories of personal data:</p>
+          <ul className="list-disc pl-5 space-y-2 text-black">
             <li><strong>Account data:</strong> name, email address, hashed password, profile photo, role (operator or traveler).</li>
             <li><strong>Assessment data (operators):</strong> operational metrics (energy, water, waste, employment, procurement, community), evidence files, scoring data, and forward commitment records.</li>
             <li><strong>Usage data:</strong> IP address, browser type, pages visited, actions taken on the Platform, session duration.</li>
@@ -56,7 +56,7 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">3. Legal basis for processing</h2>
-          <div className="space-y-3 text-muted-foreground">
+          <div className="space-y-3 text-black">
             <p><strong>Contract:</strong> Processing your account data, running assessments, and delivering the platform features you request.</p>
             <p><strong>Legal obligation:</strong> Compliance with financial, tax, and regulatory obligations under US federal and state law.</p>
             <p><strong>Legitimate interests:</strong> Platform security, fraud prevention, service improvement, internal analytics, and audit logging.</p>
@@ -67,7 +67,7 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">4. How we use your data</h2>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+          <ul className="list-disc pl-5 space-y-2 text-black">
             <li>Creating and managing your account.</li>
             <li>Running GPS and DPI scoring assessments.</li>
             <li>Generating and publishing operator public profiles.</li>
@@ -81,9 +81,9 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">5. Third-party processors</h2>
-          <p className="text-muted-foreground mb-3">We share data with the following sub-processors, each bound by appropriate data processing agreements:</p>
+          <p className="text-black mb-3">We share data with the following sub-processors, each bound by appropriate data processing agreements:</p>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-muted-foreground border border-border rounded-lg overflow-hidden">
+            <table className="w-full text-sm text-black border border-border rounded-lg overflow-hidden">
               <thead className="bg-secondary">
                 <tr>
                   <th className="text-left px-4 py-2 font-medium text-foreground">Processor</th>
@@ -104,14 +104,14 @@ export default function PrivacyPolicyPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-muted-foreground mt-3">
+          <p className="text-black mt-3">
             For EU/UK users: transfers to processors outside the EEA are protected by Standard Contractual Clauses (SCCs) or adequacy decisions.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold mb-3">6. Data retention</h2>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+          <ul className="list-disc pl-5 space-y-2 text-black">
             <li><strong>Account data:</strong> Retained for the duration of your account plus 3 years for legal and audit purposes.</li>
             <li><strong>Assessment and scoring data:</strong> Retained indefinitely — immutable audit records required for certification integrity.</li>
             <li><strong>Email logs:</strong> Retained for 3 years.</li>
@@ -122,8 +122,8 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">7. Your rights</h2>
-          <p className="text-muted-foreground mb-3">You have the following rights regarding your personal data:</p>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+          <p className="text-black mb-3">You have the following rights regarding your personal data:</p>
+          <ul className="list-disc pl-5 space-y-2 text-black">
             <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
             <li><strong>Rectification:</strong> Correct inaccurate or incomplete data.</li>
             <li><strong>Erasure:</strong> Request deletion of your data where there is no compelling reason for continued processing.</li>
@@ -132,7 +132,7 @@ export default function PrivacyPolicyPage() {
             <li><strong>Objection:</strong> Object to processing based on legitimate interests.</li>
             <li><strong>Withdraw consent:</strong> Withdraw any consent you have given at any time, without affecting the lawfulness of prior processing.</li>
           </ul>
-          <p className="text-muted-foreground mt-3">
+          <p className="text-black mt-3">
             To exercise any of these rights, contact us at{" "}
             <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a>. We will respond within 30 days. EU/UK users also have the right to lodge a complaint with their local data protection authority.
           </p>
@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">8. Cookies</h2>
-          <p className="text-muted-foreground">
+          <p className="text-black">
             We use cookies and similar technologies. For full details, see our{" "}
             <Link href="/cookies" className="underline">Cookie Policy</Link>.
             You can manage your preferences at any time via the cookie banner or your{" "}
@@ -150,28 +150,28 @@ export default function PrivacyPolicyPage() {
 
         <section>
           <h2 className="text-xl font-semibold mb-3">9. Security</h2>
-          <p className="text-muted-foreground">
+          <p className="text-black">
             We implement appropriate technical and organisational measures including encryption in transit (TLS), hashed passwords (bcrypt), role-based access controls, and append-only audit logs. No method of transmission over the internet is 100% secure; we cannot guarantee absolute security.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold mb-3">10. Children</h2>
-          <p className="text-muted-foreground">
+          <p className="text-black">
             The Platform is not directed at children under 16. We do not knowingly collect data from children. If you believe we have inadvertently collected data from a child, please contact us immediately.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold mb-3">11. Changes to this policy</h2>
-          <p className="text-muted-foreground">
+          <p className="text-black">
             We may update this Privacy Policy from time to time. When we make material changes, we will notify you by email or by a prominent notice on the Platform. The &quot;Last updated&quot; date at the top of this page reflects the most recent revision.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold mb-3">12. Contact</h2>
-          <p className="text-muted-foreground">
+          <p className="text-black">
             For any privacy-related questions or requests, contact us at:<br />
             <a href={`mailto:${CONTROLLER_EMAIL}`} className="underline">{CONTROLLER_EMAIL}</a><br />
             <a href={`mailto:${HELLO_EMAIL}`} className="underline">{HELLO_EMAIL}</a>
@@ -180,10 +180,10 @@ export default function PrivacyPolicyPage() {
       </div>
 
       <div className="mt-12 pt-6 border-t border-border flex gap-6 text-sm">
-        <Link href="/terms" className="text-muted-foreground hover:text-foreground underline">
+        <Link href="/terms" className="text-black hover:text-foreground underline">
           Terms &amp; Conditions
         </Link>
-        <Link href="/cookies" className="text-muted-foreground hover:text-foreground underline">
+        <Link href="/cookies" className="text-black hover:text-foreground underline">
           Cookie Policy
         </Link>
       </div>

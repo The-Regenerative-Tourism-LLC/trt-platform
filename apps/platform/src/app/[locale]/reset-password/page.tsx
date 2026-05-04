@@ -26,7 +26,7 @@ export default async function ResetPasswordPage() {
           <h1 className="type-h2 text-foreground">
             {t("title")}
           </h1>
-          <p className="type-s text-muted-foreground">
+          <p className="type-s text-black">
             {t("subtitle")}
           </p>
         </div>

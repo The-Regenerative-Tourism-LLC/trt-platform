@@ -80,7 +80,7 @@ export function PillarBar({
     <div className="space-y-1">
       <div className="flex justify-between gap-2 type-xs">
         <span className="font-medium truncate">{label}</span>
-        <span className="tabular-nums text-muted-foreground shrink-0">
+        <span className="tabular-nums text-black shrink-0">
           {score}/100 · {Math.round(weight * 100)}% = {weighted}
         </span>
       </div>
@@ -142,7 +142,7 @@ export function GPSCircle({
         <span className={cn("font-black tabular-nums", size >= 128 ? "type-h5" : "type-xl")}>
           {score}
         </span>
-        <span className="type-label text-muted-foreground">GPS</span>
+        <span className="type-label text-black">GPS</span>
       </div>
     </div>
   );

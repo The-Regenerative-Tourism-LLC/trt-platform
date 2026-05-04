@@ -53,7 +53,7 @@ export default async function PricingPage() {
             {t("titleLine1")}
             <br className="hidden sm:block" /> {t("titleLine2")}
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+          <p className="text-black text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
             {t("subtitle")}
           </p>
         </div>
@@ -66,15 +66,15 @@ export default async function PricingPage() {
           <Card className="flex flex-col">
             <CardHeader className="space-y-2">
               <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                <Lock className="h-4 w-4 text-black" />
+                <span className="text-xs uppercase tracking-widest font-medium text-black">
                   {t("free.badge")}
                 </span>
               </div>
               <CardTitle className="text-2xl sm:text-3xl font-bold">
                 Free
               </CardTitle>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-black text-sm">
                 {t("free.subtitle")}
               </p>
             </CardHeader>
@@ -92,11 +92,11 @@ export default async function PricingPage() {
                   <Check className="h-4 w-4 text-accent shrink-0 mt-0.5" />
                   {t("free.features.three")}
                 </li>
-                <li className="flex gap-2 text-muted-foreground">
+                <li className="flex gap-2 text-black">
                   <Lock className="h-4 w-4 shrink-0 mt-0.5" />
                   {t("free.features.four")}
                 </li>
-                <li className="flex gap-2 text-muted-foreground">
+                <li className="flex gap-2 text-black">
                   <Lock className="h-4 w-4 shrink-0 mt-0.5" />
                   {t("free.features.five")}
                 </li>
@@ -123,9 +123,9 @@ export default async function PricingPage() {
                 <CardTitle className="text-2xl sm:text-3xl font-bold">
                   €29
                 </CardTitle>
-                <span className="text-muted-foreground text-sm">/month</span>
+                <span className="text-black text-sm">/month</span>
               </div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-black text-sm">
                 {t("founder.subtitle")}
               </p>
             </CardHeader>
@@ -178,8 +178,8 @@ export default async function PricingPage() {
           <Card className="flex flex-col">
             <CardHeader className="space-y-2">
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs uppercase tracking-widest font-medium text-muted-foreground">
+                <Globe className="h-4 w-4 text-black" />
+                <span className="text-xs uppercase tracking-widest font-medium text-black">
                   {t("standard.badge")}
                 </span>
               </div>
@@ -187,9 +187,9 @@ export default async function PricingPage() {
                 <CardTitle className="text-2xl sm:text-3xl font-bold">
                   €60
                 </CardTitle>
-                <span className="text-muted-foreground text-sm">/month</span>
+                <span className="text-black text-sm">/month</span>
               </div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-black text-sm">
                 {t("standard.subtitle")}
               </p>
             </CardHeader>
@@ -240,7 +240,7 @@ export default async function PricingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             {t("global.title")}
           </h2>
-          <p className="text-muted-foreground leading-relaxed max-w-xl mx-auto">
+          <p className="text-black leading-relaxed max-w-xl mx-auto">
             {t("global.body")}
           </p>
           <Button variant="outline" size="lg" className="mt-2" asChild>
@@ -279,7 +279,7 @@ export default async function PricingPage() {
                 <h3 className="font-semibold text-sm text-foreground">
                   {item.q}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-black leading-relaxed">
                   {item.a}
                 </p>
               </div>

@@ -27,7 +27,7 @@ export function GpsPreviewStep({
   const t = useTranslations("onboarding.review.gpsPreview");
   const topIcon = (
     <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-      <TrendingUp className="w-6 h-6 text-muted-foreground" />
+      <TrendingUp className="w-6 h-6 text-black" />
     </div>
   );
 
@@ -50,20 +50,20 @@ export function GpsPreviewStep({
           {/* Score Summary card */}
           <div className="rounded-xl border bg-card divide-y divide-border/60">
             <div className="px-5 py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-black">
                 {t("scoreSummary", { version: preview.methodologyVersion })}
               </p>
             </div>
             <div className="px-5 py-3 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{t("p1Row")}</span>
+              <span className="text-sm text-black">{t("p1Row")}</span>
               <span className="text-sm tabular-nums font-medium">{preview.pillar1Score.toFixed(1)}</span>
             </div>
             <div className="px-5 py-3 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{t("p2Row")}</span>
+              <span className="text-sm text-black">{t("p2Row")}</span>
               <span className="text-sm tabular-nums font-medium">{preview.pillar2Score.toFixed(1)}</span>
             </div>
             <div className="px-5 py-3 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{t("p3Row")}</span>
+              <span className="text-sm text-black">{t("p3Row")}</span>
               <span className="text-sm tabular-nums font-medium">{preview.pillar3Score.toFixed(0)}</span>
             </div>
             <div className="px-5 py-3 flex items-center justify-between">
@@ -71,8 +71,8 @@ export function GpsPreviewStep({
               <span className="text-sm tabular-nums font-bold">{Math.round(preview.gpsScore)}</span>
             </div>
             <div className="px-5 py-3 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{t("progressModifier")}</span>
-              <span className="text-sm tabular-nums text-muted-foreground">+0</span>
+              <span className="text-sm text-black">{t("progressModifier")}</span>
+              <span className="text-sm tabular-nums text-black">+0</span>
             </div>
             <div className="px-5 py-4 flex items-center justify-between">
               <span className="text-base font-bold">{t("finalGps")}</span>
@@ -92,7 +92,7 @@ export function GpsPreviewStep({
           <div className="rounded-xl border bg-card p-5 space-y-4">
             <div>
               <p className="text-sm font-semibold">{t("dpsTitle")}</p>
-              <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+              <p className="text-sm text-black mt-1.5 leading-relaxed">
                 {t("dpsBody")}
               </p>
             </div>
@@ -104,11 +104,11 @@ export function GpsPreviewStep({
               ] as const).map((item) => (
                 <div key={item.label} className="flex items-center justify-between rounded-lg border border-border/60 px-4 py-2.5">
                   <span className="text-sm">{item.label}</span>
-                  <span className="text-sm tabular-nums text-muted-foreground">{item.range}</span>
+                  <span className="text-sm tabular-nums text-black">{item.range}</span>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-black">
               {t("dpsNote")}
             </p>
           </div>
@@ -147,7 +147,7 @@ export function ReviewSubmitStep({
 
   const topIcon = (
     <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-      <Award className="w-6 h-6 text-muted-foreground" />
+      <Award className="w-6 h-6 text-black" />
     </div>
   );
 
@@ -170,31 +170,31 @@ export function ReviewSubmitStep({
 
       {/* Green Passport Score card */}
       <div className="rounded-xl border bg-card px-5 py-6 space-y-4">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black text-center">
           {t("gpsScoreTitle")}
         </p>
         <div className="text-center space-y-1">
           <p className="text-6xl font-bold tabular-nums">{gps}</p>
-          <p className="text-xs text-muted-foreground">{t("notYetPublished")}</p>
+          <p className="text-xs text-black">{t("notYetPublished")}</p>
         </div>
         <div className="grid grid-cols-3 gap-4 text-center pt-2">
           <div>
-            <p className="text-xs text-muted-foreground">{t("p1Footprint")}</p>
+            <p className="text-xs text-black">{t("p1Footprint")}</p>
             <p className="text-lg font-bold tabular-nums">{p1.toFixed(1)}/100</p>
-            <p className="text-xs text-muted-foreground">{t("weight40")}</p>
+            <p className="text-xs text-black">{t("weight40")}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">{t("p2Integration")}</p>
+            <p className="text-xs text-black">{t("p2Integration")}</p>
             <p className="text-lg font-bold tabular-nums">{p2.toFixed(1)}/100</p>
-            <p className="text-xs text-muted-foreground">{t("weight30")}</p>
+            <p className="text-xs text-black">{t("weight30")}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">{t("p3Contribution")}</p>
+            <p className="text-xs text-black">{t("p3Contribution")}</p>
             <p className="text-lg font-bold tabular-nums">{p3.toFixed(0)}/100</p>
-            <p className="text-xs text-muted-foreground">{t("weight30")}</p>
+            <p className="text-xs text-black">{t("weight30")}</p>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground text-center">
+        <p className="text-xs text-black text-center">
           How your GPS is calculated: ({p1.toFixed(1)}×0.40) + ({p2.toFixed(1)}×0.30) + ({p3.toFixed(0)}×0.30) = <strong>{gps}</strong>
         </p>
       </div>
@@ -229,10 +229,10 @@ export function ReviewSubmitStep({
 
       {/* Review before publishing info */}
       <div className="rounded-xl border bg-card px-4 py-4 flex items-start gap-3">
-        <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+        <Info className="w-4 h-4 text-black shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold">{t("reviewTitle")}</p>
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+          <p className="text-xs text-black mt-1 leading-relaxed">
             {t("reviewBody")}
           </p>
         </div>
@@ -240,14 +240,14 @@ export function ReviewSubmitStep({
 
       {/* Cycle 1 baseline warning */}
       <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 flex items-start gap-3">
-        <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <AlertTriangle className="w-4 h-4 text-black shrink-0 mt-0.5" />
+        <p className="text-sm text-black leading-relaxed">
           {t("baselineWarning")}
         </p>
       </div>
 
       {/* Privacy */}
-      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-1">
+      <div className="flex items-center justify-center gap-2 text-xs text-black py-1">
         <Shield className="w-3.5 h-3.5 shrink-0" />
         <span>{t("howWeProtect")}</span>
       </div>
@@ -319,7 +319,7 @@ export function SubmissionSuccessScreen({
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
                 {t("heroTitle")}
               </h1>
-              <p className="text-muted-foreground text-base leading-relaxed max-w-lg mx-auto">
+              <p className="text-black text-base leading-relaxed max-w-lg mx-auto">
                 {t("heroBody")}
               </p>
             </div>
@@ -327,7 +327,7 @@ export function SubmissionSuccessScreen({
 
           {/* What happens next */}
           <div className="space-y-3">
-            <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-sm font-semibold uppercase tracking-widest text-black">
               {t("whatHappensTitle")}
             </p>
             <div className="space-y-3">
@@ -341,7 +341,7 @@ export function SubmissionSuccessScreen({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-semibold">{s.title}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{s.desc}</p>
+                    <p className="text-sm text-black mt-0.5 leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
               ))}
@@ -355,7 +355,7 @@ export function SubmissionSuccessScreen({
               {recommendations.map((r, i) => (
                 <div key={i} className="flex items-start gap-2.5">
                   <span className="text-primary mt-0.5 shrink-0 text-sm">→</span>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{r}</p>
+                  <p className="text-sm text-black leading-relaxed">{r}</p>
                 </div>
               ))}
             </div>

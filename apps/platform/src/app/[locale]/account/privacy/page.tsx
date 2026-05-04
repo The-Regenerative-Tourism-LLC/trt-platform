@@ -32,7 +32,7 @@ export default async function PrivacyPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-bold text-foreground mb-1">Privacy &amp; Consent</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-black">
           Manage your data preferences and consent settings.
         </p>
       </div>
@@ -42,7 +42,7 @@ export default async function PrivacyPage() {
         <h2 className="text-base font-semibold text-foreground mb-4">Legal acceptance</h2>
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Terms &amp; Conditions</span>
+            <span className="text-black">Terms &amp; Conditions</span>
             {user.termsAcceptedAt ? (
               <span className="text-green-700 dark:text-green-400">
                 Accepted {user.termsAcceptedAt.toLocaleDateString("en-GB", { dateStyle: "medium" })}
@@ -52,7 +52,7 @@ export default async function PrivacyPage() {
             )}
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Privacy Policy</span>
+            <span className="text-black">Privacy Policy</span>
             {user.privacyAcceptedAt ? (
               <span className="text-green-700 dark:text-green-400">
                 Accepted {user.privacyAcceptedAt.toLocaleDateString("en-GB", { dateStyle: "medium" })}
@@ -75,7 +75,7 @@ export default async function PrivacyPage() {
       {/* Data rights */}
       <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
         <h2 className="text-base font-semibold text-foreground mb-2">Your data rights</h2>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-black mb-4">
           Under GDPR you have rights to access, correct, export, or delete your data. To exercise any of these rights, contact us.
         </p>
         <a

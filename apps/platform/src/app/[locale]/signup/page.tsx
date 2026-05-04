@@ -33,14 +33,14 @@ export default async function SignupPage() {
             <h1 className="type-h2 text-foreground text-center">
               {t("title")}
             </h1>
-            <p className="type-s text-muted-foreground text-center">
+            <p className="type-s text-black text-center">
               {t("subtitle")}
             </p>
           </div>
 
           <SignupForm />
 
-          <p className="text-center type-s text-muted-foreground">
+          <p className="text-center type-s text-black">
             {t("hasAccount")}{" "}
             <Link href={loginHref} className="text-foreground font-medium hover:underline">
               {t("signIn")}

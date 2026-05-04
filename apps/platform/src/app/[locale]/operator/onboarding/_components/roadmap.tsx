@@ -64,13 +64,13 @@ export function RoadmapScreen({
       >
         <div className="flex items-center w-full max-w-onboarding mx-auto px-3 sm:px-6">
           <div className="w-16 sm:w-20" />
-          <span className="flex-1 text-center text-xs sm:text-sm font-mono font-medium tabular-nums text-muted-foreground">
+          <span className="flex-1 text-center text-xs sm:text-sm font-mono font-medium tabular-nums text-black">
             01 / {String(displayTotal).padStart(2, "0")}
           </span>
           <div className="flex items-center justify-end w-16 sm:w-20">
             <button
               onClick={onSaveClose}
-              className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-black hover:text-foreground transition-colors"
             >
               <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">{tNav("save")}</span>
@@ -89,7 +89,7 @@ export function RoadmapScreen({
             <h1 className="text-5xl font-bold tracking-tight text-foreground leading-tight">
               {tWelcome("buildTitle")}
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
+            <p className="text-sm sm:text-base text-black leading-relaxed max-w-xl">
               {tWelcome("buildDescription")}
             </p>
           </div>
@@ -131,7 +131,7 @@ export function RoadmapScreen({
                 {/* Text */}
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-bold leading-snug text-foreground">{s.label}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5 leading-snug">{s.desc}</p>
+                  <p className="text-sm text-black mt-0.5 leading-snug">{s.desc}</p>
                 </div>
 
                 {s.done && (
@@ -146,14 +146,14 @@ export function RoadmapScreen({
           {/* Info boxes */}
           <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-surface/20 p-3 sm:p-4">
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-black" />
+              <p className="text-sm text-black leading-relaxed">
                 {tWelcome("autosave")}
               </p>
             </div>
             <div className="flex items-center gap-3 rounded-xl border border-border/40 bg-surface/20 p-3 sm:p-4">
-              <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-black" />
+              <p className="text-sm text-black leading-relaxed">
                 {tWelcome("nda")}
               </p>
             </div>

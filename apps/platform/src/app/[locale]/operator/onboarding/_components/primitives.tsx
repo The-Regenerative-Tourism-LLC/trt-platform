@@ -19,7 +19,7 @@ export function FieldGroup({
   return (
     <div className="space-y-1.5">
       <label className="flex items-center gap-1.5 text-sm font-medium">{label}</label>
-      {hint && <p className="text-sm text-muted-foreground leading-relaxed">{hint}</p>}
+      {hint && <p className="text-sm text-black leading-relaxed">{hint}</p>}
       {children}
     </div>
   );
@@ -57,7 +57,7 @@ export function NumberInput({
           step={step}
           className={`${inputCls} pr-20`}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground bg-muted px-2 py-1 rounded pointer-events-none">
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black bg-muted px-2 py-1 rounded pointer-events-none">
           {unit}
         </span>
       </div>
@@ -152,7 +152,7 @@ export function Tip({
   return (
     <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
       <span className="text-base select-none shrink-0 mt-0.5">{icon}</span>
-      <div className="text-sm text-muted-foreground leading-relaxed">{children}</div>
+      <div className="text-sm text-black leading-relaxed">{children}</div>
     </div>
   );
 }
@@ -162,7 +162,7 @@ export function PrivacyBadge() {
   return (
     <div className="flex items-start gap-3 rounded-xl bg-muted/30 border border-border/40 px-4 py-3">
       <span className="text-base select-none shrink-0 mt-0.5">🔒</span>
-      <p className="text-sm text-muted-foreground leading-relaxed">
+      <p className="text-sm text-black leading-relaxed">
         {t("nda")}
       </p>
     </div>
@@ -180,7 +180,7 @@ export function MetricDisplay({
 }) {
   return (
     <div className="flex items-center justify-between gap-2 bg-muted/50 rounded-xl px-4 py-3">
-      <span className="text-xs text-muted-foreground min-w-0 truncate">{label}</span>
+      <span className="text-xs text-black min-w-0 truncate">{label}</span>
       <span className="font-bold text-sm tabular-nums shrink-0">
         {value}
         {unit ? ` ${unit}` : ""}
@@ -207,7 +207,7 @@ export function ScoreBar({
         <span className="text-sm font-medium">{label}</span>
         <div className="flex items-center gap-2">
           {meta && (
-            <span className="text-xs text-muted-foreground">{meta}</span>
+            <span className="text-xs text-black">{meta}</span>
           )}
           <span className="text-sm font-bold tabular-nums w-7 text-right">
             {Math.round(score)}
@@ -248,7 +248,7 @@ export function EvidenceTierSelector({
   const options = tiers ?? EVIDENCE_TIERS;
   return (
     <div className="rounded-2xl bg-muted/50 border border-border/40 px-4 py-4 space-y-2">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-black">
         {label ?? t("sourceLabel")}
       </p>
       <div className="relative">
@@ -264,7 +264,7 @@ export function EvidenceTierSelector({
             </option>
           ))}
         </select>
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black">
           &#x2304;
         </span>
       </div>

@@ -22,8 +22,10 @@
     "science": "Science",
     "pricing": "Pricing",
     "blog": "Blog",
-    "login": "Login",
-    "signup": "Get started"
+    "login": "Log in",
+    "signup": "Get started",
+    "solutions": "Solutions",
+    "beGenerant": "Be a generant"
   },
   "home": {
     "hero": {

@@ -159,7 +159,7 @@ export function DiscoverClient({
                   className={`px-4 py-1.5 type-xs font-medium transition-all ${
                     activeTabKey === tabItem.key
                       ? "bg-foreground text-background"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-black hover:text-foreground"
                   }`}
                 >
                   {tabItem.label}
@@ -168,7 +168,7 @@ export function DiscoverClient({
             </div>
 
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black" />
               <Input
                 placeholder={t("search.placeholder")}
                 value={search}
@@ -182,7 +182,7 @@ export function DiscoverClient({
               className={`flex items-center gap-1.5 px-3 py-1.5 type-xs font-medium rounded-full border transition-colors ${
                 hasActiveFilters
                   ? "bg-accent text-accent-foreground border-accent"
-                  : "bg-card border-border text-muted-foreground hover:text-foreground"
+                  : "bg-card border-border text-black hover:text-foreground"
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -194,7 +194,7 @@ export function DiscoverClient({
               )}
             </button>
 
-            <div className="hidden sm:flex items-center gap-1.5 type-xs text-muted-foreground">
+            <div className="hidden sm:flex items-center gap-1.5 type-xs text-black">
               <ArrowUpDown className="w-3.5 h-3.5" />
               <select
                 value={sort}
@@ -214,7 +214,7 @@ export function DiscoverClient({
           {showFilters && (
             <div className="pb-3 flex flex-wrap gap-3 items-end border-t border-border pt-3">
               <div>
-                <label className="type-label text-muted-foreground block mb-1">
+                <label className="type-label text-black block mb-1">
                   {t("filters.territory")}
                 </label>
                 <select
@@ -231,7 +231,7 @@ export function DiscoverClient({
                 </select>
               </div>
               <div>
-                <label className="type-label text-muted-foreground block mb-1">
+                <label className="type-label text-black block mb-1">
                   {t("filters.band")}
                 </label>
                 <select
@@ -253,7 +253,7 @@ export function DiscoverClient({
                     setSelectedTerritory("");
                     setSelectedBand("");
                   }}
-                  className="type-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  className="type-xs text-black hover:text-foreground flex items-center gap-1"
                 >
                   <X className="w-3 h-3" /> {t("filters.clear")}
                 </button>
@@ -265,12 +265,12 @@ export function DiscoverClient({
 
       {/* Results */}
       <div className="container-section py-8 md:py-12">
-        <p className="type-xs text-muted-foreground mb-6">
+        <p className="type-xs text-black mb-6">
           {t("results.count", { count: filtered.length })}
         </p>
 
         {filtered.length === 0 ? (
-          <div className="text-center text-muted-foreground py-20 type-s">
+          <div className="text-center text-black py-20 type-s">
             {t("results.empty")}
           </div>
         ) : (
@@ -331,7 +331,7 @@ function OperatorCard({ operator: op }: { operator: Operator }) {
           {pillars.map((p) => (
             <div key={p.label} className="space-y-1">
               <div className="flex justify-between type-xs">
-                <span className="text-muted-foreground">{p.label}</span>
+                <span className="text-black">{p.label}</span>
                 <span className="tabular-nums font-semibold">
                   {p.value ?? "—"}
                 </span>
@@ -361,7 +361,7 @@ function OperatorCard({ operator: op }: { operator: Operator }) {
         </div>
 
         {op.territory && (
-          <p className="type-xs text-muted-foreground">
+          <p className="type-xs text-black">
             📍 {op.territory.name}
             {op.territory.pressureLevel && (
               <span

@@ -90,7 +90,7 @@ export default function ChangePasswordForm() {
         </svg>
         <div>
           <p className="text-sm font-semibold text-foreground">Password updated</p>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-sm text-black mt-0.5">
             A confirmation email has been sent to your address.
           </p>
           <button

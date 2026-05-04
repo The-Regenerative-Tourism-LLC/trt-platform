@@ -52,7 +52,7 @@ export function SectionProgress({ stepId }: { stepId: string }) {
                   ? "bg-secondary text-primary border border-primary/30"
                   : isPast
                   ? "text-primary"
-                  : "text-muted-foreground/40"
+                  : "text-black/40"
               }`}
             >
               {isPast ? "✓ " : ""}
@@ -134,20 +134,20 @@ export function StepShell({
           max-w-onboarding mx-auto px-3 sm:px-6`}>
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors w-16 sm:w-20"
+            className="flex items-center gap-1.5 text-xs sm:text-sm text-black hover:text-foreground transition-colors w-16 sm:w-20"
           >
             <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">{t("back")}</span>
           </button>
 
-          <span className="flex-1 text-center text-xs sm:text-sm font-mono font-medium tabular-nums text-muted-foreground">
+          <span className="flex-1 text-center text-xs sm:text-sm font-mono font-medium tabular-nums text-black">
             {String(stepNumber).padStart(2, "0")} / {String(totalSteps).padStart(2, "0")}
           </span>
 
           <div className="flex items-center justify-end w-16 sm:w-20">
             <button
               onClick={onSaveClose}
-              className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-black hover:text-foreground transition-colors"
             >
               <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">{t("save")}</span>
@@ -163,12 +163,12 @@ export function StepShell({
           <div className="max-w-onboarding mx-auto space-y-4 sm:space-y-5">
             {topIcon}
             {saved && (
-              <span className="text-xs text-muted-foreground font-medium">{t("saved")}</span>
+              <span className="text-xs text-black font-medium">{t("saved")}</span>
             )}
             <div className="space-y-2">
               <h1 className="text-5xl font-bold tracking-tight text-foreground leading-tight">{title}</h1>
               {subtitle && (
-                <p className="text-sm text-muted-foreground leading-relaxed">{subtitle}</p>
+                <p className="text-sm text-black leading-relaxed">{subtitle}</p>
               )}
             </div>
             <div className="space-y-3">{children}</div>
@@ -176,12 +176,12 @@ export function StepShell({
         ) : (
           <div className="max-w-onboarding mx-auto space-y-5 sm:space-y-8">
             {saved && (
-              <span className="text-xs text-muted-foreground font-medium">{t("saved")}</span>
+              <span className="text-xs text-black font-medium">{t("saved")}</span>
             )}
             <div className="space-y-2 sm:space-y-3">
               <h1 className="text-5xl font-bold tracking-tight text-foreground leading-tight">{title}</h1>
               {subtitle && (
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{subtitle}</p>
+                <p className="text-sm sm:text-base text-black leading-relaxed">{subtitle}</p>
               )}
             </div>
             <div className="space-y-4 sm:space-y-5">{children}</div>
@@ -198,7 +198,7 @@ export function StepShell({
           {isLast ? (
             <div className="flex flex-col items-end gap-1">
               {!canSubmit && (
-                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                <p className="text-[10px] sm:text-xs text-black">
                   {t("tickConfirm")}
                 </p>
               )}
@@ -213,7 +213,7 @@ export function StepShell({
           ) : (
             <div className="flex flex-col items-end gap-1">
               {canNext === false && (
-                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                <p className="text-[10px] sm:text-xs text-black">
                   {t("completeRequired")}
                 </p>
               )}
@@ -259,7 +259,7 @@ export function GpsFloatingCard({
   return (
     <div className="hidden lg:block fixed top-20 right-6 z-30 w-52">
       <div className="rounded-xl border bg-card shadow-lg p-4 space-y-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black">
           {t("preview")}
         </p>
         <div className="space-y-2">
@@ -269,7 +269,7 @@ export function GpsFloatingCard({
             { labelKey: "p3" as const, score: p3 },
           ]).map((p) => (
             <div key={p.labelKey} className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{t(p.labelKey)}</span>
+              <span className="text-xs text-black">{t(p.labelKey)}</span>
               <span className="text-xs tabular-nums text-foreground">
                 {p.score.toFixed(1)}/100
               </span>
@@ -280,7 +280,7 @@ export function GpsFloatingCard({
           <span className="text-sm font-bold">GPS</span>
           <span className="text-xl font-bold tabular-nums">{gps.toFixed(1)}</span>
         </div>
-        <p className="text-xs text-center text-muted-foreground">
+        <p className="text-xs text-center text-black">
           {t("notPublished")}
         </p>
       </div>

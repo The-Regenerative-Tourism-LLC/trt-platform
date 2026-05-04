@@ -37,7 +37,7 @@ export default async function AccountLayout({
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link
             href={dashboardUrl}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1.5 text-sm text-black hover:text-foreground transition-colors"
           >
             <svg
               className="w-4 h-4"
@@ -65,7 +65,7 @@ export default async function AccountLayout({
         <div className="flex gap-8">
           {/* Side nav */}
           <nav className="w-48 shrink-0">
-            <p className="text-[11px] uppercase tracking-[0.2em] font-semibold text-muted-foreground/60 mb-3">
+            <p className="text-[11px] uppercase tracking-[0.2em] font-semibold text-black/60 mb-3">
               Account
             </p>
             <ul className="space-y-1">

@@ -15,7 +15,7 @@ export function CookiePreferencesLink() {
     <button
       type="button"
       onClick={handleClick}
-      className="underline hover:text-foreground text-muted-foreground text-left"
+      className="underline hover:text-foreground text-black text-left"
     >
       Update cookie preferences
     </button>

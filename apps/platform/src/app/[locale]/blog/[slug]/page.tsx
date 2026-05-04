@@ -243,14 +243,14 @@ export default async function BlogPostPage({ params }: Props) {
         {/* Tags */}
         {post.tags.length > 0 && (
           <div className="mt-14 pt-8 border-t border-border">
-            <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3 font-medium">
+            <p className="text-[11px] uppercase tracking-widest text-black mb-3 font-medium">
               Tags
             </p>
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs bg-secondary text-muted-foreground px-3 py-1.5 rounded-full"
+                  className="text-xs bg-secondary text-black px-3 py-1.5 rounded-full"
                 >
                   {tag}
                 </span>
@@ -280,7 +280,7 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="mt-10 text-center">
           <Link
             href="/journal"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+            className="inline-flex items-center gap-2 text-sm text-black hover:text-foreground transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             Back to all articles

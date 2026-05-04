@@ -34,7 +34,7 @@ export default async function AcceptTermsPage() {
           <h1 className="type-h2 text-foreground">
             {t("title")}
           </h1>
-          <p className="type-s text-muted-foreground max-w-sm">
+          <p className="type-s text-black max-w-sm">
             {t("subtitle")}
           </p>
         </div>
@@ -43,7 +43,7 @@ export default async function AcceptTermsPage() {
           <AcceptTermsForm />
         </div>
 
-        <p className="text-center type-xs text-muted-foreground">
+        <p className="text-center type-xs text-black">
           {t.rich("footer", {
             privacy: (chunks) => (
               <Link href={privacyHref} className="underline hover:text-foreground">

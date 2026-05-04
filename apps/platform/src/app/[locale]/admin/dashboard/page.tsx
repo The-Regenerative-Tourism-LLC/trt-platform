@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
             }`}
           >
             <div className="text-3xl font-black tabular-nums">{s.value}</div>
-            <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+            <div className="text-xs text-black mt-1">{s.label}</div>
           </div>
         ))}
       </div>
@@ -93,7 +93,7 @@ export default async function AdminDashboardPage() {
                 <p className="font-medium text-sm">
                   {s.operator.tradingName ?? s.operator.legalName}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-black">
                   {new Date(s.computedAt).toLocaleString()} ·{" "}
                   <span className="font-mono">{s.id.slice(0, 8)}…</span>
                 </p>
@@ -102,14 +102,14 @@ export default async function AdminDashboardPage() {
                 <div className="text-xl font-black tabular-nums">
                   {Number(s.gpsTotal)}
                 </div>
-                <div className="text-xs text-muted-foreground capitalize">
+                <div className="text-xs text-black capitalize">
                   {s.gpsBand.replace(/_/g, " ")}
                 </div>
               </div>
             </div>
           ))}
           {recentScores.length === 0 && (
-            <div className="p-8 text-center text-muted-foreground text-sm">
+            <div className="p-8 text-center text-black text-sm">
               {t("recentScores.empty")}
             </div>
           )}

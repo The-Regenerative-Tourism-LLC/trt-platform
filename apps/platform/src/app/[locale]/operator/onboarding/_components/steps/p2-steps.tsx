@@ -23,7 +23,7 @@ function FieldTooltip({ text }: { text: string }) {
   return (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
-        <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+        <button type="button" className="text-black/60 hover:text-black transition-colors">
           <HelpCircle className="w-4 h-4" />
         </button>
       </TooltipTrigger>
@@ -74,7 +74,7 @@ export function P2EmploymentStep({
       {floatingGps}
 
       {/* Confidentiality notice */}
-      <div className="flex items-center gap-3 text-muted-foreground">
+      <div className="flex items-center gap-3 text-black">
         <Lock className="w-4 h-4 shrink-0" strokeWidth={1.5} />
         <div>
           <p className="text-sm font-medium text-foreground">{t("confidentialTitle")}</p>
@@ -97,7 +97,7 @@ export function P2EmploymentStep({
         </div>
         <div>
           <p className="text-sm font-semibold">{t("soloToggle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("soloToggleDesc")}</p>
+          <p className="text-xs text-black mt-0.5">{t("soloToggleDesc")}</p>
         </div>
       </button>
 
@@ -116,14 +116,14 @@ export function P2EmploymentStep({
         </div>
         <div>
           <p className="text-sm font-semibold">{t("seasonalToggle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("seasonalToggleDesc")}</p>
+          <p className="text-xs text-black mt-0.5">{t("seasonalToggleDesc")}</p>
         </div>
       </button>
 
       {data.soloOperator ? (
         <div className="rounded-xl border border-primary/30 bg-secondary p-5">
           <p className="text-base font-medium text-foreground">{t("soloSummaryTitle")}</p>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-black mt-1">
             {t("soloSummaryDesc")}
           </p>
         </div>
@@ -179,7 +179,7 @@ export function P2EmploymentStep({
                 }}
                 className="w-full h-1.5 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-foreground [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-background [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-foreground [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-solid"
               />
-              <div className="bg-muted/60 border border-border/40 rounded-xl px-4 py-3 text-sm text-muted-foreground leading-relaxed">
+              <div className="bg-muted/60 border border-border/40 rounded-xl px-4 py-3 text-sm text-black leading-relaxed">
                 <span className="font-semibold text-foreground">{t("familyRunTip")}</span>{" "}
                 {t("familyRunBody")}
               </div>
@@ -192,7 +192,7 @@ export function P2EmploymentStep({
           >
             <div className="space-y-3">
               <div className="relative flex items-center">
-                <span className="absolute left-3 text-sm text-muted-foreground select-none">€</span>
+                <span className="absolute left-3 text-sm text-black select-none">€</span>
                 <input
                   type="number"
                   value={data.averageMonthlyWage ?? ""}
@@ -205,13 +205,13 @@ export function P2EmploymentStep({
                   min={0}
                   className={`${inputCls} pl-7 pr-20`}
                 />
-                <span className="absolute right-3 text-xs text-muted-foreground bg-muted px-2 py-1 rounded pointer-events-none">
+                <span className="absolute right-3 text-xs text-black bg-muted px-2 py-1 rounded pointer-events-none">
                   /month
                 </span>
               </div>
               <div className="flex gap-3 rounded-xl bg-muted/60 border border-border/40 px-4 py-3">
                 <span className="text-base select-none shrink-0 mt-0.5">💡</span>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-black leading-relaxed">
                   {t("minimumWageTip")}
                 </p>
               </div>
@@ -264,7 +264,7 @@ export function P2ProcurementStep({
       {floatingGps}
 
       {/* Confidentiality notice */}
-      <div className="flex items-center gap-3 text-muted-foreground">
+      <div className="flex items-center gap-3 text-black">
         <Lock className="w-4 h-4 shrink-0" strokeWidth={1.5} />
         <div>
           <p className="text-sm font-medium text-foreground">{t("confidentialTitle")}</p>
@@ -274,8 +274,8 @@ export function P2ProcurementStep({
 
       {/* Info box */}
       <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/40 px-4 py-3">
-        <ShoppingCart className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" strokeWidth={1.5} />
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <ShoppingCart className="w-5 h-5 shrink-0 mt-0.5 text-black" strokeWidth={1.5} />
+        <p className="text-sm text-black leading-relaxed">
           {t("infoBox")}
         </p>
       </div>
@@ -284,7 +284,7 @@ export function P2ProcurementStep({
       <div className="space-y-3">
         <p className="text-sm font-semibold">{t("fbTitle")}</p>
         {fsLabel && (
-          <p className="text-sm text-muted-foreground bg-muted/40 border border-border/40 rounded-xl px-4 py-2.5 leading-relaxed">
+          <p className="text-sm text-black bg-muted/40 border border-border/40 rounded-xl px-4 py-2.5 leading-relaxed">
             {t.rich("fbContext", {
               fsLabel,
               strong: (chunks) => <strong>{chunks}</strong>,
@@ -294,7 +294,7 @@ export function P2ProcurementStep({
         <div className="grid grid-cols-2 gap-3">
           <FieldGroup label={t("totalFbSpend")}>
             <div className="relative flex items-center">
-              <span className="absolute left-3 text-sm text-muted-foreground select-none">€</span>
+              <span className="absolute left-3 text-sm text-black select-none">€</span>
               <input
                 type="number"
                 value={data.totalFbSpend ?? ""}
@@ -303,12 +303,12 @@ export function P2ProcurementStep({
                 min={0}
                 className={`${inputCls} pl-7 pr-16`}
               />
-              <span className="absolute right-3 text-xs text-muted-foreground bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
+              <span className="absolute right-3 text-xs text-black bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
             </div>
           </FieldGroup>
           <FieldGroup label={t("localFbSpend")}>
             <div className="relative flex items-center">
-              <span className="absolute left-3 text-sm text-muted-foreground select-none">€</span>
+              <span className="absolute left-3 text-sm text-black select-none">€</span>
               <input
                 type="number"
                 value={data.localFbSpend ?? ""}
@@ -317,7 +317,7 @@ export function P2ProcurementStep({
                 min={0}
                 className={`${inputCls} pl-7 pr-16`}
               />
-              <span className="absolute right-3 text-xs text-muted-foreground bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
+              <span className="absolute right-3 text-xs text-black bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
             </div>
           </FieldGroup>
         </div>
@@ -330,7 +330,7 @@ export function P2ProcurementStep({
         <div className="grid grid-cols-2 gap-3">
           <FieldGroup label={t("totalNonFbSpend")}>
             <div className="relative flex items-center">
-              <span className="absolute left-3 text-sm text-muted-foreground select-none">€</span>
+              <span className="absolute left-3 text-sm text-black select-none">€</span>
               <input
                 type="number"
                 value={data.totalNonFbSpend ?? ""}
@@ -339,12 +339,12 @@ export function P2ProcurementStep({
                 min={0}
                 className={`${inputCls} pl-7 pr-16`}
               />
-              <span className="absolute right-3 text-xs text-muted-foreground bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
+              <span className="absolute right-3 text-xs text-black bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
             </div>
           </FieldGroup>
           <FieldGroup label={t("localNonFbSpend")}>
             <div className="relative flex items-center">
-              <span className="absolute left-3 text-sm text-muted-foreground select-none">€</span>
+              <span className="absolute left-3 text-sm text-black select-none">€</span>
               <input
                 type="number"
                 value={data.localNonFbSpend ?? ""}
@@ -353,7 +353,7 @@ export function P2ProcurementStep({
                 min={0}
                 className={`${inputCls} pl-7 pr-16`}
               />
-              <span className="absolute right-3 text-xs text-muted-foreground bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
+              <span className="absolute right-3 text-xs text-black bg-muted px-2 py-1 rounded pointer-events-none">/year</span>
             </div>
           </FieldGroup>
         </div>
@@ -398,7 +398,7 @@ export function P2RevenueStep({
       {/* Info box */}
       <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/40 px-4 py-3">
         <span className="text-base select-none shrink-0 mt-0.5">💡</span>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-black leading-relaxed">
           {t("infoBox")}
         </p>
       </div>
@@ -466,7 +466,7 @@ export function P2RevenueStep({
         </div>
         <div>
           <p className="text-sm font-semibold">{t("allDirectToggle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("allDirectToggleDesc")}</p>
+          <p className="text-xs text-black mt-0.5">{t("allDirectToggleDesc")}</p>
         </div>
       </button>
 
@@ -488,7 +488,7 @@ export function P2RevenueStep({
             }}
             className="w-full h-1.5 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-foreground [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-background [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-foreground [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-solid"
           />
-          <p className="text-xs text-muted-foreground">{t("localOwnershipNote")}</p>
+          <p className="text-xs text-black">{t("localOwnershipNote")}</p>
         </div>
       </FieldGroup>
 
@@ -498,11 +498,11 @@ export function P2RevenueStep({
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-background rounded-xl border border-border/50 px-4 py-3 text-center">
             <p className="text-2xl font-bold tabular-nums">{directPct}%</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("directBookingsLabel")}</p>
+            <p className="text-xs text-black mt-1">{t("directBookingsLabel")}</p>
           </div>
           <div className="bg-background rounded-xl border border-border/50 px-4 py-3 text-center">
             <p className="text-2xl font-bold tabular-nums">{platformPct}%</p>
-            <p className="text-xs text-muted-foreground mt-1">{t("platformsLabel")}</p>
+            <p className="text-xs text-black mt-1">{t("platformsLabel")}</p>
           </div>
         </div>
       </div>
@@ -572,7 +572,7 @@ export function P2CommunityStep({
               </option>
             ))}
           </select>
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">&#x2304;</span>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black">&#x2304;</span>
         </div>
       </div>
 
@@ -580,7 +580,7 @@ export function P2CommunityStep({
       <div className="rounded-2xl border border-border/50 bg-background px-5 py-4 space-y-4">
         <div>
           <p className="text-sm font-semibold">{t("p2SummaryTitle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("p2Formula")}</p>
+          <p className="text-xs text-black mt-0.5">{t("p2Formula")}</p>
         </div>
         <div className="space-y-3">
           {P2_WEIGHTS.map(({ key, label, weight }) => {
@@ -591,7 +591,7 @@ export function P2CommunityStep({
               <div key={key} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{label}</span>
-                  <span className="text-xs text-muted-foreground tabular-nums">
+                  <span className="text-xs text-black tabular-nums">
                     {Math.round(raw)}/100 · {weight}% = {contribution}
                   </span>
                 </div>
@@ -613,8 +613,8 @@ export function P2CommunityStep({
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{t("gpsContribution")}</span>
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <span className="text-xs text-black">{t("gpsContribution")}</span>
+            <span className="text-xs text-black tabular-nums">
               {preview ? (preview.pillar2Score * 0.30).toFixed(1) : "—"}
             </span>
           </div>

@@ -22,7 +22,7 @@ function FieldTooltip({ text }: { text: string }) {
   return (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
-        <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+        <button type="button" className="text-black/60 hover:text-black transition-colors">
           <HelpCircle className="w-4 h-4" />
         </button>
       </TooltipTrigger>
@@ -86,7 +86,7 @@ function EnergySharedTail({
 
         <div className="space-y-2">
           <label className="text-sm font-medium">{t("onsiteRenewable")}</label>
-          <p className="text-xs text-muted-foreground">{t("onsiteRenewableDesc")}</p>
+          <p className="text-xs text-black">{t("onsiteRenewableDesc")}</p>
           <p className="text-sm font-semibold tabular-nums">{onsitePct}%</p>
           <input
             type="range"
@@ -102,7 +102,7 @@ function EnergySharedTail({
 
         <div className="space-y-2">
           <label className="text-sm font-medium">{t("tariffRenewable")}</label>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-black">
             {t("tariffRenewableDesc")}
           </p>
           <p className="text-sm font-semibold tabular-nums">{tariffPct}%</p>
@@ -140,7 +140,7 @@ function EnergySharedTail({
             min={0}
             className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
             kWh/year
           </span>
         </div>
@@ -148,42 +148,42 @@ function EnergySharedTail({
 
       {/* Live computation */}
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black">
           {t("liveComputation")}
         </p>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("netConsumption")}</span>
+            <span className="text-sm text-black">{t("netConsumption")}</span>
             <span className="text-sm font-bold tabular-nums">
               {hasAnyEnergy ? Math.round(netEnergy).toLocaleString() : "0"}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">kWh/year</span>
+              <span className="text-xs font-normal text-black ml-1.5">kWh/year</span>
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("energyIntensity")}</span>
+            <span className="text-sm text-black">{t("energyIntensity")}</span>
             <span className="text-sm font-bold tabular-nums">
               {activityUnit > 0 && hasAnyEnergy ? Math.round(energyIntensity) : "0"}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+              <span className="text-xs font-normal text-black ml-1.5">
                 kWh/{unitLabel}
               </span>
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("renewablePct")}</span>
+            <span className="text-sm text-black">{t("renewablePct")}</span>
             <span className="text-sm font-bold tabular-nums">
               {onsitePct > 0 || tariffPct > 0 ? `${Math.round(renewableCombined)}%` : "—"}
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("subScore1A")}</span>
-            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+            <span className="text-sm text-black">{t("subScore1A")}</span>
+            <span className="text-sm font-bold tabular-nums text-black">—</span>
           </div>
         </div>
       </div>
 
       {/* Evidence quality */}
       <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
-        <p className="text-sm text-muted-foreground">{t("evidenceSource")}</p>
+        <p className="text-sm text-black">{t("evidenceSource")}</p>
         <select
           value={data.evidenceTierEnergy ?? ""}
           onChange={(e) =>
@@ -249,7 +249,7 @@ export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProp
               <option value="hybrid">{t("hybrid")}</option>
               <option value="electric">{t("electric")}</option>
             </select>
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-black">
               ▾
             </span>
           </div>
@@ -283,7 +283,7 @@ export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProp
                 min={0}
                 className="w-full rounded-lg border border-input bg-background pl-3 pr-28 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
                 {isElectric ? "kWh/month" : "litres/month"}
               </span>
             </div>
@@ -306,7 +306,7 @@ export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProp
             <p className="text-sm font-medium leading-tight">
               {t("noFixedBase")}
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-black mt-0.5">
               {t("noFixedBaseDesc")}
             </p>
           </div>
@@ -332,7 +332,7 @@ export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProp
                 min={0}
                 className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
                 kWh/year
               </span>
             </div>
@@ -372,7 +372,7 @@ export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProp
       {/* Info box */}
       <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
         <span className="text-base select-none shrink-0 mt-0.5">🏢</span>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-black leading-relaxed">
           {t("multipleBuildings")}
         </p>
       </div>
@@ -400,7 +400,7 @@ export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProp
             min={0}
             className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
             kWh/year
           </span>
         </div>
@@ -425,7 +425,7 @@ export function P1EnergyStep({ data, updateField, shell, floatingGps }: StepProp
             min={0}
             className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
             kWh/year
           </span>
         </div>
@@ -500,7 +500,7 @@ export function P1WaterStep({
             min={0}
             className="w-full rounded-lg border border-input bg-background pl-3 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
             litres/year
           </span>
         </div>
@@ -510,7 +510,7 @@ export function P1WaterStep({
       <div className="space-y-3">
         <div className="space-y-0.5">
           <p className="text-sm font-semibold">{t("recirculationTitle")}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-black">
             {t("recirculationDesc")}
           </p>
         </div>
@@ -532,37 +532,37 @@ export function P1WaterStep({
 
       {/* Live computation */}
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black">
           {t("liveComputation")}
         </p>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("waterIntensity")}</span>
+            <span className="text-sm text-black">{t("waterIntensity")}</span>
             <span className="text-sm font-bold tabular-nums">
               {data.totalWaterLitres != null && activityUnit > 0
                 ? Math.round(waterIntensity).toLocaleString()
                 : "0"}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+              <span className="text-xs font-normal text-black ml-1.5">
                 L/{unitLabel}
               </span>
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("recirculationBonus")}</span>
+            <span className="text-sm text-black">{t("recirculationBonus")}</span>
             <span className="text-sm font-bold tabular-nums">
               {selectedCount > 0 ? `+${recirculationBonus.toFixed(1)}` : "—"}
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("subScore1B")}</span>
-            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+            <span className="text-sm text-black">{t("subScore1B")}</span>
+            <span className="text-sm font-bold tabular-nums text-black">—</span>
           </div>
         </div>
       </div>
 
       {/* Evidence quality */}
       <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-black">
           {t("evidenceSource")}
         </p>
         <select
@@ -621,7 +621,7 @@ export function P1WasteStep({
       {/* Info box */}
       <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
         <span className="text-base select-none shrink-0 mt-0.5">💡</span>
-        <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
+        <div className="text-sm text-black leading-relaxed space-y-2">
           <p>
             <strong>{t("estimationTitle")}</strong> {t("estimationBody")}
           </p>
@@ -656,7 +656,7 @@ export function P1WasteStep({
         />
       </FieldGroup>
       {totalWaste > 0 && (
-        <p className="text-sm text-muted-foreground bg-muted/50 border border-border/50 rounded-xl px-4 py-3 leading-relaxed">
+        <p className="text-sm text-black bg-muted/50 border border-border/50 rounded-xl px-4 py-3 leading-relaxed">
           {t("breakdownIntro", {
             total: totalWaste.toLocaleString(),
             remaining: Math.max(0, totalWaste - totalDiverted).toLocaleString(),
@@ -708,11 +708,11 @@ export function P1WasteStep({
       {totalWaste > 0 && (
         <div className="bg-muted/50 border border-border/50 rounded-xl px-4 py-3 space-y-1.5">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{t("sentToLandfill")}</span>
+            <span className="text-black">{t("sentToLandfill")}</span>
             <span className="font-medium">{Math.max(0, totalWaste - totalDiverted).toLocaleString()} kg</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">{t("diversionRate")}</span>
+            <span className="text-black">{t("diversionRate")}</span>
             <span className="font-bold">{diversionRate.toFixed(1)}%</span>
           </div>
         </div>
@@ -741,12 +741,12 @@ export function P1WasteStep({
 
       {/* Live computation */}
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black">
           {t("liveComputation")}
         </p>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("wasteDiversionRate")}</span>
+            <span className="text-sm text-black">{t("wasteDiversionRate")}</span>
             <span className="text-sm font-bold tabular-nums">
               {totalWaste > 0 && totalDiverted > 0
                 ? `${Math.round(diversionRate)}%`
@@ -754,21 +754,21 @@ export function P1WasteStep({
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("bonusPoints")}</span>
+            <span className="text-sm text-black">{t("bonusPoints")}</span>
             <span className="text-sm font-bold tabular-nums">
               {bonusCount > 0 ? `+${bonusCount}` : "—"}
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("subScore1C")}</span>
-            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+            <span className="text-sm text-black">{t("subScore1C")}</span>
+            <span className="text-sm font-bold tabular-nums text-black">—</span>
           </div>
         </div>
       </div>
 
       {/* Evidence quality */}
       <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-black">
           {t("evidenceSource")}
         </p>
         <select
@@ -832,7 +832,7 @@ export function P1CarbonStep({
       {/* Info box */}
       <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
         <span className="text-base select-none shrink-0 mt-0.5">☁️</span>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-black leading-relaxed">
           {t("autoCalcInfo")}
         </p>
       </div>
@@ -840,26 +840,26 @@ export function P1CarbonStep({
       {/* Auto-calculated emission figures */}
       <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
         <p className="text-sm font-semibold">Auto-calculated emission figures</p>
-        <p className="text-xs text-muted-foreground font-mono">
+        <p className="text-xs text-black font-mono">
           {t("gridFactor")}
         </p>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-black">
               {t("scope1Label")}
             </span>
             <span className="text-sm font-bold tabular-nums whitespace-nowrap ml-4">
               {Math.round(scope1KgCo2).toLocaleString()}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">kgCO₂/year</span>
+              <span className="text-xs font-normal text-black ml-1.5">kgCO₂/year</span>
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-black">
               {t("scope2Label")}
             </span>
             <span className="text-sm font-bold tabular-nums whitespace-nowrap ml-4">
               {Math.round(scope2KgCo2).toLocaleString()}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">kgCO₂/year</span>
+              <span className="text-xs font-normal text-black ml-1.5">kgCO₂/year</span>
             </span>
           </div>
         </div>
@@ -884,7 +884,7 @@ export function P1CarbonStep({
             min={0}
             className="w-full rounded-lg border border-input bg-background pl-3 pr-28 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black font-medium bg-muted px-2 py-0.5 rounded pointer-events-none">
             kgCO₂/year
           </span>
         </div>
@@ -893,7 +893,7 @@ export function P1CarbonStep({
       {/* Scope 3 explanation box */}
       <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/40">
         <span className="text-base select-none shrink-0 mt-0.5">💡</span>
-        <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
+        <div className="text-sm text-black leading-relaxed space-y-2">
           <p className="font-semibold text-foreground">{t("scope3Title")}</p>
           <p>
             {t("scope3Body")}
@@ -910,36 +910,36 @@ export function P1CarbonStep({
 
       {/* Live computation */}
       <div className="space-y-2">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-black">
           {t("liveComputation")}
         </p>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("totalEmissions")}</span>
+            <span className="text-sm text-black">{t("totalEmissions")}</span>
             <span className="text-sm font-bold tabular-nums">
               {Math.round(totalKgCo2).toLocaleString()}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">kgCO₂/year</span>
+              <span className="text-xs font-normal text-black ml-1.5">kgCO₂/year</span>
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("carbonIntensity")}</span>
+            <span className="text-sm text-black">{t("carbonIntensity")}</span>
             <span className="text-sm font-bold tabular-nums">
               {activityUnit > 0 ? carbonIntensity.toFixed(2) : "0"}
-              <span className="text-xs font-normal text-muted-foreground ml-1.5">
+              <span className="text-xs font-normal text-black ml-1.5">
                 kgCO₂/{unitLabel}
               </span>
             </span>
           </div>
           <div className="flex items-center justify-between bg-muted/50 border border-border/40 rounded-xl px-4 py-3">
-            <span className="text-sm text-muted-foreground">{t("subScore1D")}</span>
-            <span className="text-sm font-bold tabular-nums text-muted-foreground">—</span>
+            <span className="text-sm text-black">{t("subScore1D")}</span>
+            <span className="text-sm font-bold tabular-nums text-black">—</span>
           </div>
         </div>
       </div>
 
       {/* Evidence quality */}
       <div className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
-        <p className="text-sm text-muted-foreground">{t("evidenceSource")}</p>
+        <p className="text-sm text-black">{t("evidenceSource")}</p>
         <select
           value={data.evidenceTierCarbon ?? ""}
           onChange={(e) =>
@@ -1044,7 +1044,7 @@ export function P1SiteStep({
       <div className="rounded-xl border bg-card p-5 space-y-4">
         <div className="space-y-1">
           <p className="text-sm font-semibold">{t("p1SummaryTitle")}</p>
-          <p className="text-xs text-muted-foreground font-mono">
+          <p className="text-xs text-black font-mono">
             {t("p1Formula")}
           </p>
         </div>
@@ -1055,8 +1055,8 @@ export function P1SiteStep({
             return (
               <div key={ind.key} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground font-medium">{ind.label}</span>
-                  <span className="tabular-nums text-muted-foreground">
+                  <span className="text-black font-medium">{ind.label}</span>
+                  <span className="tabular-nums text-black">
                     {preview != null || ind.key === "1E"
                       ? `${ind.score}/100 · ${ind.weight}% = ${contribution % 1 === 0 ? contribution : contribution.toFixed(1)}`
                       : `—/100 · ${ind.weight}% = —`}
@@ -1081,8 +1081,8 @@ export function P1SiteStep({
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{t("gpsContribution")}</span>
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <span className="text-xs text-black">{t("gpsContribution")}</span>
+            <span className="text-xs text-black tabular-nums">
               {gpsContribution % 1 === 0 ? gpsContribution : gpsContribution.toFixed(1)}
             </span>
           </div>

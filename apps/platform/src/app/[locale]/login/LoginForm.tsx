@@ -125,7 +125,7 @@ export function LoginForm() {
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
-        <div className="relative flex justify-center text-xs text-muted-foreground uppercase tracking-wider">
+        <div className="relative flex justify-center text-xs text-black uppercase tracking-wider">
           <span className="bg-cream px-3">{t("divider")}</span>
         </div>
       </div>
@@ -171,7 +171,7 @@ export function LoginForm() {
             </label>
             <Link
               href={forgotPasswordHref}
-              className="text-xs text-muted-foreground hover:text-foreground font-medium"
+              className="text-xs text-black hover:text-foreground font-medium"
             >
               {t("forgotPassword")}
             </Link>

@@ -73,7 +73,7 @@ export function DestinationsClient({
       <div className="sticky top-14 z-30 bg-background border-b border-border">
         <div className="container-section py-3 md:py-4 flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black" />
             <Input
               placeholder={t("searchPlaceholder")}
               value={search}
@@ -86,7 +86,7 @@ export function DestinationsClient({
 
       <div className="container-section py-8 md:py-12 space-y-12">
         {filtered.length === 0 ? (
-          <div className="text-center text-muted-foreground py-20 type-s">
+          <div className="text-center text-black py-20 type-s">
             {t("empty")}
           </div>
         ) : (
@@ -95,7 +95,7 @@ export function DestinationsClient({
               <div>
                 <div className="flex items-center gap-2 mb-5">
                   <div className="w-2 h-2 bg-accent animate-pulse" />
-                  <p className="type-label text-muted-foreground">
+                  <p className="type-label text-black">
                     {t("liveLabel")}
                   </p>
                 </div>
@@ -110,11 +110,11 @@ export function DestinationsClient({
             {comingSoon.length > 0 && (
               <div>
                 <div className="mb-2">
-                  <p className="type-label text-muted-foreground">
+                  <p className="type-label text-black">
                     {t("comingSoonLabel")}
                   </p>
                 </div>
-                <p className="type-xs text-muted-foreground mb-5 max-w-lg">
+                <p className="type-xs text-black mb-5 max-w-lg">
                   {t("comingSoonBody")}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
@@ -177,8 +177,8 @@ function LiveDestinationCard({ territory: t }: { territory: Territory }) {
         <div className="space-y-2">
           {metrics.map((m) => (
             <div key={m.label} className="flex items-center gap-2">
-              <m.icon className="w-3 h-3 text-muted-foreground shrink-0" />
-              <span className="type-xs text-muted-foreground w-24 shrink-0">
+              <m.icon className="w-3 h-3 text-black shrink-0" />
+              <span className="type-xs text-black w-24 shrink-0">
                 {m.label}
               </span>
               <div className="flex-1 h-1 bg-border overflow-hidden rounded-full">
@@ -251,8 +251,8 @@ function ComingSoonCard({ territory: t }: { territory: Territory }) {
         <div className="space-y-2">
           {metrics.map((m) => (
             <div key={m.label} className="flex items-center gap-2">
-              <m.icon className="w-3 h-3 text-muted-foreground shrink-0" />
-              <span className="type-xs text-muted-foreground w-24 shrink-0">
+              <m.icon className="w-3 h-3 text-black shrink-0" />
+              <span className="type-xs text-black w-24 shrink-0">
                 {m.label}
               </span>
               <div className="flex-1 h-1 bg-border overflow-hidden rounded-full">
@@ -261,7 +261,7 @@ function ComingSoonCard({ territory: t }: { territory: Territory }) {
                   style={{ width: `${m.value || 0}%` }}
                 />
               </div>
-              <span className="type-label tabular-nums w-6 text-right text-muted-foreground">
+              <span className="type-label tabular-nums w-6 text-right text-black">
                 {m.value ?? "—"}
               </span>
             </div>

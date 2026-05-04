@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Leaf } from "lucide-react";
+import { Leaf } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { LookbookCta } from "@/components/sections/LookbookCta";
@@ -9,6 +9,114 @@ import { LookbookCta } from "@/components/sections/LookbookCta";
 export const metadata: Metadata = {
   title: "The Regenerative Tourism",
 };
+
+// ── Hero: placeholder activity cards ──────────────────────────────────────────
+
+const ACCENT_BG: Record<string, string> = {
+  lime: "bg-accent",
+  blue: "bg-primary",
+  green: "bg-success",
+  pink: "bg-muted",
+};
+
+const PLACEHOLDER_ACTIVITIES = [
+  {
+    id: 1,
+    title: "Levada da Caldeirão Verde",
+    location: "Santana, Madeira",
+    gps: 82,
+    image: "/assets/editorial-levada-trail.jpg",
+    accent: "lime",
+  },
+  {
+    id: 2,
+    title: "Madeira Embroidery Workshop",
+    location: "Funchal, Madeira",
+    gps: 74,
+    image: "/assets/editorial-craft-workshop.jpg",
+    accent: "blue",
+  },
+  {
+    id: 3,
+    title: "Story of Passion Fruit in Madeira",
+    location: "Madeira, Portugal",
+    gps: 68,
+    image: "/assets/editorial-local-hands.jpg",
+    accent: "green",
+  },
+  {
+    id: 4,
+    title: "Eco-Friendly Private Tours",
+    location: "Madeira, Portugal",
+    gps: 79,
+    image: "/assets/editorial-nature-tour.jpg",
+    accent: "blue",
+  },
+  {
+    id: 5,
+    title: "Porto Santo Eco Hostel",
+    location: "Porto Santo",
+    gps: 61,
+    image: "/assets/stay-pontadosol-madeira.jpg",
+    accent: "pink",
+    comingSoon: true,
+  },
+  {
+    id: 6,
+    title: "Quinta Rural Stay",
+    location: "Madeira, Portugal",
+    gps: 85,
+    image: "/assets/stay-rural-madeira.jpg",
+    accent: "lime",
+  },
+  {
+    id: 7,
+    title: "Marine Research Expedition",
+    location: "Madeira, Portugal",
+    gps: 91,
+    image: "/assets/editorial-marine-research.jpg",
+    accent: "blue",
+  },
+];
+
+function ActivityCard({
+  title,
+  location,
+  gps,
+  image,
+  accent,
+  comingSoon,
+}: {
+  title: string;
+  location: string;
+  gps: number;
+  image: string;
+  accent: string;
+  comingSoon?: boolean;
+}) {
+  return (
+    <div className="relative shrink-0 w-[200px] aspect-[3/4] overflow-hidden rounded-lg">
+      <Image src={image} alt={title} fill className="object-cover" sizes="200px" />
+
+      {/* Colored top accent */}
+      <div className={`absolute top-0 left-0 right-0 h-1 ${ACCENT_BG[accent] ?? "bg-primary"}`} />
+
+      {/* GPS score badge */}
+      <span className="badge badge-lime absolute top-3 left-3">{gps}</span>
+
+      {/* "Soon" badge */}
+      {comingSoon && (
+        <span className="badge badge-dark absolute top-3 right-3">Soon</span>
+      )}
+
+      {/* Title gradient overlay */}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 pt-10">
+        <p className="type-xs font-semibold text-dark-foreground leading-snug">{title}</p>
+        <p className="type-xs text-dark-foreground mt-0.5">{location}</p>
+      </div>
+    </div>
+  );
+}
 
 function ScoreRings({
   fp,
@@ -105,137 +213,112 @@ export default function LandingPage() {
       <Navbar />
 
       {/* ═══ 1. HERO ═══ */}
-      <section className="relative min-h-screen overflow-hidden flex items-end">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/assets/hero-walk.mp4" type="video/mp4" />
-        </video>
-        {/* Image overlays — opacity allowed for video/image overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
-
-        <div className="relative z-10 w-full pb-16 md:pb-24">
-          <div className="container-section grid md:grid-cols-[1.2fr_1fr] gap-10 md:gap-20 items-end">
-            <div>
-              <p className="type-label text-dark-foreground italic mb-4">
-                The first regenerative map of tourism
-              </p>
-              <h1 className="type-h1 text-dark-foreground">
-                Travel impact.
-                <br />
-                Visible at the
-                <br />
-                moment of booking.
-              </h1>
-            </div>
-
-            <div className="space-y-6 md:pb-4">
-              <p className="type-m text-dark-foreground">
-                We&apos;re building something that&apos;s never existed in
-                tourism — a live impact layer that tells what tourism does to
-                places, people and communities.
-                <br />
-                <br />
-                For operators ready to measure and improve — a way to be found
-                by travelers who care. For travelers — a way to make every trip
-                count.
-              </p>
-              <div className="flex items-center gap-4 flex-wrap">
-                <Link href="/signup" className="btn btn-primary">
-                  Join as operator
-                </Link>
-                <Link
-                  href="/traveler/waitlist"
-                  className="inline-flex items-center gap-2 type-s text-dark-foreground hover:text-lime transition-colors"
-                >
-                  For travelers <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
+      <section className="pb-0 bg-background ">
+        {/* Heading + description + CTA */}
+        <div className="section">
+        <div className="container-section">
+          <div className=" max-w-[950px] m-auto flex flex-col items-center justify-center gap-[20px]">
+             <h1 className="type-h1 text-center">
+            Tourism leaves a mark.{" "}
+            <br />
+            We help you make it a good one.
+          </h1>
+          <p className="type-m text-center max-w-[552px]">
+            A score from 0 to 100 — independently assessed across Footprint,
+            Roots, and Regeneration. For travelers who choose by what&apos;s
+            next. For operators who do the work.
+          </p>
+            <Link href="/signup" className="btn btn-primary">
+              Join as operator
+            </Link>
           </div>
+         
         </div>
-      </section>
+        </div>
 
-      {/* ═══ 2. PRESS & PARTNERS — Marquee ═══ */}
-      <section className="bg-background border-b border-border overflow-hidden">
-        <div className="py-5 md:py-6">
-          <div className="animate-marquee flex w-max gap-8 md:gap-12 items-center">
-            {[0, 1, 2].map((dup) => (
-              <div
-                key={dup}
-                className="flex items-center gap-8 md:gap-12 shrink-0"
-              >
-                <a
-                  href="https://retreat.startupmadeira.eu/finalists-2026/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 shrink-0"
-                >
-                  <Image
-                    src="/assets/madeira-startup-retreat.png"
-                    alt="Madeira Startup Retreat"
-                    width={120}
-                    height={40}
-                    className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
-                  />
-                  <span className="type-label text-muted-foreground">
-                    Cohort 2026
-                  </span>
-                </a>
-                <div className="w-px h-5 shrink-0 bg-border" />
-                <a
-                  href="https://www.clarin.com/viajes/viajar-cuidar-destino-innovador-proyecto-jovenes-argentinos-brasileno-llego-europa_0_fexstVhMcf.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0"
-                >
-                  <Image
-                    src="/assets/clarin-logo.svg"
-                    alt="Clarín"
-                    width={80}
-                    height={32}
-                    className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
-                  />
-                </a>
-                <div className="w-px h-5 shrink-0 bg-border" />
-                <a
-                  href="https://www.canal12misiones.com/noticias-de-misiones/turismo/misioneros-finalistas-concurso-portugal"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0"
-                >
-                  <Image
-                    src="/assets/canal12-logo.png"
-                    alt="Canal 12 Misiones"
-                    width={120}
-                    height={40}
-                    className="h-10 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
-                  />
-                </a>
-                <div className="w-px h-5 shrink-0 bg-border" />
-                <a
-                  href="https://www.instagram.com/reel/DUGuXlpjtDp/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0"
-                >
-                  <Image
-                    src="/assets/silicon-misiones-logo.png"
-                    alt="Silicon Misiones"
-                    width={100}
-                    height={32}
-                    className="h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all opacity-50"
-                  />
-                </a>
-                <div className="w-px h-5 shrink-0 bg-border" />
-              </div>
+        {/* Horizontal activity card strip */}
+        <div className="">
+        <div className=" overflow-x-auto scrollbar-none">
+          <div
+            className="flex gap-3 pb-4"
+            style={{ paddingInline: "var(--page-x)" }}
+          >
+            {PLACEHOLDER_ACTIVITIES.map((a) => (
+              <ActivityCard key={a.id} {...a} />
             ))}
           </div>
+        </div>
+        </div>
+
+        {/* Featured in */}
+        <div className="section">
+        <div className="container-section border-t border-border mt-8 pt-6 pb-[var(--section-y)]">
+          <div className="flex items-center gap-8 flex-wrap">
+            <span className="type-label text-black shrink-0">
+              Featured in
+            </span>
+            <a
+              href="https://retreat.startupmadeira.eu/finalists-2026/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 shrink-0"
+            >
+              <Image
+                src="/assets/madeira-startup-retreat.png"
+                alt="Madeira Startup Retreat"
+                width={100}
+                height={32}
+                className="h-8 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
+              />
+              <span className="type-label text-black">Cohort 2026</span>
+            </a>
+            <div className="w-px h-4 shrink-0 bg-border" />
+            <a
+              href="https://www.clarin.com/viajes/viajar-cuidar-destino-innovador-proyecto-jovenes-argentinos-brasileno-llego-europa_0_fexstVhMcf.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0"
+            >
+              <Image
+                src="/assets/clarin-logo.svg"
+                alt="Clarín"
+                width={70}
+                height={28}
+                className="h-7 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
+              />
+            </a>
+            <div className="w-px h-4 shrink-0 bg-border" />
+            <a
+              href="https://www.canal12misiones.com/noticias-de-misiones/turismo/misioneros-finalistas-concurso-portugal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0"
+            >
+              <Image
+                src="/assets/canal12-logo.png"
+                alt="Canal 12 Misiones"
+                width={100}
+                height={32}
+                className="h-8 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
+              />
+            </a>
+            <div className="w-px h-4 shrink-0 bg-border" />
+            <a
+              href="https://www.instagram.com/reel/DUGuXlpjtDp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0"
+            >
+              <Image
+                src="/assets/silicon-misiones-logo.png"
+                alt="Silicon Misiones"
+                width={80}
+                height={28}
+                className="h-7 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
+              />
+            </a>
+          </div>
+        </div>
         </div>
       </section>
 
@@ -246,14 +329,14 @@ export default function LandingPage() {
             <div className="reveal">
               <h2 className="type-h2 text-foreground">
                 There will be no tourism industry on a dead planet.
-                <span className="block mt-1 text-muted-foreground">
+                <span className="block mt-1 text-black">
                   We keep talking about sustainable travel while the places we
                   love quietly disappear. The problem isn&apos;t that travelers
                   don&apos;t care. The problem is that caring has never been
                   enough.
                 </span>
               </h2>
-              <p className="type-m text-muted-foreground mt-10">
+              <p className="type-m text-black mt-10">
                 You can want to do the right thing and still have no way to know
                 if you are. You can be an operator doing everything right — and
                 still lose to someone who isn&apos;t. Because the system
@@ -277,7 +360,7 @@ export default function LandingPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="type-s text-muted-foreground italic text-right">
+              <p className="type-s text-black italic text-right">
                 2026 — We start here in Madeira
               </p>
             </div>
@@ -322,7 +405,7 @@ export default function LandingPage() {
       <section className="section border-t border-border">
         <div className="container-section">
           <div className="text-center reveal">
-            <p className="type-label text-muted-foreground italic">
+            <p className="type-label text-black italic">
               Coming soon — Off the beaten track.
             </p>
             <h2 className="type-h2 text-foreground mt-4">
@@ -330,7 +413,7 @@ export default function LandingPage() {
               <br />
               when impact is visible.
             </h2>
-            <p className="type-m text-muted-foreground max-w-text mx-auto mt-5">
+            <p className="type-m text-black max-w-text mx-auto mt-5">
               Local Madeiran guide running electric-car tours to places most
               visitors never reach. 100% local operator, zero direct emissions,
               low-pressure destinations.
@@ -373,7 +456,7 @@ export default function LandingPage() {
 
             {/* Verified Metrics card — desktop */}
             <div className="hidden md:block absolute -right-20 bottom-12 w-56 card card-sm space-y-4 z-10">
-              <p className="type-label text-muted-foreground">
+              <p className="type-label text-black">
                 Verified Metrics
               </p>
               <div className="space-y-2">
@@ -387,7 +470,7 @@ export default function LandingPage() {
                     key={m.label}
                     className="flex justify-between items-center"
                   >
-                    <span className="type-xs text-muted-foreground">
+                    <span className="type-xs text-black">
                       {m.label}
                     </span>
                     <span className="type-xs font-bold text-foreground">
@@ -418,7 +501,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="card card-sm space-y-4">
-              <p className="type-label text-muted-foreground">
+              <p className="type-label text-black">
                 Verified Metrics
               </p>
               <div className="space-y-2">
@@ -432,7 +515,7 @@ export default function LandingPage() {
                     key={m.label}
                     className="flex justify-between items-center"
                   >
-                    <span className="type-xs text-muted-foreground">
+                    <span className="type-xs text-black">
                       {m.label}
                     </span>
                     <span className="type-xs font-bold text-foreground">
@@ -444,7 +527,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <p className="type-s text-muted-foreground italic text-center mt-8">
+          <p className="type-s text-black italic text-center mt-8">
             100% electric · 100% local
           </p>
         </div>
@@ -454,7 +537,7 @@ export default function LandingPage() {
       <section className="section">
         <div className="container-section">
           <div className="text-center reveal">
-            <p className="type-label text-muted-foreground italic mb-4">
+            <p className="type-label text-black italic mb-4">
               Meet the Green Passport
             </p>
             <h2 className="type-h2 text-foreground">
@@ -482,7 +565,7 @@ export default function LandingPage() {
                 className="card card-muted card-interactive space-y-4 h-full reveal"
               >
                 <h3 className="type-h5 text-foreground">{pillar.title}</h3>
-                <p className="type-m text-muted-foreground">{pillar.desc}</p>
+                <p className="type-m text-black">{pillar.desc}</p>
               </div>
             ))}
           </div>
@@ -527,7 +610,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col justify-center px-8 md:px-16 lg:px-24 py-16 md:py-24">
             <div className="reveal">
-              <p className="type-label text-muted-foreground italic mb-3">
+              <p className="type-label text-black italic mb-3">
                 Simple, transparent, verified
               </p>
               <h2 className="type-h2 text-foreground mb-12">
@@ -564,7 +647,7 @@ export default function LandingPage() {
                     <span className="type-h5 text-foreground block mb-1">
                       {step.title}
                     </span>
-                    <p className="type-m text-muted-foreground">{step.desc}</p>
+                    <p className="type-m text-black">{step.desc}</p>
                   </div>
                 </div>
               ))}
@@ -584,7 +667,7 @@ export default function LandingPage() {
         <div className="container-section">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
             <div className="reveal">
-              <p className="type-label text-muted-foreground italic mb-4">
+              <p className="type-label text-black italic mb-4">
                 Every destination is different
               </p>
               <h2 className="type-h2 text-foreground">
@@ -592,7 +675,7 @@ export default function LandingPage() {
                 <br />
                 We measure that too.
               </h2>
-              <p className="type-m text-muted-foreground mt-6">
+              <p className="type-m text-black mt-6">
                 The Destination Pressure Index contextualises your score against
                 where you operate — tourist intensity, ecological sensitivity,
                 economic leakage.
@@ -608,12 +691,12 @@ export default function LandingPage() {
 
             <div className="reveal">
               <div className="card">
-                <p className="type-label text-muted-foreground mb-4">
+                <p className="type-label text-black mb-4">
                   DPI · Madeira
                 </p>
                 <div className="flex items-end gap-2">
                   <span className="type-h1 text-foreground tabular-nums">73</span>
-                  <span className="type-m text-muted-foreground mb-2">/100</span>
+                  <span className="type-m text-black mb-2">/100</span>
                 </div>
                 <span className="badge badge-pink mt-4">High Pressure</span>
                 <div className="flex gap-8 mt-6 pt-6 border-t border-border">
@@ -623,7 +706,7 @@ export default function LandingPage() {
                     { label: "Leakage", value: "51/100" },
                   ].map((m) => (
                     <div key={m.label}>
-                      <span className="type-label text-muted-foreground block">
+                      <span className="type-label text-black block">
                         {m.label}
                       </span>
                       <span className="type-s font-semibold tabular-nums text-foreground">
@@ -666,7 +749,7 @@ export default function LandingPage() {
                   <br />
                   That&apos;s a starting point.
                 </h2>
-                <p className="type-m text-muted-foreground max-w-text mx-auto mt-4">
+                <p className="type-m text-black max-w-text mx-auto mt-4">
                   The Green Passport doesn&apos;t penalise — it maps where you
                   are. Sign a Forward Commitment, receive 15 baseline Pillar 3
                   points, and get matched with verified local institutions.

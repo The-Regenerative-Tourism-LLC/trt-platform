@@ -71,7 +71,7 @@ function AcceptInviteForm() {
           </svg>
         </div>
         <h2 className="type-m font-semibold text-foreground mb-2">Account created</h2>
-        <p className="text-muted-foreground type-s mb-4">
+        <p className="text-black type-s mb-4">
           Your account is ready. Redirecting to login…
         </p>
         <Link href="/login" className="text-primary type-s font-medium hover:underline">
@@ -133,7 +133,7 @@ function AcceptInviteForm() {
       <button
         type="submit"
         disabled={isLoading}
-        className="btn btn-primary w-full disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+        className="btn btn-primary w-full disabled:bg-muted disabled:text-black disabled:cursor-not-allowed"
       >
         {isLoading ? "Creating account…" : "Accept invitation"}
       </button>
@@ -158,7 +158,7 @@ export default function AcceptInvitePage() {
           <h1 className="type-h2 text-foreground mb-2">
             Accept your invitation
           </h1>
-          <p className="text-muted-foreground type-s">
+          <p className="text-black type-s">
             Create your account to get started.
           </p>
         </div>

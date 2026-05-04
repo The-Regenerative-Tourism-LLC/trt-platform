@@ -32,7 +32,7 @@ export function TravelerDashboardClient() {
           <h1 className="text-3xl font-bold">
             {t("welcome", { name: user?.name ?? "Traveler" })}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-black mt-1">
             {t("tagline")}
           </p>
         </div>
@@ -63,7 +63,7 @@ export function TravelerDashboardClient() {
         </div>
         <div>
           <h2 className="text-xl font-bold">{t("passport.title")}</h2>
-          <p className="text-muted-foreground mt-2 max-w-md">
+          <p className="text-black mt-2 max-w-md">
             {t("passport.description")}
           </p>
         </div>
@@ -95,7 +95,7 @@ export function TravelerDashboardClient() {
             className="rounded-lg border border-border bg-card p-5 text-center shadow-sm"
           >
             <p className="text-3xl font-bold">{stat.value}</p>
-            <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+            <p className="text-sm text-black mt-1">{stat.label}</p>
           </div>
         ))}
       </div>

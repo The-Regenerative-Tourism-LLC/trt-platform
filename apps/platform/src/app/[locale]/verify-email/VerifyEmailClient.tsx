@@ -156,7 +156,7 @@ export default function VerifyEmailClient() {
           <h1 className="text-xl font-semibold text-foreground mb-2">
             {t("verifying.title")}
           </h1>
-          <p className="text-muted-foreground text-sm">{t("verifying.body")}</p>
+          <p className="text-black text-sm">{t("verifying.body")}</p>
         </>
       )}
 
@@ -170,7 +170,7 @@ export default function VerifyEmailClient() {
           <h1 className="text-xl font-semibold text-foreground mb-2">
             {t("success.title")}
           </h1>
-          <p className="text-muted-foreground text-sm mb-4">
+          <p className="text-black text-sm mb-4">
             {sessionStatus === "authenticated"
               ? t("success.redirecting")
               : t("success.body")}
@@ -195,7 +195,7 @@ export default function VerifyEmailClient() {
               <h1 className="text-xl font-semibold text-foreground mb-2">
                 {t("expired.title")}
               </h1>
-              <p className="text-muted-foreground text-sm mb-6">{errorMessage}</p>
+              <p className="text-black text-sm mb-6">{errorMessage}</p>
             </>
           ) : (
             <>
@@ -207,7 +207,7 @@ export default function VerifyEmailClient() {
               <h1 className="text-xl font-semibold text-foreground mb-2">
                 {t("checkInbox.title")}
               </h1>
-              <p className="text-muted-foreground text-sm mb-6">
+              <p className="text-black text-sm mb-6">
                 {t.rich("checkInbox.body", {
                   email: () => (
                     <strong>{session?.user?.email ?? t("checkInbox.fallbackEmail")}</strong>
@@ -218,7 +218,7 @@ export default function VerifyEmailClient() {
           )}
 
           <div className="border-t border-border pt-6 mt-2">
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="text-sm text-black mb-3">
               {t("resend.prompt")}
             </p>
 
@@ -230,7 +230,7 @@ export default function VerifyEmailClient() {
                   value={resendEmail}
                   onChange={(e) => setResendEmail(e.target.value)}
                   placeholder={t("resend.emailPlaceholder")}
-                  className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
               )}
 
@@ -246,12 +246,12 @@ export default function VerifyEmailClient() {
               </button>
             </form>
 
-            <p className="mt-4 text-xs text-muted-foreground/60">
+            <p className="mt-4 text-xs text-black/60">
               {t("resend.rateLimit")}
             </p>
           </div>
 
-          <p className="mt-6 text-xs text-muted-foreground/60">
+          <p className="mt-6 text-xs text-black/60">
             <button
               onClick={() => signOut({ redirectTo: loginHref })}
               className="hover:underline"

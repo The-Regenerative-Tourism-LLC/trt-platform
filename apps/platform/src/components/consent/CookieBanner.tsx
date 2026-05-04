@@ -24,7 +24,7 @@ export function CookieBanner() {
         <div className="w-full max-w-md bg-card border border-border rounded-2xl shadow-xl p-6 space-y-5">
           <div>
             <h2 className="text-base font-semibold text-foreground">Cookie preferences</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-black mt-1">
               Manage which cookies we may use.{" "}
               <Link href="/cookies" className="underline hover:text-foreground">
                 Cookie Policy
@@ -37,7 +37,7 @@ export function CookieBanner() {
             <div className="flex items-start justify-between gap-4 py-3 border-b border-border">
               <div>
                 <p className="text-sm font-medium text-foreground">Essential</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-black mt-0.5">
                   Required for the platform to function. Cannot be disabled.
                 </p>
               </div>
@@ -50,7 +50,7 @@ export function CookieBanner() {
             <div className="flex items-start justify-between gap-4 py-3 border-b border-border">
               <div>
                 <p className="text-sm font-medium text-foreground">Analytics</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-black mt-0.5">
                   Google Analytics and Microsoft Clarity to understand how the platform is used.
                 </p>
               </div>
@@ -68,7 +68,7 @@ export function CookieBanner() {
             <div className="flex items-start justify-between gap-4 py-3">
               <div>
                 <p className="text-sm font-medium text-foreground">Marketing</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-black mt-0.5">
                   Klaviyo, Meta Pixel, and Google Ads to deliver relevant content.
                 </p>
               </div>
@@ -94,7 +94,7 @@ export function CookieBanner() {
             <button
               type="button"
               onClick={() => setShowPreferences(false)}
-              className="px-4 py-2.5 text-sm text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors"
+              className="px-4 py-2.5 text-sm text-black border border-border rounded-lg hover:bg-secondary transition-colors"
             >
               Back
             </button>
@@ -131,7 +131,7 @@ export function CookieBanner() {
                 setMarketingChecked(false);
                 setShowPreferences(true);
               }}
-              className="px-4 py-2 text-sm text-muted-foreground border border-border rounded-lg hover:bg-secondary transition-colors"
+              className="px-4 py-2 text-sm text-black border border-border rounded-lg hover:bg-secondary transition-colors"
             >
               Customize
             </button>

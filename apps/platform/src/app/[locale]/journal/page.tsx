@@ -117,7 +117,7 @@ export default async function JournalPage({
                   className={`relative px-4 md:px-6 h-full type-s font-medium transition-colors whitespace-nowrap shrink-0 flex items-center ${
                     activeTab === t.id
                       ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-black hover:text-foreground"
                   }`}
                 >
                   {t.label}
@@ -137,7 +137,7 @@ export default async function JournalPage({
             <div className="tab-panel">
               {featured && (
                 <div className="mb-16">
-                  <p className="type-label text-muted-foreground mb-6">Latest</p>
+                  <p className="type-label text-black mb-6">Latest</p>
                   <Link
                     href={`/blog/${featured.slug}`}
                     className="group block border border-border bg-card overflow-hidden card-interactive"
@@ -150,7 +150,7 @@ export default async function JournalPage({
                       </div>
                       <div className="p-8 md:p-10 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-3 type-xs text-muted-foreground mb-4">
+                          <div className="flex items-center gap-3 type-xs text-black mb-4">
                             <time dateTime={featured.publishedAt}>
                               {formatDate(featured.publishedAt)}
                             </time>
@@ -160,7 +160,7 @@ export default async function JournalPage({
                           <h2 className="type-h4 group-hover:text-primary transition-colors mb-4">
                             {featured.title}
                           </h2>
-                          <p className="type-s text-muted-foreground line-clamp-3">
+                          <p className="type-s text-black line-clamp-3">
                             {featured.excerpt}
                           </p>
                         </div>
@@ -179,7 +179,7 @@ export default async function JournalPage({
 
               {rest.length > 0 && (
                 <>
-                  <p className="type-label text-muted-foreground mb-6">More articles</p>
+                  <p className="type-label text-black mb-6">More articles</p>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {rest.map((post) => (
                       <Link
@@ -193,7 +193,7 @@ export default async function JournalPage({
                           </span>
                         </div>
                         <div className="p-6">
-                          <div className="flex items-center gap-2 type-xs text-muted-foreground mb-3">
+                          <div className="flex items-center gap-2 type-xs text-black mb-3">
                             <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
                             <span>·</span>
                             <span>{post.readingTimeMinutes} min read</span>
@@ -201,7 +201,7 @@ export default async function JournalPage({
                           <h3 className="type-h5 group-hover:text-primary transition-colors line-clamp-3">
                             {post.title}
                           </h3>
-                          <p className="mt-2 type-s text-muted-foreground line-clamp-2">
+                          <p className="mt-2 type-s text-black line-clamp-2">
                             {post.excerpt}
                           </p>
                         </div>
@@ -212,7 +212,7 @@ export default async function JournalPage({
               )}
 
               {allPosts.length === 0 && (
-                <div className="text-center py-24 text-muted-foreground">
+                <div className="text-center py-24 text-black">
                   No articles yet — check back soon.
                 </div>
               )}
@@ -223,10 +223,10 @@ export default async function JournalPage({
           {activeTab === "press" && (
             <div className="tab-panel">
               <div className="max-w-xl">
-                <p className="type-label text-muted-foreground mb-6">Press & Coverage</p>
-                <div className="text-center py-24 text-muted-foreground card-dashed">
+                <p className="type-label text-black mb-6">Press & Coverage</p>
+                <div className="text-center py-24 text-black card-dashed">
                   <p className="type-s">No press coverage yet — check back soon.</p>
-                  <p className="type-xs mt-2 text-muted-foreground">
+                  <p className="type-xs mt-2 text-black">
                     Press inquiries:{" "}
                     <a href="mailto:press@theregenerativetourism.com" className="underline hover:text-foreground transition-colors">
                       press@theregenerativetourism.com
@@ -240,8 +240,8 @@ export default async function JournalPage({
           {/* ── Research tab ── */}
           {activeTab === "research" && (
             <div className="tab-panel max-w-2xl">
-              <p className="type-label text-muted-foreground mb-2">Scientific Research</p>
-              <p className="type-s text-muted-foreground mb-10">
+              <p className="type-label text-black mb-2">Scientific Research</p>
+              <p className="type-s text-black mb-10">
                 Peer-reviewed frameworks, GSTC alignment, UN SDG mapping, and the academic
                 foundations underpinning the Green Passport Score methodology.
               </p>
@@ -260,9 +260,9 @@ export default async function JournalPage({
                       <h2 className="type-h5 group-hover:text-primary transition-colors">
                         {r.title}
                       </h2>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5 group-hover:translate-x-0.5 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-black shrink-0 mt-0.5 group-hover:translate-x-0.5 transition-transform" />
                     </div>
-                    <p className="type-s text-muted-foreground">{r.description}</p>
+                    <p className="type-s text-black">{r.description}</p>
                   </Link>
                 ))}
               </div>

@@ -337,7 +337,7 @@ export function EvidenceClient() {
       {/* Back link */}
       <Link
         href="/operator/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-black hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         {t("backToDashboard")}
@@ -346,7 +346,7 @@ export function EvidenceClient() {
       {/* Page heading */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+        <p className="text-black mt-1 text-sm leading-relaxed">
           {t("subtitle")}
         </p>
       </div>
@@ -355,12 +355,12 @@ export function EvidenceClient() {
       <div className="rounded-xl border bg-card p-5 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold">{t("coverage.title")}</span>
-          <span className="text-sm text-muted-foreground tabular-nums">
+          <span className="text-sm text-black tabular-nums">
             {t("coverage.of", { verified: verifiedCount, total: totalCount })}
           </span>
         </div>
         <Progress value={coveragePct} className="h-1.5" />
-        <div className="flex items-center gap-5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-5 text-xs text-black">
           <span className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-foreground" />
             {t("coverage.verified", { count: verifiedCount })}
@@ -379,10 +379,10 @@ export function EvidenceClient() {
       {/* Help box */}
       <div className="rounded-xl border bg-card p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <HelpCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+          <HelpCircle className="h-4 w-4 text-black shrink-0" />
           <span className="text-sm font-semibold">{t("help.title")}</span>
         </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-black leading-relaxed">
           {t("help.description")}
         </p>
       </div>
@@ -419,22 +419,22 @@ export function EvidenceClient() {
               className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/30 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-black">
                   {group.pillar === "P1" ? "P1" : group.pillar === "P2" ? "👤" : "🌱"}
                 </div>
                 <div>
                   <p className="text-sm font-semibold">
                     {group.pillar} — {t(`pillars.${group.pillar.toLowerCase() as "p1" | "p2" | "p3"}`)}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-black">
                     {groupVerified} of {group.indicators.length} covered
                   </p>
                 </div>
               </div>
               {isExpanded ? (
-                <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                <ChevronUp className="h-4 w-4 text-black" />
               ) : (
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 text-black" />
               )}
             </button>
 
@@ -458,11 +458,11 @@ export function EvidenceClient() {
                         <p className="text-sm font-semibold leading-snug">
                           {t(`indicators.${ind.id}.label` as Parameters<typeof t>[0])}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                        <p className="text-xs text-black mt-0.5 leading-snug">
                           {t(`indicators.${ind.id}.hint` as Parameters<typeof t>[0])}
                         </p>
                         {latest && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1.5">
+                          <p className="text-xs text-black flex items-center gap-1 mt-1.5">
                             {state === "verified" && (
                               <CheckCircle2 className="h-3 w-3 text-green-600 shrink-0" />
                             )}
@@ -473,7 +473,7 @@ export function EvidenceClient() {
                               <XCircle className="h-3 w-3 text-destructive shrink-0" />
                             )}
                             {state === "lapsed" && (
-                              <AlertTriangle className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+                              <AlertTriangle className="h-3 w-3 text-black/60 shrink-0" />
                             )}
                             <Paperclip className="h-3 w-3 shrink-0" />
                             <span className="truncate max-w-[220px]">{latest.fileName}</span>

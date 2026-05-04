@@ -144,7 +144,7 @@ export function DiscoverClient({ operators, territories }: Props) {
           <Compass className="h-6 w-6 text-accent" />
           <h1 className="text-3xl font-bold tracking-tight">Discover</h1>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-black">
           Explore verified regenerative operators. Every score is computed, not claimed.
         </p>
       </div>
@@ -152,7 +152,7 @@ export function DiscoverClient({ operators, territories }: Props) {
       {/* Search + filter toggle */}
       <div className="flex gap-3 items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -175,7 +175,7 @@ export function DiscoverClient({ operators, territories }: Props) {
         <Card>
           <CardContent className="py-4 flex flex-wrap gap-4 items-end">
             <div className="flex flex-col gap-1 min-w-[160px]">
-              <label className="text-xs font-medium text-muted-foreground">GPS Band</label>
+              <label className="text-xs font-medium text-black">GPS Band</label>
               <select
                 value={bandFilter}
                 onChange={(e) => setBandFilter(e.target.value)}
@@ -189,7 +189,7 @@ export function DiscoverClient({ operators, territories }: Props) {
               </select>
             </div>
             <div className="flex flex-col gap-1 min-w-[160px]">
-              <label className="text-xs font-medium text-muted-foreground">Territory</label>
+              <label className="text-xs font-medium text-black">Territory</label>
               <select
                 value={territoryFilter}
                 onChange={(e) => setTerritoryFilter(e.target.value)}
@@ -204,7 +204,7 @@ export function DiscoverClient({ operators, territories }: Props) {
               </select>
             </div>
             <div className="flex flex-col gap-1 min-w-[140px]">
-              <label className="text-xs font-medium text-muted-foreground">Sort by</label>
+              <label className="text-xs font-medium text-black">Sort by</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as "score" | "recent" | "name")}
@@ -275,9 +275,9 @@ function OperatorGrid({ operators }: { operators: OperatorCard[] }) {
     return (
       <Card>
         <CardContent className="py-16 text-center space-y-4">
-          <Search className="h-10 w-10 text-muted-foreground/30 mx-auto" />
+          <Search className="h-10 w-10 text-black/30 mx-auto" />
           <p className="text-lg font-semibold">No operators found</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-black">
             Try adjusting your search or filters.
           </p>
         </CardContent>
@@ -317,7 +317,7 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
           />
         ) : (
           <div className="h-44 w-full bg-secondary flex items-center justify-center">
-            <Leaf className="h-10 w-10 text-muted-foreground/40" />
+            <Leaf className="h-10 w-10 text-black/40" />
           </div>
         )}
 
@@ -327,7 +327,7 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
             <span className="text-2xl font-black tabular-nums leading-none">
               {score.gpsTotal}
             </span>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground mt-0.5">
+            <p className="text-[9px] uppercase tracking-wider text-black mt-0.5">
               GPS
             </p>
           </div>
@@ -349,7 +349,7 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
           <p className="font-semibold leading-tight group-hover:text-primary transition-colors">
             {op.tradingName ?? op.legalName}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+          <p className="text-xs text-black mt-0.5 flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             {op.destinationRegion}
             {op.country ? `, ${op.country}` : ""}
@@ -371,7 +371,7 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
         {/* Badges row */}
         <div className="flex flex-wrap gap-1.5 pt-1">
           {dpsConfig && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border text-muted-foreground">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border text-black">
               {dpsConfig.arrow} {dpsConfig.label}
             </span>
           )}
@@ -384,7 +384,7 @@ function OperatorCardComponent({ operator: op }: { operator: OperatorCard }) {
 
         {/* Territory + DPI */}
         {op.territory && (
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <p className="text-xs text-black flex items-center gap-1">
             <MapPin className="h-3 w-3" />
             {op.territory.name}
             {op.territory.pressureLevel && (

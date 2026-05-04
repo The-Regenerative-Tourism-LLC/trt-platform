@@ -52,7 +52,7 @@ export function AcceptTermsForm() {
             onChange={(e) => setMarketingOptIn(e.target.checked)}
             className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
           />
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-black">
             {t("marketingOptIn")}
           </span>
         </label>

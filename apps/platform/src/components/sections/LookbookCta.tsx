@@ -64,7 +64,7 @@ export function LookbookCta({ eyebrow, heading, children }: LookbookCtaProps) {
       {/* Centered heading + CTA */}
       <div className="relative z-20 flex flex-col items-center justify-center min-h-[60vh] md:min-h-[70vh] container-text text-center">
         {eyebrow && (
-          <p className="type-label text-muted-foreground italic mb-4">{eyebrow}</p>
+          <p className="type-label text-black italic mb-4">{eyebrow}</p>
         )}
         <h2 className="type-h1 text-foreground mb-10">{heading}</h2>
         {children}

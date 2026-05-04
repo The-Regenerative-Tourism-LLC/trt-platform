@@ -173,11 +173,11 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
           className="rounded-2xl border bg-card p-5 flex flex-wrap gap-4 items-end shadow-sm"
         >
           <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-            <label htmlFor="q" className="text-xs font-medium text-muted-foreground">
+            <label htmlFor="q" className="text-xs font-medium text-black">
               {t("filters.searchLabel")}
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-black" />
               <input
                 id="q"
                 name="q"
@@ -190,7 +190,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5 min-w-[180px]">
-            <label htmlFor="band" className="text-xs font-medium text-muted-foreground">
+            <label htmlFor="band" className="text-xs font-medium text-black">
               {t("filters.bandLabel")}
             </label>
             <select
@@ -209,7 +209,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5 min-w-[180px]">
-            <label htmlFor="territory" className="text-xs font-medium text-muted-foreground">
+            <label htmlFor="territory" className="text-xs font-medium text-black">
               {t("filters.territoryLabel")}
             </label>
             <select
@@ -228,7 +228,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
           </div>
 
           <div className="flex flex-col gap-1.5 min-w-[140px]">
-            <label htmlFor="sort" className="text-xs font-medium text-muted-foreground">
+            <label htmlFor="sort" className="text-xs font-medium text-black">
               {t("filters.sortLabel")}
             </label>
             <select
@@ -257,7 +257,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
         {/* Active filters */}
         {activeFilters > 0 && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">{t("filters.active")}</span>
+            <span className="text-black">{t("filters.active")}</span>
             {q && (
               <span className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-xs font-medium">
                 &ldquo;{q}&rdquo;
@@ -285,9 +285,9 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
         {/* Results */}
         {sorted.length === 0 ? (
           <div className="rounded-2xl border bg-card p-16 text-center space-y-4">
-            <Search className="h-10 w-10 text-muted-foreground/30 mx-auto" />
+            <Search className="h-10 w-10 text-black/30 mx-auto" />
             <p className="text-lg font-semibold">{t("empty.title")}</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-black">
               {t("empty.description")}
             </p>
             <Link
@@ -323,7 +323,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                     />
                   ) : (
                     <div className="h-40 w-full bg-secondary flex items-center justify-center">
-                      <Leaf className="h-8 w-8 text-muted-foreground/40" />
+                      <Leaf className="h-8 w-8 text-black/40" />
                     </div>
                   )}
 
@@ -334,7 +334,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                         <p className="font-semibold leading-tight truncate group-hover:text-primary transition-colors">
                           {op.tradingName ?? op.legalName}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1">
+                        <p className="text-xs text-black mt-0.5 truncate flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {op.destinationRegion}
                           {op.country ? `, ${op.country}` : ""}
@@ -344,7 +344,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                         <div className="text-3xl font-black tabular-nums leading-none">
                           {gpsTotal}
                         </div>
-                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <div className="text-[10px] uppercase tracking-wider text-black">
                           GPS
                         </div>
                       </div>
@@ -352,7 +352,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
 
                     {/* Tagline */}
                     {op.tagline && (
-                      <p className="text-xs text-muted-foreground italic line-clamp-2">
+                      <p className="text-xs text-black italic line-clamp-2">
                         {op.tagline}
                       </p>
                     )}
@@ -365,7 +365,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                         { label: "P3", score: Number(score.p3Score), color: "bg-[hsl(var(--gps-regen))]" },
                       ].map((p) => (
                         <div key={p.label} className="flex items-center gap-2">
-                          <span className="text-[10px] w-5 text-muted-foreground font-medium">
+                          <span className="text-[10px] w-5 text-black font-medium">
                             {p.label}
                           </span>
                           <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
@@ -374,7 +374,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                               style={{ width: `${p.score}%` }}
                             />
                           </div>
-                          <span className="text-[10px] tabular-nums text-muted-foreground w-7 text-right">
+                          <span className="text-[10px] tabular-nums text-black w-7 text-right">
                             {p.score}
                           </span>
                         </div>
@@ -389,7 +389,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
                         {config.label}
                       </span>
                       {dpsConfig && (
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full border text-muted-foreground">
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full border text-black">
                           {dpsConfig.arrow} {dpsConfig.label}
                         </span>
                       )}
@@ -397,7 +397,7 @@ export default async function PublicOperatorsPage({ searchParams }: Props) {
 
                     {/* Territory + DPI */}
                     {op.territory && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <p className="text-xs text-black flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {op.territory.name}
                         {op.territory.pressureLevel && (

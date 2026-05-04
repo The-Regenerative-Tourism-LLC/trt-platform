@@ -49,12 +49,12 @@ export default function ForgotPasswordForm() {
           </svg>
         </div>
         <h2 className="text-lg font-semibold text-foreground mb-2">{t("success.title")}</h2>
-        <p className="text-muted-foreground text-sm mb-6">
+        <p className="text-black text-sm mb-6">
           {t.rich("success.body", {
             email: () => <strong>{email}</strong>,
           })}
         </p>
-        <p className="text-muted-foreground/60 text-xs mb-4">
+        <p className="text-black/60 text-xs mb-4">
           {t("success.hint")}
         </p>
         <Link href={loginHref} className="text-foreground text-sm font-medium hover:underline">
@@ -78,7 +78,7 @@ export default function ForgotPasswordForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t("emailPlaceholder")}
-            className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
 
@@ -95,7 +95,7 @@ export default function ForgotPasswordForm() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 text-center text-sm text-black">
         {t("rememberPassword")}{" "}
         <Link href={loginHref} className="text-foreground font-medium hover:underline">
           {t("signIn")}

@@ -49,9 +49,9 @@ export default async function LeaderboardPage() {
 
       <div className="container-text py-8 md:py-12">
         <div className="text-center py-20 space-y-4">
-          <Trophy className="w-10 h-10 text-muted-foreground mx-auto" />
+          <Trophy className="w-10 h-10 text-black mx-auto" />
           <h2 className="type-h5">{t("comingSoon.title")}</h2>
-          <p className="type-s text-muted-foreground max-w-md mx-auto">
+          <p className="type-s text-black max-w-md mx-auto">
             {t("comingSoon.description")}
           </p>
           <Button variant="outline" asChild>

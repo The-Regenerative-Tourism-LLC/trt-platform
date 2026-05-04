@@ -197,7 +197,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             {operator.tradingName ?? operator.legalName}
           </h1>
-          <div className="flex items-center justify-center gap-3 text-muted-foreground text-sm flex-wrap">
+          <div className="flex items-center justify-center gap-3 text-black text-sm flex-wrap">
             {operator.destinationRegion && (
               <span className="flex items-center gap-1">
                 <MapPin className="h-3.5 w-3.5" />
@@ -212,7 +212,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
             )}
           </div>
           {operator.tagline && (
-            <p className="text-muted-foreground italic max-w-xl mx-auto">
+            <p className="text-black italic max-w-xl mx-auto">
               {operator.tagline}
             </p>
           )}
@@ -221,10 +221,10 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         {/* Score breakdown */}
         <div className="rounded-lg border border-border bg-card p-6 md:p-8 space-y-6 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
+            <h2 className="text-sm uppercase tracking-wider text-black font-medium">
               {t("detail.scoreTitle")}
             </h2>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-black">
               GPS {gpsTotal}/100
             </span>
           </div>
@@ -280,7 +280,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                   <span className="text-xs font-semibold">{pillar.label}</span>
                   <span className="text-sm font-bold tabular-nums">{pillar.score}</span>
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                <p className="text-[11px] text-black leading-relaxed">
                   {pillar.description}
                 </p>
               </div>
@@ -292,7 +292,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         {dpsTotal != null && dpsBand && dpsConfig && (
           <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
+              <h2 className="text-sm uppercase tracking-wider text-black font-medium flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
                 {t("detail.directionTitle")}
               </h2>
@@ -302,7 +302,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               <span className="text-4xl font-black tabular-nums">
                 {dpsTotal > 0 ? "+" : ""}{dpsTotal}
               </span>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-black">
                 {t("detail.dpsDescriptionPre")}{" "}
                 <strong className="text-foreground">{dpsConfig.label.toLowerCase()}</strong>
                 {" "}{t("detail.dpsDescriptionPost")}
@@ -319,7 +319,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                     <span className="text-lg font-bold tabular-nums">
                       {d.value != null ? (d.value > 0 ? `+${d.value}` : d.value) : "—"}
                     </span>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{d.label}</p>
+                    <p className="text-[10px] text-black mt-0.5">{d.label}</p>
                   </div>
                 ))}
               </div>
@@ -336,7 +336,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                 {t("detail.forwardCommitment.title")}
               </h2>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-black">
               {t("detail.forwardCommitment.description")}{" "}
               {t("detail.forwardCommitment.category")}: <strong>{fcr.preferredCategory}</strong>.{" "}
               {t("detail.forwardCommitment.status")}: <strong className="capitalize">{fcr.status}</strong>.
@@ -348,7 +348,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         {operator.territory?.compositeDpi != null && (
           <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-2">
+              <h2 className="text-sm uppercase tracking-wider text-black font-medium flex items-center gap-2">
                 <Globe className="h-4 w-4" />
                 {t("detail.destinationContext", { name: operator.territory.name })}
               </h2>
@@ -360,7 +360,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               <span className="text-4xl font-black tabular-nums">
                 {Number(operator.territory.compositeDpi)}
               </span>
-              <div className="text-sm text-muted-foreground flex-1">
+              <div className="text-sm text-black flex-1">
                 <p>
                   {t("detail.dpiDescription")}{" "}
                   <strong className="text-foreground">
@@ -378,7 +378,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               ].map((m) => (
                 <div key={m.label} className="rounded-xl bg-muted p-3 text-center">
                   <span className="text-lg font-bold tabular-nums">{m.value != null ? Number(m.value) : "—"}</span>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                  <p className="text-[10px] text-black mt-0.5">
                     {m.label} ({m.weight})
                   </p>
                 </div>
@@ -390,7 +390,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         {/* Score History (if multiple cycles) */}
         {operator.scoreSnapshots.length > 1 && (
           <div className="rounded-lg border border-border bg-card p-6 space-y-4 shadow-sm">
-            <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-medium">
+            <h2 className="text-sm uppercase tracking-wider text-black font-medium">
               {t("detail.historyTitle")}
             </h2>
             <div className="space-y-3">
@@ -405,7 +405,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                     <p className="text-sm font-medium">
                       {i === 0 ? t("detail.current") : t("detail.cycle", { n: operator.scoreSnapshots.length - i })}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-black">
                       {new Date(s.computedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "long",
@@ -415,7 +415,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                   </div>
                   <div className="text-right">
                     <span className="text-xl font-black tabular-nums">{Number(s.gpsTotal)}</span>
-                    <p className="text-xs text-muted-foreground capitalize">
+                    <p className="text-xs text-black capitalize">
                       {(s.gpsBand as string).replace(/_/g, " ")}
                     </p>
                   </div>
@@ -431,7 +431,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-accent" />
               <h2 className="text-sm font-semibold">{t("detail.evidenceTitle")}</h2>
-              <span className="ml-auto text-xs text-muted-foreground">
+              <span className="ml-auto text-xs text-black">
                 {t("detail.evidenceCount", { count: verifiedEvidence.length })}
               </span>
             </div>
@@ -443,7 +443,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                   ? { label: "P2", color: "bg-secondary text-foreground border-border" }
                   : e.indicatorId.startsWith("p3_")
                   ? { label: "P3", color: "bg-secondary text-foreground border-border" }
-                  : { label: "—", color: "bg-muted text-muted-foreground border-border" };
+                  : { label: "—", color: "bg-muted text-black border-border" };
 
                 const tierColors: Record<string, string> = {
                   T1: "bg-primary text-primary-foreground",
@@ -472,7 +472,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
                 );
               })}
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-black">
               {t("detail.evidenceNote")}
             </p>
           </div>
@@ -481,10 +481,10 @@ export default async function PublicGreenPassportPage({ params }: Props) {
         {/* Verification & Audit */}
         <div className="rounded-lg border border-border bg-muted/30 p-6 space-y-3 shadow-sm">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-muted-foreground" />
+            <Shield className="h-4 w-4 text-black" />
             <h2 className="text-sm font-semibold">{t("detail.auditTitle")}</h2>
           </div>
-          <div className="grid sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+          <div className="grid sm:grid-cols-2 gap-2 text-xs text-black">
             <p>
               <span className="font-medium text-foreground">{t("detail.auditMethodology")}:</span>{" "}
               {score.methodologyVersion}
@@ -502,7 +502,7 @@ export default async function PublicGreenPassportPage({ params }: Props) {
               <span className="font-mono">{score.id}</span>
             </p>
           </div>
-          <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
+          <p className="text-[11px] text-black/80 leading-relaxed">
             {t("detail.auditDescription")}
           </p>
         </div>

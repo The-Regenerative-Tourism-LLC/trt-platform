@@ -128,7 +128,7 @@ export function SignupForm() {
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
-        <div className="relative flex justify-center text-xs text-muted-foreground uppercase tracking-wider">
+        <div className="relative flex justify-center text-xs text-black uppercase tracking-wider">
           <span className="bg-cream px-3">{t("divider")}</span>
         </div>
       </div>
@@ -152,7 +152,7 @@ export function SignupForm() {
                 : "border-border hover:border-foreground/30 hover:bg-secondary/50"
             }`}
           >
-            <span className={`mt-0.5 flex-shrink-0 ${selectedRole === "operator" ? "text-foreground" : "text-muted-foreground"}`}>
+            <span className={`mt-0.5 flex-shrink-0 ${selectedRole === "operator" ? "text-foreground" : "text-black"}`}>
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
@@ -168,7 +168,7 @@ export function SignupForm() {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm text-black mb-3">
                 {t("operator.description")}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -182,7 +182,7 @@ export function SignupForm() {
                     className={`text-xs px-2.5 py-1 rounded-full font-medium ${
                       selectedRole === "operator"
                         ? "bg-foreground/10 text-foreground"
-                        : "bg-secondary text-muted-foreground"
+                        : "bg-secondary text-black"
                     }`}
                   >
                     {f}
@@ -197,7 +197,7 @@ export function SignupForm() {
             onClick={() => router.push(travelerWaitlistHref)}
             className="w-full flex gap-5 items-start p-5 rounded-2xl border-2 border-border hover:border-foreground/30 hover:bg-secondary/50 text-left transition-all opacity-70"
           >
-            <span className="mt-0.5 flex-shrink-0 text-muted-foreground">
+            <span className="mt-0.5 flex-shrink-0 text-black">
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -205,9 +205,9 @@ export function SignupForm() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-semibold text-foreground">{t("traveler.label")}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-medium">{t("traveler.comingSoon")}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-black font-medium">{t("traveler.comingSoon")}</span>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm text-black mb-3">
                 {t("traveler.description")}
               </p>
               <span className="text-xs font-medium text-foreground underline underline-offset-2">
@@ -233,7 +233,7 @@ export function SignupForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("namePlaceholder")}
-              className={`flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                 errors.name ? "border-destructive" : ""
               }`}
             />
@@ -253,7 +253,7 @@ export function SignupForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("emailPlaceholder")}
-              className={`flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                 errors.email ? "border-destructive" : ""
               }`}
             />
@@ -273,7 +273,7 @@ export function SignupForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={t("passwordPlaceholder")}
-              className={`flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                 errors.password ? "border-destructive" : ""
               }`}
             />
@@ -292,7 +292,7 @@ export function SignupForm() {
               onChange={(e) => setMarketingOptIn(e.target.checked)}
               className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-black">
               {t("marketingOptIn")}
             </span>
           </label>
@@ -340,7 +340,7 @@ export function SignupForm() {
           {loading ? t("submitting") : t("submit")}
         </button>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-xs text-black">
           {t.rich("googleConsent", {
             terms: (chunks) => (
               <Link href={termsHref} className="underline hover:text-foreground">

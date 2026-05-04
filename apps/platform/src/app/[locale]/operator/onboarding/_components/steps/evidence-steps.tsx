@@ -61,7 +61,7 @@ function CheckRow({
         <span className="text-xs text-orange-500 tabular-nums shrink-0">{impact}</span>
       )}
       {indicator && (
-        <span className="text-xs text-muted-foreground tabular-nums shrink-0 w-5 text-right">{indicator}</span>
+        <span className="text-xs text-black tabular-nums shrink-0 w-5 text-right">{indicator}</span>
       )}
     </label>
   );
@@ -79,8 +79,8 @@ function SectionCard({
   return (
     <div className="rounded-xl border border-border overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2.5 bg-muted/30 border-b border-border/40">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{title}</span>
-        <span className="text-[10px] text-muted-foreground">{badge}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-black">{title}</span>
+        <span className="text-[10px] text-black">{badge}</span>
       </div>
       {children}
     </div>
@@ -133,7 +133,7 @@ export function EvidenceChecklistStep({ data, updateField, shell, preview, previ
 
   const topIcon = (
     <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-      <FileText className="w-6 h-6 text-muted-foreground" />
+      <FileText className="w-6 h-6 text-black" />
     </div>
   );
 
@@ -160,12 +160,12 @@ export function EvidenceChecklistStep({ data, updateField, shell, preview, previ
         </div>
       ) : preview ? (
         <div className="rounded-xl border bg-card px-5 py-4 space-y-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-black text-center">
             {t("liveGpsTitle")}
           </p>
           <div className="text-center">
             <p className="text-4xl font-bold tabular-nums">{Math.round(preview.gpsScore)}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("notYetPublished")}</p>
+            <p className="text-xs text-black mt-0.5">{t("notYetPublished")}</p>
           </div>
           <div className="flex items-center justify-around text-sm tabular-nums">
             <span>P1 <strong>{preview.pillar1Score.toFixed(1)}</strong></span>
@@ -186,7 +186,7 @@ export function EvidenceChecklistStep({ data, updateField, shell, preview, previ
         </div>
         <div>
           <p className="text-sm font-medium">{t("documentsReady", { count: totalChecked, total: totalDocs })}</p>
-          <p className="text-xs text-muted-foreground">{t("documentsNote")}</p>
+          <p className="text-xs text-black">{t("documentsNote")}</p>
         </div>
       </div>
 
@@ -253,11 +253,11 @@ export function EvidenceChecklistStep({ data, updateField, shell, preview, previ
 
       {/* Info note */}
       <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 space-y-1.5">
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-xs text-black leading-relaxed">
           <span className="text-foreground font-medium">{t("evidenceQualityNote")}</span>{" "}
           {t("evidenceQualityDetail")}
         </p>
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-xs text-black leading-relaxed">
           {t("uncheckedNote")}
         </p>
       </div>
@@ -361,7 +361,7 @@ export function EvidenceUploadStep({
       {uploadedEvidence.length === 0 ? (
         <div className="rounded-xl border bg-muted/30 p-5 space-y-2">
           <p className="text-sm font-medium">{t("noFilesTitle")}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-black">
             {t("noFilesDescPrefix")}{" "}
             <Link
               href={withLocale("/operator/evidence")}
@@ -389,7 +389,7 @@ export function EvidenceUploadStep({
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-medium truncate">{ev.fileName}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
+                    <p className="text-sm text-black mt-0.5">{label}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span
@@ -400,7 +400,7 @@ export function EvidenceUploadStep({
                           ? "border-amber-300 text-amber-700 bg-amber-50"
                           : ev.tier === "T3"
                           ? "border-blue-300 text-blue-700 bg-blue-50"
-                          : "border-border text-muted-foreground"
+                          : "border-border text-black"
                       }`}
                     >
                       {ev.tier}
@@ -409,7 +409,7 @@ export function EvidenceUploadStep({
                       className={`text-xs px-1.5 py-0.5 rounded border ${
                         ev.verificationState === "verified"
                           ? "border-primary/40 text-primary"
-                          : "border-border text-muted-foreground"
+                          : "border-border text-black"
                       }`}
                     >
                       {ev.verificationState}
@@ -419,7 +419,7 @@ export function EvidenceUploadStep({
               </button>
             );
           })}
-          <p className="text-xs text-muted-foreground pt-1">
+          <p className="text-xs text-black pt-1">
             {t("filesLinked", {
               selected: selectedChecksums.size,
               total: uploadedEvidence.length,
@@ -433,7 +433,7 @@ export function EvidenceUploadStep({
       <div className="rounded-xl border bg-card p-5 space-y-4">
         <p className="text-sm font-semibold">{t("addEvidenceTitle")}</p>
         {!latestSnapshotId ? (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-black">
             {t("noSnapshotDescPrefix")}{" "}
             <Link
               href={withLocale("/operator/evidence")}
@@ -562,7 +562,7 @@ export function DeltaStep({
         </div>
       ) : !priorScore ? (
         <div className="rounded-xl border bg-muted/30 p-5">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-black">
             {t("noPriorCycle")}
           </p>
         </div>
@@ -571,7 +571,7 @@ export function DeltaStep({
           <div className="rounded-xl border bg-card p-5 space-y-3">
             <div className="flex items-baseline justify-between">
               <p className="text-sm font-semibold">{t("previousAssessment")}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-black">
                 {new Date(priorScore.createdAt).toLocaleDateString(undefined, {
                   year: "numeric",
                   month: "short",
@@ -580,15 +580,15 @@ export function DeltaStep({
               </p>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <span className="text-muted-foreground">{t("gpsTotal")}</span>
+              <span className="text-black">{t("gpsTotal")}</span>
               <span className="font-bold tabular-nums">{Math.round(priorScore.gpsScore)}</span>
-              <span className="text-muted-foreground">{t("p1Footprint")}</span>
+              <span className="text-black">{t("p1Footprint")}</span>
               <span className="tabular-nums">{Math.round(priorScore.pillar1Score)}</span>
-              <span className="text-muted-foreground">{t("p2Integration")}</span>
+              <span className="text-black">{t("p2Integration")}</span>
               <span className="tabular-nums">{Math.round(priorScore.pillar2Score)}</span>
-              <span className="text-muted-foreground">{t("p3Regenerative")}</span>
+              <span className="text-black">{t("p3Regenerative")}</span>
               <span className="tabular-nums">{Math.round(priorScore.pillar3Score)}</span>
-              <span className="text-muted-foreground">{t("methodology")}</span>
+              <span className="text-black">{t("methodology")}</span>
               <span className="font-mono text-xs">{priorScore.methodologyVersion}</span>
             </div>
           </div>
@@ -606,7 +606,7 @@ export function DeltaStep({
             />
           </FieldGroup>
           <div className="rounded-xl border bg-muted/30 p-4">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-black">
               {t("dpsNote")}
             </p>
           </div>

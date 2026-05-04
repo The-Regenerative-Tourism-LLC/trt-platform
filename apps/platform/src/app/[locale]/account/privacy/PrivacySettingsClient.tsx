@@ -69,7 +69,7 @@ export function PrivacySettingsClient({
       {/* Marketing email consent */}
       <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
         <h2 className="text-base font-semibold text-foreground mb-1">Marketing emails</h2>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-black mb-4">
           Receive news, tips, and updates about regenerative tourism via Klaviyo. You can withdraw this consent at any time.
         </p>
         <label className="flex items-center gap-3 cursor-pointer mb-4">
@@ -84,7 +84,7 @@ export function PrivacySettingsClient({
           </span>
         </label>
         {marketingConsentedAt && initialMarketing && (
-          <p className="text-xs text-muted-foreground mb-3">
+          <p className="text-xs text-black mb-3">
             Opted in: {new Date(marketingConsentedAt).toLocaleDateString("en-GB", { dateStyle: "medium" })}
           </p>
         )}
@@ -98,7 +98,7 @@ export function PrivacySettingsClient({
             {savingMarketing ? "Saving…" : "Save"}
           </button>
           {marketingMessage && (
-            <span className="text-sm text-muted-foreground">{marketingMessage}</span>
+            <span className="text-sm text-black">{marketingMessage}</span>
           )}
         </div>
       </div>
@@ -106,11 +106,11 @@ export function PrivacySettingsClient({
       {/* Cookie consent */}
       <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
         <h2 className="text-base font-semibold text-foreground mb-1">Cookie preferences</h2>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="text-sm text-black mb-4">
           Manage which optional cookies we may use. Essential cookies cannot be disabled.
         </p>
         {cookieConsentUpdatedAt && (
-          <p className="text-xs text-muted-foreground mb-3">
+          <p className="text-xs text-black mb-3">
             Last updated: {new Date(cookieConsentUpdatedAt).toLocaleDateString("en-GB", { dateStyle: "medium" })}
           </p>
         )}
@@ -124,7 +124,7 @@ export function PrivacySettingsClient({
             />
             <div>
               <span className="text-sm text-foreground block">Analytics</span>
-              <span className="text-xs text-muted-foreground">Google Analytics, Microsoft Clarity</span>
+              <span className="text-xs text-black">Google Analytics, Microsoft Clarity</span>
             </div>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
@@ -136,7 +136,7 @@ export function PrivacySettingsClient({
             />
             <div>
               <span className="text-sm text-foreground block">Marketing</span>
-              <span className="text-xs text-muted-foreground">Klaviyo, Meta Pixel, Google Ads</span>
+              <span className="text-xs text-black">Klaviyo, Meta Pixel, Google Ads</span>
             </div>
           </label>
         </div>
@@ -150,7 +150,7 @@ export function PrivacySettingsClient({
             {savingCookies ? "Saving…" : "Save"}
           </button>
           {cookieMessage && (
-            <span className="text-sm text-muted-foreground">{cookieMessage}</span>
+            <span className="text-sm text-black">{cookieMessage}</span>
           )}
         </div>
       </div>

@@ -146,10 +146,10 @@ export function OperatorDashboardClient() {
         </div>
         <div className="space-y-2 max-w-md">
           <h1 className="text-2xl font-bold tracking-tight">{t("error.title")}</h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-black leading-relaxed">
             {t("error.description")}
           </p>
-          <p className="text-xs text-muted-foreground/70">
+          <p className="text-xs text-black/70">
             {error instanceof Error ? error.message : "Unknown API error"}
           </p>
         </div>
@@ -177,7 +177,7 @@ export function OperatorDashboardClient() {
         </div>
         <div className="space-y-2 max-w-sm">
           <h1 className="text-2xl font-bold tracking-tight">{t("inProgress.title")}</h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-black leading-relaxed">
             {t("inProgress.description")}
           </p>
         </div>
@@ -248,19 +248,19 @@ export function OperatorDashboardClient() {
               <QrCode className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+              <p className="text-xs text-black font-medium uppercase tracking-wide">
                 {t("operatorCode.label")}
               </p>
               <p className="text-2xl font-mono font-bold tracking-widest mt-0.5">
                 {operator.operatorCode}
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-black mt-0.5">
                 {t("operatorCode.hint")}
               </p>
             </div>
             <button
               onClick={() => navigator.clipboard.writeText(operator.operatorCode ?? "")}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0 border border-border rounded-lg px-3 py-2"
+              className="flex items-center gap-1.5 text-xs text-black hover:text-foreground transition-colors shrink-0 border border-border rounded-lg px-3 py-2"
             >
               <Copy className="w-3.5 h-3.5" />
               {t("operatorCode.copy")}
@@ -288,11 +288,11 @@ export function OperatorDashboardClient() {
       <Card className="border-border/60">
         <CardContent className="flex items-center gap-4 py-4">
           <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-            <Globe className="w-4 h-4 text-muted-foreground" />
+            <Globe className="w-4 h-4 text-black" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold">{t("publicProfile.title")}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-black mt-0.5">
               {t("publicProfile.description")}
             </p>
           </div>
@@ -326,7 +326,7 @@ export function OperatorDashboardClient() {
                   {score.isPublished ? t("score.published") : t("score.pendingVerification")}
                 </Badge>
                 {!score.isPublished && (
-                  <p className="text-[11px] text-muted-foreground text-center px-3 leading-relaxed">
+                  <p className="text-[11px] text-black text-center px-3 leading-relaxed">
                     {t("score.proxyNote")}
                   </p>
                 )}
@@ -336,7 +336,7 @@ export function OperatorDashboardClient() {
             {/* Pillar breakdown */}
             <Card className="md:col-span-3">
               <CardHeader className="pb-2 pt-5">
-                <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                <CardTitle className="text-xs uppercase tracking-wider text-black font-semibold">
                   {t("pillars.title")}
                 </CardTitle>
               </CardHeader>
@@ -377,7 +377,7 @@ export function OperatorDashboardClient() {
                         style={{ width: `${Math.min(s, 100)}%` }}
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">{pillarDescription(key, s)}</p>
+                    <p className="text-xs text-black">{pillarDescription(key, s)}</p>
                   </div>
                 ))}
                 <Separator />
@@ -395,7 +395,7 @@ export function OperatorDashboardClient() {
               <CardContent className="pt-5 pb-5 space-y-5">
                 {/* Header row */}
                 <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-black font-semibold">
                     <Globe className="h-3.5 w-3.5" />
                     {t("territory.label", { name: territory.name })}
                   </div>
@@ -410,9 +410,9 @@ export function OperatorDashboardClient() {
                     <span className="text-5xl font-black tabular-nums leading-none">
                       {territory.compositeDpi}
                     </span>
-                    <span className="text-xs text-muted-foreground font-medium">/100</span>
+                    <span className="text-xs text-black font-medium">/100</span>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-snug flex-1">
+                  <p className="text-sm text-black leading-snug flex-1">
                     {t("territory.dpiNote")}
                   </p>
                 </div>
@@ -427,16 +427,16 @@ export function OperatorDashboardClient() {
                   ].map((m) => (
                     <div key={m.label} className="space-y-0.5">
                       <span className="text-xl font-bold tabular-nums">{m.value ?? "—"}</span>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-[11px] text-black">
                         {m.label}
-                        <span className="text-muted-foreground/50 ml-1">({m.weight})</span>
+                        <span className="text-black/50 ml-1">({m.weight})</span>
                       </p>
                     </div>
                   ))}
                 </div>
 
                 {territory.dpiComputedAt && (
-                  <p className="text-[11px] text-muted-foreground/60">
+                  <p className="text-[11px] text-black/60">
                     {t("territory.lastComputed", {
                       date: new Date(territory.dpiComputedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
@@ -454,7 +454,7 @@ export function OperatorDashboardClient() {
           {score.dpsTotal != null && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-2">
+                <CardTitle className="text-xs uppercase tracking-wider text-black font-semibold flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   {t("dps.title")}
                 </CardTitle>
@@ -478,13 +478,13 @@ export function OperatorDashboardClient() {
                         <span className="text-xl font-bold tabular-nums">
                           {d.value != null ? (d.value > 0 ? `+${d.value}` : d.value) : "—"}
                         </span>
-                        <p className="text-[10px] text-muted-foreground mt-1">{d.label}</p>
-                        <p className="text-[9px] text-muted-foreground/60">{d.range}</p>
+                        <p className="text-[10px] text-black mt-1">{d.label}</p>
+                        <p className="text-[9px] text-black/60">{d.range}</p>
                       </div>
                     ))}
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-black">
                   {t("dps.range")}
                 </p>
               </CardContent>
@@ -495,7 +495,7 @@ export function OperatorDashboardClient() {
           {prev && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-2">
+                <CardTitle className="text-xs uppercase tracking-wider text-black font-semibold flex items-center gap-2">
                   <TrendingUp className="h-4 w-4" />
                   {t("delta.title")}
                 </CardTitle>
@@ -517,20 +517,20 @@ export function OperatorDashboardClient() {
                       <div key={label} className="rounded-lg bg-muted p-3 text-center space-y-1">
                         <span
                           className={`text-xl font-bold tabular-nums ${
-                            neutral ? "text-muted-foreground" : positive ? "text-primary" : "text-destructive"
+                            neutral ? "text-black" : positive ? "text-primary" : "text-destructive"
                           }`}
                         >
                           {neutral ? "±0" : positive ? `+${diff}` : `${diff}`}
                         </span>
-                        <p className="text-[10px] text-muted-foreground">{label}</p>
-                        <p className="text-[9px] text-muted-foreground/60">
+                        <p className="text-[10px] text-black">{label}</p>
+                        <p className="text-[9px] text-black/60">
                           {previous} → {current}
                         </p>
                       </div>
                     );
                   })}
                 </div>
-                <p className="text-xs text-muted-foreground mt-3">
+                <p className="text-xs text-black mt-3">
                   {t("delta.comparedTo", {
                     date: new Date(prev.createdAt).toLocaleDateString("en-GB", {
                       day: "numeric",
@@ -560,7 +560,7 @@ function NoAssessmentState() {
           <Zap className="w-8 h-8 text-primary" />
         </div>
         <p className="font-semibold text-lg">{t("noAssessment.title")}</p>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+        <p className="text-sm text-black max-w-md mx-auto">
           {t("noAssessment.description")}
         </p>
       </CardContent>

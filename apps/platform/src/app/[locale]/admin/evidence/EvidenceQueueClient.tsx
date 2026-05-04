@@ -70,11 +70,11 @@ const STATE_CONFIG: Record<VerificationState, { icon: typeof Clock; color: strin
   pending: { icon: Clock, color: "text-amber-600", bgColor: "bg-card" },
   verified: { icon: CheckCircle2, color: "text-primary", bgColor: "bg-secondary text-primary" },
   rejected: { icon: XCircle, color: "text-destructive", bgColor: "bg-destructive/10 text-destructive" },
-  lapsed: { icon: AlertCircle, color: "text-muted-foreground", bgColor: "bg-muted text-muted-foreground" },
+  lapsed: { icon: AlertCircle, color: "text-black", bgColor: "bg-muted text-black" },
 };
 
 function TierBadge({ tier }: { tier: EvidenceTier | null }) {
-  if (!tier) return <span className="text-xs text-muted-foreground">—</span>;
+  if (!tier) return <span className="text-xs text-black">—</span>;
   return (
     <Badge variant="outline" className={`text-[10px] ${TIER_STYLES[tier] ?? ""}`}>
       {tier}
@@ -147,7 +147,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-black mt-1">
             {t("subtitle")}
           </p>
         </div>
@@ -174,9 +174,9 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
         ].map((s) => (
           <Card key={s.label} className={s.alert ? "border-amber-300 bg-amber-50" : ""}>
             <CardContent className="py-4 text-center">
-              <s.icon className={`h-4 w-4 mx-auto mb-1 ${s.alert ? "text-amber-600" : "text-muted-foreground"}`} />
+              <s.icon className={`h-4 w-4 mx-auto mb-1 ${s.alert ? "text-amber-600" : "text-black"}`} />
               <div className="text-3xl font-black tabular-nums">{s.value}</div>
-              <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+              <div className="text-xs text-black mt-1">{s.label}</div>
             </CardContent>
           </Card>
         ))}
@@ -202,7 +202,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
             <Card>
               <CardContent className="py-12 text-center space-y-3">
                 <CheckCircle2 className="h-10 w-10 text-primary/40 mx-auto" />
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-black">
                   {t("empty.allClear")}
                 </p>
               </CardContent>
@@ -221,7 +221,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
                           <p className="font-semibold text-sm truncate" title={operatorName}>
                             {operatorName}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-black">
                             Cycle {e.assessmentSnapshot.assessmentCycle}
                           </p>
                         </div>
@@ -229,17 +229,17 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
                       </div>
 
                       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-                        <dt className="text-muted-foreground font-medium">{t("table.indicator")}</dt>
+                        <dt className="text-black font-medium">{t("table.indicator")}</dt>
                         <dd className="font-mono truncate">{e.indicatorId}</dd>
-                        <dt className="text-muted-foreground font-medium">{t("table.file")}</dt>
+                        <dt className="text-black font-medium">{t("table.file")}</dt>
                         <dd className="truncate" title={e.fileName ?? "—"}>
                           {e.fileName ?? "—"}
                         </dd>
-                        <dt className="text-muted-foreground font-medium">{t("table.tier")}</dt>
-                        <dd className="font-mono truncate text-muted-foreground" title={e.checksum ?? undefined}>
+                        <dt className="text-black font-medium">{t("table.tier")}</dt>
+                        <dd className="font-mono truncate text-black" title={e.checksum ?? undefined}>
                           {e.checksum ? `${e.checksum.slice(0, 16)}…` : "—"}
                         </dd>
-                        <dt className="text-muted-foreground font-medium">{t("table.submitted")}</dt>
+                        <dt className="text-black font-medium">{t("table.submitted")}</dt>
                         <dd>{formatDate(e.submittedAt)}</dd>
                       </dl>
 
@@ -312,7 +312,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
                       <TableCell className="font-medium max-w-[160px] truncate" title={operatorName}>
                         {operatorName}
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
+                      <TableCell className="font-mono text-xs text-black">
                         {e.indicatorId}
                       </TableCell>
                       <TableCell>
@@ -321,13 +321,13 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
                       <TableCell className="tabular-nums text-center">
                         {e.assessmentSnapshot.assessmentCycle}
                       </TableCell>
-                      <TableCell className="max-w-[160px] truncate text-xs text-muted-foreground" title={e.fileName ?? undefined}>
+                      <TableCell className="max-w-[160px] truncate text-xs text-black" title={e.fileName ?? undefined}>
                         {e.fileName ?? "—"}
                       </TableCell>
                       <TableCell>
                         <StateBadge state={e.verificationState} />
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      <TableCell className="text-xs text-black whitespace-nowrap">
                         {formatDate(e.submittedAt)}
                       </TableCell>
                     </TableRow>
@@ -335,7 +335,7 @@ export function EvidenceQueueClient({ pendingEvidence, allEvidence }: Props) {
                 })}
                 {allEvidence.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-10 text-black">
                       {t("empty.noRecords")}
                     </TableCell>
                   </TableRow>

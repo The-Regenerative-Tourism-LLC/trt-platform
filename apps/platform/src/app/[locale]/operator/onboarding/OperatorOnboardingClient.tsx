@@ -566,7 +566,7 @@ export function OperatorOnboardingClient() {
           subtitle={tCommon("stepNotImplemented")}
         >
           <div className="rounded-xl border bg-muted/30 p-5">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-black">
               {tCommon("stepUnavailable", { stepId })}
             </p>
           </div>

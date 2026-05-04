@@ -107,7 +107,7 @@ export function SelectRoleForm() {
               className={`mt-0.5 flex-shrink-0 ${
                 selected === option.value
                   ? "text-foreground"
-                  : "text-muted-foreground"
+                  : "text-black"
               }`}
             >
               {option.icon}
@@ -133,7 +133,7 @@ export function SelectRoleForm() {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm text-black mb-3">
                 {t("operator.description")}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -147,7 +147,7 @@ export function SelectRoleForm() {
                     className={`text-xs px-2.5 py-1 rounded-full font-medium ${
                       selected === option.value
                         ? "bg-foreground/10 text-foreground"
-                        : "bg-secondary text-muted-foreground"
+                        : "bg-secondary text-black"
                     }`}
                   >
                     {f}
@@ -174,7 +174,7 @@ export function SelectRoleForm() {
             onChange={(e) => setMarketingOptIn(e.target.checked)}
             className="mt-0.5 h-4 w-4 rounded border-border accent-primary flex-shrink-0"
           />
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-black">
             {t("marketingOptIn")}
           </span>
         </label>

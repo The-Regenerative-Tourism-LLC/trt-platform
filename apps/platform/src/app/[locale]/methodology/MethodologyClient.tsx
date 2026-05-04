@@ -169,7 +169,7 @@ export function MethodologyClient() {
                 key={tabItem.id}
                 onClick={() => setTab(tabItem.id)}
                 className={`relative px-4 md:px-6 h-full type-s font-medium transition-colors whitespace-nowrap shrink-0 ${
-                  activeTab === tabItem.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  activeTab === tabItem.id ? "text-foreground" : "text-black hover:text-foreground"
                 }`}
               >
                 {tabItem.label}
@@ -193,11 +193,11 @@ export function MethodologyClient() {
 
                 {/* Intro */}
                 <div className="reveal space-y-3">
-                  <p className="type-label text-muted-foreground italic">The Green Passport Score</p>
+                  <p className="type-label text-black italic">The Green Passport Score</p>
                   <h2 className="type-h2">
                     Every operator receives a single score from 0 to 100
                   </h2>
-                  <p className="type-m text-muted-foreground">
+                  <p className="type-m text-black">
                     Three pillars. Three questions. One number that travels with you at the moment of booking.
                   </p>
                 </div>
@@ -212,29 +212,29 @@ export function MethodologyClient() {
                     >
                       <div className="px-6 md:px-8 pt-6 pb-5 space-y-3">
                         <div className="flex items-baseline justify-between">
-                          <span className="type-label text-muted-foreground tabular-nums">
+                          <span className="type-label text-black tabular-nums">
                             {p.num}
                           </span>
-                          <span className="type-label text-muted-foreground tabular-nums">
+                          <span className="type-label text-black tabular-nums">
                             {p.weight}
                           </span>
                         </div>
                         <div className="space-y-1">
                           <h3 className="type-h4">{p.title}</h3>
-                          <p className="type-m text-muted-foreground italic">
+                          <p className="type-m text-black italic">
                             &ldquo;{p.question}&rdquo;
                           </p>
                         </div>
-                        <p className="type-m text-muted-foreground">{p.explanation}</p>
+                        <p className="type-m text-black">{p.explanation}</p>
                       </div>
                       <div className="border-t border-border divide-y divide-border">
                         {p.indicators.map((ind) => (
                           <div key={ind.code} className="px-6 md:px-8 py-3.5 flex items-start gap-6">
                             <div className="flex-1 space-y-0.5">
                               <p className="type-s font-semibold">{ind.code}</p>
-                              <p className="type-s text-muted-foreground">{ind.desc}</p>
+                              <p className="type-s text-black">{ind.desc}</p>
                             </div>
-                            <span className="type-label text-muted-foreground tabular-nums shrink-0 pt-0.5">
+                            <span className="type-label text-black tabular-nums shrink-0 pt-0.5">
                               {ind.weight}
                             </span>
                           </div>
@@ -247,7 +247,7 @@ export function MethodologyClient() {
                 {/* How the weights work */}
                 <div className="reveal card px-6 md:px-8 py-6 space-y-3">
                   <p className="type-s font-semibold">How the weights work</p>
-                  <p className="type-m text-muted-foreground">
+                  <p className="type-m text-black">
                     Operational Footprint accounts for 40 % because it covers the most measurable
                     universal impact of any tourism business. Local Integration and Regenerative
                     Contribution each account for 30 %. The final score is a weighted average across
@@ -258,9 +258,9 @@ export function MethodologyClient() {
                 {/* Performance band */}
                 <div className="reveal space-y-6 max-w-xl">
                   <div className="space-y-2">
-                    <p className="type-label text-muted-foreground italic">Performance band</p>
+                    <p className="type-label text-black italic">Performance band</p>
                     <h3 className="type-h3">What the score means</h3>
-                    <p className="type-m text-muted-foreground">
+                    <p className="type-m text-black">
                       Every operator is placed into a performance band. These make it easy to
                       understand, at a glance, where an operator stands.
                     </p>
@@ -275,14 +275,14 @@ export function MethodologyClient() {
                         <span className={`w-3 h-3 rounded-[3px] shrink-0 ${GPS_BAND_COLORS[i]}`} />
                         <p className="type-s font-semibold flex-1">
                           {b.band}
-                          <span className="text-muted-foreground font-normal ml-2">— {b.range}</span>
+                          <span className="text-black font-normal ml-2">— {b.range}</span>
                         </p>
                       </div>
                     ))}
                   </div>
                   <div className="card card-muted px-5 py-3.5 space-y-1">
                     <p className="type-s font-semibold">Forward Commitment</p>
-                    <p className="type-m text-muted-foreground">
+                    <p className="type-m text-black">
                       Operators who are not yet published can still use a Forward Commitment tool to
                       declare their improvement targets. The Progress Modifier can add up to 10
                       points — or subtract up to 8 if performance drops.
@@ -322,13 +322,13 @@ export function MethodologyClient() {
               <div className="space-y-14">
 
                 <div className="reveal space-y-4">
-                  <p className="type-label text-muted-foreground italic">Destination Pressure Index</p>
+                  <p className="type-label text-black italic">Destination Pressure Index</p>
                   <h2 className="type-h2">
                     Where you operate
                     <br />
                     changes everything
                   </h2>
-                  <p className="type-m text-muted-foreground max-w-sm">
+                  <p className="type-m text-black max-w-sm">
                     A hotel on a fragile island faces different pressures than one in a continental
                     city. The DPI measures how much pressure tourism places on a specific territory.
                     Unlike the GPS — a higher DPI means more pressure.
@@ -336,7 +336,7 @@ export function MethodologyClient() {
                 </div>
 
                 <div className="reveal space-y-5">
-                  <p className="type-label text-muted-foreground italic">What we measure</p>
+                  <p className="type-label text-black italic">What we measure</p>
                   <h3 className="type-h3">
                     Four factors from verified public data
                   </h3>
@@ -349,16 +349,16 @@ export function MethodologyClient() {
                       >
                         <div className="flex items-baseline justify-between gap-3">
                           <h4 className="type-s font-semibold">{c.label}</h4>
-                          <span className="type-label text-muted-foreground tabular-nums shrink-0">{c.weight}</span>
+                          <span className="type-label text-black tabular-nums shrink-0">{c.weight}</span>
                         </div>
-                        <p className="type-m text-muted-foreground">{c.friendly}</p>
+                        <p className="type-m text-black">{c.friendly}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="reveal card p-5 space-y-2">
                     <h4 className="type-s font-semibold">Pressure levels</h4>
-                    <p className="type-m text-muted-foreground max-w-sm">
+                    <p className="type-m text-black max-w-sm">
                       Destinations are grouped into three levels: Low (absorbs tourism well),
                       Moderate (strain is visible), and High (approaching or exceeding capacity).
                       This context helps travelers understand the stakes — and helps operators see how
@@ -367,7 +367,7 @@ export function MethodologyClient() {
                   </div>
                 </div>
 
-                <Link href="/destinations" className="reveal inline-flex items-center gap-1.5 type-m text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/destinations" className="reveal inline-flex items-center gap-1.5 type-m text-black hover:text-foreground transition-colors">
                   See live destination data <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
 
@@ -383,18 +383,18 @@ export function MethodologyClient() {
               <div className="space-y-14">
 
                 <div className="reveal space-y-4">
-                  <p className="type-label text-muted-foreground italic">The travel record</p>
+                  <p className="type-label text-black italic">The travel record</p>
                   <h2 className="type-h2">
                     Every trip becomes part of your record
                   </h2>
-                  <p className="type-m text-muted-foreground max-w-xs">
+                  <p className="type-m text-black max-w-xs">
                     Every choice you make when you travel has an impact. For the first time, that
                     impact has a record.
                   </p>
                 </div>
 
                 <div className="reveal space-y-5">
-                  <p className="type-label text-muted-foreground italic">How it works</p>
+                  <p className="type-label text-black italic">How it works</p>
                   <h3 className="type-h3">Before and after your trip</h3>
                   <div className="grid sm:grid-cols-2 gap-3 mt-6">
                     {[
@@ -406,9 +406,9 @@ export function MethodologyClient() {
                         className="reveal card p-5 space-y-3"
                         style={{ transitionDelay: `${i * 80}ms` }}
                       >
-                        <span className="type-label text-muted-foreground tabular-nums">{card.num}</span>
+                        <span className="type-label text-black tabular-nums">{card.num}</span>
                         <h3 className="type-s font-semibold">{card.title}</h3>
-                        <p className="type-m text-muted-foreground">{card.desc}</p>
+                        <p className="type-m text-black">{card.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -416,7 +416,7 @@ export function MethodologyClient() {
 
                 <div className="space-y-5">
                   <div className="reveal space-y-2">
-                    <p className="type-label text-muted-foreground italic">Actions, not likes</p>
+                    <p className="type-label text-black italic">Actions, not likes</p>
                     <h3 className="type-h3">How your record grows</h3>
                   </div>
                   <div className="space-y-3">
@@ -432,13 +432,13 @@ export function MethodologyClient() {
                         style={{ transitionDelay: `${i * 60}ms` }}
                       >
                         <p className="type-s font-semibold">{a.action}</p>
-                        <p className="type-m text-muted-foreground">{a.detail}</p>
+                        <p className="type-m text-black">{a.detail}</p>
                       </div>
                     ))}
 
                     <div className="reveal card p-5 space-y-1.5">
                       <p className="type-s font-semibold">Real impact, real record.</p>
-                      <p className="type-m text-muted-foreground max-w-sm">
+                      <p className="type-m text-black max-w-sm">
                         Every entry in your record traces back to a verified action with real-world
                         impact. What you actually did — not a reward for scrolling.
                       </p>
@@ -458,18 +458,18 @@ export function MethodologyClient() {
               <div className="space-y-14">
 
                 <div className="reveal space-y-4">
-                  <p className="type-label text-muted-foreground italic">Verification</p>
+                  <p className="type-label text-black italic">Verification</p>
                   <h2 className="type-h2">
                     A score is only as trustworthy as the data behind it
                   </h2>
-                  <p className="type-m text-muted-foreground max-w-sm">
+                  <p className="type-m text-black max-w-sm">
                     Not all evidence is equal. We grade every piece by quality — and quality directly
                     affects your score. The more you prove, the more your score reflects.
                   </p>
                 </div>
 
                 <div className="reveal space-y-5">
-                  <p className="type-label text-muted-foreground italic">Evidence quality</p>
+                  <p className="type-label text-black italic">Evidence quality</p>
                   <h3 className="type-h3">Four levels of evidence</h3>
                   <div className="grid sm:grid-cols-2 gap-3 mt-6">
                     {EVIDENCE_TIERS_T.map((tier, i) => (
@@ -478,16 +478,16 @@ export function MethodologyClient() {
                         className="reveal card p-5 space-y-2"
                         style={{ transitionDelay: `${i * 70}ms` }}
                       >
-                        <span className="type-label text-muted-foreground tabular-nums">{tier.num}</span>
+                        <span className="type-label text-black tabular-nums">{tier.num}</span>
                         <h4 className="type-s font-semibold">{tier.label}</h4>
-                        <p className="type-m text-muted-foreground">{tier.desc}</p>
+                        <p className="type-m text-black">{tier.desc}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="reveal card p-5 space-y-2">
                     <p className="type-s font-semibold">Why does quality matter?</p>
-                    <p className="type-m text-muted-foreground max-w-lg">
+                    <p className="type-m text-black max-w-lg">
                       The more you prove, the more your score reflects. An operator who claims 80%
                       waste diversion but only has a self-declaration will score lower than one who
                       submits utility invoices. It&apos;s not a penalty — it&apos;s an incentive for transparency.
@@ -497,7 +497,7 @@ export function MethodologyClient() {
 
                 <div className="space-y-5">
                   <div className="reveal space-y-2">
-                    <p className="type-label text-muted-foreground italic">Beyond documents</p>
+                    <p className="type-label text-black italic">Beyond documents</p>
                     <h3 className="type-h3">Multi-layer verification</h3>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -511,7 +511,7 @@ export function MethodologyClient() {
                         style={{ transitionDelay: `${i * 80}ms` }}
                       >
                         <p className="type-s font-semibold">{card.title}</p>
-                        <p className="type-m text-muted-foreground">{card.desc}</p>
+                        <p className="type-m text-black">{card.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -519,11 +519,11 @@ export function MethodologyClient() {
 
                 <div className="space-y-5">
                   <div className="reveal space-y-2">
-                    <p className="type-label text-muted-foreground italic">Scientific foundations</p>
+                    <p className="type-label text-black italic">Scientific foundations</p>
                     <h3 className="type-h3">
                       Academic foundations, one convergent model
                     </h3>
-                    <p className="type-m text-muted-foreground max-w-lg">
+                    <p className="type-m text-black max-w-lg">
                       The GPS wasn&apos;t built from scratch. It converges five independent research
                       traditions that independently arrived at the same three-domain structure —
                       environmental, social, and regenerative.
@@ -537,23 +537,23 @@ export function MethodologyClient() {
                         style={{ transitionDelay: `${i * 40}ms` }}
                       >
                         <p className="type-s font-semibold shrink-0 w-44">{ref.author}</p>
-                        <p className="type-s text-muted-foreground">{ref.note}</p>
+                        <p className="type-s text-black">{ref.note}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="reveal card p-5 space-y-2">
                     <p className="type-s font-semibold">Open source by design</p>
-                    <p className="type-m text-muted-foreground">
+                    <p className="type-m text-black">
                       Measurement infrastructure for regenerative tourism should belong to everyone
                       — not locked behind a certification body.
                     </p>
                     <div className="space-y-1.5 pt-1">
-                      <Link href="/science/gstc" className="flex items-center gap-2 type-m text-muted-foreground hover:text-foreground transition-colors">
+                      <Link href="/science/gstc" className="flex items-center gap-2 type-m text-black hover:text-foreground transition-colors">
                         <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         GSTC Criteria Mapping
                       </Link>
-                      <Link href="/science/sdgs" className="flex items-center gap-2 type-m text-muted-foreground hover:text-foreground transition-colors">
+                      <Link href="/science/sdgs" className="flex items-center gap-2 type-m text-black hover:text-foreground transition-colors">
                         <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                         UN SDGs Alignment
                       </Link>

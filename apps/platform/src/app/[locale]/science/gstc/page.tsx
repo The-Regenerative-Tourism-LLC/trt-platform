@@ -88,13 +88,13 @@ export default async function GstcPage() {
 
           {/* Badge + heading */}
           <div className="space-y-6 mb-14">
-            <span className="inline-flex items-center border border-border rounded-full px-3 py-1 text-xs text-muted-foreground">
+            <span className="inline-flex items-center border border-border rounded-full px-3 py-1 text-xs text-black">
               {t("badge")}
             </span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
               {t("title")}
             </h1>
-            <p className="text-base text-muted-foreground leading-relaxed">
+            <p className="text-base text-black leading-relaxed">
               {t("subtitle")}
             </p>
           </div>
@@ -108,25 +108,25 @@ export default async function GstcPage() {
               {CRITERIA.map((c) => (
                 <div key={c.id} className="px-6 md:px-8 py-6 space-y-4">
                   <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-black/50 shrink-0" />
                     <p className="font-semibold text-sm">
                       {c.id} — {c.title}
                     </p>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4 pl-6">
                     <div className="space-y-1.5">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-black/60">
                         {t("requirement")}
                       </p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm text-black leading-relaxed">
                         {c.requirement}
                       </p>
                     </div>
                     <div className="space-y-1.5 rounded-xl bg-secondary/40 border border-border/60 p-4">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-black/60">
                         {t("implementation")}
                       </p>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm text-black leading-relaxed">
                         {c.implementation}
                       </p>
                     </div>
@@ -139,7 +139,7 @@ export default async function GstcPage() {
           {/* Beyond Compliance card */}
           <div className="rounded-2xl border border-border bg-card px-6 md:px-8 py-6 space-y-4 mb-12">
             <p className="font-semibold text-base">{t("beyondTitle")}</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-black leading-relaxed">
               While GSTC sets the floor for sustainable tourism, Pillar 3 (Regenerative
               Contribution, 30%) extends the framework into active regeneration — measuring whether
               operators are actively restoring ecosystems, strengthening communities, and building
@@ -147,7 +147,7 @@ export default async function GstcPage() {
               not by reduced damage but by positive contribution to the regenerative capacity of a
               living system.
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-black leading-relaxed">
               The Direction of Performance Score further extends GSTC by providing a structured
               incentive for continuous improvement — rewarding trajectory, not just current position.
             </p>
@@ -159,13 +159,13 @@ export default async function GstcPage() {
               href="https://www.gstcouncil.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 text-black hover:text-foreground transition-colors"
             >
               {t("visit")} <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <Link
               href={methodologyHref}
-              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 text-black hover:text-foreground transition-colors"
             >
               {t("fullMethodology")} <ArrowRight className="w-3.5 h-3.5" />
             </Link>

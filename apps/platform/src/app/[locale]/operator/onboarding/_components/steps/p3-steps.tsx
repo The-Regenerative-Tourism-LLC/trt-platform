@@ -81,11 +81,11 @@ export function P3StatusStep({
               }`}
             >
               <div className="shrink-0 w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                <Icon className="w-5 h-5 text-muted-foreground" />
+                <Icon className="w-5 h-5 text-black" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold">{title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+                <p className="text-xs text-black mt-0.5">{desc}</p>
               </div>
               <div className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                 selected ? "border-foreground bg-foreground" : "border-muted-foreground/40"
@@ -159,7 +159,7 @@ export function P3ProgrammeStep({
           </div>
           <div className="space-y-1">
             <p className="text-sm font-semibold">{t("informalCapTitle")}</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-black leading-relaxed">
               {t("informalCapBody")}
             </p>
           </div>
@@ -170,7 +170,7 @@ export function P3ProgrammeStep({
       <div className="space-y-2">
         <div>
           <p className="text-sm font-medium">{t("categoryTitle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("categorySubtitle")}</p>
+          <p className="text-xs text-black mt-0.5">{t("categorySubtitle")}</p>
         </div>
         <div className="space-y-2">
           {P3_CATEGORIES.map((cat) => {
@@ -194,7 +194,7 @@ export function P3ProgrammeStep({
               >
                 <div>
                   <p className="text-sm font-medium">{cat.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{cat.description}</p>
+                  <p className="text-xs text-black mt-0.5">{cat.description}</p>
                 </div>
                 <div className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                   checked ? "border-foreground bg-foreground" : "border-muted-foreground/40"
@@ -210,7 +210,7 @@ export function P3ProgrammeStep({
       {/* 3B: Traceability */}
       <div className="space-y-1.5">
         <p className="text-sm font-medium">{t("traceabilityTitle")}</p>
-        <p className="text-xs text-muted-foreground">{t("traceabilitySubtitle")}</p>
+        <p className="text-xs text-black">{t("traceabilitySubtitle")}</p>
         <select
           value={data.p3Traceability ?? ""}
           onChange={(e) => updateField({ p3Traceability: e.target.value === "" ? undefined : parseInt(e.target.value) })}
@@ -226,7 +226,7 @@ export function P3ProgrammeStep({
       {/* 3C: Additionality */}
       <div className="space-y-1.5">
         <p className="text-sm font-medium">{t("additionalityTitle")}</p>
-        <p className="text-xs text-muted-foreground">{t("additionalitySubtitle")}</p>
+        <p className="text-xs text-black">{t("additionalitySubtitle")}</p>
         <select
           value={data.p3Additionality ?? ""}
           onChange={(e) => updateField({ p3Additionality: e.target.value === "" ? undefined : parseInt(e.target.value) })}
@@ -242,7 +242,7 @@ export function P3ProgrammeStep({
       {/* 3D: Continuity */}
       <div className="space-y-1.5">
         <p className="text-sm font-medium">{t("continuityTitle")}</p>
-        <p className="text-xs text-muted-foreground">{t("continuitySubtitle")}</p>
+        <p className="text-xs text-black">{t("continuitySubtitle")}</p>
         <select
           value={data.p3Continuity ?? ""}
           onChange={(e) => updateField({ p3Continuity: e.target.value === "" ? undefined : parseInt(e.target.value) })}
@@ -257,11 +257,11 @@ export function P3ProgrammeStep({
 
       {/* Supporting context (not scored) */}
       <div className="space-y-4 pt-1">
-        <p className="text-sm font-medium text-muted-foreground">{t("contextTitle")}</p>
+        <p className="text-sm font-medium text-black">{t("contextTitle")}</p>
 
         <div className="space-y-1.5">
           <p className="text-sm font-medium">{t("programmeDescription")}</p>
-          <p className="text-xs text-muted-foreground">{t("programmeDescriptionHint")}</p>
+          <p className="text-xs text-black">{t("programmeDescriptionHint")}</p>
           <textarea
             value={data.p3ProgrammeDescription ?? ""}
             onChange={(e) => updateField({ p3ProgrammeDescription: e.target.value })}
@@ -288,7 +288,7 @@ export function P3ProgrammeStep({
           <div className="space-y-1.5">
             <p className="text-sm font-medium">{t("annualBudget")}</p>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">€</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-black pointer-events-none">€</span>
               <input
                 type="number"
                 value={data.p3AnnualBudget ?? ""}
@@ -297,14 +297,14 @@ export function P3ProgrammeStep({
                 min={0}
                 className={inputCls + " pl-7 pr-14"}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">/year</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-black pointer-events-none">/year</span>
             </div>
           </div>
         </div>
 
         <div className="space-y-1.5">
           <p className="text-sm font-medium">{t("partnerName")}</p>
-          <p className="text-xs text-muted-foreground">{t("partnerNameHint")}</p>
+          <p className="text-xs text-black">{t("partnerNameHint")}</p>
           <input
             type="text"
             value={data.p3InstitutionName ?? ""}
@@ -328,7 +328,7 @@ export function P3ProgrammeStep({
       <div className="rounded-2xl border border-border/50 bg-background px-5 py-4 space-y-4">
         <div>
           <p className="text-sm font-semibold">{t("p3SummaryTitle")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{t("p3Formula")}</p>
+          <p className="text-xs text-black mt-0.5">{t("p3Formula")}</p>
         </div>
         <div className="space-y-3">
           {p3Breakdown.map(({ key, label, weight }) => {
@@ -338,7 +338,7 @@ export function P3ProgrammeStep({
               <div key={key} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">{label}</span>
-                  <span className="text-xs text-muted-foreground tabular-nums">
+                  <span className="text-xs text-black tabular-nums">
                     {Math.round(score)}/100 · {weight}% = {contribution}
                   </span>
                 </div>
@@ -358,8 +358,8 @@ export function P3ProgrammeStep({
             <span className="text-sm font-bold tabular-nums">{Math.round(p3Total)}/100</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{t("gpsContribution")}</span>
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <span className="text-xs text-black">{t("gpsContribution")}</span>
+            <span className="text-xs text-black tabular-nums">
               {(p3Total * 0.30).toFixed(1)}
             </span>
           </div>

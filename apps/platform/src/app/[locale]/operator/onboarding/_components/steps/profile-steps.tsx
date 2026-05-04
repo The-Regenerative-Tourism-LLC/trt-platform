@@ -141,11 +141,11 @@ export function OperatorTypeStep({
                   <span className="text-base font-bold text-foreground leading-snug">
                     {opt.label}
                   </span>
-                  <span className="text-[10px] font-medium text-muted-foreground border border-border/60 rounded-full px-2 py-0.5 leading-none whitespace-nowrap">
+                  <span className="text-[10px] font-medium text-black border border-border/60 rounded-full px-2 py-0.5 leading-none whitespace-nowrap">
                     {opt.badge}
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                <p className="text-sm text-black mt-1.5 leading-relaxed">
                   {opt.desc}
                 </p>
               </div>
@@ -223,8 +223,8 @@ export function OperatorTypeStep({
 
       {/* Info box */}
       <div className="flex items-start gap-3 rounded-xl border border-border/40 bg-surface/20 px-4 py-4">
-        <Info className="w-[15px] h-[15px] shrink-0 text-muted-foreground/70 mt-px" strokeWidth={1.5} />
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <Info className="w-[15px] h-[15px] shrink-0 text-black/70 mt-px" strokeWidth={1.5} />
+        <p className="text-sm text-black leading-relaxed">
           {t("infoBox")}
         </p>
       </div>
@@ -429,10 +429,10 @@ function OwnershipSection({
     <div className="border-t border-border/50 pt-6 space-y-5">
       {/* Header */}
       <div className="flex items-start gap-2.5">
-        <span className="text-muted-foreground mt-0.5">🔒</span>
+        <span className="text-black mt-0.5">🔒</span>
         <div>
           <p className="text-sm font-semibold">{t("title")}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-black mt-0.5">
             {t("confidential")}
           </p>
         </div>
@@ -515,7 +515,7 @@ function OwnershipSection({
               onChange={(e) => updateField({ localEquityPct: Number(e.target.value) })}
               className="w-full accent-foreground cursor-pointer"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-black">
               <span>0%</span>
               <span>100%</span>
             </div>
@@ -717,7 +717,7 @@ export function ExperienceTypesStep({
             >
               <span className="text-xl block mb-1">{sub.icon}</span>
               <p className="text-xs font-semibold leading-tight">{sub.label}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">
+              <p className="text-[10px] text-black mt-0.5 leading-snug">
                 {sub.desc}
               </p>
             </button>
@@ -725,7 +725,7 @@ export function ExperienceTypesStep({
         })}
       </div>
       {selected.length === 0 && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-black">
           {t("selectAtLeastOne")}
         </p>
       )}
@@ -952,7 +952,7 @@ function FoodServiceSection({
         <p className="text-sm font-semibold">{t("foodOnSite")}</p>
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
-            <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+            <button type="button" className="text-black/60 hover:text-black transition-colors">
               <HelpCircle className="w-4 h-4" />
             </button>
           </TooltipTrigger>
@@ -976,13 +976,13 @@ function FoodServiceSection({
             }`}
           >
             <p className="text-base font-semibold">{t(fs.labelKey)}</p>
-            <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{t(fs.descKey)}</p>
+            <p className="text-sm text-black mt-0.5 leading-relaxed">{t(fs.descKey)}</p>
           </button>
         ))}
       </div>
       <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
         <span className="text-base shrink-0 mt-0.5">🌿</span>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm text-black leading-relaxed">
           <span className="font-semibold text-foreground">{t("foodAgriTip")}</span>{" "}
           {t("foodAgriTipBody")}
         </p>
@@ -1001,11 +1001,11 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
 
   const topIcon = isPureExp ? (
     <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-      <Mountain className="w-6 h-6 text-muted-foreground" />
+      <Mountain className="w-6 h-6 text-black" />
     </div>
   ) : (
     <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-      <Building2 className="w-6 h-6 text-muted-foreground" />
+      <Building2 className="w-6 h-6 text-black" />
     </div>
   );
 
@@ -1022,7 +1022,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
           <div className="space-y-3">
             <div>
               <p className="text-sm font-semibold">{t("accomCategories")}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("accomCategoriesHint")}</p>
+              <p className="text-xs text-black mt-0.5">{t("accomCategoriesHint")}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {ACCOM_CATEGORIES_MERGED.map((cat) => (
@@ -1056,8 +1056,8 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
               <NumberInput value={data.guestNights} onChange={(v) => updateField({ guestNights: v })} placeholder="e.g. 3200" min={0} />
             </FieldGroup>
             <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
-              <Info className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
-              <div className="text-sm text-muted-foreground leading-relaxed">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-black" />
+              <div className="text-sm text-black leading-relaxed">
                 <p className="font-medium text-foreground/80 mb-1">{t("guestNightsCalcTitle")}</p>
                 <p>{t("guestNightsCalcBody")}</p>
               </div>
@@ -1081,7 +1081,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
           {/* Subcategories */}
           <div>
             <p className="text-sm font-semibold">{t("experienceSubcategories")}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t("experienceSubcategoriesHint")}</p>
+            <p className="text-xs text-black mt-0.5">{t("experienceSubcategoriesHint")}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {EXPERIENCE_SUBCATEGORIES_MERGED.map((sub) => {
@@ -1104,7 +1104,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
                 >
                   <span className="text-2xl block mb-2">{sub.icon}</span>
                   <p className="text-sm font-semibold leading-tight">{sub.label}</p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-snug">{sub.desc}</p>
+                  <p className="text-xs text-black mt-1 leading-snug">{sub.desc}</p>
                 </button>
               );
             })}
@@ -1116,7 +1116,7 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
               <p className="text-sm font-semibold">{t("visitorDaysLabel")}</p>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
-                  <button type="button" className="text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+                  <button type="button" className="text-black/60 hover:text-black transition-colors">
                     <HelpCircle className="w-4 h-4" />
                   </button>
                 </TooltipTrigger>
@@ -1136,8 +1136,8 @@ export function OperationActivityStep({ data, updateField, shell }: StepProps) {
               min={0}
             />
             <div className="flex gap-3 rounded-xl bg-muted/50 border border-border/50 px-4 py-3">
-              <Info className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <Info className="w-4 h-4 shrink-0 mt-0.5 text-black" />
+              <p className="text-sm text-black leading-relaxed">
                 <span className="font-semibold text-foreground">{t("visitorDayDef")}</span>{" "}
                 {t("visitorDayCalc")}
               </p>
@@ -1343,7 +1343,7 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
         ))}
 
         {/* Upload slot */}
-        <label className={`rounded-xl border-2 border-dashed border-border hover:border-foreground/40 bg-background hover:bg-muted/20 transition-all cursor-pointer aspect-[4/3] flex flex-col items-center justify-center gap-2 text-muted-foreground ${uploading ? "pointer-events-none opacity-60" : ""}`}>
+        <label className={`rounded-xl border-2 border-dashed border-border hover:border-foreground/40 bg-background hover:bg-muted/20 transition-all cursor-pointer aspect-[4/3] flex flex-col items-center justify-center gap-2 text-black ${uploading ? "pointer-events-none opacity-60" : ""}`}>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -1374,12 +1374,12 @@ export function PhotosStep({ data, updateField, shell }: StepProps) {
       {/* Image guidelines */}
       <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-2">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-muted-foreground shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-black shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
           </svg>
           {t("guidelinesTitle")}
         </div>
-        <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+        <ul className="text-xs text-black space-y-1 list-disc list-inside">
           <li><strong>{t("guidelineRatio")}</strong></li>
           <li>{t("guidelineResize")}</li>
           <li>{t("guidelineFormat")}</li>

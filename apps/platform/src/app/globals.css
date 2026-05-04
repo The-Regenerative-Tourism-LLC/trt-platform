@@ -23,6 +23,7 @@
   --brand-green: #369B79;
   --brand-blue: #3E82ED;
   --brand-black: #000000;
+  --brand-surface: #E8E7E0;
 
   /* Semantic colors */
   --background: var(--brand-base);
@@ -52,6 +53,9 @@
 
   --destructive: var(--brand-purple);
   --destructive-foreground: var(--brand-base);
+
+  --surface: var(--brand-surface);
+  --surface-foreground: var(--brand-black);
 
   /* Font */
   --font-brand: "TWK Lausanne", system-ui, sans-serif;
@@ -126,12 +130,9 @@
   /* Layout */
   --page-x: 48px;
 
-  --section-y-sm: 64px;
-  --section-y: 96px;
-  --section-y-lg: 140px;
+
 
   --container-page: 1400px;
-  --container-section: 1240px;
   --container-content: 1120px;
   --container-text: 720px;
   --container-blog: 820px;
@@ -198,38 +199,7 @@
   --touch-target: 44px;
 }
 
-/* Mobile/tablet adjustments */
-@media (max-width: 1023px) {
-  :root {
-    --page-x: 24px;
 
-    --section-y-sm: 48px;
-    --section-y: 72px;
-    --section-y-lg: 96px;
-
-    --type-h1-size: 52px;
-    --type-h1-line: 58px;
-
-    --type-h2-size: 46px;
-    --type-h2-line: 52px;
-
-    --type-h3-size: 38px;
-    --type-h3-line: 44px;
-
-    --type-h4-size: 32px;
-    --type-h4-line: 38px;
-
-    --type-h5-size: 26px;
-    --type-h5-line: 32px;
-
-    --type-h6-size: 22px;
-    --type-h6-line: 28px;
-
-    --card-padding: 28px;
-    --card-padding-sm: 20px;
-    --card-padding-lg: 36px;
-  }
-}
 
 @media (max-width: 639px) {
   :root {
@@ -289,6 +259,8 @@
   --color-card-foreground: var(--card-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
 
   --color-purple: var(--brand-purple);
   --color-base: var(--brand-base);
@@ -340,7 +312,6 @@
   body {
     margin: 0;
     background: var(--background);
-    color: var(--foreground);
     font-family: var(--font-brand);
     font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
@@ -388,10 +359,18 @@
 /* Typography */
 @layer components {
   .type-h1 {
-    font-size: var(--type-h1-size);
-    line-height: var(--type-h1-line);
-    font-weight: var(--weight-bold);
-    letter-spacing: var(--tracking-heading);
+    font-size: 80px;
+    line-height: 100%;
+    font-weight: 250;
+  }
+
+
+   @media (max-width: 640px) {
+   .type-h1 {
+    font-size: 60px;
+    line-height: 100%;
+    font-weight: 250;
+  }
   }
 
   .type-h2 {
@@ -480,12 +459,24 @@
 /* Sections and containers */
 @layer components {
   .section {
-    padding-block: var(--section-y);
+    padding: 80px 40px;
+  }
+  @media (max-width: 640px) {
+    .section {
+    padding: 80px 16px;
+  }
   }
 
-  .section-sm {
-    padding-block: var(--section-y-sm);
+  .wrapper-header {
+    padding: 16px 40px;
   }
+  @media (max-width: 640px) {
+    .wrapper-header {
+    padding: 16px 16px;
+  }
+  }
+
+
 
   .section-lg {
     padding-block: var(--section-y-lg);
@@ -493,35 +484,25 @@
 
   .section-dark {
     background: var(--dark);
-    color: var(--dark-foreground);
   }
 
   .section-accent {
     background: var(--accent);
-    color: var(--accent-foreground);
   }
 
   .section-muted {
     background: var(--muted);
-    color: var(--muted-foreground);
   }
 
-  .container-page,
-  .container-section,
-  .container-content,
-  .container-text,
-  .container-blog,
-  .container-onboarding {
-    width: calc(100% - calc(var(--page-x) * 2));
-    margin-inline: auto;
-  }
+
 
   .container-page {
     max-width: var(--container-page);
   }
 
   .container-section {
-    max-width: var(--container-section);
+    max-width: 1280px;
+    margin: auto;
   }
 
   .container-content {
@@ -542,10 +523,6 @@
 
   .max-w-page {
     max-width: var(--container-page);
-  }
-
-  .max-w-section {
-    max-width: var(--container-section);
   }
 
   .max-w-content {
@@ -569,7 +546,6 @@
 @layer components {
   .card {
     background: var(--card);
-    color: var(--card-foreground);
     border: var(--border-solid);
     border-radius: var(--card-radius);
     padding: var(--card-padding);
@@ -598,13 +574,11 @@
 
   .card-muted {
     background: var(--muted);
-    color: var(--muted-foreground);
     border: var(--border-solid);
   }
 
   .card-dark {
     background: var(--dark);
-    color: var(--dark-foreground);
     border: var(--border-width-thin) solid var(--dark-foreground);
   }
 
@@ -745,6 +719,12 @@
     background: var(--brand-green-navy);
     color: var(--brand-base);
     border-color: var(--brand-green-navy);
+  }
+
+  .badge-surface {
+    background: var(--brand-surface);
+    color: var(--brand-black);
+    border-color: var(--brand-surface);
   }
 
   .pill {

@@ -32,7 +32,7 @@ export default async function LoginPage() {
               />
             </Link>
             <h1 className="type-h2 text-foreground text-center">{t("title")}</h1>
-            <p className="type-s text-muted-foreground text-center">
+            <p className="type-s text-black text-center">
               {t("subtitle")}
             </p>
           </div>
@@ -47,7 +47,7 @@ export default async function LoginPage() {
             <LoginForm />
           </Suspense>
 
-          <p className="text-center type-s text-muted-foreground">
+          <p className="text-center type-s text-black">
             {t("noAccount")}{" "}
             <Link href={signupHref} className="text-foreground font-medium hover:underline">
               {t("signUp")}

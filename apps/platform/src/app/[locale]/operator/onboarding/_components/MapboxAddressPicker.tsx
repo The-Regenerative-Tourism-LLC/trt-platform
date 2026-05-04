@@ -203,7 +203,7 @@ export function MapboxAddressPicker({
                 onMouseDown={() => handleSelect(f)}
                 className="w-full text-left px-4 py-3 text-sm hover:bg-muted transition-colors border-b border-border/30 last:border-0 flex items-start gap-2"
               >
-                <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-muted-foreground" />
+                <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5 text-black" />
                 <span>{f.place_name}</span>
               </button>
             ))}

@@ -92,20 +92,20 @@ export default async function SdgsPage() {
 
           {/* Badge + heading */}
           <div className="space-y-6 mb-14">
-            <span className="inline-flex items-center border border-border rounded-full px-3 py-1 text-xs text-muted-foreground">
+            <span className="inline-flex items-center border border-border rounded-full px-3 py-1 text-xs text-black">
               {t("badge")}
             </span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-[1.05]">
               {t("title")}
             </h1>
-            <p className="text-base text-muted-foreground leading-relaxed">
+            <p className="text-base text-black leading-relaxed">
               {t("subtitle")}
             </p>
           </div>
 
           {/* Research quote */}
           <div className="rounded-2xl border border-border bg-card px-6 md:px-8 py-6 mb-6">
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-black leading-relaxed">
               Lavaredas et al. (2025) confirm in their bibliometric review of tourism SDG research
               (2015–2023) that SDG 8, SDG 12, and SDG 17 are the three most cited SDGs in tourism
               scholarship — validating the priority weighting of Local Integration and Regenerative
@@ -128,14 +128,14 @@ export default async function SdgsPage() {
                 <div className="space-y-1.5 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-sm">{sdg.title}</p>
-                    <span className="text-[10px] border border-border rounded-full px-2 py-0.5 text-muted-foreground">
+                    <span className="text-[10px] border border-border rounded-full px-2 py-0.5 text-black">
                       {sdg.target}
                     </span>
-                    <span className="text-[10px] border border-border rounded-full px-2 py-0.5 text-muted-foreground">
+                    <span className="text-[10px] border border-border rounded-full px-2 py-0.5 text-black">
                       {sdg.pillar}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{sdg.desc}</p>
+                  <p className="text-sm text-black leading-relaxed">{sdg.desc}</p>
                 </div>
               </div>
             ))}
@@ -147,13 +147,13 @@ export default async function SdgsPage() {
               href="https://sdgs.un.org/goals"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 text-black hover:text-foreground transition-colors"
             >
               {t("visit")} <ExternalLink className="w-3.5 h-3.5" />
             </a>
             <Link
               href={methodologyHref}
-              className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 text-black hover:text-foreground transition-colors"
             >
               {t("fullMethodology")}
             </Link>

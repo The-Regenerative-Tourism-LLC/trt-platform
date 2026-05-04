@@ -87,18 +87,18 @@ export default function TravelerWaitlistPage() {
       {/* ═══ 2. WHAT YOU CAN DO TODAY ═══ */}
       <section className="section">
         <div className="container-section">
-          <p className="type-label text-muted-foreground italic mb-3">
+          <p className="type-label text-black italic mb-3">
             Available now
           </p>
           <h2 className="type-h2 mb-3">What you can do today</h2>
-          <p className="type-s text-muted-foreground max-w-md mb-10">
+          <p className="type-s text-black max-w-md mb-10">
             While the full traveler experience is being built, you can already
             explore what&apos;s on the map.
           </p>
           <div className="grid md:grid-cols-2 gap-4 max-w-3xl">
             <div className="card flex flex-col gap-4">
               <h3 className="type-m font-semibold">Browse destinations</h3>
-              <p className="type-s text-muted-foreground flex-1">
+              <p className="type-s text-black flex-1">
                 See the Destination Pressure Index for Madeira and upcoming
                 territories.
               </p>
@@ -111,7 +111,7 @@ export default function TravelerWaitlistPage() {
             </div>
             <div className="card flex flex-col gap-4">
               <h3 className="type-m font-semibold">Discover operators</h3>
-              <p className="type-s text-muted-foreground flex-1">
+              <p className="type-s text-black flex-1">
                 See verified Green Passport Scores for operators already in the
                 program.
               </p>
