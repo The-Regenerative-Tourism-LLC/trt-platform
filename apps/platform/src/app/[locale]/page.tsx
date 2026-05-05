@@ -190,48 +190,84 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ 2. WHAT IS GENERANT? ═══ */}
-      <section className="section section-dark">
+      {/* ═══ 2. SEE WHAT TOURISM ACTUALLY DOES ═══ */}
+      <section className="section border-t border-border overflow-hidden">
         <div className="container-section">
-          <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 md:gap-16 items-center">
-            <div className="reveal">
-              <p className="type-label text-pink italic mb-4">{t("whatIsGenerant.label")}</p>
-              <h2 className="type-h2 text-dark-foreground mb-6">{t("whatIsGenerant.heading")}</h2>
-              <p className="type-m text-dark-foreground/70 mb-8">{t("whatIsGenerant.body")}</p>
-              <ul className="space-y-3 mb-10">
-                {([
-                  t("whatIsGenerant.item1"),
-                  t("whatIsGenerant.item2"),
-                  t("whatIsGenerant.item3"),
-                  t("whatIsGenerant.item4"),
-                ] as string[]).map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="shrink-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center mt-0.5">
-                      <Check className="w-3 h-3 text-accent-foreground" />
-                    </span>
-                    <span className="type-s text-dark-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/signup" className="btn btn-primary">
-                {t("whatIsGenerant.cta")}
-              </Link>
+          <div className="grid md:grid-cols-2 gap-16 md:gap-20 items-center">
+
+            {/* Left: Impact card mockup */}
+            <div className="relative min-h-[520px] reveal">
+              {/* Background image */}
+              <div className="relative overflow-hidden rounded-xl aspect-[4/3]">
+                <Image
+                  src="/assets/editorial-madeira-coast.jpg"
+                  alt="Madeira landscape"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/50 via-black/20 to-transparent" />
+              </div>
+
+              {/* Meet Filippa – polaroid card */}
+              <div className="absolute bottom-8 left-0 bg-white shadow-xl p-3 rotate-[-4deg] w-[148px] z-10">
+                <div className="relative w-full aspect-square overflow-hidden mb-2">
+                  <Image
+                    src="/assets/operator-portrait.jpg"
+                    alt={t("seeWhatTourism.card.personName")}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-[11px] font-bold text-foreground leading-tight">{t("seeWhatTourism.card.personName")}</p>
+                <p className="text-[10px] text-black leading-tight">{t("seeWhatTourism.card.personRole")}</p>
+                <span className="badge badge-lime mt-2 text-[9px]">Generant ✓</span>
+              </div>
+
+              {/* Your Impact card */}
+              <div className="absolute -bottom-6 right-0 md:-right-8 bg-white border border-border rounded-xl shadow-xl p-5 w-[268px] z-20">
+                <p className="type-h5 text-foreground mb-1">{t("seeWhatTourism.card.title")}</p>
+                <p className="text-[11px] text-black mb-3 leading-snug">
+                  {t("seeWhatTourism.card.subtitle")}{" "}
+                  <span className="inline-flex items-center gap-1">
+                    <span className="badge badge-surface text-[10px] px-1.5 py-0.5">{t("seeWhatTourism.card.people")}</span>
+                    <span className="badge badge-surface text-[10px] px-1.5 py-0.5">{t("seeWhatTourism.card.place")}</span>
+                    <span className="badge badge-surface text-[10px] px-1.5 py-0.5">{t("seeWhatTourism.card.nights")}</span>
+                  </span>
+                </p>
+
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="type-s font-bold text-foreground tabular-nums">10.4 kgCO₂</span>
+                    <span className="badge badge-surface text-[10px] px-1.5 py-0.5 shrink-0">{t("seeWhatTourism.card.pillar1")}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="type-s font-bold text-foreground tabular-nums">€598</span>
+                    <span className="badge badge-surface text-[10px] px-1.5 py-0.5 shrink-0">{t("seeWhatTourism.card.pillar2")}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="type-s font-bold text-foreground tabular-nums">1 Programme</span>
+                    <span className="badge badge-surface text-[10px] px-1.5 py-0.5 shrink-0">{t("seeWhatTourism.card.pillar3")}</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-border space-y-1">
+                  <p className="text-[11px] text-black">✦ {t("seeWhatTourism.card.extra1")}</p>
+                  <p className="text-[11px] text-black">✦ {t("seeWhatTourism.card.extra2")}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="reveal">
-              <div className="overflow-hidden aspect-[3/4] max-h-[480px]">
-                <Image
-                  src="/assets/madeira-nature.jpg"
-                  alt="Mountain stream and wildflowers in Madeira"
-                  width={600}
-                  height={800}
-                  className="w-full h-full object-cover"
-                />
+            {/* Right: Text content */}
+            <div className="reveal md:pl-4">
+              <p className="type-label text-black italic mb-6 uppercase tracking-widest">{t("seeWhatTourism.label")}</p>
+              <h2 className="type-h2 text-foreground mb-6">{t("seeWhatTourism.heading")}</h2>
+              <p className="type-m text-black mb-10">{t("seeWhatTourism.body")}</p>
+              <div className="flex flex-wrap gap-3">
+                <Link href="/discover" className="btn btn-primary">{t("seeWhatTourism.cta1")}</Link>
+                <Link href="/signup" className="btn btn-dark">{t("seeWhatTourism.cta2")}</Link>
               </div>
-              <p className="type-s text-dark-foreground/50 italic text-right mt-3">
-                {t("manifesto.imageCaption")}
-              </p>
             </div>
+
           </div>
         </div>
       </section>

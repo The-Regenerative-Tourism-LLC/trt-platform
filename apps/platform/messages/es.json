@@ -156,15 +156,26 @@
       "experience": "Experiencia Regenerativa",
       "stay": "Alojamiento"
     },
-    "whatIsGenerant": {
-      "label": "Sobre la plataforma",
-      "heading": "¿Qué es Generant?",
-      "body": "La Marca Generant es lo que los operadores obtienen cuando su impacto es verificado de forma independiente — una puntuación en vivo en tres pilares medibles, actualizada cada ciclo y visible para los viajeros en el momento de la reserva.",
-      "item1": "Evaluado de forma independiente de 0 a 100",
-      "item2": "Medido en Huella, Raíces y Regeneración",
-      "item3": "Actualizado cada ciclo — no una auditoría única",
-      "item4": "Visible para los viajeros en el momento de la reserva",
-      "cta": "Sé un Generant"
+    "seeWhatTourism": {
+      "label": "Para viajeros y operadores",
+      "heading": "Mira lo que el turismo realmente hace.",
+      "body": "La mayoría de las plataformas te dicen adónde ir, o te clasifican con estrellas. Generant muestra lo que realmente sucede — con la tierra, las personas, los negocios locales y las comunidades por las que pasa el turismo.",
+      "cta1": "Encuentra tu próximo viaje",
+      "cta2": "Obtén tu Marca",
+      "card": {
+        "title": "Tu Impacto",
+        "subtitle": "Este es el impacto de tu estancia para:",
+        "people": "2 personas",
+        "place": "Quinta Alegre",
+        "nights": "3 noches",
+        "pillar1": "Pilar 1: Huella",
+        "pillar2": "Pilar 2: Raíces",
+        "pillar3": "Pilar 3: Regeneración",
+        "extra1": "+ 600L de agua conservada",
+        "extra2": "Ingresos directos a pequeños productores de Madeira",
+        "personName": "Conoce a Filippa",
+        "personRole": "Anfitriona, Quinta Alegre"
+      }
     },
     "builtOnReal": {
       "heading": "Construido sobre lo que es real."

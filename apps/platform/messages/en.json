@@ -53,7 +53,7 @@
       "actuallyDoes": "actually does.",
       "cta": "Be a Generant",
       "mark": "The Generant Mark — Footprint · Roots · Regeneration",
-      "heading": "Tourism leaves a mark.\nWe help you make it a good one.",
+      "heading": "Travelers who care, meet the operators who prove it.",
       "body": "We're building something that's never existed in tourism — a live impact layer that tells what tourism does to places, people and communities.\n\nFor operators ready to measure and improve — a way to be found by travelers who care. For travelers — a way to make every trip count.",
       "ctaTravelers": "For travelers"
     },
@@ -156,15 +156,26 @@
       "experience": "Regenerative Experience",
       "stay": "Stay"
     },
-    "whatIsGenerant": {
-      "label": "About the platform",
-      "heading": "What is Generant?",
-      "body": "The Generant Mark is what operators earn when their impact is independently verified — a live score across three measurable pillars, updated each cycle and visible to travelers at the moment of booking.",
-      "item1": "Independently assessed from 0 to 100",
-      "item2": "Measured across Footprint, Roots, and Regeneration",
-      "item3": "Updated each cycle — not a one-time audit",
-      "item4": "Visible to travelers at the moment of booking",
-      "cta": "Be a Generant"
+    "seeWhatTourism": {
+      "label": "For travelers and operators",
+      "heading": "See what tourism actually does.",
+      "body": "Most platforms tell you where to go, or rank you by stars. Generant shows what actually happens — to the land, the people, the local businesses, and the communities that tourism runs through.",
+      "cta1": "Find your next trip",
+      "cta2": "Get your Mark",
+      "card": {
+        "title": "Your Impact",
+        "subtitle": "Here's the impact of your stay for:",
+        "people": "2 people",
+        "place": "Quinta Alegre",
+        "nights": "3 nights",
+        "pillar1": "Pillar 1: Footprint",
+        "pillar2": "Pillar 2: Roots",
+        "pillar3": "Pillar 3: Regeneration",
+        "extra1": "+ 600L water conserved",
+        "extra2": "Direct revenue to small-scale Madeira producers",
+        "personName": "Meet Filippa",
+        "personRole": "Host, Quinta Alegre"
+      }
     },
     "builtOnReal": {
       "heading": "Built on what's real."
