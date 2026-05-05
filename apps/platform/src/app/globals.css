@@ -22,6 +22,7 @@
   --brand-lime: #E3FD52;
   --brand-green: #369B79;
   --brand-blue: #3E82ED;
+  --brand-blue-50-transparency: #3e81ed77;
   --brand-black: #000000;
   --brand-surface: #E8E7E0;
 
@@ -269,6 +270,7 @@
   --color-lime: var(--brand-lime);
   --color-green: var(--brand-green);
   --color-blue: var(--brand-blue);
+  --color-blue-50-transparency: var(--brand-blue-50-transparency);
   --color-black: var(--brand-black);
 
   --font-sans: var(--font-brand);

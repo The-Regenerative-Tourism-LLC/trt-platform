@@ -213,16 +213,23 @@ export default function LandingPage() {
       <Navbar />
 
       {/* ═══ 1. HERO ═══ */}
-      <section className="pb-0 bg-background ">
+      <section className="pb-0 bg-background">
         {/* Heading + description + CTA */}
-        <div className="section">
+        <div className="section flex flex-col w-full gap-[64px]">
+          <div className="flex justify-between">
+            <div><p className="type-xl text-blue-50-transparency">[ 32.7607° N, 16.9595° W ]</p></div>
+            <div><p className="type-xl text-blue-50-transparency">[ 32.7607° N, 16.9595° W ]</p></div>
+          </div>
         <div className="container-section">
-          <div className=" max-w-[950px] m-auto flex flex-col items-center justify-center gap-[20px]">
+          <div className="max-w-[950px] m-auto flex flex-col items-center justify-center gap-[20px]">
+            <div className="flex flex-col justify-center items-center gap-[16px]">
+              <p className="type-m text-blue">The Generant Mark — Footprint · Roots · Regeneration</p>
              <h1 className="type-h1 text-center">
             Tourism leaves a mark.{" "}
             <br />
             We help you make it a good one.
           </h1>
+            </div>
           <p className="type-m text-center max-w-[552px]">
             A score from 0 to 100 — independently assessed across Footprint,
             Roots, and Regeneration. For travelers who choose by what&apos;s
@@ -238,10 +245,9 @@ export default function LandingPage() {
 
         {/* Horizontal activity card strip */}
         <div className="">
-        <div className=" overflow-x-auto scrollbar-none">
+        <div className="overflow-x-auto scrollbar-none">
           <div
             className="flex gap-3 pb-4"
-            style={{ paddingInline: "var(--page-x)" }}
           >
             {PLACEHOLDER_ACTIVITIES.map((a) => (
               <ActivityCard key={a.id} {...a} />
