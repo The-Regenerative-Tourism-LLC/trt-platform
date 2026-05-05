@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Leaf } from "lucide-react";
+import { Leaf, Check } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { LookbookCta } from "@/components/sections/LookbookCta";
 
 export const metadata: Metadata = {
   title: "The Regenerative Tourism",
 };
-
-// ── Hero: placeholder activity cards ──────────────────────────────────────────
 
 const ACCENT_BG: Record<string, string> = {
   lime: "bg-accent",
@@ -20,116 +18,53 @@ const ACCENT_BG: Record<string, string> = {
 };
 
 const PLACEHOLDER_ACTIVITIES = [
-  {
-    id: 1,
-    title: "Levada da Caldeirão Verde",
-    location: "Santana, Madeira",
-    gps: 82,
-    image: "/assets/editorial-levada-trail.jpg",
-    accent: "lime",
-  },
-  {
-    id: 2,
-    title: "Madeira Embroidery Workshop",
-    location: "Funchal, Madeira",
-    gps: 74,
-    image: "/assets/editorial-craft-workshop.jpg",
-    accent: "blue",
-  },
-  {
-    id: 3,
-    title: "Story of Passion Fruit in Madeira",
-    location: "Madeira, Portugal",
-    gps: 68,
-    image: "/assets/editorial-local-hands.jpg",
-    accent: "green",
-  },
-  {
-    id: 4,
-    title: "Eco-Friendly Private Tours",
-    location: "Madeira, Portugal",
-    gps: 79,
-    image: "/assets/editorial-nature-tour.jpg",
-    accent: "blue",
-  },
-  {
-    id: 5,
-    title: "Porto Santo Eco Hostel",
-    location: "Porto Santo",
-    gps: 61,
-    image: "/assets/stay-pontadosol-madeira.jpg",
-    accent: "pink",
-    comingSoon: true,
-  },
-  {
-    id: 6,
-    title: "Quinta Rural Stay",
-    location: "Madeira, Portugal",
-    gps: 85,
-    image: "/assets/stay-rural-madeira.jpg",
-    accent: "lime",
-  },
-  {
-    id: 7,
-    title: "Marine Research Expedition",
-    location: "Madeira, Portugal",
-    gps: 91,
-    image: "/assets/editorial-marine-research.jpg",
-    accent: "blue",
-  },
+  { id: 1, title: "Levada da Caldeirão Verde",     location: "Santana, Madeira",   gps: 82, image: "/assets/editorial-levada-trail.jpg",    accent: "lime",  type: "experience" as const },
+  { id: 2, title: "Madeira Embroidery Workshop",   location: "Funchal, Madeira",   gps: 74, image: "/assets/editorial-craft-workshop.jpg",  accent: "blue",  type: "experience" as const },
+  { id: 3, title: "Story of Passion Fruit in Madeira", location: "Madeira, Portugal", gps: 68, image: "/assets/editorial-local-hands.jpg", accent: "green", type: "experience" as const },
+  { id: 4, title: "Eco-Friendly Private Tours",    location: "Madeira, Portugal",  gps: 79, image: "/assets/editorial-nature-tour.jpg",    accent: "blue",  type: "experience" as const },
+  { id: 5, title: "Porto Santo Eco Hostel",        location: "Porto Santo",        gps: 61, image: "/assets/stay-pontadosol-madeira.jpg",  accent: "pink",  type: "stay"       as const, comingSoon: true },
+  { id: 6, title: "Quinta Rural Stay",             location: "Madeira, Portugal",  gps: 85, image: "/assets/stay-rural-madeira.jpg",       accent: "lime",  type: "stay"       as const },
+  { id: 7, title: "Marine Research Expedition",    location: "Madeira, Portugal",  gps: 91, image: "/assets/editorial-marine-research.jpg",accent: "blue",  type: "experience" as const },
 ];
 
-function ActivityCard({
-  title,
-  location,
-  gps,
-  image,
-  accent,
-  comingSoon,
-}: {
-  title: string;
-  location: string;
-  gps: number;
-  image: string;
-  accent: string;
-  comingSoon?: boolean;
+function ActivityCard({ title, image, comingSoon, type, typeLabel }: {
+  title: string; location: string; gps: number; image: string; accent: string;
+  comingSoon?: boolean; type: "experience" | "stay"; typeLabel: string;
 }) {
   return (
-    <div className="relative shrink-0 w-[200px] aspect-[3/4] overflow-hidden rounded-lg">
-      <Image src={image} alt={title} fill className="object-cover" sizes="200px" />
+    <div className="relative shrink-0 w-[288px] aspect-[3/4] overflow-hidden  flex flex-col justify-between">
+  <Image
+    src={image}
+    alt={title}
+    fill
+    className="object-cover z-0"
+    sizes="288px"
+  />
+<div className="relative p-[16px] z-10 flex flex-col justify-between h-full  bg-black/20">
+<p className="  type-h5 text-base">
+    {title}
+  </p>
+  <div>
+    <span
+      className={`badge type-badge mt-2 ${
+        type === "experience" ? "badge-lime" : "badge-green"
+      }`}
+    >
+      {typeLabel}
+    </span>
+  </div>
+</div>
+  
 
-      {/* Colored top accent */}
-      <div className={`absolute top-0 left-0 right-0 h-1 ${ACCENT_BG[accent] ?? "bg-primary"}`} />
+  {/* {comingSoon && <span className="relative z-10 badge badge-grey">Soon</span>} */}
 
-      {/* GPS score badge */}
-      <span className="badge badge-lime absolute top-3 left-3">{gps}</span>
-
-      {/* "Soon" badge */}
-      {comingSoon && (
-        <span className="badge badge-dark absolute top-3 right-3">Soon</span>
-      )}
-
-      {/* Title gradient overlay */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 pt-10">
-        <p className="type-xs font-semibold text-dark-foreground leading-snug">{title}</p>
-        <p className="type-xs text-dark-foreground mt-0.5">{location}</p>
-      </div>
-    </div>
+  
+</div>
   );
 }
 
-function ScoreRings({
-  fp,
-  lc,
-  rg,
-  total,
-  size = 120,
-}: {
-  fp: number;
-  lc: number;
-  rg: number;
-  total: number;
-  size?: number;
+function ScoreRings({ fp, lc, rg, total, size = 120 }: {
+  fp: number; lc: number; rg: number; total: number; size?: number;
 }) {
   const cx = size / 2;
   const cy = size / 2;
@@ -142,71 +77,54 @@ function ScoreRings({
     return `${(v / 100) * c} ${c}`;
   };
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      style={{ transform: "rotate(-90deg)" }}
-    >
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: "rotate(-90deg)" }}>
       <circle cx={cx} cy={cy} r={r1} fill="none" style={{ stroke: "var(--brand-pink)" }} strokeWidth={sw} />
       <circle cx={cx} cy={cy} r={r2} fill="none" style={{ stroke: "var(--brand-pink)" }} strokeWidth={sw} />
       <circle cx={cx} cy={cy} r={r3} fill="none" style={{ stroke: "var(--brand-pink)" }} strokeWidth={sw} />
       <circle cx={cx} cy={cy} r={r1} fill="none" style={{ stroke: "var(--brand-green)" }} strokeWidth={sw} strokeDasharray={dash(r1, fp)} strokeLinecap="round" />
       <circle cx={cx} cy={cy} r={r2} fill="none" style={{ stroke: "var(--brand-blue)" }} strokeWidth={sw} strokeDasharray={dash(r2, lc)} strokeLinecap="round" />
       <circle cx={cx} cy={cy} r={r3} fill="none" style={{ stroke: "var(--brand-lime)" }} strokeWidth={sw} strokeDasharray={dash(r3, rg)} strokeLinecap="round" />
-      <text
-        x={cx}
-        y={cy}
-        textAnchor="middle"
-        dominantBaseline="central"
-        transform={`rotate(90,${cx},${cy})`}
-        fontSize={size * 0.22}
-        fontWeight="700"
-        fill="currentColor"
-      >
+      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" transform={`rotate(90,${cx},${cy})`} fontSize={size * 0.22} fontWeight="700" fill="currentColor">
         {total}
       </text>
     </svg>
   );
 }
 
-const FAQ_ITEMS = [
-  {
-    question: "What is The Regenerative Tourism platform?",
-    answer:
-      "A verification layer for tourism. We measure and make visible the real environmental and social impact of operators — at the moment of booking.",
-  },
-  {
-    question: "What is the Green Passport?",
-    answer:
-      "Your verified impact identity as a tourism operator. A score from 0 to 100 across three pillars, updated each cycle, visible to travelers when they book.",
-  },
-  {
-    question: "How is this different from sustainability certifications?",
-    answer:
-      "Most certifications are static and hard to compare. We use a dynamic scoring system designed to be visible, transparent, and continuously updated.",
-  },
-  {
-    question: "How does the verification process work?",
-    answer:
-      "Operators complete an assessment, submit supporting data, and receive a verified score. The process is structured, but designed to be simple.",
-  },
-  {
-    question: "What if my score is low?",
-    answer:
-      "That's a starting point. We provide Insights and guidance to help improve over time. The goal is progress — not perfection.",
-  },
-  {
-    question: "How can I join?",
-    answer:
-      "You can apply to be part of the founding cohort or start the free assessment to understand your impact.",
-  },
-];
+export default async function LandingPage() {
+  const t = await getTranslations("home");
+  const tCommon = await getTranslations("common");
+  const tPricing = await getTranslations("public.pricing");
 
-export default function LandingPage() {
-  const mid = Math.ceil(FAQ_ITEMS.length / 2);
-  const faqLeft = FAQ_ITEMS.slice(0, mid);
-  const faqRight = FAQ_ITEMS.slice(mid);
+  const activityLabels = {
+    experience: t("activityType.experience"),
+    stay: t("activityType.stay"),
+  };
+
+  const faqItems = [
+    { question: t("faq.items.whatIs.question"), answer: t("faq.items.whatIs.answer") },
+    { question: t("faq.items.greenPassport.question"), answer: t("faq.items.greenPassport.answer") },
+    { question: t("faq.items.different.question"), answer: t("faq.items.different.answer") },
+    { question: t("faq.items.verification.question"), answer: t("faq.items.verification.answer") },
+    { question: t("faq.items.lowScore.question"), answer: t("faq.items.lowScore.answer") },
+    { question: t("faq.items.join.question"), answer: t("faq.items.join.answer") },
+  ];
+
+  const mid = Math.ceil(faqItems.length / 2);
+  const faqLeft = faqItems.slice(0, mid);
+  const faqRight = faqItems.slice(mid);
+
+  const pillars = [
+    { title: t("meetTheScore.pillars.footprint.title"), desc: t("meetTheScore.pillars.footprint.desc") },
+    { title: t("meetTheScore.pillars.local.title"), desc: t("meetTheScore.pillars.local.desc") },
+    { title: t("meetTheScore.pillars.regen.title"), desc: t("meetTheScore.pillars.regen.desc") },
+  ];
+
+  const steps = [
+    { num: t("howItWorks.steps.assessment.num"), title: t("howItWorks.steps.assessment.title"), desc: t("howItWorks.steps.assessment.desc") },
+    { num: t("howItWorks.steps.verify.num"), title: t("howItWorks.steps.verify.title"), desc: t("howItWorks.steps.verify.desc") },
+    { num: t("howItWorks.steps.live.num"), title: t("howItWorks.steps.live.title"), desc: t("howItWorks.steps.live.desc") },
+  ];
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -214,149 +132,93 @@ export default function LandingPage() {
 
       {/* ═══ 1. HERO ═══ */}
       <section className="pb-0 bg-background">
-        {/* Heading + description + CTA */}
         <div className="section flex flex-col w-full gap-[64px]">
-          <div className="flex justify-between">
+          <div className="container-section w-full flex justify-between">
             <div><p className="type-xl text-blue-50-transparency">[ 32.7607° N, 16.9595° W ]</p></div>
             <div><p className="type-xl text-blue-50-transparency">[ 32.7607° N, 16.9595° W ]</p></div>
           </div>
-        <div className="container-section">
-          <div className="max-w-[950px] m-auto flex flex-col items-center justify-center gap-[20px]">
-            <div className="flex flex-col justify-center items-center gap-[16px]">
-              <p className="type-m text-blue">The Generant Mark — Footprint · Roots · Regeneration</p>
-             <h1 className="type-h1 text-center">
-            Tourism leaves a mark.{" "}
-            <br />
-            We help you make it a good one.
-          </h1>
+          <div className="container-section">
+            <div className="max-w-[950px] m-auto flex flex-col items-center justify-center gap-[20px]">
+              <div className="flex flex-col justify-center items-center gap-[16px]">
+                <p className="type-m text-blue">{t("hero.mark")}</p>
+                <h1 className="type-h1 text-center whitespace-pre-line">
+                  {t("hero.heading")}
+                </h1>
+              </div>
+              <p className="type-m text-center max-w-[552px]">
+                {t("hero.bodyShort")}
+              </p>
+              <Link href="/signup" className="btn btn-primary">
+                {tCommon("joinAsOperator")}
+              </Link>
             </div>
-          <p className="type-m text-center max-w-[552px]">
-            A score from 0 to 100 — independently assessed across Footprint,
-            Roots, and Regeneration. For travelers who choose by what&apos;s
-            next. For operators who do the work.
-          </p>
-            <Link href="/signup" className="btn btn-primary">
-              Join as operator
-            </Link>
           </div>
-         
-        </div>
         </div>
 
-        {/* Horizontal activity card strip */}
+        {/* Activity cards strip */}
         <div className="">
-        <div className="overflow-x-auto scrollbar-none">
-          <div
-            className="flex gap-3 pb-4"
-          >
-            {PLACEHOLDER_ACTIVITIES.map((a) => (
-              <ActivityCard key={a.id} {...a} />
-            ))}
+          <div className="overflow-x-auto scrollbar-none">
+            <div className="flex gap-3 pb-4">
+              {PLACEHOLDER_ACTIVITIES.map((a) => (
+                <ActivityCard key={a.id} {...a} typeLabel={activityLabels[a.type]} />
+              ))}
+            </div>
           </div>
-        </div>
         </div>
 
         {/* Featured in */}
         <div className="section">
-        <div className="container-section border-t border-border mt-8 pt-6 pb-[var(--section-y)]">
-          <div className="flex items-center gap-8 flex-wrap">
-            <span className="type-label text-black shrink-0">
-              Featured in
-            </span>
-            <a
-              href="https://retreat.startupmadeira.eu/finalists-2026/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 shrink-0"
-            >
-              <Image
-                src="/assets/madeira-startup-retreat.png"
-                alt="Madeira Startup Retreat"
-                width={100}
-                height={32}
-                className="h-8 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
-              />
-              <span className="type-label text-black">Cohort 2026</span>
-            </a>
-            <div className="w-px h-4 shrink-0 bg-border" />
-            <a
-              href="https://www.clarin.com/viajes/viajar-cuidar-destino-innovador-proyecto-jovenes-argentinos-brasileno-llego-europa_0_fexstVhMcf.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0"
-            >
-              <Image
-                src="/assets/clarin-logo.svg"
-                alt="Clarín"
-                width={70}
-                height={28}
-                className="h-7 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
-              />
-            </a>
-            <div className="w-px h-4 shrink-0 bg-border" />
-            <a
-              href="https://www.canal12misiones.com/noticias-de-misiones/turismo/misioneros-finalistas-concurso-portugal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0"
-            >
-              <Image
-                src="/assets/canal12-logo.png"
-                alt="Canal 12 Misiones"
-                width={100}
-                height={32}
-                className="h-8 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
-              />
-            </a>
-            <div className="w-px h-4 shrink-0 bg-border" />
-            <a
-              href="https://www.instagram.com/reel/DUGuXlpjtDp/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0"
-            >
-              <Image
-                src="/assets/silicon-misiones-logo.png"
-                alt="Silicon Misiones"
-                width={80}
-                height={28}
-                className="h-7 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all"
-              />
-            </a>
+          <div className="container-section pt-6 pb-6">
+            <div className="flex items-center justify-center gap-10 flex-wrap">
+              <span className="type-label text-black shrink-0">Featured in</span>
+              {/* Área alvo: 3600px² — cada logo redimensionado proporcionalmente */}
+              <a href="https://retreat.startupmadeira.eu/finalists-2026/" target="_blank" rel="noopener noreferrer" className="shrink-0 flex items-center gap-2">
+                <Image src="/assets/madeira-startup-retreat.png" alt="Madeira Startup Retreat" width={106} height={34} className="object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
+                <span className="type-label text-black">Cohort 2026</span>
+              </a>
+              <a href="https://www.clarin.com/viajes/viajar-cuidar-destino-innovador-proyecto-jovenes-argentinos-brasileno-llego-europa_0_fexstVhMcf.html" target="_blank" rel="noopener noreferrer" className="shrink-0">
+                <Image src="/assets/clarin-logo.svg" alt="Clarín" width={95} height={38} className="object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
+              </a>
+              <a href="https://www.canal12misiones.com/noticias-de-misiones/turismo/misioneros-finalistas-concurso-portugal" target="_blank" rel="noopener noreferrer" className="shrink-0">
+                <Image src="/assets/canal12-logo.png" alt="Canal 12 Misiones" width={106} height={34} className="object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
+              </a>
+              <a href="https://www.instagram.com/reel/DUGuXlpjtDp/" target="_blank" rel="noopener noreferrer" className="shrink-0">
+                <Image src="/assets/silicon-misiones-logo.png" alt="Silicon Misiones" width={101} height={36} className="object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all" />
+              </a>
+            </div>
           </div>
-        </div>
         </div>
       </section>
 
-      {/* ═══ 3. MANIFESTO ═══ */}
-      <section className="section">
+      {/* ═══ 2. WHAT IS GENERANT? ═══ */}
+      <section className="section section-dark">
         <div className="container-section">
-          <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 md:gap-16 items-end">
+          <div className="grid md:grid-cols-[1.1fr_0.9fr] gap-10 md:gap-16 items-center">
             <div className="reveal">
-              <h2 className="type-h2 text-foreground">
-                There will be no tourism industry on a dead planet.
-                <span className="block mt-1 text-black">
-                  We keep talking about sustainable travel while the places we
-                  love quietly disappear. The problem isn&apos;t that travelers
-                  don&apos;t care. The problem is that caring has never been
-                  enough.
-                </span>
-              </h2>
-              <p className="type-m text-black mt-10">
-                You can want to do the right thing and still have no way to know
-                if you are. You can be an operator doing everything right — and
-                still lose to someone who isn&apos;t. Because the system
-                wasn&apos;t built to tell the difference. We&apos;re building
-                that system.
-              </p>
-              <div className="mt-8">
-                <Link href="/signup" className="btn btn-dark">
-                  Join us
-                </Link>
-              </div>
+              <p className="type-label text-pink italic mb-4">{t("whatIsGenerant.label")}</p>
+              <h2 className="type-h2 text-dark-foreground mb-6">{t("whatIsGenerant.heading")}</h2>
+              <p className="type-m text-dark-foreground/70 mb-8">{t("whatIsGenerant.body")}</p>
+              <ul className="space-y-3 mb-10">
+                {([
+                  t("whatIsGenerant.item1"),
+                  t("whatIsGenerant.item2"),
+                  t("whatIsGenerant.item3"),
+                  t("whatIsGenerant.item4"),
+                ] as string[]).map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="shrink-0 w-5 h-5 rounded-full bg-accent flex items-center justify-center mt-0.5">
+                      <Check className="w-3 h-3 text-accent-foreground" />
+                    </span>
+                    <span className="type-s text-dark-foreground">{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="btn btn-primary">
+                {t("whatIsGenerant.cta")}
+              </Link>
             </div>
 
-            <div className="space-y-4 reveal">
+            <div className="reveal">
               <div className="overflow-hidden aspect-[3/4] max-h-[480px]">
                 <Image
                   src="/assets/madeira-nature.jpg"
@@ -366,235 +228,72 @@ export default function LandingPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="type-s text-black italic text-right">
-                2026 — We start here in Madeira
+              <p className="type-s text-dark-foreground/50 italic text-right mt-3">
+                {t("manifesto.imageCaption")}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ 4. FOUNDING COHORT ═══ */}
-      <section className="section section-dark relative overflow-hidden">
-        <Image
-          src="/assets/madeira-map.svg"
-          alt=""
-          fill
-          className="object-contain pointer-events-none"
-          style={{ objectPosition: "center 60%", opacity: 0.15 }}
-          aria-hidden="true"
-        />
-        <div className="relative container-section text-center">
-          <div className="reveal">
-            <p className="type-label text-pink italic">
-              Founding cohort · Madeira 2026
-            </p>
-            <h2 className="type-h1 text-dark-foreground mt-4 max-w-text mx-auto">
-              30 operators.
-              <br />
-              One island.
-              <br />
-              The first regenerative map
-              <br />
-              in tourism history.
-            </h2>
-            <div className="mt-8">
-              <Link href="/signup" className="btn btn-primary">
-                Join us
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 5. EXPERIENCE PREVIEW ═══ */}
+      {/* ═══ 3. BUILT ON WHAT'S REAL ═══ */}
       <section className="section border-t border-border">
         <div className="container-section">
-          <div className="text-center reveal">
-            <p className="type-label text-black italic">
-              Coming soon — Off the beaten track.
-            </p>
-            <h2 className="type-h2 text-foreground mt-4">
-              This is what booking looks like
-              <br />
-              when impact is visible.
-            </h2>
-            <p className="type-m text-black max-w-text mx-auto mt-5">
-              Local Madeiran guide running electric-car tours to places most
-              visitors never reach. 100% local operator, zero direct emissions,
-              low-pressure destinations.
-            </p>
-            <div className="flex justify-center mt-6">
-              <Link href="/discover" className="btn btn-dark">
-                Explore more
-              </Link>
-            </div>
+          <div className="reveal mb-12">
+            <h2 className="type-h2 text-foreground">{t("builtOnReal.heading")}</h2>
           </div>
-
-          <div className="relative mt-16 max-w-[768px] mx-auto reveal">
-            {/* Green Passport card — desktop */}
-            <div className="hidden md:block absolute -left-24 top-8 w-52 card card-sm space-y-3 z-10">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                  <Leaf className="w-4 h-4 text-accent-foreground" />
+          <div className="grid md:grid-cols-3 gap-4">
+            {pillars.map((pillar, i) => (
+              <div key={i} className="card card-muted card-interactive space-y-4 h-full reveal">
+                <div className="w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center">
+                  <Leaf className="w-5 h-5 text-foreground" />
                 </div>
-                <span className="type-label text-foreground">
-                  Green Passport
-                </span>
-              </div>
-              <div className="flex items-center justify-center">
-                <ScoreRings fp={82} lc={88} rg={61} total={76} size={80} />
-              </div>
-              <div className="text-center">
-                <span className="badge badge-lime">Regenerative Practice</span>
-              </div>
-            </div>
-
-            <div className="overflow-hidden aspect-[3/4] max-h-[550px] mx-auto md:max-w-md">
-              <Image
-                src="/assets/madeira-coast-drone.jpg"
-                alt="Aerial view of Madeira coastline"
-                width={500}
-                height={667}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Verified Metrics card — desktop */}
-            <div className="hidden md:block absolute -right-20 bottom-12 w-56 card card-sm space-y-4 z-10">
-              <p className="type-label text-black">
-                Verified Metrics
-              </p>
-              <div className="space-y-2">
-                {[
-                  { label: "Direct emissions", value: "0 kg CO₂" },
-                  { label: "Local employment", value: "100%" },
-                  { label: "Direct booking rate", value: "92%" },
-                  { label: "Regen programme", value: "Active" },
-                ].map((m) => (
-                  <div
-                    key={m.label}
-                    className="flex justify-between items-center"
-                  >
-                    <span className="type-xs text-black">
-                      {m.label}
-                    </span>
-                    <span className="type-xs font-bold text-foreground">
-                      {m.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile-only cards */}
-          <div className="grid grid-cols-2 gap-3 mt-6 md:hidden">
-            <div className="card card-sm space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
-                  <Leaf className="w-3.5 h-3.5 text-accent-foreground" />
-                </div>
-                <span className="type-label text-foreground">
-                  Green Passport
-                </span>
-              </div>
-              <div className="flex items-center justify-center">
-                <ScoreRings fp={82} lc={88} rg={61} total={76} size={70} />
-              </div>
-              <div className="text-center">
-                <span className="badge badge-lime">Regen Practice</span>
-              </div>
-            </div>
-            <div className="card card-sm space-y-4">
-              <p className="type-label text-black">
-                Verified Metrics
-              </p>
-              <div className="space-y-2">
-                {[
-                  { label: "Direct emissions", value: "0 kg CO₂" },
-                  { label: "Local employment", value: "100%" },
-                  { label: "Direct booking rate", value: "92%" },
-                  { label: "Regen programme", value: "Active" },
-                ].map((m) => (
-                  <div
-                    key={m.label}
-                    className="flex justify-between items-center"
-                  >
-                    <span className="type-xs text-black">
-                      {m.label}
-                    </span>
-                    <span className="type-xs font-bold text-foreground">
-                      {m.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <p className="type-s text-black italic text-center mt-8">
-            100% electric · 100% local
-          </p>
-        </div>
-      </section>
-
-      {/* ═══ 6. MEET THE SCORE ═══ */}
-      <section className="section">
-        <div className="container-section">
-          <div className="text-center reveal">
-            <p className="type-label text-black italic mb-4">
-              Meet the Green Passport
-            </p>
-            <h2 className="type-h2 text-foreground">
-              Your verified impact score — visible at the moment of booking.
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4 mt-16">
-            {[
-              {
-                title: "Operational Footprint",
-                desc: "How light is your operation on the planet? Energy, water, waste and carbon — measured against real data, not estimates.",
-              },
-              {
-                title: "Local Integration",
-                desc: "How much of what you earn stays here? Local jobs, local suppliers, direct bookings.",
-              },
-              {
-                title: "Regenerative Contribution",
-                desc: "What do you actively give back? Your own programmes, community initiatives, or institutional partnerships — as long as it's real and traceable.",
-              },
-            ].map((pillar, i) => (
-              <div
-                key={i}
-                className="card card-muted card-interactive space-y-4 h-full reveal"
-              >
                 <h3 className="type-h5 text-foreground">{pillar.title}</h3>
                 <p className="type-m text-black">{pillar.desc}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="mt-8 card card-dark grid md:grid-cols-2 gap-8 items-center reveal">
-            <div className="text-center md:text-left">
-              <h3 className="type-h4 text-dark-foreground mt-3">
-                Your Green Passport Score — verified and live at booking.
-              </h3>
-              <div className="mt-6">
-                <Link href="/signup" className="btn btn-primary">
-                  Join us
-                </Link>
+      {/* ═══ 4. THE GENERANT MARK ═══ */}
+      <section className="section border-t border-border">
+        <div className="container-section">
+          <div className="text-center reveal">
+            <p className="type-label text-black italic mb-6">{t("generantMark.label")}</p>
+
+            <div className="flex items-center justify-center mb-8">
+              <div className="relative">
+                <ScoreRings fp={78} lc={71} rg={65} total={74} size={220} />
               </div>
             </div>
-            <div className="flex items-center justify-center text-dark-foreground">
-              <ScoreRings fp={78} lc={71} rg={65} total={74} size={200} />
-            </div>
+
+            <h2 className="type-h2 text-foreground max-w-[600px] mx-auto mb-6 whitespace-pre-line">
+              {t("generantMark.heading")}
+            </h2>
+
+            <Link href="/signup" className="btn btn-primary">
+              {t("generantMark.cta")}
+            </Link>
+          </div>
+
+          {/* Score legend */}
+          <div className="mt-12 flex items-center justify-center gap-6 flex-wrap">
+            {[
+              { label: t("meetTheScore.pillars.footprint.title"), color: "var(--brand-green)" },
+              { label: t("meetTheScore.pillars.local.title"), color: "var(--brand-blue)" },
+              { label: t("meetTheScore.pillars.regen.title"), color: "var(--brand-lime)" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full shrink-0" style={{ background: item.color }} />
+                <span className="type-s text-black">{item.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ 7. HOW IT WORKS ═══ */}
+      {/* ═══ 5. YOUR WORK IS REAL ═══ */}
       <section>
         <div className="grid md:grid-cols-[1fr_1fr] min-h-[600px] md:min-h-[700px]">
           <div className="relative h-[350px] md:h-auto overflow-hidden">
@@ -616,90 +315,53 @@ export default function LandingPage() {
 
           <div className="flex flex-col justify-center px-8 md:px-16 lg:px-24 py-16 md:py-24">
             <div className="reveal">
-              <p className="type-label text-black italic mb-3">
-                Simple, transparent, verified
-              </p>
-              <h2 className="type-h2 text-foreground mb-12">
-                Here&apos;s what happens when you apply
+              <p className="type-label text-black italic mb-3">{t("yourWorkIsReal.label")}</p>
+              <h2 className="type-h2 text-foreground mb-12 whitespace-pre-line">
+                {t("yourWorkIsReal.heading")}
               </h2>
             </div>
 
             <div className="space-y-0">
-              {[
-                {
-                  num: "01",
-                  title: "Complete your assessment",
-                  desc: "Answer questions about your real operations — energy, water, local employment, what you give back. No estimates unless that's all you have. No greenwashing.",
-                },
-                {
-                  num: "02",
-                  title: "We verify",
-                  desc: "Our team reviews your data before anything goes live. Not automated. Not instant. Rigorous on purpose.",
-                },
-                {
-                  num: "03",
-                  title: "Your score goes live",
-                  desc: "Visible to travelers at the moment they book. Everything you do right — finally visible to the people looking for exactly that.",
-                },
-              ].map((step, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-6 py-7 border-t border-border reveal"
-                >
-                  <span className="type-h2 text-foreground leading-none min-w-[60px]">
-                    {step.num}
-                  </span>
+              {steps.map((step, i) => (
+                <div key={i} className="flex items-start gap-6 py-7 border-t border-border reveal">
+                  <span className="type-h2 text-foreground leading-none min-w-[60px]">{step.num}</span>
                   <div className="flex-1">
-                    <span className="type-h5 text-foreground block mb-1">
-                      {step.title}
-                    </span>
+                    <span className="type-h5 text-foreground block mb-1">{step.title}</span>
                     <p className="type-m text-black">{step.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-10 text-center reveal">
+            <div className="mt-10 reveal">
               <Link href="/signup" className="btn btn-dark">
-                Join us as operator
+                {t("yourWorkIsReal.cta")}
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ 8. DPI — Context matters ═══ */}
+      {/* ═══ 6. EVERY DESTINATION HAS A STORY ═══ */}
       <section className="section section-muted">
         <div className="container-section">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
             <div className="reveal">
-              <p className="type-label text-black italic mb-4">
-                Every destination is different
-              </p>
-              <h2 className="type-h2 text-foreground">
-                Context matters.
-                <br />
-                We measure that too.
+              <p className="type-label text-black italic mb-4">{t("everyDestination.label")}</p>
+              <h2 className="type-h2 text-foreground whitespace-pre-line mb-6">
+                {t("everyDestination.heading")}
               </h2>
-              <p className="type-m text-black mt-6">
-                The Destination Pressure Index contextualises your score against
-                where you operate — tourist intensity, ecological sensitivity,
-                economic leakage.
-                <br />
-                <br />
-                Operating responsibly here isn&apos;t abstract. It&apos;s
-                urgent. And now it&apos;s measurable.
+              <p className="type-m text-black mt-2 whitespace-pre-line">
+                {t("everyDestination.body")}
               </p>
               <Link href="/destinations" className="btn btn-dark mt-8">
-                Explore destinations
+                {t("everyDestination.cta")}
               </Link>
             </div>
 
             <div className="reveal">
               <div className="card">
-                <p className="type-label text-black mb-4">
-                  DPI · Madeira
-                </p>
+                <p className="type-label text-black mb-4">DPI · Madeira</p>
                 <div className="flex items-end gap-2">
                   <span className="type-h1 text-foreground tabular-nums">73</span>
                   <span className="type-m text-black mb-2">/100</span>
@@ -712,58 +374,18 @@ export default function LandingPage() {
                     { label: "Leakage", value: "51/100" },
                   ].map((m) => (
                     <div key={m.label}>
-                      <span className="type-label text-black block">
-                        {m.label}
-                      </span>
-                      <span className="type-s font-semibold tabular-nums text-foreground">
-                        {m.value}
-                      </span>
+                      <span className="type-label text-black block">{m.label}</span>
+                      <span className="type-s font-semibold tabular-nums text-foreground">{m.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ═══ 9. FORWARD COMMITMENT ═══ */}
-      <section className="section">
-        <div className="container-section">
-          <div className="grid md:grid-cols-[1fr_1.4fr] gap-4 md:gap-5">
-            <div className="relative overflow-hidden aspect-[4/3] md:aspect-auto md:h-full min-h-[240px] reveal">
-              <Image
-                src="/assets/madeira-cliff-coast.jpg"
-                alt="Dramatic cliff coastline in Madeira"
-                fill
-                className="object-cover"
-              />
-              <a
-                href="https://www.instagram.com/javierlomont/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute bottom-4 left-4 z-10 bg-dark text-dark-foreground type-xs px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-colors"
-              >
-                📷 @javierlomont
-              </a>
-            </div>
-
-            <div className="card card-muted card-lg flex flex-col justify-between min-h-[240px] text-center reveal">
-              <div>
-                <h2 className="type-h2 text-foreground">
-                  Low score today?
-                  <br />
-                  That&apos;s a starting point.
-                </h2>
-                <p className="type-m text-black max-w-text mx-auto mt-4">
-                  The Green Passport doesn&apos;t penalise — it maps where you
-                  are. Sign a Forward Commitment, receive 15 baseline Pillar 3
-                  points, and get matched with verified local institutions.
-                </p>
-              </div>
-              <div className="mt-8 flex justify-center">
-                <Link href="/signup" className="btn btn-dark">
-                  Join us
+              <div className="card card-muted mt-4 flex flex-col gap-4">
+                <h3 className="type-h5 text-foreground">{t("forwardCommitment.heading").split("\n")[0]}</h3>
+                <p className="type-m text-black">{t("forwardCommitment.body")}</p>
+                <Link href="/signup" className="btn btn-dark self-start">
+                  {tCommon("joinUs")}
                 </Link>
               </div>
             </div>
@@ -771,33 +393,125 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══ 10. TRAVELER LOOKBOOK ═══ */}
-      <LookbookCta
-        eyebrow="For travelers"
-        heading={
-          <>
-            You care where you go.
-            <br />
-            Now you can prove it.
-          </>
-        }
-      >
-        <div className="klaviyo-form-SbN4HA max-w-[400px]" />
-      </LookbookCta>
+      {/* ═══ 7. FOUNDING COHORT ═══ */}
+      <section className="section section-dark relative overflow-hidden">
+        <Image
+          src="/assets/madeira-map.svg"
+          alt=""
+          fill
+          className="object-contain pointer-events-none"
+          style={{ objectPosition: "center 60%", opacity: 0.15 }}
+          aria-hidden="true"
+        />
+        <div className="relative container-section text-center">
+          <div className="reveal">
+            <p className="type-label text-pink italic">{t("foundingCohort.eyebrow")}</p>
+            <h2 className="type-h1 text-dark-foreground mt-4 max-w-text mx-auto whitespace-pre-line">
+              {t("foundingCohort.heading")}
+            </h2>
+            <div className="mt-8">
+              <Link href="/signup" className="btn btn-primary">
+                {tCommon("joinUs")}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {/* ═══ 11. FAQ ═══ */}
+      {/* ═══ 8. PRICING ═══ */}
+      <section className="section border-t border-border">
+        <div className="container-section">
+          <div className="text-center reveal mb-12">
+            <p className="type-label text-black italic mb-4">{t("pricingSection.label")}</p>
+            <h2 className="type-h2 text-foreground whitespace-pre-line">
+              {t("pricingSection.heading")}
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 items-start">
+            {/* Free */}
+            <div className="card space-y-6 reveal">
+              <div>
+                <span className="badge badge-surface mb-3">{tPricing("free.badge")}</span>
+                <div className="flex items-end gap-1 mt-4">
+                  <span className="type-h1 text-foreground">Free</span>
+                </div>
+                <p className="type-s text-black mt-2">{tPricing("free.subtitle")}</p>
+              </div>
+              <ul className="space-y-2">
+                {(["one","two","three","four","five"] as const).map((k) => (
+                  <li key={k} className="flex items-start gap-2 type-s text-black">
+                    <Check className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
+                    {tPricing(`free.features.${k}`)}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="btn btn-dark w-full text-center">
+                {tPricing("free.cta")}
+              </Link>
+            </div>
+
+            {/* Founder */}
+            <div className="card card-dark space-y-6 reveal relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-accent" />
+              <div>
+                <span className="badge badge-lime mb-3">{tPricing("founder.badge")}</span>
+                <div className="flex items-end gap-1 mt-4">
+                  <span className="type-h1 text-dark-foreground">29</span>
+                  <span className="type-m text-dark-foreground/60 mb-2">/mo</span>
+                </div>
+                <p className="type-s text-dark-foreground/70 mt-2">{tPricing("founder.subtitle")}</p>
+                <p className="type-xs text-pink mt-1">{tPricing("founder.notice")}</p>
+              </div>
+              <ul className="space-y-2">
+                {(["one","two","three","four","five","six","seven"] as const).map((k) => (
+                  <li key={k} className="flex items-start gap-2 type-s text-dark-foreground">
+                    <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                    {tPricing(`founder.features.${k}`)}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="btn btn-primary w-full text-center">
+                {tPricing("founder.cta")}
+              </Link>
+            </div>
+
+            {/* Standard */}
+            <div className="card space-y-6 reveal">
+              <div>
+                <span className="badge badge-surface mb-3">{tPricing("standard.badge")}</span>
+                <div className="flex items-end gap-1 mt-4">
+                  <span className="type-h1 text-foreground">60</span>
+                  <span className="type-m text-black mb-2">/mo</span>
+                </div>
+                <p className="type-s text-black mt-2">{tPricing("standard.subtitle")}</p>
+              </div>
+              <ul className="space-y-2">
+                {(["one","two","three","four","five","six"] as const).map((k) => (
+                  <li key={k} className="flex items-start gap-2 type-s text-black">
+                    <Check className="w-4 h-4 text-foreground shrink-0 mt-0.5" />
+                    {tPricing(`standard.features.${k}`)}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="btn btn-dark w-full text-center">
+                {tPricing("standard.cta")}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 9. FAQ ═══ */}
       <section className="section section-dark">
         <div className="container-section space-y-10">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <p className="type-label text-pink italic mb-3">FAQs</p>
-              <h2 className="type-h2 text-dark-foreground">Common Questions</h2>
+              <p className="type-label text-pink italic mb-3">{t("faq.eyebrow")}</p>
+              <h2 className="type-h2 text-dark-foreground">{t("faq.heading")}</h2>
             </div>
-            <a
-              href="mailto:hello@theregenerativetourism.com"
-              className="btn btn-primary shrink-0"
-            >
-              Contact us
+            <a href="mailto:hello@theregenerativetourism.com" className="btn btn-primary shrink-0">
+              {tCommon("contactUs")}
             </a>
           </div>
 
@@ -807,9 +521,7 @@ export default function LandingPage() {
                 <details key={i} className="group border-t border-pink">
                   <summary className="flex items-center justify-between w-full py-5 type-s font-semibold cursor-pointer list-none gap-4 text-dark-foreground">
                     <span>{item.question}</span>
-                    <span className="shrink-0 type-xl text-pink transition-transform duration-200 group-open:rotate-45">
-                      +
-                    </span>
+                    <span className="shrink-0 type-xl text-pink transition-transform duration-200 group-open:rotate-45">+</span>
                   </summary>
                   <p className="type-s text-pink pb-5">{item.answer}</p>
                 </details>
@@ -821,9 +533,7 @@ export default function LandingPage() {
                 <details key={i} className="group border-t border-pink">
                   <summary className="flex items-center justify-between w-full py-5 type-s font-semibold cursor-pointer list-none gap-4 text-dark-foreground">
                     <span>{item.question}</span>
-                    <span className="shrink-0 type-xl text-pink transition-transform duration-200 group-open:rotate-45">
-                      +
-                    </span>
+                    <span className="shrink-0 type-xl text-pink transition-transform duration-200 group-open:rotate-45">+</span>
                   </summary>
                   <p className="type-s text-pink pb-5">{item.answer}</p>
                 </details>

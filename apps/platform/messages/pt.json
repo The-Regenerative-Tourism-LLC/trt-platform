@@ -25,12 +25,35 @@
     "login": "Entrar",
     "signup": "Começar",
     "solutions": "Soluções",
-    "beGenerant": "Seja um generant"
+    "beGenerant": "Seja um generant",
+    "solutionsPopup": {
+      "header": "PARA QUEM É",
+      "operators": {
+        "title": "Para Operadores",
+        "desc": "Verifique a sua pegada, integração local e contribuição regenerativa."
+      },
+      "travelers": {
+        "title": "Para Viajantes",
+        "desc": "Saiba o que a sua viagem apoia — e construa um registo do impacto que fez ao longo do tempo."
+      },
+      "destinations": {
+        "title": "Para Destinos",
+        "desc": "Dados em tempo real dos operadores e viajantes no seu território.",
+        "badge": "Em breve"
+      }
+    }
   },
   "home": {
     "hero": {
       "eyebrow": "O primeiro mapa regenerativo do turismo",
-      "heading": "Impacto de viagem. Visível no momento da reserva.",
+      "headingLine1": "Viajantes que se importam,",
+      "headingLine2": "conheçam os operadores que provam.",
+      "bodyShort": "Uma pontuação de 0 a 100 — avaliada de forma independente em Pegada, Raízes e Regeneração. Para viajantes que escolhem pelo próximo passo. Para operadores que fazem o trabalho.",
+      "seeWhat": "Veja o que o turismo",
+      "actuallyDoes": "realmente faz.",
+      "cta": "Seja um Generant",
+      "mark": "A Marca Generant — Pegada · Raízes · Regeneração",
+      "heading": "O turismo deixa uma marca.\nAjudamos você a torná-la boa.",
       "body": "Estamos construindo algo que nunca existiu no turismo — uma camada de impacto ao vivo que mostra o que o turismo faz aos lugares, às pessoas e às comunidades.\n\nPara operadores prontos para medir e melhorar — uma forma de ser encontrado por viajantes que se importam. Para viajantes — uma forma de fazer cada viagem valer.",
       "ctaTravelers": "Para viajantes"
     },
@@ -128,6 +151,43 @@
           "answer": "Pode candidatar-se para fazer parte do coorte fundador ou iniciar a avaliação gratuita para entender o seu impacto."
         }
       }
+    },
+    "activityType": {
+      "experience": "Experiência Regenerativa",
+      "stay": "Estadia"
+    },
+    "whatIsGenerant": {
+      "label": "Sobre a plataforma",
+      "heading": "O que é o Generant?",
+      "body": "A Marca Generant é o que os operadores ganham quando o seu impacto é verificado de forma independente — uma pontuação ao vivo em três pilares mensuráveis, atualizada a cada ciclo e visível para os viajantes no momento da reserva.",
+      "item1": "Avaliado de forma independente de 0 a 100",
+      "item2": "Medido em Pegada, Raízes e Regeneração",
+      "item3": "Atualizado a cada ciclo — não uma auditoria única",
+      "item4": "Visível para os viajantes no momento da reserva",
+      "cta": "Seja um Generant"
+    },
+    "builtOnReal": {
+      "heading": "Construído sobre o que é real."
+    },
+    "generantMark": {
+      "label": "A marca generant",
+      "heading": "Uma pontuação que os operadores ganham.\nUm sinal em que os viajantes confiam.",
+      "cta": "Seja um Generant"
+    },
+    "yourWorkIsReal": {
+      "label": "Simples, transparente, verificado",
+      "heading": "O seu trabalho é real.\nGaranta que os viajantes certos o saibam.",
+      "cta": "Entrar como operador"
+    },
+    "everyDestination": {
+      "label": "Cada destino é diferente",
+      "heading": "Cada destino tem uma história.\nAjude a escrever a melhor versão.",
+      "body": "O Índice de Pressão de Destino contextualiza a sua pontuação em relação ao local onde opera — intensidade turística, sensibilidade ecológica, fuga económica.\n\nOperar de forma responsável aqui não é abstrato. É urgente. E agora é mensurável.",
+      "cta": "Explorar destinos"
+    },
+    "pricingSection": {
+      "label": "Preços",
+      "heading": "Comece gratuitamente.\nVá mais fundo quando estiver pronto."
     }
   },
   "public": {

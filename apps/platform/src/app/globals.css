@@ -24,7 +24,7 @@
   --brand-blue: #3E82ED;
   --brand-blue-50-transparency: #3e81ed77;
   --brand-black: #000000;
-  --brand-surface: #E8E7E0;
+  --brand-grey: #E8E7E0;
 
   /* Semantic colors */
   --background: var(--brand-base);
@@ -55,7 +55,7 @@
   --destructive: var(--brand-purple);
   --destructive-foreground: var(--brand-base);
 
-  --surface: var(--brand-surface);
+  --surface: var(--brand-grey);
   --surface-foreground: var(--brand-black);
 
   /* Font */
@@ -105,7 +105,7 @@
   --type-button-size: 14px;
   --type-button-line: 16px;
 
-  --type-badge-size: 14px;
+  --type-badge-size: 10px;
   --type-badge-line: 32px;
 
   --tracking-heading: -0.03em;
@@ -272,6 +272,7 @@
   --color-blue: var(--brand-blue);
   --color-blue-50-transparency: var(--brand-blue-50-transparency);
   --color-black: var(--brand-black);
+  --color-base: var(--brand-base);
 
   --font-sans: var(--font-brand);
   --font-display: var(--font-brand);
@@ -397,12 +398,17 @@
   }
 
   .type-h5 {
-    font-size: var(--type-h5-size);
-    line-height: var(--type-h5-line);
-    font-weight: var(--weight-bold);
-    letter-spacing: var(--tracking-tight);
+    font-size: 36px;
+    line-height: 100%;
+    font-weight: 250;
   }
-
+   @media (max-width: 640px) {
+   .type-h5 {
+    font-size: 24px;
+    line-height: 100%;
+    font-weight: 250;
+  }
+  }
   .type-h6 {
     font-size: var(--type-h6-size);
     line-height: var(--type-h6-line);
@@ -442,10 +448,9 @@
   }
 
   .type-badge {
-    font-size: var(--type-badge-size);
-    line-height: var(--type-badge-line);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-badge);
+    font-size: 11px;
+    line-height: 120%;
+    font-weight: 500;
     text-transform: uppercase;
   }
 
@@ -495,8 +500,6 @@
   .section-muted {
     background: var(--muted);
   }
-
-
 
   .container-page {
     max-width: var(--container-page);
@@ -684,10 +687,9 @@
     min-height: var(--type-badge-line);
     padding-inline: var(--badge-padding-x);
     border-radius: var(--badge-radius);
-    font-size: var(--type-badge-size);
-    line-height: var(--type-badge-line);
-    font-weight: var(--weight-semibold);
-    letter-spacing: var(--tracking-badge);
+    font-size: 11px;
+    line-height: 120%;
+    font-weight: 500;
     text-transform: uppercase;
     white-space: nowrap;
     border: var(--border-width-thin) solid transparent;
@@ -723,10 +725,10 @@
     border-color: var(--brand-green-navy);
   }
 
-  .badge-surface {
-    background: var(--brand-surface);
+  .badge-grey {
+    background: var(--brand-grey);
     color: var(--brand-black);
-    border-color: var(--brand-surface);
+    border-color: var(--brand-grey);
   }
 
   .pill {

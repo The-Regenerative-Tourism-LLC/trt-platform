@@ -357,14 +357,14 @@ export function Navbar() {
         {/* Solutions megamenu panel */}
         {solutionsOpen && !user && (
           <div
-            className="absolute left-0 right-0 top-full bg-background border-b border-border shadow-sm z-10 hidden md:block"
+
+          className="absolute left-0 right-0 top-full bg-background border-b border-border shadow-sm z-10 hidden md:block wrapper-header"
             onMouseEnter={openSolutions}
             onMouseLeave={closeSolutions}
           >
-            <div className="container-page py-5">
-              <p className="type-label text-primary mb-4">WHO IS THIS FOR</p>
+            <div className="container-section py-5">
+              <p className="type-label text-primary mb-4">{tNav("solutionsPopup.header")}</p>
               <div className="grid grid-cols-3 gap-3 pb-2">
-                {/* For Operators */}
                 <Link
                   href={withLocale("/signup")}
                   className="relative overflow-hidden rounded-lg border border-border p-5 flex flex-col gap-4 no-underline hover:border-accent transition-colors"
@@ -374,12 +374,11 @@ export function Navbar() {
                     <KeyRound className="w-5 h-5 text-accent-foreground" />
                   </div>
                   <div>
-                    <p className="type-m font-semibold text-foreground">For Operators</p>
-                    <p className="type-s text-black mt-2">Verify your footprint, local integration, and regenerative contribution.</p>
+                    <p className="type-m font-semibold text-foreground">{tNav("solutionsPopup.operators.title")}</p>
+                    <p className="type-s text-black mt-2">{tNav("solutionsPopup.operators.desc")}</p>
                   </div>
                 </Link>
 
-                {/* For Travelers */}
                 <Link
                   href={withLocale("/traveler/waitlist")}
                   className="relative overflow-hidden rounded-lg border border-border p-5 flex flex-col gap-4 no-underline hover:border-primary transition-colors"
@@ -389,21 +388,20 @@ export function Navbar() {
                     <Globe className="w-5 h-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <p className="type-m font-semibold text-foreground">For Travelers</p>
-                    <p className="type-s text-black mt-2">Know what your trip supports — and build a record of the impact you&apos;ve made over time.</p>
+                    <p className="type-m font-semibold text-foreground">{tNav("solutionsPopup.travelers.title")}</p>
+                    <p className="type-s text-black mt-2">{tNav("solutionsPopup.travelers.desc")}</p>
                   </div>
                 </Link>
 
-                {/* For Destinations */}
                 <div className="relative overflow-hidden rounded-lg border border-border p-5 flex flex-col gap-4 cursor-default">
                   <div className="absolute top-0 left-0 right-0 h-1 bg-surface" />
-                  <span className="badge badge-surface absolute top-3 right-3">Soon</span>
+                  <span className="badge badge-surface absolute top-3 right-3">{tNav("solutionsPopup.destinations.badge")}</span>
                   <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center shrink-0">
                     <MapPin className="w-5 h-5 text-surface-foreground" />
                   </div>
                   <div>
-                    <p className="type-m font-semibold text-foreground">For Destinations</p>
-                    <p className="type-s text-black mt-2">Live data from the operators and travelers inside your territory.</p>
+                    <p className="type-m font-semibold text-foreground">{tNav("solutionsPopup.destinations.title")}</p>
+                    <p className="type-s text-black mt-2">{tNav("solutionsPopup.destinations.desc")}</p>
                   </div>
                 </div>
               </div>
